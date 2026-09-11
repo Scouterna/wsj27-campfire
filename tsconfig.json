@@ -1,0 +1,65 @@
+// The one TypeScript program for the whole repository. Every package is covered by it,
+// and there is no per-package tsconfig.json – one program, one set of rules, one place to
+// look. tsconfig is JSONC, so these comments are legal.
+//
+// This is the shared profile – bundler resolution, and both the browser's library and
+// Node's. That is the trade that buys the simplicity: `lib` carries the DOM and Node's
+// library, and `types` carries Node's globals, so tsc will not stop a browser file
+// reaching for `process` or a tooling file reaching for `document`. Splitting the two
+// apart costs a config file per runtime and a leaf file per package, which is the
+// machinery this deliberately does not have. ESLint still holds the layering line that
+// matters – a library may not import an app – and that is the rule worth a check.
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    // --- Emit and module hygiene ---
+    "verbatimModuleSyntax": true, // forces explicit `import type`, erases cleanly under a type-stripper
+    "isolatedModules": true, // every file must transpile on its own (bundler/stripper requirement)
+    "moduleDetection": "force", // treat every file as a module, never an implicit global script
+    "resolveJsonModule": true, // allow typed `import data from "./x.json"`
+
+    // --- Strictness ---
+    "strict": true, // off by default, so this is what turns the strict family on
+    "noUncheckedIndexedAccess": true, // index access yields `T | undefined` – narrow before use
+    "exactOptionalPropertyTypes": true, // distinguishes a missing key from one set to `undefined`
+    "noImplicitOverride": true, // overriding a base method requires the `override` keyword
+    "noImplicitReturns": true, // reject a function that returns a value on some paths, falls off on others
+    "noPropertyAccessFromIndexSignature": true, // index-signature reads need bracket notation
+    "noFallthroughCasesInSwitch": true, // a case flowing into the next without break/return is an error
+    "allowUnreachableCode": false, // dead code is an error, not a warning
+    "allowUnusedLabels": false, // stray labels are an error
+    "noUncheckedSideEffectImports": true, // a bare side-effect import must actually resolve
+    "forceConsistentCasingInFileNames": true, // guards against macOS-vs-Linux import-casing bugs
+
+    // Unused locals and parameters are ESLint's, on purpose: at the tsc level they fight
+    // mid-refactor editing, where a variable is legitimately unused for a minute.
+
+    "skipLibCheck": true, // do not type-check `.d.ts` in node_modules – large build-time win
+
+    // --- Runtime: the browser and Node 24 ---
+    // `target` is the syntax ceiling and `lib` the runtime library, split on purpose:
+    // Vite bundles the VitePress config with esbuild 0.21.5, which parses this file and
+    // warns on any target newer than ES2023 – while the library is Node 24's and the
+    // browser's, neither of which esbuild reads. Raise `target` when VitePress ships an
+    // esbuild that knows ES2025.
+    "target": "ES2023",
+    "module": "esnext", // a bundler consumes the ESM output
+    "moduleResolution": "bundler", // graph resolved by the bundler – extensionless imports, `exports` honored
+    "lib": ["ES2025", "DOM", "DOM.Iterable"], // Node 24's library and the browser's, both
+    "types": ["node"], // Node globals; requires @types/node pinned to the Node major
+    "jsx": "react-jsx", // the automatic runtime – no `import React` in every file
+    "noEmit": true, // tsc type-checks only; Vite and Node run the code
+    "useDefineForClassFields": true, // standard ES class-field semantics
+
+    // tools/mock runs its TypeScript natively on Node, which requires the explicit
+    // `.ts` in relative imports; this permits those specifiers.
+    "allowImportingTsExtensions": true
+  },
+
+  // Everything, so a new package is covered the day it lands rather than the day someone
+  // remembers to add it. `**` skips dot-directories, so VitePress's is named outright –
+  // without it ESLint's project service reports its config as "not found by the project
+  // service" rather than as untyped.
+  "include": ["**/*.ts", "**/*.tsx", "docs/.vitepress/**/*.ts"],
+  "exclude": ["**/node_modules", "**/.build", "temp"]
+}

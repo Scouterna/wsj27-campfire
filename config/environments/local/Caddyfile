@@ -1,0 +1,38 @@
+# The local environment: everything on this machine, with the mock standing in for the
+# whole back-end. Sign-in is a persona picker, and nothing reaches the network.
+#
+# The three front doors all serve http://localhost:8000, so the web application and
+# the shells never know which environment is running.
+#
+# One Caddy config per way Campfire is served, one folder per environment:
+#   local/Caddyfile       this one – `pnpm start:local`, the mock back-end
+#   dev/Caddyfile         `pnpm start:dev`, the real back-end in containers
+#   prod/Caddyfile        `pnpm start:prod`, the built image against the real back-end
+#   prod/image.Caddyfile  inside the image, wherever it is deployed
+:8000 {
+	# Everything the back-end owns goes to the mock: the auth service, the project API,
+	# and under /__mock__ its ScoutID stand-in and control surface. Anything not listed
+	# here is the web application's. handle rather than handle_path, because the mock mounts both
+	# services at these full paths – the prefixes the deployed ingress serves.
+	#
+	# Each matcher names the bare prefix beside the subtree, because `/api/auth/*`
+	# alone does not match `/api/auth` – the health check the mock serves there would
+	# otherwise fall through and answer with the web application's index.html.
+	@auth path /api/auth /api/auth/*
+	handle @auth {
+		reverse_proxy localhost:8003
+	}
+
+	@project path /api/project /api/project/*
+	handle @project {
+		reverse_proxy localhost:8003
+	}
+
+	handle /__mock__/* {
+		reverse_proxy localhost:8003
+	}
+
+	handle {
+		reverse_proxy localhost:3000
+	}
+}

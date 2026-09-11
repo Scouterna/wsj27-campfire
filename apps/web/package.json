@@ -1,0 +1,26 @@
+{
+  "name": "@scouterna/wsj27-campfire-web",
+  "version": "2026.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build --config ../../config/vite/vite.config.ts",
+    "clean": "rm -rf .build",
+    "start": "vite --config ../../config/vite/vite.config.ts"
+  },
+  "dependencies": {
+    "@scouterna/wsj27-campfire-authentication": "workspace:*",
+    "@scouterna/wsj27-campfire-home": "workspace:*",
+    "@scouterna/wsj27-campfire-host": "workspace:*",
+    "@scouterna/wsj27-campfire-journey": "workspace:*",
+    "@scouterna/wsj27-campfire-participants": "workspace:*",
+    "@scouterna/wsj27-campfire-ui": "workspace:*",
+    "@scouterna/wsj27-campfire-utils": "workspace:*",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4"
+  }
+}

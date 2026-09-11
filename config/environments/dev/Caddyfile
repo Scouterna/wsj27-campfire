@@ -1,0 +1,36 @@
+# The dev environment: the real back-end in containers, with the web application still
+# served by Vite so a change on the host reaches the browser. This is where the real
+# sign-in flow is exercised – the one thing the mock cannot do.
+#
+# The three front doors all serve http://localhost:8000, so the web application and
+# the shells never know which environment is running.
+#
+# One Caddy config per way Campfire is served, one folder per environment:
+#   local/Caddyfile       `pnpm start:local`, the mock back-end
+#   dev/Caddyfile         this one – `pnpm start:dev`, the real back-end in containers
+#   prod/Caddyfile        `pnpm start:prod`, the built image against the real back-end
+#   prod/image.Caddyfile  inside the image, wherever it is deployed
+:8000 {
+	# The prefix is stripped before proxying: the real service serves its endpoints at its
+	# root, and the deployed ingress does the same. The matcher names the bare prefix
+	# beside the subtree, because the ingress answers both – so `/api/auth` reaches the
+	# service's health check rather than falling through to the web application.
+	@auth path /api/auth /api/auth/*
+	handle @auth {
+		uri strip_prefix /api/auth
+		reverse_proxy auth:8000
+	}
+
+	# The same for the project API, which serves its endpoints at its root too.
+	# localhost, because the service shares the ingress's network namespace –
+	# compose.yaml says why.
+	@project path /api/project /api/project/*
+	handle @project {
+		uri strip_prefix /api/project
+		reverse_proxy localhost:8001
+	}
+
+	handle {
+		reverse_proxy web:3000
+	}
+}

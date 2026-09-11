@@ -1,0 +1,164 @@
+# Where Campfire runs. Three environments, and they differ in what sits behind the one
+# origin: the mock on a developer's machine, or the real services in containers behind
+# an ingress. The deployed environments run in Azure; `pnpm start:dev` and
+# `pnpm start:prod` bring the same containers up in Docker on a developer's machine, and
+# the guidebook's environments page describes those stacks.
+#
+# A deployment node is described like any other element – one sentence, saying what it
+# is – and carries the technology it runs on.
+
+deploymentEnvironment "Local" {
+
+  deploymentNode "Developer's machine" {
+    description "The one machine that runs the whole stack behind localhost."
+    technology "macOS"
+
+    localCaddy = infrastructureNode "Caddy" {
+      description "The one origin, on port 8000."
+      technology "Caddy"
+    }
+
+    deploymentNode "Vite" {
+      description "The web application's dev server, on port 3000."
+      technology "Node.js 24, Vite"
+      localWeb = containerInstance webApp
+    }
+
+    deploymentNode "Node.js" {
+      description "The mock's own process, on port 8003."
+      technology "Node.js 24"
+      localMock = containerInstance mock
+    }
+
+    deploymentNode "iOS Simulator" {
+      description "The Apple shell, pointed at localhost."
+      technology "Xcode"
+      localApple = containerInstance appleShell
+    }
+
+    deploymentNode "Android emulator" {
+      description "The Android shell, with port 8000 reversed to the host."
+      technology "Android SDK"
+      localAndroid = containerInstance androidShell
+    }
+
+    localCaddy -> localWeb "Proxies every other path to"
+    localCaddy -> localMock "Proxies /api/auth and /api/project to"
+    localApple -> localCaddy "Loads the application from"
+    localAndroid -> localCaddy "Loads the application from"
+  }
+}
+
+deploymentEnvironment "Dev" {
+
+  deploymentNode "Azure" {
+    description "The deployed dev environment, at campfire.wsj27.scouterna.net."
+    technology "Microsoft Azure"
+
+    deploymentNode "Kubernetes cluster" {
+      description "The cluster that runs the web image and the two services."
+      technology "Kubernetes"
+
+      devIngress = infrastructureNode "Ingress" {
+        description "The one origin, over HTTPS."
+        technology "Kubernetes ingress"
+      }
+
+      deploymentNode "Web" {
+        description "The published web image, serving the built application."
+        technology "Caddy 2, container"
+        devWeb = containerInstance webApp
+      }
+
+      deploymentNode "Auth service" {
+        description "The auth service's own image."
+        technology "Python, container"
+        devAuth = softwareSystemInstance authService
+      }
+
+      deploymentNode "Participants service" {
+        description "The participants service's own image."
+        technology "Python, container"
+        devProject = softwareSystemInstance participantsService
+      }
+
+      devIngress -> devWeb "Routes every other path to"
+      devIngress -> devAuth "Routes /api/auth to"
+      devIngress -> devProject "Routes /api/project to"
+    }
+  }
+
+  deploymentNode "Member's phone" {
+    description "A leader's or a CMT member's own phone."
+    technology "iOS 26 or Android"
+    devApple = containerInstance appleShell
+    devAndroid = containerInstance androidShell
+  }
+
+  deploymentNode "Scouterna" {
+    description "Scouterna's own systems, with ScoutID's dev realm."
+    technology "Keycloak, Scoutnet"
+    softwareSystemInstance scoutid
+    softwareSystemInstance scoutnet
+  }
+
+  devApple -> devIngress "Loads the application from"
+  devAndroid -> devIngress "Loads the application from"
+}
+
+deploymentEnvironment "Prod" {
+
+  deploymentNode "Azure" {
+    description "The production environment, at campfire.wsj27.se."
+    technology "Microsoft Azure"
+
+    deploymentNode "Kubernetes cluster" {
+      description "The cluster that runs the web image and the two services."
+      technology "Kubernetes"
+
+      prodIngress = infrastructureNode "Ingress" {
+        description "The one origin, over HTTPS."
+        technology "Kubernetes ingress"
+      }
+
+      deploymentNode "Web" {
+        description "The published web image, serving the built application."
+        technology "Caddy 2, container"
+        prodWeb = containerInstance webApp
+      }
+
+      deploymentNode "Auth service" {
+        description "The auth service's own image."
+        technology "Python, container"
+        prodAuth = softwareSystemInstance authService
+      }
+
+      deploymentNode "Participants service" {
+        description "The participants service's own image."
+        technology "Python, container"
+        prodProject = softwareSystemInstance participantsService
+      }
+
+      prodIngress -> prodWeb "Routes every other path to"
+      prodIngress -> prodAuth "Routes /api/auth to"
+      prodIngress -> prodProject "Routes /api/project to"
+    }
+  }
+
+  deploymentNode "Member's phone" {
+    description "A leader's or a CMT member's own phone."
+    technology "iOS 26 or Android"
+    prodApple = containerInstance appleShell
+    prodAndroid = containerInstance androidShell
+  }
+
+  deploymentNode "Scouterna" {
+    description "Scouterna's own systems, with ScoutID's production realm."
+    technology "Keycloak, Scoutnet"
+    softwareSystemInstance scoutid
+    softwareSystemInstance scoutnet
+  }
+
+  prodApple -> prodIngress "Loads the application from"
+  prodAndroid -> prodIngress "Loads the application from"
+}

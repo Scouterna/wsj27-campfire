@@ -1,0 +1,15 @@
+# What the web image's build context leaves behind – the native apps and their build
+# output dwarf the workspace, and none of it reaches the bundle. config/environments/prod is where
+# the Dockerfile and the Caddyfile it copies in live, so the secrets and the compose
+# files are excluded by name rather than the directory being excluded wholesale.
+.git
+**/node_modules
+**/.build
+apps/android
+apps/apple
+config/environments/*/compose.yaml
+config/environments/*/.env
+config/environments/*/signing-key.pem
+docs
+temp
+*.log

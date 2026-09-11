@@ -1,0 +1,49 @@
+/* The design system's tokens. Raw values live here and nowhere else: a component names a
+   role, never a value. A theme crosses to a shell as a name, and each shell holds its own
+   copy of the color behind it, so a unit color changes in three places or none. Today the
+   only copy is the blue behind each shell's launch screen. */
+
+@layer tokens {
+  :root {
+    /* The paper every page is printed on, and the ink it is printed in. */
+    --color-paper: #f4f2ec;
+    --color-ink: #1a1a1a;
+
+    /* The contingent's five unit colors. */
+    --color-theme-blue: #2e768a;
+    --color-theme-brown: #975a15;
+    --color-theme-green: #768b33;
+    --color-theme-red: #ce4a17;
+    --color-theme-yellow: #f4c126;
+
+    /* The unit color in force. Blue is the contingent's own and the default; a themed
+       scope swaps the pointer rather than every rule that reads it. */
+    --color-theme-bright: var(--color-theme-blue);
+
+    /* The display face, for the wordmark and the headings that carry the brand. Only a
+       regular weight is drawn, so the weight is a token too – asking for bold would have
+       the browser synthesize one, and a synthesized script is a smear. */
+    --typography-display-font_family: "Bravely Script", cursive;
+    --typography-display-font_weight: 400;
+  }
+
+  [data-theme="blue"] {
+    --color-theme-bright: var(--color-theme-blue);
+  }
+
+  [data-theme="brown"] {
+    --color-theme-bright: var(--color-theme-brown);
+  }
+
+  [data-theme="green"] {
+    --color-theme-bright: var(--color-theme-green);
+  }
+
+  [data-theme="red"] {
+    --color-theme-bright: var(--color-theme-red);
+  }
+
+  [data-theme="yellow"] {
+    --color-theme-bright: var(--color-theme-yellow);
+  }
+}

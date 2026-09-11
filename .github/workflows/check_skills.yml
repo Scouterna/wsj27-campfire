@@ -1,0 +1,123 @@
+name: Check skills
+
+# Validates every skill under .agents/skills against the rules
+# release_skills.yml depends on, so a skill that cannot be released fails the
+# pull request instead of being skipped in silence at release time.
+#
+# Filtered inside the job rather than by `on: paths:`. A workflow skipped by a
+# path filter reports no status, and a required check waits on that status
+# forever; a skipped job reports as passing, so this stays a check that can
+# block a merge while still doing no work on a pull request that touches no
+# skill.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+# One run per pull request. Pushing again cancels the run it superseded, so a
+# branch pushed three times in a minute costs one run, not three.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  skills:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Asks the API, so nothing is cloned on a pull request with no skill
+      # changes – including the workflow itself, so editing the check runs it.
+      - name: Look for skill changes
+        id: changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          # Listed in its own step, so a failed API call fails the job rather
+          # than reading as "nothing changed" and skipping the validation. The files
+          # endpoint rather than `gh pr diff`, which refuses a pull request of
+          # more than 300 files; this one pages through up to 3,000.
+          files="$(gh api --paginate \
+                     "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files?per_page=100" \
+                     --jq '.[].filename')"
+
+          if printf '%s\n' "$files" \
+             | grep -qE '^(\.agents/skills/|\.github/workflows/check_skills\.yml$)'; then
+            echo "skills=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skills=false" >> "$GITHUB_OUTPUT"
+            echo "No skill changes in this pull request."
+          fi
+
+      # Full history, so the released tags are present to compare against.
+      - name: Check out the repository
+        if: steps.changed.outputs.skills == 'true'
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Validate skills
+        if: steps.changed.outputs.skills == 'true'
+        run: |
+          set -euo pipefail
+
+          failed=0
+          fail() { echo "::error file=$1::$2"; failed=1; }
+
+          for skill_md in .agents/skills/*/SKILL.md; do
+            # No matching skills – the glob stays literal, so skip it.
+            [ -e "$skill_md" ] || continue
+
+            skill_dir="$(dirname "$skill_md")"
+            dir_name="$(basename "$skill_dir")"
+
+            # Frontmatter, parsed exactly as release_skills.yml parses it.
+            frontmatter="$(awk 'NR==1 && $0=="---"{f=1; next} f && /^---[[:space:]]*$/{exit} f' "$skill_md")"
+
+            name="$(printf '%s\n' "$frontmatter" | sed -n 's/^name:[[:space:]]*//p' | head -n1)"
+            version="$(printf '%s\n' "$frontmatter" | sed -n 's/^[[:space:]]*version:[[:space:]]*//p' | head -n1 | tr -d '"')"
+            description="$(printf '%s\n' "$frontmatter" | sed -n 's/^description:[[:space:]]*//p' | head -n1)"
+
+            # release_skills.yml skips a skill missing either, and it never ships.
+            [ -n "$name" ] || fail "$skill_md" "Missing frontmatter name."
+            [ -n "$version" ] || fail "$skill_md" "Missing metadata.version."
+            [ -n "$description" ] || fail "$skill_md" "Missing frontmatter description – the release notes are built from it."
+
+            # The zip is named from the frontmatter and found by its directory,
+            # so a mismatch releases the wrong thing.
+            if [ -n "$name" ] && [ "$name" != "$dir_name" ]; then
+              fail "$skill_md" "Frontmatter name \"$name\" does not match directory \"$dir_name\"."
+            fi
+
+            if [ -n "$version" ] && ! printf '%s' "$version" | grep -Eq '^[0-9]+\.[0-9]+$'; then
+              fail "$skill_md" "metadata.version \"$version\" is not a major.minor string."
+            fi
+
+            # Every relative link in SKILL.md must resolve, or the skill ships broken.
+            while IFS= read -r target; do
+              case "$target" in http*|mailto:*|"#"*|"") continue ;; esac
+              [ -e "$skill_dir/${target%%#*}" ] || fail "$skill_md" "Broken link: $target"
+            done < <(grep -oE '\]\([^)]+\)' "$skill_md" | sed 's/^](//; s/)$//')
+
+            # The release is keyed on the tag, so a changed skill whose version
+            # stayed put is skipped as already released and never ships.
+            if [ -n "$name" ] && [ -n "$version" ]; then
+              tag="${name}-v${version}"
+              if git rev-parse -q --verify "refs/tags/${tag}" >/dev/null; then
+                if ! git diff --quiet "refs/tags/${tag}" HEAD -- "$skill_dir"; then
+                  fail "$skill_md" "Content changed since $tag was released, but metadata.version is still $version. Bump it, or release_skills.yml skips this skill."
+                fi
+              fi
+            fi
+          done
+
+          if [ "$failed" -ne 0 ]; then
+            echo "Skill validation failed."
+            exit 1
+          fi
+
+          echo "Skills valid."

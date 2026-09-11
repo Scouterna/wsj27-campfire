@@ -1,0 +1,91 @@
+# SwiftLint owns Swift correctness and quality, the way ESLint owns it for
+# TypeScript (ADR 006). Style belongs to SwiftFormat, so the rules that would
+# argue with it are off.
+#
+# Where a rule is switched off, the reason is beside it. An exception without a
+# stated cause is indistinguishable from an accident.
+#
+# `pnpm check:apple:lint` passes --strict. The thresholds below are errors, but
+# many rules report a warning by default – yoda_condition and identifier_name
+# among them – and --strict is what makes those fail the build too.
+
+# The paths to lint are given on the command line rather than here: SwiftLint
+# resolves a config file's own paths relative to that file, and this one lives
+# in config/ with every other tool's.
+
+# On top of the defaults: the opt-in rules worth having.
+opt_in_rules:
+  - array_init
+  - closure_end_indentation
+  - closure_spacing
+  - collection_alignment
+  - contains_over_filter_count
+  - contains_over_first_not_nil
+  - discouraged_object_literal
+  - empty_collection_literal
+  - empty_count
+  - empty_string
+  - enum_case_associated_values_count
+  - explicit_init
+  - fallthrough
+  - fatal_error_message
+  - first_where
+  - flatmap_over_map_reduce
+  - identical_operands
+  - implicitly_unwrapped_optional
+  - joined_default_parameter
+  - last_where
+  - legacy_multiple
+  - literal_expression_end_indentation
+  - lower_acl_than_parent
+  - modifier_order
+  - multiline_arguments
+  - operator_usage_whitespace
+  - overridden_super_call
+  - prefer_self_type_over_type_of_self
+  - private_action
+  - private_outlet
+  - redundant_nil_coalescing
+  - redundant_type_annotation
+  - sorted_first_last
+  - static_operator
+  - toggle_bool
+  - unavailable_function
+  - unneeded_parentheses_in_closure_argument
+  - unowned_variable_capture
+  - untyped_error_in_catch
+  - yoda_condition
+
+disabled_rules:
+  # SwiftFormat decides line breaks and wrapping; a second opinion on the same
+  # question only produces arguments neither tool can win.
+  - trailing_comma
+  # Xcode's own switch indentation, which SwiftFormat is configured to produce.
+  - switch_case_alignment
+
+line_length:
+  error: 100
+  ignores_comments: false
+  ignores_urls: true
+
+identifier_name:
+  # `id` and `to` are good names, and both are shorter than the default floor.
+  min_length: 2
+  excluded:
+    - id
+    - to
+
+type_body_length:
+  error: 250
+
+file_length:
+  error: 400
+
+function_body_length:
+  error: 60
+
+cyclomatic_complexity:
+  error: 10
+
+nesting:
+  type_level: 2

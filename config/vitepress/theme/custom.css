@@ -1,0 +1,243 @@
+/* Campfire guidebook theme overrides.
+
+   The palette is the Swedish contingent's graphic profile ("Grafisk form",
+   version 8, 2026-06-14). Each hue has a base color plus a 15% darker and a
+   15% lighter shade; the darker shade carries the color on light backgrounds
+   and the lighter one on dark backgrounds, which is also how the profile uses
+   them. */
+
+:root {
+  /* Official color – the contingent's official contexts. */
+  --campfire-official-dark: #9a3616;
+  --campfire-official: #ce4a17;
+  --campfire-official-light: #e66b45;
+
+  /* Primary colors – the more informal contexts. */
+  --campfire-yellow-dark: #eead05;
+  --campfire-yellow: #f4c126;
+  --campfire-yellow-light: #f9d578;
+
+  --campfire-blue-dark: #215161;
+  --campfire-blue: #2e768a;
+  --campfire-blue-light: #4096b2;
+
+  /* Extended scale – complements the colors above. */
+  --campfire-green-dark: #526125;
+  --campfire-green: #768b33;
+  --campfire-green-light: #98b147;
+
+  --campfire-brown-dark: #643c13;
+  --campfire-brown: #975a15;
+  --campfire-brown-light: #c97719;
+}
+
+/* The official color is the site's accent: links and highlights on the base
+   shade in light mode (4.55:1 on white), on the lighter shade in dark mode
+   (5.36:1 on the default dark background) – both clear WCAG AA for body
+   text. Solid accents stay on the base shade in both modes, with white text
+   on top, which is the profile's rule for text on a base color. */
+:root {
+  --vp-c-brand-1: var(--campfire-official);
+  --vp-c-brand-2: var(--campfire-official-dark);
+  --vp-c-brand-3: var(--campfire-official);
+  --vp-c-brand-soft: rgb(206 74 23 / 14%);
+}
+
+.dark {
+  --vp-c-brand-1: var(--campfire-official-light);
+  --vp-c-brand-2: var(--campfire-official);
+  --vp-c-brand-3: var(--campfire-official);
+  --vp-c-brand-soft: rgb(230 107 69 / 16%);
+}
+
+/* The contingent's display face, for the one heading a page has. The file is the
+   design system's own – the same face the application's titles are set in – reached by
+   relative path so the guidebook never carries a second copy of it. */
+@font-face {
+  font-family: "Bravely Script";
+  src: url("../../../libraries/ui/assets/fonts/bravelyscript.woff2") format("woff2");
+  font-display: swap;
+}
+
+.vp-doc h1 {
+  font-family: "Bravely Script", cursive;
+  font-size: 2.5rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+
+@media (min-width: 768px) {
+  .vp-doc h1 {
+    font-size: 3rem;
+  }
+}
+
+/* The contingent logotype at the top of the sidebar. The mark is near-square,
+   so it needs the sidebar's full width to stay readable – at nav-logo size the
+   jamboree line disappears. The asset is 360px wide, which is exactly 2x the
+   180px it renders at.
+
+   Pulled up over the sidebar's own top padding (reserved to clear the fixed
+   nav bar above it) rather than reducing that padding directly, which would
+   carry every item below the logotype up with it. `position: relative` moves
+   the image without disturbing the layout box it leaves behind, and needs
+   `z-index` because that same top offset would otherwise tuck it behind the
+   nav bar sitting above the sidebar in stacking order. */
+.VPSidebarNav .campfire-logotype,
+.campfire-logotype {
+  display: block;
+  height: auto;
+  margin: 0 0 2rem;
+  max-width: 180px;
+  position: relative;
+  top: -20px;
+  width: 100%;
+  z-index: 1;
+}
+
+/* The app icon in the mobile nav bar (see themeConfig.logo) – square in the
+   source, rounded here the same way the sidebar's own icon would be, so it
+   reads as a platform mark rather than a favicon glued into the title bar. */
+.VPNavBarTitle .VPImage.logo {
+  border-radius: 22%;
+}
+
+/* Above 960px the sidebar is visible and already carries the logotype, so the
+   nav's copy would be a duplicate – hide it there. Below that breakpoint the
+   sidebar collapses into a drawer, and the nav copy is the only branding left,
+   so it stays, raised from the default 24px – a little more room than a plain
+   icon needs, but it matches the logotype's own raise from when this rule
+   covered both. */
+:root {
+  --vp-nav-logo-height: 36px;
+}
+
+@media (min-width: 960px) {
+  .VPNavBarTitle {
+    display: none;
+  }
+}
+
+/* Mermaid draws connectors in black, which is right on the light background
+   and invisible on the dark one. Node borders are fine either way, because
+   they sit on a light brand-colored fill, but the edges and arrowheads run
+   over the page itself – so flip only those to white in dark mode, which is
+   also the profile's rule for marks on a black background.
+
+   Mermaid scopes its own rules by the diagram's id (`#mermaid-88
+   .flowchart-link`), which outranks any selector built from classes, so the
+   edge rule needs `!important` to win. */
+.dark .flowchart-link {
+  stroke: #fff !important;
+}
+
+.dark marker path {
+  fill: #fff;
+  stroke: #fff;
+}
+
+/* Flowchart edge labels – the words on the arrows, like "Yes" and "No" – sit on
+   a white pill from Mermaid's edgeLabelBackground. In dark mode the plugin
+   forces Mermaid's own `dark` theme, which colors that text light, leaving it
+   white on the white pill. Pin the text dark in both modes so it reads on the
+   pill. As with the edge rule above, Mermaid's id-scoped rules outrank plain
+   class selectors, so this needs `!important`. */
+.mermaid .edgeLabel,
+.mermaid .edgeLabel p,
+.mermaid .edgeLabel span {
+  color: #213547 !important;
+  background-color: #fff !important;
+}
+
+/* Remove the divider line the default theme draws above every h2.
+   Drop the border and its accompanying padding; the h2's top margin
+   still gives the heading room to breathe. */
+.vp-doc h2 {
+  border-top: 0;
+  padding-top: 0;
+}
+
+/* The default theme offsets the h2 anchor by the same 24px as that padding,
+   so it lines up with the heading text. With the padding gone the offset has
+   to go too, or the anchor drops down beside the paragraph below. */
+.vp-doc h2 .header-anchor {
+  top: 0;
+}
+
+/* Let readers inspect diagrams and other guidebook images without leaving the
+   page. Mermaid renders inline, so its diagrams are SVG in the page rather
+   than images, and need the affordance spelled out separately. */
+.vp-doc img,
+.vp-doc .mermaid svg {
+  cursor: zoom-in;
+}
+
+.image-lightbox {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  padding: 2rem;
+  background: rgb(0 0 0 / 80%);
+  cursor: zoom-out;
+  /* The box is the full viewport, margin aside, and scrolls rather than
+     shrinking the diagram to fit – a component diagram is often too tall to
+     read once shrunk to viewport height, and this way it never has to be. */
+  overflow-y: auto;
+}
+
+/* Both kinds of diagram sit on the backdrop the same way: full box width and
+   natural height, so a diagram wider than it is tall reads at a sensible size
+   and one taller than the viewport scrolls instead of shrinking past
+   legibility, on a padded, rounded surface. For a Mermaid diagram the cap is
+   its own inline max-width, its natural size, deliberately left in place:
+   unlike the exported architecture diagrams, which are far wider than any
+   viewport, a Mermaid diagram is often smaller, and stretching one past its
+   natural width only magnifies its labels. */
+.image-lightbox img,
+.image-lightbox .mermaid svg {
+  width: 100%;
+  height: auto;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.image-lightbox img {
+  /* White rather than the theme variable, because a Structurizr export bakes
+     background: #ffffff into its own markup: the frame has to match the
+     diagram it wraps, and in dark mode the theme variable would ring a white
+     diagram in near-black. */
+  background: #fff;
+}
+
+.image-lightbox .mermaid svg {
+  /* A diagram narrower than the box sits centered rather than left. It is a
+     block, so auto margins do the centering, not text-align. */
+  display: block;
+  margin-inline: auto;
+
+  /* A Mermaid diagram is transparent and draws in the site's text colors, so
+     on the dark backdrop it needs a surface of its own. It goes on the diagram
+     rather than a wrapper so the surface ends where the diagram does, and the
+     variable tracks the site theme, which is what the diagram's own colors
+     already do. */
+  background: var(--vp-c-bg);
+}
+
+.image-lightbox-close {
+  /* Fixed, not absolute: the lightbox itself is the scroll container, so an
+     absolutely positioned child would scroll away with the diagram instead
+     of staying reachable. */
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 90%);
+  color: #213547;
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+}

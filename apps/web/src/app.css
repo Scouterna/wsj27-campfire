@@ -1,0 +1,16 @@
+/* What the application itself owns: the page frame the screens are drawn into. What each
+   piece looks like belongs to the ui library, together with the tokens and the base. */
+
+@import "@scouterna/wsj27-campfire-ui/styles.css";
+
+@layer screen {
+  body {
+    /* One reading column, centered, on the paper the base layer already painted. The
+       accent is the unit color in force, so a control the design system has no component
+       for still reads as this unit's. */
+    accent-color: var(--color-theme-bright);
+    margin: 0 auto;
+    max-width: 640px;
+    padding: 24px 16px;
+  }
+}

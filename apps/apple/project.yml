@@ -1,0 +1,170 @@
+name: Campfire
+
+# The readable source for the Xcode project. `pnpm generate:apple` runs XcodeGen over
+# this file and the result, Campfire.xcodeproj, is committed – so a fresh clone can build
+# and run with Xcode alone, and XcodeGen is a prerequisite for changing the project
+# rather than for using it.
+options:
+  minimumXcodeGenVersion: 2.46.0
+  createIntermediateGroups: true
+  indentWidth: 2
+  tabWidth: 2
+  deploymentTarget:
+    iOS: 26.0
+  defaultConfig: Local (Debug)
+  groupSortPosition: top
+
+attributes:
+  BuildIndependentTargetsInParallel: true
+
+# Three environments, differing in one setting: the origin the shell loads the web
+# application from. Everything else – the bundle identifier, the app name, the icon – is
+# shared, so the three cannot sit on a phone side by side and are not meant to.
+#
+# Xcode's own Debug and Release are gone: a configuration here is an environment crossed
+# with a build type, which is what XcodeGen's configVariants below turn into one scheme
+# per environment.
+configs:
+  Local (Debug): debug
+  Local (Release): release
+  Dev (Debug): debug
+  Dev (Release): release
+  Prod (Debug): debug
+  Prod (Release): release
+
+configFiles:
+  Local (Debug): config/Local.xcconfig
+  Local (Release): config/Local.xcconfig
+  Dev (Debug): config/Dev.xcconfig
+  Dev (Release): config/Dev.xcconfig
+  Prod (Debug): config/Prod.xcconfig
+  Prod (Release): config/Prod.xcconfig
+
+settings:
+  # No target links AppIntents.framework, so Xcode's metadata processor has nothing to
+  # extract and says so once per target on every build. Telling it not to look is the only
+  # way to stop it; this comes back the day an App Intent is added.
+  LM_SKIP_METADATA_EXTRACTION: YES
+  DEAD_CODE_STRIPPING: true
+  ENABLE_USER_SCRIPT_SANDBOXING: true
+  SWIFT_VERSION: 6
+
+fileGroups:
+  - config
+  - project.yml
+
+targets:
+  Campfire:
+    type: application
+    # iOS only. iPadOS, macOS, watchOS, tvOS, and visionOS are out of scope. This bounds
+    # the platform; TARGETED_DEVICE_FAMILY below bounds the device, and both are needed –
+    # on its own this still produces an iPad build.
+    supportedDestinations: [iOS]
+
+    sources:
+      - path: assets
+        buildPhase: resources
+      - path: src
+        buildPhase: sources
+        createIntermediateGroups: true
+
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(CAMPFIRE_BUNDLE_ID)
+        PRODUCT_NAME: $(CAMPFIRE_APP_NAME)
+        # iPhone alone. supportedDestinations above bounds the platform, not the device
+        # family, which defaults to "1,2" and would ship an iPad build – a device this
+        # phone-width web application is not laid out for.
+        TARGETED_DEVICE_FAMILY: "1"
+        # Automatic signing with a real team, so the shell can run on a device. A
+        # Simulator build never signs, so this costs the Simulator path nothing.
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: $(CAMPFIRE_DEVELOPMENT_TEAM)
+
+    info:
+      path: config/generated/Campfire.plist
+      properties:
+        CFBundleDevelopmentRegion: sv
+        CFBundleName: $(CAMPFIRE_APP_NAME)
+        CFBundleDisplayName: $(CAMPFIRE_APP_NAME)
+        CFBundleShortVersionString: $(CAMPFIRE_VERSION_NUMBER)
+        CFBundleVersion: $(CAMPFIRE_BUILD_NUMBER)
+
+        # Read by Config.swift. The one place the address of the web application appears.
+        Campfire:
+          WebOrigin: $(CAMPFIRE_WEB_ORIGIN)
+
+        # The development server speaks cleartext on the loopback address, which App
+        # Transport Security refuses by default. This permits it for local addresses and
+        # nothing else.
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+
+        # The launch screen is the tonal blue the app icon and the web share, drawn before
+        # any of the app's code runs.
+        UILaunchScreen:
+          UIColorName: LaunchScreenBackground
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        ITSAppUsesNonExemptEncryption: false
+
+    scheme:
+      # One scheme per environment – Campfire Local, Campfire Dev, Campfire Prod – each
+      # bound to that environment's pair of configurations. Prod leads so that a fresh
+      # checkout opens on it in Xcode's scheme menu; the scripts name the scheme they
+      # want and never rely on the selection.
+      configVariants:
+        - Prod
+        - Dev
+        - Local
+      testTargets:
+        - name: CampfireTests
+          parallelizable: true
+        - name: CampfireUITests
+
+  # Swift Testing, hosted by the app so that Config can read the same Info.plist the
+  # shell reads.
+  CampfireTests:
+    type: bundle.unit-test
+    supportedDestinations: [iOS]
+    sources:
+      - path: test
+        buildPhase: sources
+        createIntermediateGroups: true
+    dependencies:
+      - target: Campfire
+    settings:
+      base:
+        CODE_SIGNING_ALLOWED: false
+        PRODUCT_BUNDLE_IDENTIFIER: $(CAMPFIRE_BUNDLE_ID).tests
+        BUNDLE_LOADER: $(TEST_HOST)
+        "TEST_HOST[sdk=iphonesimulator*]": $(BUILT_PRODUCTS_DIR)/$(CAMPFIRE_APP_NAME).app/$(CAMPFIRE_APP_NAME)
+    info:
+      path: config/generated/Campfire-test.plist
+      properties:
+        CFBundleDevelopmentRegion: sv
+        CFBundleName: CampfireTests
+        CFBundleShortVersionString: $(CAMPFIRE_VERSION_NUMBER)
+        CFBundleVersion: $(CAMPFIRE_BUILD_NUMBER)
+
+  # XCUITest, driving the real shell.
+  CampfireUITests:
+    type: bundle.ui-testing
+    supportedDestinations: [iOS]
+    sources:
+      - path: test-ui
+        buildPhase: sources
+        createIntermediateGroups: true
+    dependencies:
+      - target: Campfire
+    settings:
+      base:
+        CODE_SIGNING_ALLOWED: false
+        PRODUCT_BUNDLE_IDENTIFIER: $(CAMPFIRE_BUNDLE_ID).uitests
+        TEST_TARGET_NAME: Campfire
+    info:
+      path: config/generated/Campfire-uitest.plist
+      properties:
+        CFBundleDevelopmentRegion: sv
+        CFBundleName: CampfireUITests
+        CFBundleVersion: $(CAMPFIRE_BUILD_NUMBER)

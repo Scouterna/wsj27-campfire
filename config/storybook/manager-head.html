@@ -1,0 +1,36 @@
+<!--
+  The brand in the sidebar, shaped like the guidebook's nav bar: the app icon, square in
+  the source and rounded here the same way, at the same 36px, with the title beside it.
+  Storybook shows either the image or the title, never both, so the title is drawn from
+  the link's own attribute – the theme's brandTitle – rather than written a second time
+  here.
+-->
+<style>
+  a[title="Campfire UI"] {
+    align-items: center;
+    color: #3c3c43;
+    display: inline-flex;
+    font-size: 16px;
+    font-weight: 600;
+    gap: 8px;
+    text-decoration: none;
+  }
+
+  a[title="Campfire UI"]::after {
+    content: attr(title);
+  }
+
+  /* The change-detection marker beside a story that is new or changed against git.
+     Storybook paints it in its own base palette rather than the theme's, so it is the
+     one blue left on the page without this. */
+  button[data-testid="tree-change-status-button"] {
+    border-color: #ce4a17;
+    color: #ce4a17;
+  }
+
+  img[src$="/brand/icon.svg"] {
+    border-radius: 22%;
+    height: 36px;
+    width: 36px;
+  }
+</style>

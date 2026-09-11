@@ -1,0 +1,8 @@
+#!/bin/sh
+# Holds the commit subject to the Commit messages section of AGENTS.md, via the
+# rules in config/commitlint/.
+#
+# Requires pnpm, and fails the commit without it. pnpm is what this repository is
+# built on, so someone who cannot run it is not set up to commit here.
+
+pnpm exec commitlint --config config/commitlint/commitlint.config.ts --edit "$1"

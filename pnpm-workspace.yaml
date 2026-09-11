@@ -1,0 +1,56 @@
+# The pnpm workspace: where packages live, and the policy every install is
+# held to. pnpm reads its configuration from this file.
+
+# Supply chain. A version published less than three days ago is refused, so a
+# compromised release has time to be noticed before it can be installed here.
+# Strict mode also refuses a package that carries no publish timestamp, which
+# would otherwise slip past the window unchecked.
+minimumReleaseAge: 4320
+minimumReleaseAgeStrict: true
+minimumReleaseAgeIgnoreMissingTime: false
+
+# Install scripts only run for packages allowed to build. An explicit `false`
+# records a deliberate skip: esbuild and unrs-resolver ship prebuilt binaries,
+# so their fallback build scripts have nothing to do. Flip a package to `true`
+# only after reading what its script does.
+allowBuilds:
+  esbuild: false
+  unrs-resolver: false
+
+# Every dependency is added as an exact version, never a ^ or ~ range, so an
+# install can never quietly resolve to something the lockfile did not describe.
+savePrefix: ""
+
+# An unmet peer dependency is a failure, not a warning.
+#
+# This is why `workbox-build` and `workbox-window` sit in the root
+# devDependencies with nothing in the repository importing either:
+# vite-plugin-pwa declares both as required peers, and an undeclared peer is a
+# failed install here rather than a warning. They are not dead weight – removing
+# either breaks `pnpm install`. package.json is strict JSON and cannot say so
+# itself, which is why it is said here.
+strictPeerDependencies: true
+autoInstallPeers: false
+
+# VitePress bundles Algolia's DocSearch, which asks for `search-insights` to
+# report search analytics. The guidebook uses VitePress's built-in local
+# search, so DocSearch never runs and the analytics package would be dead
+# weight. Declared missing on purpose rather than installed.
+peerDependencyRules:
+  ignoreMissing:
+    - search-insights
+
+# Prefer a workspace package over the registry when both could satisfy a range.
+preferWorkspacePackages: true
+
+# The four package roots: the deployable apps, the generic libraries, the
+# feature modules, and the developer tooling. Every one of them exports raw
+# TypeScript source and has no build step of its own: Vite compiles what the web
+# application imports, and Node's type stripping runs the tools. `apps/apple`
+# and `apps/android` are native projects with no package.json – they are driven
+# by root scripts that shell into Xcode and Gradle, which pnpm does not manage.
+packages:
+  - apps/*
+  - libraries/*
+  - modules/*
+  - tools/*

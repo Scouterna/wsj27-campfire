@@ -1,0 +1,17 @@
+# The server inside the deployable image, beside the Dockerfile that copies it in. The
+# only one of the four that leaves this machine, and the only one that is not a front
+# door: there is nothing behind it. It serves the built files, and any path that is not a
+# real file falls back to index.html, so a deep link into a screen loads the app that
+# then routes to it. 8080 rather than 80, so the container never needs root. /api/auth and
+# /api/project belong to whatever ingress sits in front of it.
+#
+# One Caddy config per way Campfire is served, one folder per environment:
+#   local/Caddyfile       `pnpm start:local`, the mock back-end
+#   dev/Caddyfile         `pnpm start:dev`, the real back-end in containers
+#   prod/Caddyfile        `pnpm start:prod`, the built image against the real back-end
+#   prod/image.Caddyfile  this one – inside the image, wherever it is deployed
+:8080 {
+	root * /srv
+	try_files {path} /index.html
+	file_server
+}

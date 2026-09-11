@@ -1,0 +1,66 @@
+name: Check
+
+# Formatting, linting, Markdown, types, and the TypeScript tests across the whole
+# repository.
+#
+# Pull requests only. A pull request is tested against main as it stood when
+# the run started, which is the content that lands while one person merges one
+# change at a time onto an up-to-date branch.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+# One run per pull request. Pushing again cancels the run it superseded, so a
+# branch pushed three times in a minute costs one run, not three.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .tool-versions
+          cache: pnpm
+
+      - name: Install dependencies
+        id: install
+        run: pnpm install --frozen-lockfile
+
+      # One step per check:* script, each running even after a sibling failed,
+      # so one run reports every problem rather than only the first.
+      - name: Check formatting
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm check:format
+
+      - name: Check lint
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm check:lint
+
+      - name: Check Markdown
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm check:markdown
+
+      - name: Check types
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm check:types
+
+      # A sibling of the four checks rather than a workflow of its own: it needs the
+      # same Node and the same install, and reporting alongside them is what makes one
+      # run answer "is this branch sound?" in full.
+      - name: Test
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm test

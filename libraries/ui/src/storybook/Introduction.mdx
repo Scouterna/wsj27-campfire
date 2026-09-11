@@ -1,0 +1,24 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+
+<Meta title="Introduction" />
+
+# Campfire UI
+
+The contingent's design system: the foundations as tokens, the components over them, and
+the modules' widgets and screens built from both.
+
+- **Components** – the `libraries/ui` vocabulary.
+- **Modules** – what each feature module draws with those pieces.
+
+## Two rules
+
+**Styling lives in a stylesheet.** A component's rules sit in the `.css` file beside it,
+and the class names are the library's public vocabulary. The `style` prop is for values
+only the runtime knows; anything a rule could say belongs in a rule.
+
+**Sizes are rem against the 17-point base.** Every font size is written
+`calc(<N>rem / 17)`, never a bare `px`, which is what makes Campfire follow the text size
+the reader set in iOS Settings. The 17 is iOS's default body size in points, so `<N>` is
+the number read off the design, and the root resolves that base to the reader's
+[Dynamic Type](https://joakimkemeny.com/writing/2024-09-05-dynamic-size/) size. A bare
+`px` would ignore it.

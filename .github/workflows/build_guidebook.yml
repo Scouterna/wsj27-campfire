@@ -1,0 +1,78 @@
+name: Build guidebook
+
+# Builds the guidebook on every pull request, so a page that does not compile
+# fails the pull request rather than the deploy. release_guidebook.yml builds
+# it again on main and publishes that build.
+#
+# Filtered inside the job rather than by `on: paths:`. A workflow skipped by a
+# path filter reports no status, and a required check waits on that status
+# forever; a skipped job reports as passing.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+# One run per pull request. Pushing again cancels the run it superseded, so a
+# branch pushed three times in a minute costs one run, not three.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # Everything the built site is made from: its pages, the agent definitions
+      # the agent pages include, the VitePress config and theme, the TypeScript
+      # configuration, the lockfile, the Node version the runner installs, the
+      # workspace's install policy, and this workflow – the same list
+      # build_web.yml calls a toolchain change.
+      - name: Look for guidebook changes
+        id: changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          # Listed in its own step, so a failed API call fails the job rather
+          # than reading as "nothing changed" and skipping the build. The files
+          # endpoint rather than `gh pr diff`, which refuses a pull request of
+          # more than 300 files; this one pages through up to 3,000.
+          files="$(gh api --paginate \
+                     "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files?per_page=100" \
+                     --jq '.[].filename')"
+
+          if printf '%s\n' "$files" \
+             | grep -qE '^(docs/|\.agents/agents/|config/vitepress/|tsconfig\.json$|package\.json$|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|\.tool-versions$|\.github/workflows/build_guidebook\.yml$)'; then
+            echo "guidebook=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "guidebook=false" >> "$GITHUB_OUTPUT"
+            echo "No guidebook changes in this pull request."
+          fi
+
+      - name: Check out the repository
+        if: steps.changed.outputs.guidebook == 'true'
+        uses: actions/checkout@v7
+
+      - name: Set up pnpm
+        if: steps.changed.outputs.guidebook == 'true'
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        if: steps.changed.outputs.guidebook == 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .tool-versions
+          cache: pnpm
+
+      - name: Install dependencies
+        if: steps.changed.outputs.guidebook == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Build the guidebook
+        if: steps.changed.outputs.guidebook == 'true'
+        run: pnpm build:guidebook
