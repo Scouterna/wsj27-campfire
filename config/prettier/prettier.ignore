@@ -1,0 +1,62 @@
+# What Prettier does not format, read by `pnpm format` and `pnpm check:format`.
+#
+# Patterns are read the way .gitignore reads them, but relative to this file – so a
+# pattern with a slash in it resolves under config/prettier/ and matches nothing. A
+# bare name matches at any depth; anything with a path in it needs a leading **/ to
+# escape this directory.
+
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+.pnpm-store/
+
+# Build output. Gradle writes the root project's problems report to `build/` no
+# matter where the subprojects are told to build, so that one directory escapes
+# `.build/` – the same exception `.gitignore` carries.
+.build/
+build/
+.gradle/
+.kotlin/
+
+# Swift and Kotlin. Prettier has no parser for either and skips them in silence;
+# saying so here is what keeps "check:format passed" from reading as "these were
+# checked". SwiftFormat and ktlint own them instead.
+*.swift
+*.kt
+*.kts
+
+# Shell. Prettier has no parser for it either, and there is no shell formatter in
+# the toolchain – these are held to review rather than to a tool.
+*.sh
+
+# SVG is XML, so the XML plugin would take it – but every SVG here already has an
+# owner: svgo rewrites the icons through `pnpm format:svg`, and Structurizr writes
+# the diagrams through `pnpm build:arch`. A second formatter would fight both.
+*.svg
+
+# Generated, and owned by the tool that writes them. Editing any of these by
+# hand is a mistake, so formatting them is one too.
+**/apps/apple/Campfire.xcodeproj/
+**/apps/apple/config/generated/
+**/apps/android/gradle/wrapper/
+**/apps/android/gradlew
+**/apps/android/gradlew.bat
+
+# The compiled workspace Structurizr local writes while a view is arranged. The
+# tool owns its shape, and a Prettier pass would rewrite a file the next layout
+# session rewrites back.
+**/docs/architecture/workspace.json
+
+# Xcode-managed asset catalogs and the app icon, written by Xcode and Icon
+# Composer. Both emit `"key" : value`, so a Prettier pass and the next icon edit
+# would rewrite each other forever.
+**/apps/apple/assets/
+
+# The auth service's refresh script, copied into the mock byte for byte from
+# wsj27-auth-api so the keep-alive loop is the real one. Formatting it would make it a copy
+# that no longer compares equal to its source.
+**/tools/mock/static/
+
+# Agent scratch and the reference material under study – gitignored working files.
+temp/
+**/.agents/specs/

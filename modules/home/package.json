@@ -1,0 +1,16 @@
+{
+  "name": "@scouterna/wsj27-campfire-home",
+  "version": "2026.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@scouterna/wsj27-campfire-ui": "workspace:*",
+    "react": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.18"
+  }
+}

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<resources>
+  <style name="Theme.Campfire" parent="android:Theme.Material.Light.NoActionBar">
+    <!-- The window the system shows while the process starts, in the same tonal blue
+         as the app icon, so on Android 12 and newer the splash screen's icon sits on
+         its own background color. The Apple shell does the same with
+         UILaunchScreen's color. -->
+    <item name="android:windowBackground">@color/launch_background</item>
+  </style>
+</resources>

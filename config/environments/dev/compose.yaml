@@ -1,0 +1,121 @@
+# The dev environment's containers: Caddy as the front door, the real wsj27-auth-api
+# against the real ScoutID, and the web application's own dev server. Serves
+# http://localhost:8000, the same origin every environment serves, so the browser and
+# the shells never know which one is running.
+#
+# `pnpm start:dev` generates the signing key the auth service reads and brings this up;
+# the credentials in the .env beside this file are yours to write. The prod environment
+# has its own copy of this file, differing only in what serves the web – duplicated on
+# purpose, so each environment can be read on its own.
+services:
+  ingress:
+    image: caddy:2-alpine
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    # No depends_on: it orders starts, not readiness. Caddy answers 502 until its
+    # back-end is up, and the start script waits for a status the back-end itself
+    # produced before it reports the environment ready.
+
+  # The real auth service, built from its repository's main – the one exception to
+  # pinning every dependency (ADR 005). The back-end services are part of this system
+  # rather than dependencies held at arm's length: what they ship is what the application
+  # is meant to work against, so an environment takes whatever main holds. The stack comes
+  # up with `--build`, so the ref is resolved fresh every start.
+  auth:
+    build:
+      context: https://github.com/Scouterna/wsj27-auth-api.git#main
+    # The credentials come from the gitignored .env beside this file, which you write and
+    # nothing overwrites: OIDC_SERVER, OIDC_CLIENT_ID, and OIDC_CLIENT_SECRET. Everything
+    # else is the same on every machine, so it is here where it can be read rather than in
+    # a generated file.
+    env_file:
+      - .env
+    environment:
+      PORT: 8000
+      # The address the *browser* reaches the service on – through the ingress, never the
+      # container directly – so the Keycloak callback and every cookie land on the one
+      # origin the whole stack shares.
+      PUBLIC_URL: http://localhost:8000/api/auth
+      ALLOWED_REDIRECT_DOMAINS: localhost:8000
+      # Generated on first run and exported by the start script, which is why compose is
+      # not the way to bring these containers up by hand.
+      SIGNING_KEY: ${CAMPFIRE_SIGNING_KEY:?start this with pnpm start:dev or pnpm start:prod}
+      # Local only: the stack is plain http.
+      INSECURE_COOKIES: "true"
+      # Where the roles this service mints come from. The SERVICE_CLIENT_ROLES entry
+      # is what authorizes the call: the service mints its own token as wsj27-auth,
+      # so there is no secret to configure.
+      PROJECT_API_URL: http://ingress:8001
+      SERVICE_CLIENT_ROLES: '{"wsj27-auth": ["wsj27:bulkread"]}'
+
+  # The real project API, built from its repository's main like the auth service
+  # above. It verifies a token by fetching the JWKS at the auth service's
+  # public URL, http://localhost:8000/api/auth/certs – an address that reaches the front
+  # door only from inside the ingress's own network namespace, which is why this
+  # container shares it instead of getting its own. The ingress reaches it as
+  # localhost:8001, and the auth service as ingress:8001.
+  project:
+    build:
+      context: https://github.com/Scouterna/wsj27-project-api.git#main
+    network_mode: service:ingress
+    environment:
+      # 8001, because the ingress already holds 8000 in the shared namespace.
+      PORT: 8001
+      # Explicit, with the trailing slash its URL joining needs: the derived default
+      # builds the discovery URL from the incoming request and lands outside /api/auth.
+      OIDC_SERVER_PATH: http://localhost:8000/api/auth/
+      # The Scoutnet credentials live in the gitignored .env beside this file, with
+      # the Keycloak client's. Without them the service runs and serves nobody.
+      SCOUTNET_PROJECTS: "${SCOUTNET_PROJECTS:-[]}"
+      SCOUTNET_BODYLIST_KEY: "${SCOUTNET_BODYLIST_KEY:-}"
+      # No POSTGRES_DSN: the /cases feature stays off, and everything else works.
+    volumes:
+      # The fetched Scoutnet data survives a restart, so the service can start from
+      # its disk cache when Scoutnet is slow or unreachable.
+      - project_persist:/app/persist
+
+  # The web application's dev server, hot reload included: the repository is
+  # bind-mounted, so an edit on the host reaches Vite in the container and HMR flows
+  # back through the ingress websocket. Every workspace package's node_modules is
+  # masked by a container volume – the host's holds macOS binaries the container cannot
+  # run, and one unmasked package is enough to break the install. The list mirrors
+  # pnpm-workspace.yaml; a new package needs its mask added here.
+  web:
+    image: node:24-alpine
+    working_dir: /campfire
+    # --store-dir, because pnpm keeps its store on the same filesystem as the install
+    # so it can hard-link, and the bind mount is not the filesystem the container's home
+    # is on – left alone it writes the store into the repository as .pnpm-store/. Inside
+    # the root node_modules volume it stays in the container and survives a restart.
+    #
+    # The package's own start, not the root's `start:web`: that wrapper frees the port
+    # with the host tooling in scripts/start/helpers.sh, which inside a container finds
+    # pid 1 listening and tries to stop the container it is running in.
+    command: sh -c "corepack enable && pnpm install --frozen-lockfile --store-dir /campfire/node_modules/.pnpm-store && pnpm --filter @scouterna/wsj27-campfire-web start"
+    volumes:
+      - ../../..:/campfire
+      - web_root_modules:/campfire/node_modules
+      - web_app_modules:/campfire/apps/web/node_modules
+      - web_host_modules:/campfire/libraries/host/node_modules
+      - web_ui_modules:/campfire/libraries/ui/node_modules
+      - web_utils_modules:/campfire/libraries/utils/node_modules
+      - web_authentication_modules:/campfire/modules/authentication/node_modules
+      - web_home_modules:/campfire/modules/home/node_modules
+      - web_journey_modules:/campfire/modules/journey/node_modules
+      - web_participants_modules:/campfire/modules/participants/node_modules
+      - web_mock_modules:/campfire/tools/mock/node_modules
+
+volumes:
+  project_persist:
+  web_root_modules:
+  web_app_modules:
+  web_host_modules:
+  web_ui_modules:
+  web_utils_modules:
+  web_authentication_modules:
+  web_home_modules:
+  web_journey_modules:
+  web_participants_modules:
+  web_mock_modules:

@@ -1,0 +1,4 @@
+#include "config/Shared.xcconfig"
+
+// The deployed production build of the web application.
+CAMPFIRE_WEB_ORIGIN = https:/$()/campfire.wsj27.se

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<vector
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:width="108dp"
+  android:height="108dp"
+  android:viewportWidth="1024"
+  android:viewportHeight="1024"
+>
+  <group android:pivotX="512" android:pivotY="512" android:scaleX="0.75" android:scaleY="0.75">
+    <group
+      android:translateX="86"
+      android:translateY="86"
+      android:scaleX="2.28"
+      android:scaleY="2.28"
+    >
+      <path
+        android:fillColor="#215161"
+        android:pathData="M259.2 44.2 261.2 45.2 265.2 85.2 268.2 89.2 353.2 99.2 351.2 141.2 360.2 144.2 360.2 203.2 332.2 207.2 366.2 211.2 365.2 271.2 353.2 273.2 352.2 319.2 194.2 329.2 193.2 308.2 191.2 306.2 13.2 292.2 13.2 241.2 8.2 240.2 7.2 179.2 15.2 179.2 20.2 177.2 20.2 118.2 74.2 115.2 75.2 67.2 258.2 45.2Z"
+      />
+    </group>
+    <path
+      android:fillColor="#00000000"
+      android:pathData="M512 640C418 640 352 575 360 487C366 421 402 376 454 324C452 384 470 428 506 454C524 391 568 331 636 274C635 346 684 399 694 470C709 568 634 640 512 640Z"
+      android:strokeColor="#FFFFFF"
+      android:strokeLineCap="round"
+      android:strokeLineJoin="round"
+      android:strokeWidth="54"
+    />
+    <path
+      android:fillColor="#00000000"
+      android:pathData="M519 576C480 562 465 531 476 502C484 479 504 462 518 437C526 468 556 487 565 517C576 550 553 577 519 576Z"
+      android:strokeColor="#FFFFFF"
+      android:strokeLineCap="round"
+      android:strokeLineJoin="round"
+      android:strokeWidth="42"
+    />
+    <path
+      android:fillColor="#00000000"
+      android:pathData="M365 700 655 793"
+      android:strokeColor="#FFFFFF"
+      android:strokeLineCap="round"
+      android:strokeLineJoin="round"
+      android:strokeWidth="58"
+    />
+    <path
+      android:fillColor="#00000000"
+      android:pathData="M655 700 365 793"
+      android:strokeColor="#FFFFFF"
+      android:strokeLineCap="round"
+      android:strokeLineJoin="round"
+      android:strokeWidth="58"
+    />
+  </group>
+</vector>

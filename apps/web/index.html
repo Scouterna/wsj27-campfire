@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="utf-8" />
+    <!-- viewport-fit=cover extends the viewport under the device's safe areas, which is
+         what makes the env(safe-area-inset-*) values non-zero for an installed PWA. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Campfire</title>
+
+    <!--
+      The app icon, copied into assets/ rather than referenced out of config/, because
+      Vite serves this directory verbatim and cannot reach above the app's own root.
+    -->
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#215161" />
+
+    <!--
+      The cascade order, declared before any stylesheet loads – which is what makes load
+      order irrelevant everywhere else. Inline in the document because no stylesheet can
+      be certain of being first, and a layer that is first used rather than first named
+      takes its position from whichever file happened to load.
+    -->
+    <style>
+      @layer tokens, fonts, reset, base, component, screen;
+    </style>
+
+    <!-- Linked rather than imported from TypeScript, so tsc never has to resolve CSS. -->
+    <link rel="stylesheet" href="/src/app.css" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

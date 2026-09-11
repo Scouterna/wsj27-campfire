@@ -1,0 +1,18 @@
+{
+  "sourceLanguage" : "sv",
+  "strings" : {
+    "app.name" : {
+      "comment" : "The name of the app, shown on the shell's one screen.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Campfire"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

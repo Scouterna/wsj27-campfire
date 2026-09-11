@@ -1,0 +1,58 @@
+# Detekt's rules for Campfire's Kotlin, layered on top of its defaults with
+# `buildUponDefaultConfig` – so this file holds only what differs, and a rule
+# Detekt adds in a future release arrives switched on.
+#
+# Every exception below is here because Compose's conventions and Detekt's
+# defaults genuinely disagree, not because a rule was inconvenient.
+
+complexity:
+  LongParameterList:
+    # A composable takes its state and its callbacks as parameters. That is the
+    # framework's idiom, not a smell, and the alternative is a wrapper object
+    # per component.
+    ignoreAnnotated: ["Composable"]
+  TooManyFunctions:
+    # A screen is a file of small composables, so the count rises with the size of
+    # the UI rather than with its complexity. Detekt's 11 is tuned for classes.
+    allowedFunctionsPerFile: 20
+    allowedFunctionsPerClass: 20
+
+naming:
+  FunctionNaming:
+    # A composable is PascalCase by convention, and a test's name is a sentence
+    # in backticks. Neither is something the rule can tell from an ordinary
+    # function.
+    ignoreAnnotated: ["Composable", "Test", "ParameterizedTest"]
+
+style:
+  MaxLineLength:
+    # 100, the same ceiling .editorconfig sets for Kotlin and Prettier's printWidth
+    # sets for everything it formats. Detekt's own default is 120, which would make it
+    # the one tool in the repository with a different opinion about the same line.
+    maxLineLength: 100
+  ReturnCount:
+    # A guard clause that returns early is clearer than the nesting that avoids
+    # it, so guard clauses do not count towards the limit. Tangled control flow
+    # still does.
+    excludeGuardClauses: true
+  MagicNumber:
+    # A composable's dp and sp values are the layout, written where it is read.
+    # Naming each one moves it away from the thing it describes.
+    ignoreAnnotated: ["Composable"]
+  UnusedPrivateFunction:
+    # A @Preview function is called by the tooling, never by the code.
+    ignoreAnnotated: ["Composable", "Preview"]
+  ForbiddenComment:
+    # A comment earns its place by saying something the code cannot; a task in
+    # a comment belongs in an issue. This is the rule that enforces that.
+    #
+    # Matched as a word, so `// TODO fix this` counts as much as `// TODO:` does –
+    # the colon is a typing habit, not part of the rule. The word boundary keeps an
+    # ordinary word containing the letters from matching.
+    comments:
+      - reason: "A task in a comment belongs in an issue."
+        value: "\\bTODO\\b"
+      - reason: "A task in a comment belongs in an issue."
+        value: "\\bFIXME\\b"
+      - reason: "A task in a comment belongs in an issue."
+        value: "\\bSTOPSHIP\\b"

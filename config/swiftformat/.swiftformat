@@ -1,0 +1,34 @@
+# SwiftFormat owns formatting for Swift, the way Prettier owns it for everything
+# else (ADR 005): formatting is never a review comment, because it is never a
+# choice.
+#
+# Run it through `pnpm format:apple` or `pnpm check:apple:format`, which pass this
+# file with --config. SwiftFormat otherwise walks up from the source looking for a
+# .swiftformat, and the first one it meets may be outside the repository entirely,
+# with its own Swift version and its own disabled rules.
+
+--swiftversion 6.3
+
+# Two spaces, matching .editorconfig and every other language here.
+--indent 2
+--tabwidth 2
+--maxwidth 100
+--linebreaks lf
+
+# Match the rest of the repository's shape.
+--wraparguments before-first
+--wrapparameters before-first
+--wrapcollections before-first
+--closingparen balanced
+--commas always
+--trailingclosures
+--semicolons never
+--self remove
+--importgrouping testable-bottom
+--stripunusedargs closure-only
+
+# Xcode's own indentation for a switch's cases, which is what the editor does
+# when you type one.
+--indentcase true
+
+--exclude .build,Campfire.xcodeproj

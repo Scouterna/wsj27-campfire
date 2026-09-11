@@ -1,0 +1,26 @@
+// How markdownlint-cli2 is run: which files it reads, and where the rules come
+// from. The rules themselves, and why each one deviates from the default, are in
+// markdownlint.jsonc.
+{
+  "config": { "extends": "./markdownlint.jsonc" },
+
+  "globs": ["**/*.md"],
+
+  "ignores": [
+    // Agent scratch – gitignored working files, read by the people on the branch
+    // and never published, so not held to the site's rules.
+    ".agents/specs",
+    // Gitignored scratch space for reference material under study – not this
+    // repository's documentation.
+    "temp",
+    "**/node_modules",
+    "**/.build",
+    // Symlinks – .claude and .github point into .agents/, and every CLAUDE.md
+    // points at the AGENTS.md beside it; the real files are linted once at their
+    // real paths.
+    ".claude/agents",
+    ".claude/skills",
+    ".github/agents",
+    "**/CLAUDE.md",
+  ],
+}

@@ -1,0 +1,79 @@
+name: Check architecture
+
+# Checks the C4 model on every pull request: that the workspace parses, and that
+# every element is described and every relationship labeled.
+#
+# Its own workflow rather than a step in check.yml, because it reports its own
+# status and needs something the other four checks do not: Docker, and a pinned
+# Structurizr image. The four checks stay fast and need only pnpm.
+#
+# Filtered inside the job rather than by `on: paths:`. A workflow skipped by a
+# path filter reports no status, and a required check waits on that status
+# forever; a skipped job reports as passing.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+# One run per pull request. Pushing again cancels the run it superseded, so a
+# branch pushed three times in a minute costs one run, not three.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    # The check runs in the same pinned Structurizr image the export uses, and the
+    # runner pulls all 6 GB of it first, so this is slower than the other checks by
+    # some margin.
+    timeout-minutes: 30
+    steps:
+      # Everything the diagrams are built from: the model itself, the scripts
+      # that render and check it, and this workflow.
+      - name: Look for architecture changes
+        id: changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          # Listed in its own step, so a failed API call fails the job rather
+          # than reading as "nothing changed" and skipping the check. The files
+          # endpoint rather than `gh pr diff`, which refuses a pull request of
+          # more than 300 files; this one pages through up to 3,000.
+          files="$(gh api --paginate \
+                     "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files?per_page=100" \
+                     --jq '.[].filename')"
+
+          if printf '%s\n' "$files" \
+             | grep -qE '^(docs/architecture/|scripts/structurizr/|\.github/workflows/check_architecture\.yml$)'; then
+            echo "architecture=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "architecture=false" >> "$GITHUB_OUTPUT"
+            echo "No architecture changes in this pull request."
+          fi
+
+      - name: Check out the repository
+        if: steps.changed.outputs.architecture == 'true'
+        uses: actions/checkout@v7
+
+      # The check is one Node script and a container. Docker is already on the
+      # runner; Node comes from the same setup the other workflows use, and pnpm
+      # only so the script is run the way it is run everywhere else.
+      - name: Set up pnpm
+        if: steps.changed.outputs.architecture == 'true'
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        if: steps.changed.outputs.architecture == 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .tool-versions
+
+      - name: Check the architecture model
+        if: steps.changed.outputs.architecture == 'true'
+        run: pnpm check:arch

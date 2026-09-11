@@ -1,0 +1,142 @@
+name: Test web
+
+# The Playwright walk-throughs: one browser, one leg per feature module, each
+# driving the real web application against a real development server.
+#
+# Split from check.yml because it is the slow half. A leg installs a browser and
+# starts a server, and a pull request that touches one module has no business
+# paying that four times – so each leg first asks whether this pull request could
+# possibly change what it proves, and says so out loud when the answer is no.
+#
+# Filtered inside the job rather than by `on: paths:`. A workflow skipped by a
+# path filter reports no status, and a required check waits on that status
+# forever; a skipped job reports as passing.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+# One run per pull request. Pushing again cancels the run it superseded, so a
+# branch pushed three times in a minute costs one run, not three.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  walk:
+    name: ${{ matrix.module }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      # One module's failure is not another's, and a run that stops at the first
+      # tells you less than the one that reports them all.
+      fail-fast: false
+      matrix:
+        # The same four, in the same order, as the `modules` array in
+        # config/playwright/playwright.config.ts. A module added to one and not
+        # the other either runs nowhere or fails with "no project named X".
+        module:
+          - authentication
+          - home
+          - journey
+          - participants
+    steps:
+      # A module's walk-through can break from the module itself, from the
+      # application that composes it, from a library it stands on, from the
+      # tooling that builds and runs it, or from this workflow – so all of those
+      # count as a reason to run, and everything else as a reason not to.
+      #
+      # The tooling is named config directory by config directory rather than as
+      # `config/`, which would make a SwiftLint or commitlint edit start four
+      # browsers to prove four screens still render.
+      #
+      # Asked before the checkout, so a leg with nothing to do pays for neither.
+      - name: Look for changes this module's walk-through could see
+        id: changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          # Listed in its own step, so a failed API call fails the job rather
+          # than reading as "nothing changed" and skipping the walk-through. The files
+          # endpoint rather than `gh pr diff`, which refuses a pull request of
+          # more than 300 files; this one pages through up to 3,000.
+          files="$(gh api --paginate \
+                     "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files?per_page=100" \
+                     --jq '.[].filename')"
+
+          if printf '%s\n' "$files" \
+             | grep -qE '^(modules/${{ matrix.module }}/|apps/web/|libraries/|config/playwright/|config/vite/|tsconfig\.json$|package\.json$|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|\.tool-versions$|\.github/workflows/test_web\.yml$)'; then
+            echo "module=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "module=false" >> "$GITHUB_OUTPUT"
+            echo "Nothing in this pull request touches the ${{ matrix.module }} module, the web application, a library, or the tooling – skipping its walk-through."
+          fi
+
+      - name: Check out the repository
+        if: steps.changed.outputs.module == 'true'
+        uses: actions/checkout@v7
+
+      - name: Set up pnpm
+        if: steps.changed.outputs.module == 'true'
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        if: steps.changed.outputs.module == 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .tool-versions
+          cache: pnpm
+
+      - name: Install dependencies
+        if: steps.changed.outputs.module == 'true'
+        run: pnpm install --frozen-lockfile
+
+      # The browser is a ~100 MB download that belongs to one version of
+      # Playwright, so the cache is keyed on the version package.json pins –
+      # exactly, because every dependency here is pinned exactly.
+      - name: Read the Playwright version
+        id: playwright
+        if: steps.changed.outputs.module == 'true'
+        run: |
+          set -euo pipefail
+          version="$(node -p "require('./package.json').devDependencies['@playwright/test']")"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Restore the browser
+        id: browser
+        if: steps.changed.outputs.module == 'true'
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+
+      - name: Download Chromium
+        if: ${{ steps.changed.outputs.module == 'true' && steps.browser.outputs.cache-hit != 'true' }}
+        run: pnpm exec playwright install --with-deps chromium
+
+      # The browser itself is cached; the system libraries it links against are
+      # the runner's, and are installed again on a cache hit.
+      - name: Install Chromium's system libraries
+        if: ${{ steps.changed.outputs.module == 'true' && steps.browser.outputs.cache-hit == 'true' }}
+        run: pnpm exec playwright install-deps chromium
+
+      # The Playwright configuration starts the dev server itself, so there is no
+      # server step here – the walk-through owns the thing it drives.
+      - name: Walk through the module
+        if: steps.changed.outputs.module == 'true'
+        run: pnpm test:web:ui --project=${{ matrix.module }}
+
+      # A trace is worth more than a red cross when a walk-through fails on a
+      # machine nobody can open.
+      - name: Upload the traces
+        if: ${{ failure() && steps.changed.outputs.module == 'true' }}
+        uses: actions/upload-artifact@v5
+        with:
+          name: playwright-${{ matrix.module }}
+          path: .build/playwright/
+          retention-days: 7

@@ -1,0 +1,35 @@
+/* How the stories lay their examples out. This is the Storybook canvas's own furniture,
+   not the design system – `preview.tsx` loads it, the application never does – but it
+   lives here rather than in `config/storybook/` so the scaffolding sits beside the
+   components it frames. Every story in the repository may use these classes: the ui
+   library is the one package every module already depends on, so a module's story
+   reaching for `.story-column` reaches no further than its own imports do. */
+
+.story-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* A component shown at the width the product gives it – a phone's content column – so
+   the shapes read true rather than stretching across the canvas. */
+.story-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 400px;
+}
+
+/* The H1 of an MDX page – the Introduction – set in the contingent's display face, the
+   same way the guidebook sets its page titles, so the two sites read as one. The face
+   itself arrives with the design system's stylesheet, which preview.tsx loads. A
+   generated Docs page keeps its title in the body face: the face has no lowercase, and
+   a component's name is a word whose case means something. An MDX heading is a direct
+   child of the content column, which keeps a heading inside a rendered story out too. */
+.sbdocs-content > h1:not(.sbdocs-title) {
+  font-family: "Bravely Script", cursive;
+  font-size: 3rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.2;
+}

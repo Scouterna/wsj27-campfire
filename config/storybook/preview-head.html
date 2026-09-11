@@ -1,0 +1,11 @@
+<!--
+  The cascade order, declared before any stylesheet loads – the same line the
+  application's index.html carries. The design system writes every rule into one of
+  these layers and never outside them, so a layer that is first used rather than first
+  named would take its position from whichever file happened to load. Storybook's own
+  furniture is unlayered, which is exactly why it wins over the design system's element
+  rules on a Docs page.
+-->
+<style>
+  @layer tokens, fonts, reset, base, component, screen;
+</style>

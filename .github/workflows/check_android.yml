@@ -1,0 +1,119 @@
+name: Check Android
+
+# Formatting, linting, and the JVM tests for the Android shell. Split from
+# check.yml because it needs a JDK and the Android SDK, and a change that touches
+# no Kotlin should not pay for either.
+#
+# The instrumented tests are deliberately absent: they need an emulator, which is
+# slow enough and flaky enough on a hosted runner to cost more attention than it
+# saves. `pnpm test:android:ui` runs them on demand.
+#
+# The Swift shell has no equivalent workflow. Checking it needs macOS with Xcode,
+# which this project deliberately does not spend a runner on, so the pre-push hook
+# is the whole gate for Swift – see .githooks/pre-push.
+#
+# Filtered inside the job rather than by `on: paths:`. A workflow skipped by a
+# path filter reports no status, and a required check waits on that status
+# forever; a skipped job reports as passing.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+# One run per pull request. Pushing again cancels the run it superseded, so a
+# branch pushed three times in a minute costs one run, not three.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      # Everything the Android shell is made from: its own directory, the shared
+      # Detekt configuration, the .editorconfig ktlint reads its rules from, and
+      # this workflow.
+      #
+      # The web application is deliberately not on this list. It will belong here
+      # once the bridge lands, because the shell will then keep its own copy of
+      # the message shapes and the tests that catch the two drifting apart – but
+      # today the shell asserts nothing about the web beyond an origin.
+      - name: Look for Android changes
+        id: changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          # Listed in its own step, so a failed API call fails the job rather
+          # than reading as "nothing changed" and skipping the checks. The files
+          # endpoint rather than `gh pr diff`, which refuses a pull request of
+          # more than 300 files; this one pages through up to 3,000.
+          files="$(gh api --paginate \
+                     "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files?per_page=100" \
+                     --jq '.[].filename')"
+
+          if printf '%s\n' "$files" \
+             | grep -qE '^(apps/android/|config/detekt/|\.editorconfig$|\.github/workflows/check_android\.yml$)'; then
+            echo "android=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "android=false" >> "$GITHUB_OUTPUT"
+            echo "No Android changes in this pull request."
+          fi
+
+      - name: Check out the repository
+        if: steps.changed.outputs.android == 'true'
+        uses: actions/checkout@v7
+
+      # The version gradle/gradle-daemon-jvm.properties pins the daemon to. The
+      # wrapper's launcher needs a JVM before it can read that file, so the two
+      # have to agree.
+      - name: Set up the JDK
+        if: steps.changed.outputs.android == 'true'
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: Set up Gradle
+        if: steps.changed.outputs.android == 'true'
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          build-root-directory: apps/android
+
+      # One step per check, each running even after a sibling failed, so one run
+      # reports every problem rather than only the first.
+      - name: Check formatting
+        id: format
+        if: steps.changed.outputs.android == 'true'
+        working-directory: apps/android
+        run: ./gradlew ktlintCheck
+
+      - name: Check lint
+        if: ${{ !cancelled() && steps.changed.outputs.android == 'true' && steps.format.conclusion != 'skipped' }}
+        working-directory: apps/android
+        run: ./gradlew detekt lintLocalDebug
+
+      # assembleLocalDebugAndroidTest compiles the instrumented suite without
+      # running it. Nothing else does – ktlint, Detekt, Android Lint, the unit
+      # tests, and the debug build all pass on an instrumented source that does
+      # not compile – so without this the suite rots silently until someone runs
+      # it on an emulator by hand.
+      - name: Run the tests
+        if: ${{ !cancelled() && steps.changed.outputs.android == 'true' && steps.format.conclusion != 'skipped' }}
+        working-directory: apps/android
+        run: ./gradlew testLocalDebugUnitTest assembleLocalDebugAndroidTest
+
+      # Reports are worth more than a red cross when a check fails on a machine
+      # nobody can open.
+      - name: Upload the reports
+        if: ${{ failure() && steps.changed.outputs.android == 'true' }}
+        uses: actions/upload-artifact@v5
+        with:
+          name: android-reports
+          path: apps/android/.build/*/reports/
+          retention-days: 7

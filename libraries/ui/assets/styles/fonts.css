@@ -1,0 +1,10 @@
+/* The faces the design system ships. Bravely Script is the contingent's display face and
+   the only one – body text is the system font on purpose. */
+
+@layer fonts {
+  @font-face {
+    font-family: "Bravely Script";
+    src: url("../fonts/bravelyscript.woff2") format("woff2");
+    font-display: swap;
+  }
+}

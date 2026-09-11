@@ -1,0 +1,107 @@
+name: Release skills
+
+# Packages every skill under .agents/skills whose version has not been released
+# yet and publishes it as its own GitHub Release, one release per skill.
+# metadata.version is the source of truth: the tag is <name>-v<version>, so
+# bumping the version cuts a release and an unchanged version is skipped.
+#
+# check_skills.yml has already validated these skills on the pull request.
+# Also runnable by hand, to retry a release that failed.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".agents/skills/**"
+  workflow_dispatch:
+
+# Releases queue rather than race: two merges in quick succession would
+# otherwise create the same tag twice. Never cancel one in flight – a
+# canceled release can leave a tag without its release.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Scoped to the job that needs it: creating a release writes to the repository.
+    permissions:
+      contents: write
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Package and release new skill versions
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          build_dir="${GITHUB_WORKSPACE}/.build/skills"
+          mkdir -p "$build_dir"
+
+          released=0
+          for skill_md in .agents/skills/*/SKILL.md; do
+            # No matching skills – the glob stays literal, so skip it.
+            [ -e "$skill_md" ] || continue
+
+            skill_dir="$(dirname "$skill_md")"
+            dir_name="$(basename "$skill_dir")"
+
+            # The YAML frontmatter block, between the first two --- fences.
+            frontmatter="$(awk 'NR==1 && $0=="---"{f=1; next} f && /^---[[:space:]]*$/{exit} f' "$skill_md")"
+
+            name="$(printf '%s\n' "$frontmatter" | sed -n 's/^name:[[:space:]]*//p' | head -n1)"
+            version="$(printf '%s\n' "$frontmatter" | sed -n 's/^[[:space:]]*version:[[:space:]]*//p' | head -n1 | tr -d '"')"
+            description="$(printf '%s\n' "$frontmatter" | sed -n 's/^description:[[:space:]]*//p' | head -n1)"
+
+            if [ -z "$name" ] || [ -z "$version" ]; then
+              echo "::warning::Skipping $skill_dir – missing frontmatter name or metadata.version"
+              continue
+            fi
+
+            # The skill's name must match its directory (the packaging invariant).
+            if [ "$name" != "$dir_name" ]; then
+              echo "::warning::Skipping $skill_dir – frontmatter name \"$name\" does not match directory \"$dir_name\""
+              continue
+            fi
+
+            tag="${name}-v${version}"
+
+            # Already released at this version – its tag exists, so skip.
+            # (The tag is the version's identity and what gh release create
+            # collides on; to re-release a version, delete its tag.)
+            if git ls-remote --exit-code origin "refs/tags/${tag}" >/dev/null 2>&1; then
+              echo "Skipping $name – tag $tag already exists."
+              continue
+            fi
+
+            # Zip from inside the skill directory so SKILL.md sits at the archive root.
+            zip_path="${build_dir}/${tag}.zip"
+            ( cd "$skill_dir" && zip -r -X "$zip_path" . -x '*.DS_Store' >/dev/null )
+
+            notes_file="${build_dir}/${tag}.md"
+            {
+              printf '%s\n\n' "$description"
+              printf 'Upload the zip to Claude.ai via **Settings > Features** to enable the skill.\n'
+            } > "$notes_file"
+
+            gh release create "$tag" \
+              --repo "$REPO" \
+              --target "$SHA" \
+              --title "Skill ${name} v${version}" \
+              --notes-file "$notes_file" \
+              "$zip_path"
+
+            echo "Released $name v$version."
+            released=$((released + 1))
+          done
+
+          if [ "$released" -eq 0 ]; then
+            echo "No new skill versions to release."
+          fi
