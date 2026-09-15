@@ -51,7 +51,7 @@ export default defineConfig({
         start_url: "/",
         scope: "/",
         display: "standalone",
-        theme_color: "#215161",
+        theme_color: "#215262",
         // The same paper as `body` in app.css and the shells' Palette.paper, so the
         // splash an installed PWA shows before first paint continues the page.
         background_color: "#f4f2ec",

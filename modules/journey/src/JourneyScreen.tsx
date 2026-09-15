@@ -9,7 +9,7 @@ import type { ReactElement } from "react"
 export function JourneyScreen(): ReactElement {
   return (
     <section>
-      <Logo name="Campfire" compact />
+      <Logo />
       <h1>Resan</h1>
     </section>
   )

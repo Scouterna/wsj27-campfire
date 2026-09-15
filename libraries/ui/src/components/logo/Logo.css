@@ -1,20 +1,12 @@
 /* The Logo component's styling. */
 
 @layer component {
+  /* A default width for the surfaces that give the mark no size of their own; a hero
+     that wants it larger says so in its own stylesheet. */
   .logo {
-    color: var(--color-theme-bright);
-    display: inline-block;
-    font-family: var(--typography-display-font_family);
-    font-size: calc(32rem / 17);
-    font-weight: var(--typography-display-font_weight);
-    letter-spacing: 0.02em;
-    line-height: 1;
-    text-transform: uppercase;
-  }
-
-  /* The size a bar carries: the same mark, not a second one. */
-  .logo-compact {
-    font-size: calc(17rem / 17);
-    letter-spacing: 0.06em;
+    display: block;
+    height: auto;
+    max-width: 100%;
+    width: 350px;
   }
 }

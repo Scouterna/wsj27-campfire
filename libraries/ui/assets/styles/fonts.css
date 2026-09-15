@@ -5,6 +5,10 @@
   @font-face {
     font-family: "Bravely Script";
     src: url("../fonts/bravelyscript.woff2") format("woff2");
-    font-display: swap;
+    /* Wait for the face rather than flashing the cursive fallback: the display face
+       carries the brand, and a headline that repaints from another face is worse than
+       one that arrives a beat later. The browser's block period is short, and the file
+       is small and same-origin, so the wait is rarely visible at all. */
+    font-display: block;
   }
 }

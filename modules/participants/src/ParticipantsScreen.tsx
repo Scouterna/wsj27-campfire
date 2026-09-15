@@ -9,7 +9,7 @@ import type { ReactElement } from "react"
 export function ParticipantsScreen(): ReactElement {
   return (
     <section>
-      <Logo name="Campfire" compact />
+      <Logo />
       <h1>Deltagare</h1>
     </section>
   )

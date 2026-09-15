@@ -2,25 +2,24 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Logo } from "./Logo"
 
-const meta: Meta<typeof Logo> = {
+const meta = {
   title: "Components/Logo",
   component: Logo,
-}
+} satisfies Meta<typeof Logo>
 
 export default meta
 
-type Story = StoryObj<typeof Logo>
+type Story = StoryObj<typeof meta>
 
 /**
- * The size a page opens with.
+ * The contingent's mark, in the theme the toolbar picked.
  */
-export const Full: Story = {
-  args: { name: "Campfire" },
-}
+export const Default: Story = {}
 
 /**
- * The size a bar carries.
+ * The full alt text is the default; a surface that already says what the mark is
+ * shortens it.
  */
-export const Compact: Story = {
-  args: { name: "Campfire", compact: true },
+export const ShortAlt: Story = {
+  args: { alt: "WSJ27 – Swedish Contingent" },
 }
