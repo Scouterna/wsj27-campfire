@@ -173,6 +173,9 @@ importers:
       '@scouterna/wsj27-campfire-utils':
         specifier: workspace:*
         version: link:../../libraries/utils
+      '@tanstack/react-query':
+        specifier: 5.102.8
+        version: 5.102.8(react@19.2.8)
       react:
         specifier: 19.2.8
         version: 19.2.8
@@ -205,13 +208,27 @@ importers:
         specifier: 19.2.4
         version: 19.2.4(@types/react@19.2.18)
 
-  libraries/utils: {}
+  libraries/utils:
+    dependencies:
+      react:
+        specifier: 19.2.8
+        version: 19.2.8
+    devDependencies:
+      '@types/react':
+        specifier: 19.2.18
+        version: 19.2.18
 
   modules/authentication:
     dependencies:
       '@scouterna/wsj27-campfire-ui':
         specifier: workspace:*
         version: link:../../libraries/ui
+      '@scouterna/wsj27-campfire-utils':
+        specifier: workspace:*
+        version: link:../../libraries/utils
+      '@tanstack/react-query':
+        specifier: 5.102.8
+        version: 5.102.8(react@19.2.8)
       react:
         specifier: 19.2.8
         version: 19.2.8
@@ -1960,6 +1977,14 @@ packages:
         optional: true
       typescript:
         optional: true
+
+  '@tanstack/query-core@5.102.8':
+    resolution: {integrity: sha512-ZNjkJ33CqvPNec/6lZBnHqLc3EVGPZ9ySLhYahU9TcuRFdmwXewuj0c4hwSWcGHqEUwcSrKeZ+oGcvPBqXcQcg==}
+
+  '@tanstack/react-query@5.102.8':
+    resolution: {integrity: sha512-TYBea4OuXWD7MhaSHq069TWbFe7rcwWN6kzT7JF0OKi1K6c1gTv2IzD6A6ExJsCMozdkqBWeuIUZmu4KQg0O5A==}
+    peerDependencies:
+      react: ^18 || ^19
 
   '@testing-library/dom@10.4.1':
     resolution: {integrity: sha512-o4PXJQidqJl82ckFaXUeoAW+XysPLauYI43Abki5hABd853iMhitooc6znOnczgbTYmEP6U6/y1ZyKAIsvMKGg==}
@@ -7066,6 +7091,13 @@ snapshots:
       typescript: 6.0.3
     transitivePeerDependencies:
       - supports-color
+
+  '@tanstack/query-core@5.102.8': {}
+
+  '@tanstack/react-query@5.102.8(react@19.2.8)':
+    dependencies:
+      '@tanstack/query-core': 5.102.8
+      react: 19.2.8
 
   '@testing-library/dom@10.4.1':
     dependencies:

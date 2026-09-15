@@ -35,8 +35,14 @@ autoInstallPeers: false
 # VitePress bundles Algolia's DocSearch, which asks for `search-insights` to
 # report search analytics. The guidebook uses VitePress's built-in local
 # search, so DocSearch never runs and the analytics package would be dead
-# weight. Declared missing on purpose rather than installed.
+# weight. Declared missing on purpose rather than installed. The same DocSearch
+# also pins its React peer below 19; since it never renders, the workspace's
+# React 19 is allowed to satisfy it rather than blocking every install.
 peerDependencyRules:
+  allowedVersions:
+    "@docsearch/react>react": "19"
+    "@docsearch/react>react-dom": "19"
+    "@types/react": "19"
   ignoreMissing:
     - search-insights
 
