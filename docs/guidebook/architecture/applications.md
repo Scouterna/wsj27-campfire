@@ -25,7 +25,7 @@ Vite's configuration is shared at `config/vite/vite.config.ts` and run with `--c
 
 `vite-plugin-pwa` generates the manifest and the service worker, registered with `autoUpdate` so a deploy reaches an installed application on the next load without asking. The precache covers everything the built application is made of: `js`, `css`, `html`, `svg`, `png`, `ico`, and `woff2`. Navigations under `/api/` are kept off the fallback, because sign-in and sign-out are full-page navigations to the auth service and a precached shell served in their place would break them.
 
-The manifest is Swedish, named Campfire, `display: standalone`, with `id`, `start_url`, and `scope` all at `/`. Its theme color is `#215161` – the darker tonal blue the app icon's brush mark carries – and its background is `#f4f2ec`, the paper the whole application is drawn on, so the launch surface matches the first screen. Both shells' launch screens hold `#2e768a` instead, the same blue `--color-theme-blue` names.
+The manifest is Swedish, named Campfire, `display: standalone`, with `id`, `start_url`, and `scope` all at `/`. Its theme color is `#215262` – the darker tonal blue the app icon's brush mark carries – and its background is `#f4f2ec`, the paper the whole application is drawn on, so the launch surface matches the first screen. Both shells' launch screens hold `#2a778a` instead, the same blue `--color-theme-blue` names.
 
 ### The composition root, the gate, and the chromes
 
@@ -160,6 +160,6 @@ Three rules of its contract shape the client more than any payload field does.
 
 **Scoping happens on the back-end, and the client composes.** A unit's leader reads their own troop and nothing else; the contingent management reads everyone. A person outside the caller's scope answers as if they did not exist, so the register does not leak who is in it. There is no "everyone I may see" endpoint, so the client builds the whole register from the troop listings – the [participants module](./modules) owns that composition.
 
-**The service owns the role model.** It derives the roles from the project's own data – which troop a leader leads, which function of the contingent management somebody serves in, and the grants given to one person at a time. The auth service mints them into tokens, and the front-end's identity adapter reads them back; nothing in the front-end invents a role or decides what one means.
+**The service owns the role model.** It derives the roles from the project's own data – which troop a leader leads, which function of the contingent management somebody serves in, and the grants given to one person at a time. The auth service mints them into tokens, and the front-end's role translation reads them back; nothing in the front-end invents a role or decides what one means.
 
 On a developer's machine the [mock](../testing/mock) stands in for both services on the same two prefixes, so an address that works locally works against dev unchanged.

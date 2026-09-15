@@ -2,13 +2,15 @@
 
 Where the outside world is dealt with – the participants service, the wire shapes, the cache – and turned into the types [the domain](./domain) declares.
 
-Only the module that owns a capability has a data layer, and only two modules have one at all: authentication, which asks the auth service who is signed in, and participants, which reads the register. No other module talks to a service, and the C4 model draws exactly those two edges.
+Only the module that owns a capability has a data layer, and only two modules have one at all: authentication, which asks the auth service who is signed in and reads the signed-in person's own unit from the participants service, and participants, which reads the register. No other module talks to a service, and the C4 model draws exactly those three edges.
 
 ## Query factories
 
 Every fetch is declared as a factory that returns TanStack Query options – a stable key array, and the function that would make the request. It describes the request rather than making it, which is what lets one definition serve a route that prefetches, a component that reads, and a test that substitutes, collapsed into a single request and a single cache entry however many callers there are.
 
-The factories live in `data/`, one per endpoint, and they are the only thing in a module that knows a URL. A screen calls a hook; the hook reads the options; the options know the address.
+The factories live in `data/`, one per endpoint, and they are the only thing in a module that knows a URL. A screen calls a hook; the hook reads the options; the options know the address. The hook itself is presentation and lives in `ui/` – the factory knows the URL, the hook knows React.
+
+Every read goes through the application's one query client. The composition root owns it and hands it to whatever asks – a screen's hook through the provider, or a plain function the way the session gate hands it to `currentUser` – so one cache holds every answer. The `fetch` wrapper in `libraries/utils` is only ever the transport inside a query function; a read that calls it directly answers without being cached, deduplicated, or owned, which is why it is wrong even when it works.
 
 Keys are arrays and they are stable, because the cache is addressed by them – `["participants", "list"]` is the register, and it stays that whoever is reading, since a session has one viewer and the cache changes owner with the sign-in.
 
@@ -43,7 +45,7 @@ The fetch itself lives in `libraries/utils`, wrapped so that three outcomes are 
 
 The participants service lists the register one troop at a time and gates every answer by the caller's roles. There is no "everyone I may see" endpoint, so the client composes the register from exactly the listings the service would allow, and to do that it has to know who is reading.
 
-That fact is distilled once, in the composition root, out of the signed-in identity: the member number, the unit a leader leads, whether the whole register is theirs to read, and whether the health answers are. It is mounted above every screen, and the query factories take it. A leader asks for their own troop; the contingent management walks the leaders' listing to learn every troop, then fetches each troop, the IST, and the management itself and merges them by member number.
+That fact is distilled once, in the composition root, out of the signed-in session: the member number, the unit a leader leads, whether the whole register is theirs to read, and whether the health answers are – each read from the session's roles with the role helpers. It is mounted above every screen, and the query factories take it. A leader asks for their own troop; the contingent management walks the leaders' listing to learn every troop, then fetches each troop, the IST, and the management itself and merges them by member number.
 
 The scope travels with the answer, so the register carries what it is – everyone, one unit, or nobody – and a screen can say so rather than guess from a row count.
 

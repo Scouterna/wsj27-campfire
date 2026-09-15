@@ -10,10 +10,10 @@ That configuration lists one project per package that has tests, written out by 
 
 | Project          | Package                  | What it covers                                                         |
 | ---------------- | ------------------------ | ---------------------------------------------------------------------- |
-| `utils`          | `libraries/utils`        | `stringOrFallback`, the reader for untyped input                       |
-| `ui`             | `libraries/ui`           | The five theme names, and the check that reads one from outside        |
+| `utils`          | `libraries/utils`        | `stringOrFallback`, the `fetch` wrapper, and the role helpers          |
+| `ui`             | `libraries/ui`           | The theme names and checks, and the unit-to-theme table                |
 | `host`           | `libraries/host`         | Tier detection from the User-Agent, and its answer with no `navigator` |
-| `authentication` | `modules/authentication` | The identity adapter, and the defensive decode of the user payload     |
+| `authentication` | `modules/authentication` | The session client, the role translation, and the DTO converters       |
 | `home`           | `modules/home`           | The module's public surface – home has no model and fetches nothing    |
 | `journey`        | `modules/journey`        | The trip's phase and countdown, pure functions over its fixed dates    |
 | `participants`   | `modules/participants`   | The unit identity table and the DTO converters                         |
@@ -23,9 +23,9 @@ Hand-listing is the point. A new package with tests is a new entry here, deliber
 
 ### The coverage ratchet
 
-`pnpm test` measures coverage on every run and fails below the floor each metric carries: 93% of statements, 87% of branches, 93% of functions, and 94% of lines. The numbers are a ratchet rather than a target: each sits just under what the suite achieves, so a change that stops covering something fails, and a change that covers more is followed by raising the bar to just under the new figure.
+`pnpm test` measures coverage on every run and fails below the floor each metric carries: 97% of statements, 91% of branches, 99% of functions, and 97% of lines. The numbers are a ratchet rather than a target: each sits just under what the suite achieves, so a change that stops covering something fails, and a change that covers more is followed by raising the bar to just under the new figure.
 
-What it measures is deliberately narrow – `libraries/host`, `libraries/utils`, and `tools/mock`, minus the mock's `main.ts`, which starts a server and has no behavior of its own to assert. Components and screens stay outside the denominator on purpose, because they are proved by Storybook and by the [Playwright walk-throughs](./ui) rather than by a rendering test.
+What it measures is deliberately narrow – `libraries/host`, `libraries/utils`, and `tools/mock`, minus the mock's `main.ts`, which starts a server and has no behavior of its own to assert, and minus the utils package's one component, `RolesProvider.tsx`. Components and screens stay outside the denominator on purpose, because they are proved by Storybook and by the [Playwright walk-throughs](./ui) rather than by a rendering test.
 
 ## Swift, on a Simulator
 

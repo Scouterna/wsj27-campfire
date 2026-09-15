@@ -18,7 +18,7 @@ Registration, not import, is how a module reaches the application, and that is w
 
 ## Authentication
 
-`modules/authentication` is the client half of the auth service's browser contract: the sign-in and sign-out addresses, the question of who is signed in and its one refresh retry, the defensive decode of the user payload, and the identity adapter that turns the service's flattened roles into a role and a unit.
+`modules/authentication` is the client half of the auth service's browser contract: the sign-in and sign-out addresses, the question of who is signed in and its one refresh retry, the defensive decode of the user payload – the flattened roles translated into the closed set `utils` declares – and the signed-in person: one `User`, the application's only definition of who is signed in, with the helpers that derive the greeting name and the unit the roles or the register place them in.
 
 It holds no token and never will. The session is httpOnly cookies the browser carries, so the module asks who is signed in and is told, or is not ([ADR 019](/decisions/019-authenticate-on-the-app-origin-through-scoutid)). [Sign in](./example-flows/sign-in) walks the whole round trip.
 
@@ -50,6 +50,6 @@ A library that knows a feature is a feature module in the wrong place. The test 
 
 - **`host`** answers which tier the application is running in, a browser or a shell's webview, and carries the versioned bridge to the shells. It has no dependencies at all, not even React, because everything it does is message passing and JSON.
 - **`ui`** is the design system: components, icons, tokens, the five themes, the route and widget registries, and the behavior helpers. It knows what a row is; it does not know what a participant is.
-- **`utils`** holds the small pure helpers more than one package needs, and the bar for adding one is that a second package already wants it. `stringOrFallback` reads a string out of untyped input, and the `fetch` wrapper the [data layer](./layers/data) is built around tells a request that never reached anything, a refusal carrying its status, and an answer that was not JSON apart.
+- **`utils`** holds the small pure helpers more than one package needs, and the bar for adding one is that a second package already wants it. `stringOrFallback` reads a string out of untyped input, and the `fetch` wrapper the [data layer](./layers/data) is built around tells a request that never reached anything, a refusal carrying its status, and an answer that was not JSON apart. It also holds the session's role vocabulary – the closed `Role` set and the `hasAnyRole`, `hasAllRoles`, and `leaderUnit` helpers – with the `RolesProvider` the application mounts at the session gate, so any module reads `useRoles()` instead of having answers threaded down as props. The translation from the provider's spellings into that set is not here: it is the authentication module's, in its data layer.
 
 Libraries do not import modules, and they do not import each other.
