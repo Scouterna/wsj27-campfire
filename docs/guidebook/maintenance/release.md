@@ -4,7 +4,7 @@ Versioning and publication are settled and in use – the version moves by hand 
 
 ## Versioning
 
-The version in the root `package.json` is `2026.1.0`: Calendar Versioning in the shape `YEAR.FEATURE.PATCH` ([ADR 007](/decisions/007-version-with-calver-on-a-rebased-history)).
+The version in the root `package.json` is `2026.2.0`: Calendar Versioning in the shape `YEAR.FEATURE.PATCH` ([ADR 007](/decisions/007-version-with-calver-on-a-rebased-history)).
 
 - **`2026`** – the year of the feature release. The first feature release in a new year adopts that year; a patch stays on the year of the feature it patches and never advances it.
 - **`1`** – the feature release, moved by a `feat`.
@@ -12,7 +12,7 @@ The version in the root `package.json` is `2026.1.0`: Calendar Versioning in the
 
 The commit type says which segment should move. Nothing moves it for you: there is no changelog tool and no version script, so the bump is a deliberate edit to `package.json` in the commit that earns it. That edit is the whole ceremony, and it is what the release workflows read.
 
-Two other files carry the same number by hand – `CAMPFIRE_VERSION_NUMBER` in `apps/apple/config/Shared.xcconfig` and `versionName` in `apps/android/config/app/build.gradle.kts`, both `2026.1.0`, both on build number 1. Nothing keeps the three in step. A version bump is three edits, or an inconsistency waiting to be found.
+Two other files carry the same number by hand – `CAMPFIRE_VERSION_NUMBER` in `apps/apple/config/Shared.xcconfig` and `versionName` in `apps/android/config/app/build.gradle.kts`, both `2026.2.0`, both on build number 1. Nothing keeps the three in step. A version bump is three edits, or an inconsistency waiting to be found.
 
 ## Releasing
 
