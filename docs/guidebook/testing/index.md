@@ -16,18 +16,17 @@ Two habits hold across all of them. Tests live beside the code they cover rather
 
 ## What runs what
 
-| Command                | What it runs                                                               |
-| ---------------------- | -------------------------------------------------------------------------- |
-| `pnpm test`            | Every TypeScript test, through Vitest, with the coverage ratchet           |
-| `pnpm test:web:ui`     | The Playwright walk-throughs, one project per module, against a dev server |
-| `pnpm test:apple`      | The Apple unit tests on a Simulator, and a compile of the walk beside them |
-| `pnpm test:apple:ui`   | The Apple walk, driving the real shell on a Simulator                      |
-| `pnpm test:android`    | The Android JVM unit tests, plus the instrumented compile                  |
-| `pnpm test:android:ui` | The Android walk, on an emulator the script boots                          |
+| Command                | What it runs                                                                        |
+| ---------------------- | ----------------------------------------------------------------------------------- |
+| `pnpm test`            | Every TypeScript test, through Vitest, with the coverage ratchet                    |
+| `pnpm test:web:ui`     | The Playwright walk-throughs, one project per module, against the local environment |
+| `pnpm test:apple`      | The Apple unit tests on a Simulator, and a compile of the walk beside them          |
+| `pnpm test:apple:ui`   | The Apple walk, driving the real shell on a Simulator                               |
+| `pnpm test:android`    | The Android JVM unit tests, plus the instrumented compile                           |
+| `pnpm test:android:ui` | The Android walk, on an emulator the script boots                                   |
 
 ## The known gaps
 
 - **Nothing renders React in a test.** `libraries/ui` and the modules test in a Node environment, and their components are proved in [Storybook](../design/) and by the Playwright walk-throughs instead of by a rendering test.
-- **No browser test reaches the mock.** The Playwright walk-throughs start the Vite dev server alone, where the back-end paths answer nothing, so the seeded register's contract is proved by the mock's own tests rather than in a browser.
 - **The interactive back swipe is checked by hand.** The edge gesture cannot be synthesized, so neither shell walk can drive it.
 - **The bridge is the one contract implemented in all three languages.** A decoder that agrees with the encoder beside it proves nothing about the wire ([ADR 018](/decisions/018-bridge-the-web-application-and-the-shells-with-versioned-messages)).

@@ -219,8 +219,8 @@ campfire = softwareSystem "Campfire" {
 
   # Container level – the application over the modules, and the modules over the
   # libraries. Only the web application knows every module; a module knows the libraries
-  # and never another module, and the two edges out of the front-end belong to the two
-  # modules that own them.
+  # and never another module, and each edge out of the front-end belongs to the one
+  # module that owns it.
   webApp -> authenticationModule "Signs the member in through"
   webApp -> homeModule "Shows the start screen through"
   webApp -> journeyModule "Shows the trip through"
@@ -231,7 +231,9 @@ campfire = softwareSystem "Campfire" {
   homeModule -> uiLibrary "Builds its screens from"
   journeyModule -> uiLibrary "Builds its screens from"
   participantsModule -> uiLibrary "Builds its screens from"
+  authenticationModule -> utilsLibrary "Calls the service with"
   participantsModule -> utilsLibrary "Calls the service with"
   authenticationModule -> authService "Signs in and reads the session over /api/auth"
+  authenticationModule -> participantsService "Reads the signed-in member's unit over /api/project"
   participantsModule -> participantsService "Reads the register over /api/project"
 }

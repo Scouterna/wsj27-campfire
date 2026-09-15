@@ -4,7 +4,7 @@ Read the [root `AGENTS.md`](../AGENTS.md) first – it holds the conventions tha
 
 A module is one domain capability, whole: its data layer, its domain model, its screens, and its widgets. Four exist, and they are how the product grows – a new capability is a new module, not another folder inside an old one.
 
-Every module is one screen deep today. There is no data layer, no domain model, no widget, and no route table anywhere under `modules/`: each package exports one component that draws the wordmark and a heading, and `apps/web` mounts one of the four – the home screen – which is what makes the workspace, the Vitest projects, the Playwright projects, and Storybook real before the features are. The rules below are in force for what exists, and each section says where it describes something no module holds yet.
+Authentication is the first module with the full shape – a data layer, a model, and a screen, built by the sign-in feature. Home is the greeting page the signed-in application mounts, and journey and participants are one screen deep, waiting for their features; there is no widget and no route table anywhere under `modules/` yet. The rules below are in force for what exists, and each section says where it describes something no module holds yet.
 
 ## The one rule that carries the rest
 
@@ -48,7 +48,7 @@ modules/<name>/src/
 
 ## The public surface
 
-`src/index.ts` is a deliberate, narrow list, opening with a JSDoc block saying what the module hands out. Domain types, queries, and screens stay internal unless the application genuinely needs them – anything reaching for a domain type is reaching past the boundary rather than through it. Today each module exports exactly one screen.
+`src/index.ts` is a deliberate, narrow list, opening with a JSDoc block saying what the module hands out. Domain types, queries, and screens stay internal unless the application genuinely needs them – anything reaching for a domain type is reaching past the boundary rather than through it. Today three modules export exactly one screen, and authentication exports its screen beside the session client the gate asks and the `User` the answer decodes to.
 
 Three kinds of thing leave a module, and two of them wait on machinery `libraries/ui` does not hold yet ([Navigation and routing](../docs/guidebook/architecture/layers/navigation.md), [Presentation layer](../docs/guidebook/architecture/layers/presentation.md)):
 
@@ -60,8 +60,11 @@ Registration, not import, is how a module reaches the application. The applicati
 
 ## Data at the boundary
 
-Nothing under `modules/` fetches anything today. TanStack Query is decided and not installed ([ADR 017](../docs/decisions/017-route-and-load-data-with-tanstack-router-and-query.md)), and `libraries/utils` exports one string helper rather than the fetch wrapper this rests on. The [mock](../tools/mock/AGENTS.md) already serves the register and the gates, so what is missing is the client half. When it lands, it lands this way ([Data layer](../docs/guidebook/architecture/layers/data.md)):
+The authentication module fetches today – the session, and the signed-in person's unit – against the contract the [mock](../tools/mock/AGENTS.md) serves locally, and every module that follows lands the same way ([Data layer](../docs/guidebook/architecture/layers/data.md)):
 
+- **Every service read goes through the application's one query client** ([ADR 017](../docs/decisions/017-route-and-load-data-with-tanstack-router-and-query.md)). A factory in `data/` returns the query options; the utils `fetch` is the transport inside its query function, never a path around the cache. The composition root owns the client and hands it in – to a screen's hook, or to a plain function the way the gate hands it to `currentUser` – so one cache holds every answer. A read that calls `fetch` directly is wrong even when it works, because it answers without being cached, deduplicated, or owned.
+- **One model type per thing, and it is ours.** `model/` holds the application's definition, filled in whole by the converter – derivations included, the way `User` carries `firstName` and `unit` rather than helpers that compute them downstream. The provider's vocabulary stops in `data/dto/`, and nothing has two types for one thing: a session shape beside a profile shape is the smell that a converter stopped halfway.
+- **A hook is presentation.** It lives in `ui/` – beside the screen that owns it, or at `ui/` root as a doorway – never in `data/`, which exports factories and converters. The factory knows the URL; the hook knows React.
 - **Every DTO field is typed `unknown`**, and a converter beside it validates the payload into the domain type. Declaring a field `string` is a promise the module cannot keep about a service that will change shape over an eighteen-month build.
 - **A bad row in a list is dropped, not thrown.** One broken record must not empty the register a leader is standing in a field trying to read. A detail fetch is the opposite case: one payload, so a payload that does not convert is a screen saying the person could not be loaded.
 - **A DTO never leaves `data/`.** Nothing above it sees a wire field name, which is what makes an upstream rename stop at the converter.
@@ -75,7 +78,7 @@ Nothing under `modules/` fetches anything today. TanStack Query is decided and n
 - A module's screens are proven by the Playwright walk-through in its `test-ui/` rather than by rendering tests ([ADR 024](../docs/decisions/024-walk-through-the-web-application-per-module-with-playwright.md), [UI tests](../docs/guidebook/testing/ui.md)). `test-ui` rather than `test`, because that is what the two shells already call the suites that drive a running application.
 - Unit tests are `*.test.ts` beside what they cover, run by Vitest ([ADR 022](../docs/decisions/022-test-typescript-with-vitest.md)). Each module has a hand-written project in [`config/vitest/vitest.config.ts`](../config/vitest/vitest.config.ts), in a Node environment, and a module's tests do not run until it is listed there.
 - The modules stay outside the coverage denominator on purpose. The ratchet measures the two libraries with logic in them and the mock, because screens are proved by walking them.
-- Today each module's test asserts that the surface exports the screen the application mounts, and each walk-through asserts that the root address answers in a real browser. Both grow with the screens.
+- A module starts with a surface test asserting its exports – what makes its Vitest project runnable before real tests exist – and retires it once real tests arrive, as authentication's has. Each walk-through grows the same way, from asserting that the root address answers into walking the module's whole flow.
 
 ## Adding a module
 

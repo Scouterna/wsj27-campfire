@@ -34,7 +34,7 @@ sequenceDiagram
   Auth->>Service: GET /api/auth/user
   Service-->>Auth: The user, and their flattened roles
   Auth-->>Gate: The user
-  Gate->>Gate: Adopt the cache owner, derive the identity, resolve the theme
+  Gate->>Gate: Adopt the cache owner, mount the roles, resolve the theme
   Gate->>Gate: Draw the chrome
 ```
 
@@ -48,9 +48,9 @@ One refusal is not the end. The access token is short-lived on purpose, so a ret
 
 **The auth service** did the only part that involves a secret. It redirects to ScoutID, receives the return leg at `/api/auth/callback`, and mints the session there – httpOnly cookies on the application's own origin. The web application never sees a token, which is why it never stores one and never has to decide where to ([Applications](../applications)).
 
-**The gate** turned a user into a session. In order: hand the cache its new owner before any screen mounts, so a previous person's cached register is gone before a query reads it; derive the identity; resolve the theme; then draw the chrome. Nothing renders while the service is still answering.
+**The gate** turned a user into a session. In order: hand the cache its new owner before any screen mounts, so a previous person's cached register is gone before a query reads it; mount the session's roles for everything below; resolve the theme; then draw the chrome. Nothing renders while the service is still answering.
 
-**The identity adapter** is the one place that reads roles. The service reports them flattened, as a colon-separated hierarchy, and the adapter turns them into the three facts the application acts on: whether this person leads a unit, works in the contingent management, or is attending; which unit a leader leads; and whether the register's health answers are theirs to read beyond their own unit. An adapter rather than scattered checks, because what the provider reports is in flux – swapping the adapter is the whole migration.
+**The role translation** is the one place the provider's spellings are read. The service reports the roles flattened, as a colon-separated hierarchy, and one table turns each spelling into the closed set the application knows – leading a unit and which one, the management and its functions, the grant that opens the register's health answers – with an unknown spelling granting nothing. The set is what travels: mounted at the gate, readable anywhere below, so a screen asks it with the helpers and never reads a role string. One table rather than scattered checks, because what the provider reports is in flux – swapping the provider's shape is that one table.
 
 Roles are compared segment by segment, never with a string prefix. `wsj27:cmtx` starts with `wsj27:cmt` as text and is an unrelated role, and treating it as a match would grant access nobody was given.
 

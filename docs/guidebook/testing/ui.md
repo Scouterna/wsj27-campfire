@@ -16,7 +16,7 @@ pnpm test:web:ui --project=journey     # one module's
 How the suite runs, and why:
 
 - **Chromium alone.** The point is proving that the screens work, not that they work in three engines, and a browser matrix would cost three times the minutes to say the same thing.
-- **The dev server is started by Playwright**, on `http://127.0.0.1:3000`, by calling Vite directly rather than through `pnpm start:web`. That script wraps the server in a process group of its own, and Playwright's teardown would then stop the wrapper and leave Vite holding the port, so the run would never exit. A server already running is reused rather than fought over.
+- **The walks run against the local environment**, on `http://localhost:8000`, so the mock answers the back-end paths and the whole sign-in round trip is walkable – the persona picker included. Playwright starts the environment when nothing answers there, and one already running – a developer with `pnpm start:local` up – is reused rather than fought over.
 - **Every test gets its own browser context**, and the specs share no state, so the whole suite runs in parallel.
 - **Continuous integration is stricter than a developer's machine.** `test.only` left in a spec is a failure there rather than a quietly narrowed run, and a failed test is retried once – locally it is not, because locally the flake is the thing worth seeing.
 - **A trace is kept only for a test that failed**, which is the run where the recording is worth the wait. Traces land in `.build/playwright`, which `pnpm clean` already removes.

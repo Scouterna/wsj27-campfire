@@ -22,13 +22,13 @@ Where all of it sits on disk, and what each directory outside these four is for,
 | Package                  | Name                                       | Depends on                                                   |
 | ------------------------ | ------------------------------------------ | ------------------------------------------------------------ |
 | `apps/web`               | `@scouterna/wsj27-campfire-web`            | authentication, home, journey, participants, host, ui, utils |
-| `modules/authentication` | `@scouterna/wsj27-campfire-authentication` | ui                                                           |
+| `modules/authentication` | `@scouterna/wsj27-campfire-authentication` | ui, utils                                                    |
 | `modules/home`           | `@scouterna/wsj27-campfire-home`           | ui                                                           |
 | `modules/journey`        | `@scouterna/wsj27-campfire-journey`        | ui                                                           |
 | `modules/participants`   | `@scouterna/wsj27-campfire-participants`   | ui, utils                                                    |
 | `libraries/host`         | `@scouterna/wsj27-campfire-host`           | nothing at all – not even React                              |
 | `libraries/ui`           | `@scouterna/wsj27-campfire-ui`             | React, and nothing in the workspace                          |
-| `libraries/utils`        | `@scouterna/wsj27-campfire-utils`          | nothing at all                                               |
+| `libraries/utils`        | `@scouterna/wsj27-campfire-utils`          | React, and nothing in the workspace                          |
 | `tools/mock`             | `@scouterna/wsj27-campfire-mock`           | Hono, and nothing in the workspace                           |
 
 That table is the rule made concrete. Every arrow points from an app to a module or a library, or from a module to a library, and there is no arrow between two modules or between two libraries.

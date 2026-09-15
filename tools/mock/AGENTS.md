@@ -89,6 +89,6 @@ Tests live beside the sources as `*.test.ts` and run in the `mock` Vitest projec
 
 A stand-in that quietly drifts from the contract is worse than no stand-in, which is why the mock is one of the three packages the coverage ratchet measures at all – all of `src/` except `main.ts`, which starts a server and has no behavior of its own to assert. The tests pin the exact bytes the services send, so a service change that the mock has not followed shows up as the service disagreeing with a test, not as a test that still passes.
 
-Nothing consumes the mock yet. The web application has no data layer and no session, so what is served here is read by these tests and by hand. When the participants module's DTO converters arrive they are the other side of this contract, and a change to a route's shape is then a change in both.
+The authentication module consumes the mock today: its session client meets `/api/auth`, its unit read meets `/api/project`, and the Playwright walks drive the whole stack through it – so a change to a route's shape here is already a change in two places. When the participants module's DTO converters arrive they join the same contract.
 
 Run `pnpm test` and the four checks – `check:format`, `check:lint`, `check:markdown`, `check:types` – as separate commands before handing work back.
