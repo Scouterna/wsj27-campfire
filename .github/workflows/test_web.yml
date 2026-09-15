@@ -70,7 +70,7 @@ jobs:
                      --jq '.[].filename')"
 
           if printf '%s\n' "$files" \
-             | grep -qE '^(modules/${{ matrix.module }}/|apps/web/|libraries/|config/playwright/|config/vite/|tsconfig\.json$|package\.json$|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|\.tool-versions$|\.github/workflows/test_web\.yml$)'; then
+             | grep -qE '^(modules/${{ matrix.module }}/|apps/web/|libraries/|tools/mock/|config/playwright/|config/vite/|config/environments/local/|scripts/start/|tsconfig\.json$|package\.json$|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|\.tool-versions$|\.github/workflows/test_web\.yml$)'; then
             echo "module=true" >> "$GITHUB_OUTPUT"
           else
             echo "module=false" >> "$GITHUB_OUTPUT"
@@ -125,8 +125,18 @@ jobs:
         if: ${{ steps.changed.outputs.module == 'true' && steps.browser.outputs.cache-hit == 'true' }}
         run: pnpm exec playwright install-deps chromium
 
-      # The Playwright configuration starts the dev server itself, so there is no
-      # server step here – the walk-through owns the thing it drives.
+      # The walks run against the local environment on one origin, and Caddy is its
+      # front door – the runner does not carry it.
+      - name: Install Caddy
+        if: steps.changed.outputs.module == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y caddy
+          # The package starts Caddy as a service; only this stop may fail harmlessly.
+          sudo systemctl stop caddy || true
+
+      # The Playwright configuration starts the local environment itself, so there is
+      # no server step here – the walk-through owns the thing it drives.
       - name: Walk through the module
         if: steps.changed.outputs.module == 'true'
         run: pnpm test:web:ui --project=${{ matrix.module }}

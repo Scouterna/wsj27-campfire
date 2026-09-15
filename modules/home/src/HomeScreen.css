@@ -1,0 +1,19 @@
+/* The HomeScreen's own layout: there is no chrome around it, so the screen centers
+   itself rather than relying on an application shell that does not exist yet. */
+
+@layer screen {
+  .home-screen {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-section);
+    justify-content: center;
+    min-height: 100dvh;
+    padding: var(--spacing-section);
+    text-align: center;
+  }
+
+  .home-screen > .button {
+    max-width: 400px;
+  }
+}

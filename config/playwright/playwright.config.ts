@@ -23,10 +23,12 @@ const root = fileURLToPath(new URL("../..", import.meta.url))
 const modules = ["authentication", "home", "journey", "participants"] as const
 
 /**
- * Where the development server answers. `strictPort` in the Vite configuration means it
- * is this port or nothing, so the walk-throughs can name it rather than discover it.
+ * Where the local environment answers: Caddy on the one origin, with the mock behind
+ * `/api` and the Vite dev server behind everything else. The walks drive sign-in, and
+ * sign-in needs a back-end – bare Vite on 3000 answers HTML on every `/api` path, which
+ * is exactly the failure the mock exists to prevent.
  */
-const origin = "http://127.0.0.1:3000"
+const origin = "http://localhost:8000"
 
 export default defineConfig({
   // One project per module, each finding its specs beside the module they are about.
@@ -66,18 +68,38 @@ export default defineConfig({
   // clean` already removes and git already ignores.
   outputDir: `${root}.build/playwright`,
 
-  webServer: {
-    // The same Vite server `pnpm start:web` runs, called directly rather than through
-    // `pnpm start:web`: that script wraps the server in scripts/start/server.sh, which
-    // puts it in a process group of its own, and Playwright's teardown then stops the
-    // wrapper and leaves Vite holding the port – so the run never exits.
-    command: "pnpm --filter @scouterna/wsj27-campfire-web start",
-    cwd: root,
-    url: origin,
-    // A server already running is reused rather than fought over: `strictPort` would
-    // make a second one fail outright, and a developer who has the app up is exactly
-    // who runs these.
-    reuseExistingServer: true,
-    timeout: 120_000,
-  },
+  // The same three processes `pnpm start:local` runs, but started by Playwright one by
+  // one rather than through scripts/start/local.sh: that script puts each server in a
+  // process group of its own, and Playwright's teardown then stops the wrapper and
+  // leaves the three of them holding their ports – so the run never exits. Each entry
+  // here is a direct command Playwright can kill, and each is reused when a developer
+  // already has the environment up.
+  // Started in this order, because Playwright waits for each server's url before
+  // launching the next: the two back-ends first, then Caddy, whose readiness check
+  // runs through the proxy and therefore needs the mock already answering.
+  webServer: [
+    {
+      command: "pnpm --filter @scouterna/wsj27-campfire-mock start",
+      cwd: root,
+      url: "http://localhost:8003/__mock__/state",
+      reuseExistingServer: true,
+      timeout: 120_000,
+    },
+    {
+      command: "pnpm --filter @scouterna/wsj27-campfire-web start",
+      cwd: root,
+      url: "http://localhost:3000",
+      reuseExistingServer: true,
+      timeout: 120_000,
+    },
+    {
+      command: "caddy run --config config/environments/local/Caddyfile --adapter caddyfile",
+      cwd: root,
+      // Through the front door and past the proxy: this answers 2xx only once Caddy
+      // and the mock are both up, so a half-started environment never counts as ready.
+      url: "http://localhost:8000/__mock__/state",
+      reuseExistingServer: true,
+      timeout: 120_000,
+    },
+  ],
 })
