@@ -34,8 +34,10 @@ apps/apple/**/xcshareddata/IDEWorkspaceChecks.plist
 buildServer.json
 
 # The dev and prod environments' secrets: the env and the secret file hold a Keycloak
-# client secret, and the key signs local sessions.
+# client secret, and the key signs local sessions. The fake-user file is written and
+# removed by `pnpm start:dev --user-id`, and is per-run rather than anyone's to commit.
 config/environments/*/.env
+config/environments/*/fake-user.env
 config/environments/*/signing-key.pem
 
 # Structurizr's local server writes a search index, logs, and thumbnails here.

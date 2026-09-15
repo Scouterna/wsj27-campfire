@@ -32,6 +32,11 @@ services:
     # a generated file.
     env_file:
       - .env
+      # The fake sign-in, when `pnpm start:dev --user-id <memberNo>` wrote it: a
+      # FAKE_USER_ID the service signs every /login in as, with no ScoutID round trip.
+      # Optional, because the start script removes the file on a plain run.
+      - path: fake-user.env
+        required: false
     environment:
       PORT: 8000
       # The address the *browser* reaches the service on – through the ingress, never the
