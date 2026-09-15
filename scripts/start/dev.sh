@@ -7,6 +7,14 @@
 # the web from Vite, prod from the built image. Called by `pnpm start:dev` and
 # `pnpm start:prod`.
 #
+# `--user-id <memberNo>` (dev only) fakes the sign-in: the auth service signs every
+# /login straight in as that member, with no ScoutID round trip, while the roles are
+# still minted from the register – so the session is real everywhere but the identity
+# screens. `--roles <csv>` adds the auth service's DEFAULT_ROLES on top, granted to any
+# member the register does not know – fake a number outside the register and the
+# session wears exactly the hats the flag names. Prod stays real on purpose: it exists
+# to prove the artifact as deployed.
+#
 # Whatever holds port 8000 first – the local environment's Caddy, or this one's own
 # containers from an earlier run – is stopped and named. The stack is reported as up only once
 # the ingress answers and the web application answers through it; Ctrl+C takes the
@@ -20,15 +28,55 @@
 # Secret values never pass through this script; nothing prints them.
 set -eu
 
-environment="${1:-dev}"
-case "$environment" in
-  dev | prod) ;;
-  *)
-    echo "Unknown environment: $environment" >&2
-    echo "Expected one of: dev, prod." >&2
+environment="dev"
+user_id=""
+user_roles=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    dev | prod)
+      environment="$1"
+      ;;
+    --user-id)
+      if [ $# -lt 2 ]; then
+        echo "--user-id needs a Scoutnet member number." >&2
+        exit 1
+      fi
+      shift
+      user_id="$1"
+      ;;
+    --roles)
+      if [ $# -lt 2 ]; then
+        echo "--roles needs a comma-separated role list, like wsj27:cmt:admin." >&2
+        exit 1
+      fi
+      shift
+      user_roles="$1"
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      echo "Expected an environment (dev or prod), optionally with --user-id <memberNo>." >&2
+      exit 1
+      ;;
+  esac
+  shift
+done
+
+case "$user_id" in
+  *[!0-9]*)
+    echo "--user-id takes a Scoutnet member number, digits only – got: $user_id" >&2
     exit 1
     ;;
 esac
+
+if [ -n "$user_id" ] && [ "$environment" = "prod" ]; then
+  echo "--user-id fakes the sign-in and is for dev only – prod proves the real flow." >&2
+  exit 1
+fi
+
+if [ -n "$user_roles" ] && [ -z "$user_id" ]; then
+  echo "--roles belongs to a faked sign-in – pass --user-id <memberNo> with it." >&2
+  exit 1
+fi
 
 # shellcheck source=scripts/start/helpers.sh
 . "$(dirname "$0")/helpers.sh"
@@ -74,6 +122,24 @@ fi
 # Every run, not only on the run that created it: a key written before this line existed
 # is still on disk, and a private key readable by anything on the machine is not one.
 chmod 600 signing-key.pem
+
+# The fake sign-in file is rewritten every run – written with the flag, removed without
+# it – so a faked user can never survive into the next plain start. The identity is a
+# placeholder: the roles come from the register by member number either way, and a full
+# identity belongs in your .env as FAKE_USER_ID when the name on the greeting matters.
+rm -f fake-user.env
+if [ -n "$user_id" ]; then
+  printf 'FAKE_USER_ID={"name": "Testperson %s", "preferred_username": "scoutnet|%s"}\n' \
+    "$user_id" "$user_id" > fake-user.env
+  echo "Fake sign-in: every login lands as member $user_id, without ScoutID."
+  if [ -n "$user_roles" ]; then
+    # DEFAULT_ROLES reach any member the register's role map does not know, so they
+    # only decide the session when the member number is outside the register – a
+    # registered member's real roles win the moment the map loads.
+    printf 'DEFAULT_ROLES=%s\n' "$user_roles" >> fake-user.env
+    echo "Fake roles: a member the register does not know signs in with $user_roles."
+  fi
+fi
 
 # Exported rather than written to the .env, so that file stays yours. The service reads a
 # PEM as \n escapes, and compose substitutes this into the auth service's environment.

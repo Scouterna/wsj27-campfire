@@ -2,11 +2,11 @@
 
 Campfire runs in three environments – local, dev, and prod – and they differ in one thing: what sits behind the back-end paths. All three serve the same origin, `http://localhost:8000`, with Caddy as the front door, so the web application and the native shells never know which one is running. Neither does the sign-in flow, which only completes on the host name the identity provider sends the browser back to. [ADR 012](/decisions/012-run-campfire-in-three-environments-on-one-origin) records why that is one axis rather than two.
 
-| Environment | Command            | The web application  | Behind `/api/*`                  | Sign-in          |
-| ----------- | ------------------ | -------------------- | -------------------------------- | ---------------- |
-| local       | `pnpm start:local` | Vite, on the host    | The mock, on the host            | A persona picker |
-| dev         | `pnpm start:dev`   | Vite, in a container | The real back-end, in containers | Real ScoutID     |
-| prod        | `pnpm start:prod`  | The built image      | The real back-end, in containers | Real ScoutID     |
+| Environment | Command            | The web application  | Behind `/api/*`                  | Sign-in                         |
+| ----------- | ------------------ | -------------------- | -------------------------------- | ------------------------------- |
+| local       | `pnpm start:local` | Vite, on the host    | The mock, on the host            | A persona picker                |
+| dev         | `pnpm start:dev`   | Vite, in a container | The real back-end, in containers | Real ScoutID, or a faked member |
+| prod        | `pnpm start:prod`  | The built image      | The real back-end, in containers | Real ScoutID                    |
 
 The environment is a property of the running stack, not of the build. Nothing in the web application reads which one it is, and all three start scripts put their stack on port 8000.
 
@@ -36,6 +36,12 @@ Local is the everyday one. It needs nothing but this machine and starts in secon
 Dev exists for the one thing the mock cannot do: the real sign-in flow. `config/environments/dev/compose.yaml` runs four containers – the `ingress` Caddy that publishes 8000, the `auth` service built from the `wsj27-auth-api` repository's `main`, the `project` service built the same way from `wsj27-project-api`, and a `web` container running the same Vite dev server local runs on the host, over a bind mount of the repository. Hot reload works through the ingress, websocket and all, so dev is a working environment rather than a demo.
 
 The first dev run is slow: the `web` container installs the whole workspace inside itself, which is why the start script waits up to ten minutes for it and says so.
+
+Dev can also run without ScoutID. `pnpm start:dev --user-id <memberNo>` hands the auth service a `FAKE_USER_ID`, and every visit to `/api/auth/login` then signs straight in as that member – no identity provider round trip, not even discovery at startup, and the service logs a warning on each fake sign-in. The roles are still minted from the register by the member number, so the session behaves exactly as that person's would; only the identity screens are skipped. The flag writes `fake-user.env` beside the compose file and the next plain run removes it, so a faked user never outlives the run that asked for it. Its identity is a placeholder – the greeting reads "Testperson" – so when the name matters, put a full `FAKE_USER_ID` in your `.env` instead, in the same JSON shape the identity provider answers with. Prod refuses the flag: it exists to prove the artifact with the real flow.
+
+The roles come from the register either way, minted by the member number – so a faked member who is in the register wears their real hats, and one who is not wears none and is refused by the participants service. That second case is what `--roles` is for: `pnpm start:dev --user-id 9999999 --roles wsj27:cmt:support:halsa` sets the auth service's `DEFAULT_ROLES`, granted to any member the register does not know, so the session wears exactly the hats the flag names. Fake a number outside the register to choose roles freely; fake a real number to be that person.
+
+One startup quirk to know, fake or real alike: the auth service mints roles from a map it polls from the project API, and on a cold cache that map arrives after the stack reports ready. A session minted before then carries no roles, and the project API answers every call with a 403 saying "No suitable roles". It heals itself – every refresh looks the roles up again, so the keep-alive fixes it within one token lifetime – or immediately, by signing out and in.
 
 Secrets never enter the repository. Each container environment has its own gitignored `.env` holding the Keycloak client (`OIDC_SERVER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`) and the Scoutnet project keys (`SCOUTNET_PROJECTS`, and optionally `SCOUTNET_BODYLIST_KEY`) – you write that file, and nothing overwrites it. On a machine that has none, the first run prints exactly what to write; the values are the same ones the deployed services run with. Everything that is identical on every machine is in `compose.yaml` where it can be read, and the throwaway RSA signing key is generated on first run and passed to the container through the environment rather than written into your file. The key is readable only by its owner, and every run re-applies that rather than trusting the run that created it.
 
