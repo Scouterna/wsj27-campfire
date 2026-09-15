@@ -1,0 +1,9 @@
+/* The ThemeProvider's wrapper. */
+
+@layer component {
+  /* It exists to carry `data-theme` and must not take part in layout – its children lay
+     out as if it were not there. */
+  .theme-scope {
+    display: contents;
+  }
+}

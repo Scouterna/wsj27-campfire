@@ -9,16 +9,43 @@
     --color-paper: #f4f2ec;
     --color-ink: #1a1a1a;
 
-    /* The contingent's five unit colors. */
-    --color-theme-blue: #2e768a;
-    --color-theme-brown: #975a15;
+    /* The contingent's five unit colors – the exact outer-ring values from the five
+       badge marks, which are the authoritative artwork for the color identities. */
+    --color-theme-blue: #2a778a;
+    --color-theme-brown: #985b15;
     --color-theme-green: #768b33;
-    --color-theme-red: #ce4a17;
-    --color-theme-yellow: #f4c126;
+    --color-theme-red: #cd4b17;
+    --color-theme-yellow: #f4c125;
 
     /* The unit color in force. Blue is the contingent's own and the default; a themed
        scope swaps the pointer rather than every rule that reads it. */
     --color-theme-bright: var(--color-theme-blue);
+
+    /* The darker tone of the same identity: the one text reads in and controls fill
+       with. The bright is the identity's flag, the ink is the identity at work. Each
+       value is the badge mark's inner-disc color, so the wordmark's plate, the badge,
+       and the controls all wear one tone per theme. */
+    --color-theme-ink: #215262;
+
+    /* What sits on an ink fill. All five inks are dark enough to carry white, so this
+       one is said once and never per theme. */
+    --color-theme-on-ink: #fff;
+
+    /* The corners: a control, a default surface, a large surface, and the full pill. */
+    --border-radius-control: 12px;
+    --border-radius-default: 16px;
+    --border-radius-round: 999px;
+    --border-radius-surface: 18px;
+
+    /* Rhythm: the spaces between things, named for what they separate rather than for
+       a size, so a step in the scale reads as a relationship. A screen's own tuned
+       poster values stay in the screen; these are the systematic steps. */
+    --spacing-card: 20px;
+    --spacing-container: 16px;
+    --spacing-group: 12px;
+    --spacing-inline: 4px;
+    --spacing-section: 24px;
+    --spacing-stack: 8px;
 
     /* The display face, for the wordmark and the headings that carry the brand. Only a
        regular weight is drawn, so the weight is a token too – asking for bold would have
@@ -27,23 +54,40 @@
     --typography-display-font_weight: 400;
   }
 
+  /* What sits on a bright fill, declared on the root and on every themed scope alike. A
+     custom property substitutes its var() references where it is declared, so a value
+     that reads the theme pair and is declared only on the root would freeze the root's
+     colors into itself and a themed subtree would keep showing them. */
+  :root,
+  [data-theme] {
+    --color-theme-on-bright: #fff;
+  }
+
   [data-theme="blue"] {
     --color-theme-bright: var(--color-theme-blue);
+    --color-theme-ink: #215262;
   }
 
   [data-theme="brown"] {
     --color-theme-bright: var(--color-theme-brown);
+    --color-theme-ink: #643d14;
   }
 
   [data-theme="green"] {
     --color-theme-bright: var(--color-theme-green);
+    --color-theme-ink: #526125;
   }
 
   [data-theme="red"] {
     --color-theme-bright: var(--color-theme-red);
+    --color-theme-ink: #9b3716;
   }
 
   [data-theme="yellow"] {
     --color-theme-bright: var(--color-theme-yellow);
+    --color-theme-ink: #c3900b;
+
+    /* White vanishes on the bright yellow, so its fills carry the ink instead. */
+    --color-theme-on-bright: var(--color-theme-ink);
   }
 }

@@ -5,7 +5,17 @@
  * travels with the component and arrives when the component is imported.
  */
 
+export { Button } from "./components/button/Button"
+export type { ButtonProps } from "./components/button/Button"
 export { Logo } from "./components/logo/Logo"
 export type { LogoProps } from "./components/logo/Logo"
-export { isTheme, themes } from "./foundations/theme/Theme"
+export { isTheme, themeFromSearch, themes } from "./foundations/theme/Theme"
 export type { Theme } from "./foundations/theme/Theme"
+export {
+  ThemeProvider,
+  applyInitialTheme,
+  storedTheme,
+  useTheme,
+} from "./foundations/theme/ThemeProvider"
+export type { ThemeProviderProps } from "./foundations/theme/ThemeProvider"
+export { cmtTheme, istTheme, unitTheme } from "./foundations/theme/UnitTheme"

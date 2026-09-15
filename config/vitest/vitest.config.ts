@@ -85,16 +85,19 @@ export default defineConfig({
       exclude: [
         // It starts a server and has no behavior of its own to assert.
         "tools/mock/src/main.ts",
+        // A component, proved by the Playwright walks rather than a unit test – like
+        // every component outside the denominator.
+        "libraries/utils/src/roles/RolesProvider.tsx",
         "**/*.test.ts",
       ],
       // A ratchet, not a target: each number sits just below what the suite achieves
       // today, so a change that stops covering something fails, and a change that covers
       // more is followed by raising the bar to just under the new figure.
       thresholds: {
-        statements: 93,
-        branches: 87,
-        functions: 93,
-        lines: 94,
+        statements: 97,
+        branches: 91,
+        functions: 99,
+        lines: 97,
       },
     },
   },
