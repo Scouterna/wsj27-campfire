@@ -16,17 +16,17 @@ import {
   roleSuffixes,
   type AuthUser,
 } from "./authentication.ts"
-import type { ParticipantRecord, Register } from "./register.ts"
+import type { ParticipantRecord, ParticipantsList } from "./participants-list.ts"
 import { roleMap } from "./role-map.ts"
 
 /**
  * What the project API's routes run against: the auth service's key, the clock, and the
- * register.
+ * list of participants.
  */
 export interface ProjectDependencies {
   readonly key: SigningKey
   readonly now: () => number
-  readonly register: Register
+  readonly participantsList: ParticipantsList
 }
 
 /**
@@ -127,7 +127,10 @@ function refusal(
   return undefined
 }
 
-function troopinfo(context: Context, { key, now, register }: ProjectDependencies): Response {
+function troopinfo(
+  context: Context,
+  { key, now, participantsList }: ProjectDependencies,
+): Response {
   const user = requireAuthUser(context, key, now())
   if (user instanceof Response) {
     return user
@@ -151,7 +154,7 @@ function troopinfo(context: Context, { key, now, register }: ProjectDependencies
   if (refused !== undefined) {
     return refused
   }
-  const records = register
+  const records = participantsList
     .values()
     .filter((record) =>
       isNumbered
@@ -168,7 +171,10 @@ function troopinfo(context: Context, { key, now, register }: ProjectDependencies
   )
 }
 
-function individual(context: Context, { key, now, register }: ProjectDependencies): Response {
+function individual(
+  context: Context,
+  { key, now, participantsList }: ProjectDependencies,
+): Response {
   const user = requireAuthUser(context, key, now())
   if (user instanceof Response) {
     return user
@@ -185,7 +191,7 @@ function individual(context: Context, { key, now, register }: ProjectDependencie
   if (memberId === undefined || typeof infolevel !== "string") {
     return validationFailed(context, errors)
   }
-  const record = register.get(memberId)
+  const record = participantsList.get(memberId)
   if (record === undefined) {
     return context.json({ detail: "Participant not found in project." }, 404)
   }
@@ -209,7 +215,7 @@ function individual(context: Context, { key, now, register }: ProjectDependencie
 /**
  * Builds `/participants`: one troop or member type at a time, one person, and the role map –
  * each gated exactly as `participants.py` and `roles.py` gate them.
- * @param dependencies The auth service's key, the clock, and the register.
+ * @param dependencies The auth service's key, the clock, and the list of participants.
  * @returns The routes, ready to be mounted at `/participants`.
  */
 export function participantRoutes(dependencies: ProjectDependencies): Hono {
@@ -218,7 +224,7 @@ export function participantRoutes(dependencies: ProjectDependencies): Hono {
   router.get("/individual/:memberId", (context) => individual(context, dependencies))
   router.get("/roles", (context) => {
     const user = requireAuthUser(context, dependencies.key, dependencies.now())
-    return user instanceof Response ? user : roleMap(context, user, dependencies.register)
+    return user instanceof Response ? user : roleMap(context, user, dependencies.participantsList)
   })
   for (const path of ["/troopinfo/:troopId", "/individual/:memberId", "/roles"]) {
     refuseOtherMethods(router, path, "GET")

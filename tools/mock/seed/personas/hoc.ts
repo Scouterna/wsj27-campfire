@@ -8,5 +8,5 @@ export const persona: Persona = {
   givenName: "Karin",
   familyName: "Kron",
   memberNo: "1200401",
-  description: "Kontingentledare. Ser alla i registret, men inte hälsouppgifter.",
+  description: "Kontingentledare. Ser alla i listan med deltagare, men inte hälsouppgifter.",
 }

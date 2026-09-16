@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest"
 
 import { forms, participants, readCmtRoles } from "../../seed/participants/index.ts"
-import { decodeRegister, type ParticipantRecord } from "./register.ts"
+import { decodeParticipantsList, type ParticipantRecord } from "./participants-list.ts"
 import { loadCmtRoles } from "./roles.ts"
 
-const register = decodeRegister(participants, forms, loadCmtRoles(readCmtRoles()))
+const participantsList = decodeParticipantsList(participants, forms, loadCmtRoles(readCmtRoles()))
 
 function decoded(memberNo: number): ParticipantRecord {
-  const record = register.get(memberNo)
+  const record = participantsList.get(memberNo)
   if (record === undefined) {
     throw new Error(`No decoded participant ${String(memberNo)}`)
   }
@@ -26,7 +26,7 @@ function formsData(
 // Lars, unit 1's first leader, seeded with contact people, a diet, and an allergy.
 const lars = decoded(1_100_101)
 
-describe("the decoded register", () => {
+describe("the decoded list of participants", () => {
   it("carries the basic block in the service's names, in the service's order", () => {
     expect(Object.keys(lars)).toEqual([
       "name",

@@ -1,7 +1,7 @@
 import type { Persona } from "../../src/types.ts"
 
 /**
- * Lars, a leader of unit 1, with the richest record in the register.
+ * Lars, a leader of unit 1, with the richest record in the list of participants.
  */
 export const persona: Persona = {
   email: "leader-1@wsj.se",

@@ -6,7 +6,7 @@ import { authHealth, authRoutes } from "./auth/routes.ts"
 import { controlRoutes } from "./control/routes.ts"
 import { noCache, notFound } from "./fastapi.ts"
 import { generateSigningKey, type SigningKey } from "./keys.ts"
-import { decodeRegister } from "./project/register.ts"
+import { decodeParticipantsList } from "./project/participants-list.ts"
 import { roleMapOf } from "./project/role-map.ts"
 import { loadCmtRoles } from "./project/roles.ts"
 import { projectHealth, projectRoutes } from "./project/routes.ts"
@@ -40,8 +40,8 @@ export interface MockOptions {
 export function createApp(options: MockOptions = {}): Hono {
   const now = options.now ?? Date.now
   const key = options.key ?? generateSigningKey()
-  const register = decodeRegister(participants, forms, loadCmtRoles(readCmtRoles()))
-  const roles = new RoleCache(roleMapOf(register), now())
+  const participantsList = decodeParticipantsList(participants, forms, loadCmtRoles(readCmtRoles()))
+  const roles = new RoleCache(roleMapOf(participantsList), now())
   const scoutId = new ScoutId(now)
 
   const app = new Hono()
@@ -51,8 +51,8 @@ export function createApp(options: MockOptions = {}): Hono {
   app.get("/api/auth/", (context) => authHealth(context, roles))
   app.get("/api/project/", (context) => projectHealth(context))
   app.route("/api/auth", authRoutes({ key, now, roles, scoutId }))
-  app.route("/api/project", projectRoutes({ key, now, register }))
-  app.route("/__mock__/scoutid", scoutIdRoutes(scoutId))
+  app.route("/api/project", projectRoutes({ key, now, participantsList }))
+  app.route("/__mock__/scoutid", scoutIdRoutes(scoutId, roles))
   app.route("/__mock__", controlRoutes(scoutId, roles))
   app.notFound((context) => notFound(context))
   return app

@@ -1,7 +1,7 @@
 import type { Participant } from "../../src/types.ts"
 
 /**
- * The contingent's register as wsj27-project-api holds it before it decodes a row – two units
+ * The contingent's list of participants as wsj27-project-api holds it before it decodes a row – two units
  * of leaders, deltagare, and IST, plus the contingent management. Every row is here for a
  * case rather than for numbers: a food allergy with severities, medication with medical
  * equipment, mobility aids, a diagnosis, a mental health condition, a phobia, incomplete
@@ -13,7 +13,7 @@ import type { Participant } from "../../src/types.ts"
  * Three things to know about the data:
  *
  * - The ledare and kontingentledning rows carry the sign-in personas' identities, so a
- *   signed-in persona exists in the register and their roles are minted from their row.
+ *   signed-in persona exists in the list of participants and their roles are minted from their row.
  * - `travel` stands in for the three questions the service reads a travel package from, one
  *   per member type, which the form template does not publish. It becomes
  *   `participation_type` on the wire.

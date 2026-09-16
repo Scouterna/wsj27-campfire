@@ -149,9 +149,15 @@ describe("starting a sign-in", () => {
     expect(response.status).toBe(200)
     expect(new URL(url).pathname).toBe("/__mock__/scoutid/auth")
     const page = await response.text()
-    expect(page).toContain("leader-1@wsj.se")
-    expect(page).toContain("outsider@wsj.se")
-    expect(page).toContain("Ledare i avdelning 1.")
+    // A row shows the name and what the roles it will mint say the persona is; the
+    // email travels only in the link.
+    expect(page).toContain("Lars Lindberg")
+    expect(page).toContain("Ledare · Avdelning 1")
+    expect(page).toContain("CMT · Administration")
+    // The outsider holds no roles at all, and the page says so rather than inventing one.
+    expect(page).toContain("Olle Ohlsson")
+    expect(page).toContain("Inte med i kontingenten")
+    expect(page).toContain(encodeURIComponent("leader-1@wsj.se"))
     expect(page).toContain('href="/__mock__/scoutid/choose?')
   })
 })
@@ -185,7 +191,7 @@ describe("the round trip", () => {
     )
   })
 
-  it("reports the signed-in member from /user, with roles minted from their register row", async () => {
+  it("reports the signed-in member from /user, with roles minted from their row in the list of participants", async () => {
     const { browser } = setUp()
     await signIn(browser, "health-grant@wsj.se")
 

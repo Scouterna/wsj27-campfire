@@ -35,9 +35,9 @@ export interface ParticipantRecord {
 }
 
 /**
- * The decoded register, keyed by member number.
+ * The decoded list of participants, keyed by member number.
  */
-export type Register = ReadonlyMap<number, ParticipantRecord>
+export type ParticipantsList = ReadonlyMap<number, ParticipantRecord>
 
 const memberTypes: Readonly<Record<Participant["role"], string>> = {
   deltagare: "Deltagare",
@@ -60,20 +60,20 @@ const participationTypes: ReadonlyMap<string, ReadonlySet<string>> = new Map([
 const contactTabs: ReadonlySet<string> = new Set(["Grundläggande information"])
 
 /**
- * Decodes the seeded register the way the service decodes Scoutnet's: the basic block, the roles
+ * Decodes the seeded list of participants the way the service decodes Scoutnet's: the basic block, the roles
  * minted once, and the answers walked through the form template into `contact_info` and
  * `forms_data`.
- * @param participants The raw register.
+ * @param participants The raw list of participants.
  * @param forms The form template.
  * @param cmtDetails The CMT roster, read.
- * @returns The register, keyed by member number.
+ * @returns The list of participants, keyed by member number.
  */
-export function decodeRegister(
+export function decodeParticipantsList(
   participants: readonly Participant[],
   forms: readonly Form[],
   cmtDetails: CmtDetails,
-): Register {
-  const register = new Map<number, ParticipantRecord>()
+): ParticipantsList {
+  const participantsList = new Map<number, ParticipantRecord>()
   for (const participant of participants) {
     const memberNo = Number(participant.memberNo)
     const memberType = memberTypes[participant.role]
@@ -87,7 +87,7 @@ export function decodeRegister(
       participant.formId,
     )
     const accessLevel = participant.accessLevel ?? "Ingen"
-    register.set(memberNo, {
+    participantsList.set(memberNo, {
       name: `${participant.firstName} ${participant.lastName}`,
       member_no: memberNo,
       born: participant.birthDate,
@@ -108,10 +108,10 @@ export function decodeRegister(
       forms_data: formsData,
     })
   }
-  return register
+  return participantsList
 }
 
-// The troop the register carries: the unit for a leader or a deltagare. The project API does
+// The troop the list of participants carries: the unit for a leader or a deltagare. The project API does
 // not carry the IST's patrols, and the contingent management has no troop.
 function troopOf(participant: Participant): string {
   const isInUnit = participant.role === "deltagare" || participant.role === "ledare"
