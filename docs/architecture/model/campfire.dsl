@@ -90,12 +90,12 @@ campfire = softwareSystem "Campfire" {
       tags "module"
     }
 
-    # The contingent's register, and the largest module. It is the only one that talks
+    # The contingent's list of participants, and the largest module. It is the only one that talks
     # to the participants service, and the only one with a data layer – every field
     # arrives typed `unknown` and is validated at the boundary, because the service will
     # change shape over an eighteen-month build.
     participantsModule = container "Participants" {
-      description "The module that owns the register and its screens."
+      description "The module that owns the list of participants and its screens."
       technology "TypeScript, React 19, TanStack Query"
       tags "module"
     }
@@ -191,7 +191,7 @@ campfire = softwareSystem "Campfire" {
   # environment but local, and it is the app that sends the member there – the service
   # does the OpenID round trip once they arrive.
   this -> authService "Signs members in and out through"
-  this -> participantsService "Reads the contingent's register from"
+  this -> participantsService "Reads the contingent's list of participants from"
   this -> scoutid "Sends members to sign in at"
   authService -> scoutid "Runs the OpenID round trip with"
   # ScoutID fronts Scoutnet for identity: the sign-in is ScoutID's, the member behind it
@@ -224,7 +224,7 @@ campfire = softwareSystem "Campfire" {
   webApp -> authenticationModule "Signs the member in through"
   webApp -> homeModule "Shows the start screen through"
   webApp -> journeyModule "Shows the trip through"
-  webApp -> participantsModule "Shows the register through"
+  webApp -> participantsModule "Shows the list of participants through"
   webApp -> uiLibrary "Draws its chrome with"
   webApp -> hostLibrary "Reports the screen and the session through"
   authenticationModule -> uiLibrary "Builds its screens from"
@@ -235,5 +235,5 @@ campfire = softwareSystem "Campfire" {
   participantsModule -> utilsLibrary "Calls the service with"
   authenticationModule -> authService "Signs in and reads the session over /api/auth"
   authenticationModule -> participantsService "Reads the signed-in member's unit over /api/project"
-  participantsModule -> participantsService "Reads the register over /api/project"
+  participantsModule -> participantsService "Reads the list of participants over /api/project"
 }

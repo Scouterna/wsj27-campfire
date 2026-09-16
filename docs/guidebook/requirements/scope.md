@@ -18,16 +18,16 @@ Neither anchor is specified. Both are named here because they are where Campfire
 
 ## What version 1 is made of
 
-- **Four feature modules.** `authentication` signs a person in and out through the auth service, `home` owns the start screen with the contingent's notices and emergency numbers, `journey` knows the trip's dates and puts a countdown on that screen, and `participants` holds the register's list and detail screens. The web application composes them in one place, and none of them imports another ([Modules](../architecture/modules)).
+- **Four feature modules.** `authentication` signs a person in and out through the auth service, `home` owns the start screen with the contingent's notices and emergency numbers, `journey` knows the trip's dates and puts a countdown on that screen, and `participants` holds the contingent's list of participants – its list and detail screens. The web application composes them in one place, and none of them imports another ([Modules](../architecture/modules)).
 - **A design system.** The tokens, the five unit themes, the display face, and the components built on them, cataloged in Storybook ([Design](../design/)).
 - **Two shells that host the application.** The Apple and the Android shell each open the one origin in a webview, draw the native navigation bar and tab bar, and carry the sign-in round trip in a modal, with the origin they load carried in a build setting ([Applications](../architecture/applications)).
-- **A seeded mock that answers as both services.** `tools/mock` serves the sign-in contract behind a persona picker and the register behind the real service's gates, under the prefixes the deployed ingress serves ([The mock back-end](../testing/mock)).
+- **A seeded mock that answers as both services.** `tools/mock` serves the sign-in contract behind a persona picker and the list of participants behind the real service's gates, under the prefixes the deployed ingress serves ([The mock back-end](../testing/mock)).
 - **The whole toolchain.** The checks, the tests, the GitHub Actions workflows, the three environments behind one origin, this guidebook, the decision log, and the C4 model the diagrams are rendered from.
 
 ## What Campfire does not do
 
 - **It is not the contingent's communication channel.** Discord is where the contingent talks, before and during camp, and Campfire does not integrate with it. Duplicating a channel that already works would split the conversation in half.
-- **It is not the register's system of record.** The people, the units, and the roles are the contingent's own data, kept where the contingent keeps it. Scoutnet is where that data lives ([Scoutnet](../context/systems/scoutnet)), and Campfire reads what the participants service publishes from it.
+- **It is not the system of record for the list of participants.** The people, the units, and the roles are the contingent's own data, kept where the contingent keeps it. Scoutnet is where that data lives ([Scoutnet](../context/systems/scoutnet)), and Campfire reads what the participants service publishes from it.
 - **It is not the jamboree's program.** The camp, the subcamps, and the activities are ZHP's and WOSM's to run. Campfire is the Swedish contingent's own tool alongside them.
 - **It is not for participants.** A tool aimed at 14-to-17-year-olds is a different product with different rules, and building one is not on the table.
 
@@ -40,5 +40,5 @@ From there the work moves through the four agents with a human gate at every ste
 ## What is still open
 
 - **The feature set beyond the first feature and the two anchors is unwritten.** Campfire is expected to grow past status reporting and issue tracking, and what it grows into is not decided.
-- **What the register publishes is the service's call.** The people in the mock are invented, and what the participants service publishes – in what shape, at what level of detail, and to whom – is that service's to decide rather than this repository's ([ADR 013](/decisions/013-build-the-back-end-as-python-services-in-their-own-repositories)).
+- **What the list of participants carries is the service's call.** The people in the mock are invented, and what the participants service publishes – in what shape, at what level of detail, and to whom – is that service's to decide rather than this repository's ([ADR 013](/decisions/013-build-the-back-end-as-python-services-in-their-own-repositories)).
 - **Distribution is open.** Whether the shells reach phones through the public stores, TestFlight, or managed distribution is undecided ([ADR 010](/decisions/010-deliver-the-front-end-as-one-web-application-in-native-shells)), and [Release](../maintenance/release) says what that leaves unfinished.

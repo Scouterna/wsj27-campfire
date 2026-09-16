@@ -44,7 +44,7 @@ What a piece looks like belongs to `libraries/ui`, not to a module. A module com
 
 - **Styling is CSS in cascade layers** – `tokens, fonts, reset, base, component, screen` – declared in `index.html` before any stylesheet loads, so nothing depends on the order its CSS arrives in. A component imports its own stylesheet, so the CSS travels with the component.
 - **No inline `style` props.** Styles live in CSS.
-- **Font sizes are written `calc(<N>rem / 17)`**, against the 17-point base the design system's base stylesheet sets, so Dynamic Type carries the reader's own text size through every role.
+- **Font sizes come from the `--font-size-*` tokens**, each `calc(<N>rem / 17)` against the 17-point base the design system's base stylesheet sets, so Dynamic Type carries the reader's own text size through every role.
 - **A theme is a name, not a stylesheet.** The contingent has five color identities – blue, brown, green, red, and yellow, with blue the default – and a theme is a pair of primitives, `--color-theme-bright` and the darker `--color-theme-ink`, that every rule naming the unit's colors reads. `[data-theme="<name>"]` swaps the pair rather than every rule that reads it, and the attribute is stamped before React boots, so a returning brown-unit leader does not flash blue on the way in. A color never crosses the bridge to a shell; the name does, and each shell holds its own palette.
 - **Swedish is what a user reads.** The document is `lang="sv"`, and the few strings the shells own are Swedish too.
 

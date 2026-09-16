@@ -12,7 +12,7 @@ describe("translating a provider spelling into roles", () => {
   })
 
   it("reads a leader role with an unreadable unit as a leader with no unit", () => {
-    // A register gap upstream – still a leader, never nobody (requirement 5.4).
+    // A data gap upstream – still a leader, never nobody (requirement 5.4).
     expect(toRoles("wsj27:al:unknown")).toEqual([{ kind: "leader" }])
   })
 

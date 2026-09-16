@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { toUnit } from "./UnitDto"
 
-describe("reading the unit out of the register's answer", () => {
+describe("reading the unit out of the participants service's answer", () => {
   it("reads a troop that names a unit", () => {
     expect(toUnit({ troop: "1" })).toEqual({ number: 1 })
   })
@@ -25,7 +25,7 @@ describe("reading the unit out of the register's answer", () => {
   })
 
   it("reads a member type as no unit", () => {
-    // IST is a troop to the register and no unit to Campfire.
+    // IST is a troop to the list of participants and no unit to Campfire.
     expect(toUnit({ troop: "IST" })).toBeUndefined()
   })
 

@@ -13,6 +13,6 @@ authService = softwareSystem "Auth service" {
 }
 
 participantsService = softwareSystem "Participants service" {
-  description "The service that serves the contingent's register."
+  description "The service that serves the contingent's list of participants."
   tags "service"
 }

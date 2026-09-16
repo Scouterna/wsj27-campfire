@@ -34,7 +34,7 @@ Until a module has more than one screen, the screen sits directly in `src/` besi
 There is no dependency container and no injection framework. A module is a set of components and hooks, and what they need reaches them three ways:
 
 - **Through props**, from the composition root. Everything that crosses a module boundary travels this way – the application asks one module and hands the answer to another's screen. That coupling is a line in the one file that gets the most attention, rather than an import nobody reads.
-- **Through context**, mounted once above the screens. The theme, the widget table, and who is reading the register are each stated once at the top and read wherever they are needed, so a test can replace one by mounting a different provider.
+- **Through context**, mounted once above the screens. The theme, the widget table, and who is reading the list of participants are each stated once at the top and read wherever they are needed, so a test can replace one by mounting a different provider.
 - **Through registration**, for routes and widgets. A module declares what it owns into an interface in `libraries/ui`, and the application collects the tables. The library never learns which modules exist, and two modules claiming one address still collide at compile time.
 
 A hook is the unit that gets tested and reused, not a class. A screen calls one hook, gets the state it renders, and decides nothing about where the state came from.

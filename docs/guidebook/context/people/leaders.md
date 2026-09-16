@@ -16,7 +16,7 @@ Before camp there is a year of preparation. Leaders are notified in spring 2026,
 
 Signing in with ScoutID drops a leader on the home screen. Below the greeting sit the countdown to departure, then the contingent's notices, then their unit's leaders, their unit's scouts, and a tap-to-call plate of emergency numbers that only leaders see.
 
-The section menu gives them two places: the start screen, and their own unit – the register scoped to the unit they lead. That view needs neither the search field nor the role filters the wider register has, because a list of forty people needs neither. Opening a person shows what the back-end chose to send: contact details and next of kin, travel, diet and health, languages, readiness, and experience.
+The section menu gives them two places: the start screen, and their own unit – the list of participants scoped to the unit they lead. That view needs neither the search field nor the role filters the wider list of participants has, because a list of forty people needs neither. Opening a person shows what the back-end chose to send: contact details and next of kin, travel, diet and health, languages, readiness, and experience.
 
 The whole application takes the unit's color. Each unit has one of the five colors the [design system](../../design/) carries, and the theme is stamped on the document before first paint, so a returning brown-unit leader never flashes blue.
 
@@ -29,6 +29,6 @@ Seeing the participants in their unit is Campfire's first feature, and the scree
 Two separate answers, and one role carries both.
 
 - **That the person is a leader, and which unit they lead** is one fact: the role `wsj27:al:<unit>`, which the [participants service](../systems/participants-service) derives from Scoutnet and the [auth service](../systems/auth-service) mints into the session.
-- **What they may read** is the back-end's call, not the app's. A leader reads their own unit at any level – health answers included, because a unit's leaders are its first responders – and nothing else. A person outside it answers 404, indistinguishable from a person who does not exist, so the register never leaks who is in it.
+- **What they may read** is the back-end's call, not the app's. A leader reads their own unit at any level – health answers included, because a unit's leaders are its first responders – and nothing else. A person outside it answers 404, indistinguishable from a person who does not exist, so the list of participants never leaks who is in it.
 
-A leader's unit – troop, in the register's own vocabulary – is its deltagare and ledare, and deliberately not its IST: an IST member belongs to a patrol, not to a unit's leaders, and the service does not carry the patrols. The [mock](../../testing/mock) enforces the same rule with the same role, so what a leader sees locally is what they see for real ([ADR 021](/decisions/021-stand-in-for-the-back-end-with-a-seeded-mock)).
+A leader's unit – troop, in the participants service's own vocabulary – is its deltagare and ledare, and deliberately not its IST: an IST member belongs to a patrol, not to a unit's leaders, and the service does not carry the patrols. The [mock](../../testing/mock) enforces the same rule with the same role, so what a leader sees locally is what they see for real ([ADR 021](/decisions/021-stand-in-for-the-back-end-with-a-seeded-mock)).

@@ -146,7 +146,7 @@ The session is httpOnly cookies. The web application never sees a token, which i
 
 ### The participants service
 
-The participants service owns `/api/project`. It fetches the WSJ27 project's register from Scoutnet, decodes the form answers, and serves them one troop at a time:
+The participants service owns `/api/project`. It fetches the WSJ27 project's list of participants from Scoutnet, decodes the form answers, and serves them one troop at a time:
 
 | Path                                              | What it does                                                                       |
 | ------------------------------------------------- | ---------------------------------------------------------------------------------- |
@@ -158,7 +158,7 @@ Three rules of its contract shape the client more than any payload field does.
 
 **Every answer takes an information level** – name, basic, or full. Basic carries the person and their contact answers; full adds the health and dietary answers, and needs a health grant. A caller who may see the person but not that much is refused outright rather than quietly given less, which is why the client retries a refused full answer at basic.
 
-**Scoping happens on the back-end, and the client composes.** A unit's leader reads their own troop and nothing else; the contingent management reads everyone. A person outside the caller's scope answers as if they did not exist, so the register does not leak who is in it. There is no "everyone I may see" endpoint, so the client builds the whole register from the troop listings – the [participants module](./modules) owns that composition.
+**Scoping happens on the back-end, and the client composes.** A unit's leader reads their own troop and nothing else; the contingent management reads everyone. A person outside the caller's scope answers as if they did not exist, so the list of participants does not leak who is in it. There is no "everyone I may see" endpoint, so the client builds the whole list of participants from the troop listings – the [participants module](./modules) owns that composition.
 
 **The service owns the role model.** It derives the roles from the project's own data – which troop a leader leads, which function of the contingent management somebody serves in, and the grants given to one person at a time. The auth service mints them into tokens, and the front-end's role translation reads them back; nothing in the front-end invents a role or decides what one means.
 

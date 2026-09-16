@@ -18,7 +18,7 @@ Three lines reach ScoutID on the context diagram, and the third is the one peopl
 
 Campfire sends members to sign in at it, and the auth service runs the OpenID round trip with it – the two halves of one journey. The app starts the trip, the service finishes it. A level down, the first of those lines belongs to the two shells, each opening the round trip in a webview of its own, and never to the web application, which navigates to `/api/auth/login` and lets the service do the talking.
 
-The third line leaves ScoutID for [Scoutnet](./scoutnet): **ScoutID verifies sign-ins against Scoutnet**, which is the member registry behind it. ScoutID is the front door, not the source of truth about who a member is. The registry's member number is what comes back through it, too – a session's preferred username is `scoutnet|<member number>`, which is the same key the register is addressed by. So Scoutnet sits behind Campfire twice: through ScoutID for who you are, and through the participants service for who is in the contingent.
+The third line leaves ScoutID for [Scoutnet](./scoutnet): **ScoutID verifies sign-ins against Scoutnet**, which is the member registry behind it. ScoutID is the front door, not the source of truth about who a member is. The registry's member number is what comes back through it, too – a session's preferred username is `scoutnet|<member number>`, which is the same key the list of participants is addressed by. So Scoutnet sits behind Campfire twice: through ScoutID for who you are, and through the participants service for who is in the contingent.
 
 ## The realms
 

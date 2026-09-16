@@ -10,10 +10,10 @@ That inverts where the checking happens. `Participant` does not ask whether its 
 
 ```ts
 /**
- * One person in the contingent's register, as the application knows them.
+ * One person in the contingent's list of participants, as the application knows them.
  */
 export interface Participant {
-  /** The member number – the register's only stable key, and a string because nothing does arithmetic on it. */
+  /** The member number – the list's only stable key, and a string because nothing does arithmetic on it. */
   readonly memberNo: string
   readonly firstName: string
   readonly lastName: string
@@ -39,7 +39,7 @@ The other half of the layer is the functions that decide things, and they take d
 
 The journey module is the clearest case, because it has nothing else. The trip's dates are fixed and public, so they are written down rather than fetched, and everything the countdown shows is derived from them: which phase the contingent is in, how many days are left, and how long one person's journey lasts depending on whether they join the pre-trip. There is no request, no cache, and no loading state anywhere in it.
 
-The participants module has the same kind of function over the register: the unit identity table, which maps a unit number to the unit's profile. The unit's color is the one part that lives elsewhere – the unit-to-theme table sits with the themes in the `ui` library, so the sign-in path can dress the document before this module loads. A fact about the contingent, not about a payload, so each lives with its kind and the application reads them through a doorway.
+The participants module has the same kind of function over the list of participants: the unit identity table, which maps a unit number to the unit's profile. The unit's color is the one part that lives elsewhere – the unit-to-theme table sits with the themes in the `ui` library, so the sign-in path can dress the document before this module loads. A fact about the contingent, not about a payload, so each lives with its kind and the application reads them through a doorway.
 
 ## Errors
 
