@@ -8,5 +8,5 @@ export const persona: Persona = {
   givenName: "Olle",
   familyName: "Ohlsson",
   memberNo: "1400001",
-  description: "Inloggad men inte med i kontingenten. Nekas registret helt.",
+  description: "Inloggad men inte med i kontingenten. Nekas listan med deltagare helt.",
 }

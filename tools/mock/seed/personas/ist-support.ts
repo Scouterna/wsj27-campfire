@@ -9,5 +9,5 @@ export const persona: Persona = {
   givenName: "Sixten",
   familyName: "Segel",
   memberNo: "1200302",
-  description: "IST-stöd, listad som platsledare. Ser alla, utan hälsouppgifter.",
+  description: "IST-support, listad som platsledare. Ser alla, utan hälsouppgifter.",
 }

@@ -52,9 +52,10 @@ build/
 # would rewrite each other forever.
 **/apps/apple/assets/
 
-# The auth service's refresh script, copied into the mock byte for byte from
-# wsj27-auth-api so the keep-alive loop is the real one. Formatting it would make it a copy
-# that no longer compares equal to its source.
+# What the mock copies in from elsewhere: the auth service's refresh script, byte for
+# byte from wsj27-auth-api so the keep-alive loop is the real one, and the design
+# system's display face. Formatting either would make it a copy that no longer compares
+# equal to its source.
 **/tools/mock/static/
 
 # Agent scratch and the reference material under study – gitignored working files.

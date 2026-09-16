@@ -13,15 +13,15 @@ export interface Unit {
    */
   readonly name: string
   /**
-   * The unit's number, which is also the troop the register and a leader's role carry.
+   * The unit's number, which is also the troop the list of participants and a leader's role carry.
    */
   readonly number: number
 }
 
 /**
  * Someone a developer can sign in as – an account at the ScoutID stand-in. Their roles are not
- * here: the auth service mints them from the register, exactly as it does for a real account,
- * so a persona holds whatever their register row says.
+ * here: the auth service mints them from the list of participants, exactly as it does for a real account,
+ * so a persona holds whatever their row in the list says.
  */
 export interface Persona {
   /**
@@ -109,7 +109,7 @@ export type AccessLevel =
 export type Answer = string | readonly string[]
 
 /**
- * A person in the register, before the project API decodes them.
+ * A person in the list of participants, before the project API decodes them.
  */
 export interface Participant {
   /**
@@ -118,7 +118,7 @@ export interface Participant {
   readonly accessLevel?: AccessLevel
   /**
    * Their answers, keyed by question key. Sparse: an unanswered question is absent, which is
-   * what the register really looks like.
+   * what the list of participants really looks like.
    */
   readonly answers: Readonly<Record<string, Answer>>
   readonly birthDate: string
