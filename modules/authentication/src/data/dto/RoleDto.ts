@@ -44,7 +44,7 @@ function leaderRoles(segments: readonly string[]): readonly Role[] {
   if (unitSegment !== undefined && /^\d+$/u.test(unitSegment)) {
     return [{ kind: "leader", unitNumber: Number(unitSegment) }]
   }
-  // A leader role without a readable unit is still a leader – a register gap, not a
+  // A leader role without a readable unit is still a leader – a data gap upstream, not a
   // reason to withhold the leader role itself.
   return [{ kind: "leader" }]
 }

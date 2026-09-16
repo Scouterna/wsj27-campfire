@@ -5,9 +5,7 @@
   "description" : "The digital companion for the leaders and the contingent management team of Scouterna's Swedish contingent to the World Scout Jamboree 2027.",
   "documentation" : { },
   "id" : 1,
-  "lastModifiedAgent" : "structurizr/diagrams/3118d8eb-e14d-4ec5-8e90-4be30b7bfbbc",
-  "lastModifiedDate" : "2026-09-15T21:32:41Z",
-  "lastModifiedUser" : "517451631",
+  "lastModifiedDate" : "2026-09-16T23:25:48Z",
   "model" : {
     "deploymentNodes" : [ {
       "children" : [ {
@@ -27,7 +25,7 @@
         "instances" : "1",
         "name" : "Vite",
         "properties" : {
-          "structurizr.dsl.identifier" : "c63c2513-b8b7-4295-a34d-4eeccd543d86"
+          "structurizr.dsl.identifier" : "70763631-ec4c-4d60-8681-4279604ec112"
         },
         "tags" : "Element,Deployment Node",
         "technology" : "Node.js 24, Vite"
@@ -48,7 +46,7 @@
         "instances" : "1",
         "name" : "Node.js",
         "properties" : {
-          "structurizr.dsl.identifier" : "ebf78e8a-28ab-4df7-9357-0990d03192a0"
+          "structurizr.dsl.identifier" : "839d998f-695b-49b2-ade3-871167b6e742"
         },
         "tags" : "Element,Deployment Node",
         "technology" : "Node.js 24"
@@ -82,7 +80,7 @@
         "instances" : "1",
         "name" : "iOS Simulator",
         "properties" : {
-          "structurizr.dsl.identifier" : "b8aeb0ed-3222-40e2-85c3-bf19095f0b60"
+          "structurizr.dsl.identifier" : "76b5b265-e426-4a0c-b095-2104e4408c6c"
         },
         "tags" : "Element,Deployment Node",
         "technology" : "Xcode"
@@ -116,7 +114,7 @@
         "instances" : "1",
         "name" : "Android emulator",
         "properties" : {
-          "structurizr.dsl.identifier" : "efec40ba-9c4a-426d-9af8-8208fcaea257"
+          "structurizr.dsl.identifier" : "a04ea7ea-ae55-4e30-b806-2770f4cc7a12"
         },
         "tags" : "Element,Deployment Node",
         "technology" : "Android SDK"
@@ -151,7 +149,7 @@
       "instances" : "1",
       "name" : "Developer's machine",
       "properties" : {
-        "structurizr.dsl.identifier" : "da49e225-c4eb-4551-a4bf-a45c834bbccd"
+        "structurizr.dsl.identifier" : "018bc501-b58b-4d25-be88-65e56b31a240"
       },
       "tags" : "Element,Deployment Node",
       "technology" : "macOS"
@@ -174,7 +172,7 @@
           "instances" : "1",
           "name" : "Web",
           "properties" : {
-            "structurizr.dsl.identifier" : "62031979-7204-42f1-833c-5bc0b667420f"
+            "structurizr.dsl.identifier" : "dfe3e510-b338-4fe8-832a-12719ddad701"
           },
           "tags" : "Element,Deployment Node",
           "technology" : "Caddy 2, container"
@@ -185,7 +183,7 @@
           "instances" : "1",
           "name" : "Auth service",
           "properties" : {
-            "structurizr.dsl.identifier" : "cf886ea3-1ae0-489e-bed3-6ba1f3a14a19"
+            "structurizr.dsl.identifier" : "b9c2af31-06ee-4e90-bfdf-76dadcd880af"
           },
           "softwareSystemInstances" : [ {
             "environment" : "Dev",
@@ -213,7 +211,7 @@
           "instances" : "1",
           "name" : "Participants service",
           "properties" : {
-            "structurizr.dsl.identifier" : "16faf717-2a1f-428a-929e-7fcf51903c2d"
+            "structurizr.dsl.identifier" : "bb411460-5f27-4dc5-bb4f-f8961ef4fc96"
           },
           "softwareSystemInstances" : [ {
             "environment" : "Dev",
@@ -271,7 +269,7 @@
         "instances" : "1",
         "name" : "Kubernetes cluster",
         "properties" : {
-          "structurizr.dsl.identifier" : "b81561e2-2f17-4dac-a482-60b39ca8cafb"
+          "structurizr.dsl.identifier" : "a5991ac7-cfe3-466b-a819-c258930836be"
         },
         "tags" : "Element,Deployment Node",
         "technology" : "Kubernetes"
@@ -282,7 +280,7 @@
       "instances" : "1",
       "name" : "Azure",
       "properties" : {
-        "structurizr.dsl.identifier" : "8a14bc65-dde9-45cb-9d53-4d010e33ca24"
+        "structurizr.dsl.identifier" : "65ccb8ea-2029-4f52-8c75-cf3dfb9bf371"
       },
       "tags" : "Element,Deployment Node",
       "technology" : "Microsoft Azure"
@@ -350,7 +348,7 @@
       "instances" : "1",
       "name" : "Member's phone",
       "properties" : {
-        "structurizr.dsl.identifier" : "937efb9a-894c-4178-b3b6-b50b59879bf8"
+        "structurizr.dsl.identifier" : "c53be7fd-ade3-4249-8678-3a57845ebbf0"
       },
       "tags" : "Element,Deployment Node",
       "technology" : "iOS 26 or Android"
@@ -361,14 +359,14 @@
       "instances" : "1",
       "name" : "Scouterna",
       "properties" : {
-        "structurizr.dsl.identifier" : "bac49350-075e-4d52-9385-bb7a406ea207"
+        "structurizr.dsl.identifier" : "a6fe6f41-eacd-4776-beea-279e048460d6"
       },
       "softwareSystemInstances" : [ {
         "environment" : "Dev",
         "id" : "113",
         "instanceId" : 1,
         "properties" : {
-          "structurizr.dsl.identifier" : "9cf192a3-e469-4dcc-b4b6-1b88e6898cf1"
+          "structurizr.dsl.identifier" : "d7002e2a-3f99-454c-adaa-05969a66aafa"
         },
         "relationships" : [ {
           "description" : "Verifies sign-ins against",
@@ -384,7 +382,7 @@
         "id" : "117",
         "instanceId" : 1,
         "properties" : {
-          "structurizr.dsl.identifier" : "b8229942-567f-4e50-926d-ad55183c8b5c"
+          "structurizr.dsl.identifier" : "bb4bef4a-9bd1-4468-80c3-5e1e13ad4a7e"
         },
         "softwareSystemId" : "11",
         "tags" : "Software System Instance"
@@ -410,7 +408,7 @@
           "instances" : "1",
           "name" : "Web",
           "properties" : {
-            "structurizr.dsl.identifier" : "b5a3b1ad-6beb-4baa-9b90-fa2b2c2a4a3a"
+            "structurizr.dsl.identifier" : "91eb8c02-f899-4475-b016-74a3e65e6b08"
           },
           "tags" : "Element,Deployment Node",
           "technology" : "Caddy 2, container"
@@ -421,7 +419,7 @@
           "instances" : "1",
           "name" : "Auth service",
           "properties" : {
-            "structurizr.dsl.identifier" : "bccda768-a215-469b-b784-2e61fc6947d9"
+            "structurizr.dsl.identifier" : "deab3d44-710d-4f0a-87e6-a0668e685dff"
           },
           "softwareSystemInstances" : [ {
             "environment" : "Prod",
@@ -449,7 +447,7 @@
           "instances" : "1",
           "name" : "Participants service",
           "properties" : {
-            "structurizr.dsl.identifier" : "dc79f36d-8621-496b-ae82-776639cf5199"
+            "structurizr.dsl.identifier" : "78464fe9-06e0-4f05-a953-a19fcac64640"
           },
           "softwareSystemInstances" : [ {
             "environment" : "Prod",
@@ -507,7 +505,7 @@
         "instances" : "1",
         "name" : "Kubernetes cluster",
         "properties" : {
-          "structurizr.dsl.identifier" : "f5cd8d97-790d-445b-95df-0593405c66d6"
+          "structurizr.dsl.identifier" : "e068dd08-582d-45aa-9f6a-7da7b3bb0e08"
         },
         "tags" : "Element,Deployment Node",
         "technology" : "Kubernetes"
@@ -518,7 +516,7 @@
       "instances" : "1",
       "name" : "Azure",
       "properties" : {
-        "structurizr.dsl.identifier" : "da7907e4-47d7-42af-987a-30a5d47f6fa6"
+        "structurizr.dsl.identifier" : "f0071496-1e5c-4b61-9ab8-528db6d4641e"
       },
       "tags" : "Element,Deployment Node",
       "technology" : "Microsoft Azure"
@@ -586,7 +584,7 @@
       "instances" : "1",
       "name" : "Member's phone",
       "properties" : {
-        "structurizr.dsl.identifier" : "d03a81b8-8fd2-425b-8737-8b638d2620fa"
+        "structurizr.dsl.identifier" : "57cb2089-8bc6-4a26-ad9c-84f4e7310a8a"
       },
       "tags" : "Element,Deployment Node",
       "technology" : "iOS 26 or Android"
@@ -597,14 +595,14 @@
       "instances" : "1",
       "name" : "Scouterna",
       "properties" : {
-        "structurizr.dsl.identifier" : "9c7d579b-525b-4108-8da7-4b5c6caee528"
+        "structurizr.dsl.identifier" : "221771b9-322c-41da-9224-7712fb0782a0"
       },
       "softwareSystemInstances" : [ {
         "environment" : "Prod",
         "id" : "140",
         "instanceId" : 1,
         "properties" : {
-          "structurizr.dsl.identifier" : "a7f2ba8f-1fc8-446b-b339-bb4b39723a7c"
+          "structurizr.dsl.identifier" : "9b13cefa-03b6-436c-aeea-b9385a7f35cb"
         },
         "relationships" : [ {
           "description" : "Verifies sign-ins against",
@@ -620,7 +618,7 @@
         "id" : "144",
         "instanceId" : 1,
         "properties" : {
-          "structurizr.dsl.identifier" : "bf08e7ee-4d67-4e9a-ad2c-3f649dbdc828"
+          "structurizr.dsl.identifier" : "f0b6aca5-a853-4992-b342-0a2382be7359"
         },
         "softwareSystemId" : "11",
         "tags" : "Software System Instance"
@@ -875,7 +873,7 @@
       } ],
       "tags" : "Element,Software System,service"
     }, {
-      "description" : "The service that serves the contingent's register.",
+      "description" : "The service that serves the contingent's list of participants.",
       "documentation" : { },
       "id" : "14",
       "name" : "Participants service",
@@ -949,7 +947,7 @@
           "sourceId" : "17",
           "tags" : "Relationship"
         }, {
-          "description" : "Shows the register through",
+          "description" : "Shows the list of participants through",
           "destinationId" : "23",
           "id" : "67",
           "sourceId" : "17",
@@ -1102,7 +1100,7 @@
         "tags" : "Element,Container,module",
         "technology" : "TypeScript, React 19"
       }, {
-        "description" : "The module that owns the register and its screens.",
+        "description" : "The module that owns the list of participants and its screens.",
         "documentation" : { },
         "group" : "The modules",
         "id" : "23",
@@ -1123,7 +1121,7 @@
           "sourceId" : "23",
           "tags" : "Relationship"
         }, {
-          "description" : "Reads the register over /api/project",
+          "description" : "Reads the list of participants over /api/project",
           "destinationId" : "14",
           "id" : "78",
           "sourceId" : "23",
@@ -1207,7 +1205,7 @@
         "sourceId" : "15",
         "tags" : "Relationship"
       }, {
-        "description" : "Reads the contingent's register from",
+        "description" : "Reads the contingent's list of participants from",
         "destinationId" : "14",
         "id" : "49",
         "sourceId" : "15",
@@ -1235,18 +1233,27 @@
   "views" : {
     "configuration" : {
       "lastSavedView" : "containers",
-      "metadataSymbols" : "SquareBrackets",
       "styles" : {
         "elements" : [ {
           "background" : "#ce4a17",
           "color" : "#ffffff",
-          "shape" : "MobileDevicePortrait",
-          "tag" : "app"
+          "shape" : "RoundedBox",
+          "tag" : "Container"
+        }, {
+          "background" : "#9a3616",
+          "color" : "#ffffff",
+          "shape" : "Person",
+          "tag" : "Person"
         }, {
           "background" : "#ce4a17",
           "color" : "#ffffff",
           "shape" : "RoundedBox",
-          "tag" : "Container"
+          "tag" : "Software System"
+        }, {
+          "background" : "#ce4a17",
+          "color" : "#ffffff",
+          "shape" : "MobileDevicePortrait",
+          "tag" : "app"
         }, {
           "background" : "#7d6a4f",
           "color" : "#ffffff",
@@ -1265,11 +1272,6 @@
           "shape" : "RoundedBox",
           "tag" : "module"
         }, {
-          "background" : "#9a3616",
-          "color" : "#ffffff",
-          "shape" : "Person",
-          "tag" : "Person"
-        }, {
           "background" : "#ce4a17",
           "color" : "#ffffff",
           "shape" : "RoundedBox",
@@ -1278,11 +1280,6 @@
           "background" : "#2f6377",
           "color" : "#ffffff",
           "tag" : "service"
-        }, {
-          "background" : "#ce4a17",
-          "color" : "#ffffff",
-          "shape" : "RoundedBox",
-          "tag" : "Software System"
         }, {
           "background" : "#9a3616",
           "color" : "#ffffff",

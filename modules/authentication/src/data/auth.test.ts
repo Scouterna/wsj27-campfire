@@ -213,7 +213,7 @@ describe("asking who is signed in", () => {
     await expect(currentUser(testClient())).resolves.toBeUndefined()
   })
 
-  it("completes the unit from the register when the roles carry none", async () => {
+  it("completes the unit from the list of participants when the roles carry none", async () => {
     const asked = networkAnswers({
       "/api/auth/user": [Response.json(userPayload({ roles: ["wsj27:cmt"] }))],
       "/api/project/participants/individual/1001": [Response.json({ troop: "2" })],
@@ -225,7 +225,7 @@ describe("asking who is signed in", () => {
     expect(asked).toContain("/api/project/participants/individual/1001")
   })
 
-  it("answers a user without a unit when the register refuses", async () => {
+  it("answers a user without a unit when the participants service refuses", async () => {
     networkAnswers({
       "/api/auth/user": [Response.json(userPayload({ roles: ["wsj27:cmt"] }))],
       "/api/project/participants/individual/1001": [new Response("{}", { status: 404 })],
@@ -250,7 +250,7 @@ describe("asking who is signed in", () => {
     expect(asked).toEqual(["/api/auth/user", "/api/auth/refresh", "/api/auth/user"])
   })
 
-  it("never asks the register when the payload carried no member number", async () => {
+  it("never asks the participants service when the payload carried no member number", async () => {
     const asked = networkAnswers({
       "/api/auth/user": [Response.json(userPayload({ memberNo: undefined, roles: ["wsj27:cmt"] }))],
     })
@@ -261,7 +261,7 @@ describe("asking who is signed in", () => {
     expect(asked).toEqual(["/api/auth/user"])
   })
 
-  it("asks the register at an encoded address when the member number carries a reserved character", async () => {
+  it("asks the participants service at an encoded address when the member number carries a reserved character", async () => {
     // The number is a service payload's string, so a value like "10/01" must not
     // rewrite the path it is asked on.
     const asked = networkAnswers({
@@ -275,7 +275,7 @@ describe("asking who is signed in", () => {
     expect(asked).toContain("/api/project/participants/individual/10%2F01")
   })
 
-  it("never asks the register for a leader whose roles carry the unit", async () => {
+  it("never asks the participants service for a leader whose roles carry the unit", async () => {
     const asked = networkAnswers({ "/api/auth/user": [Response.json(userPayload({}))] })
 
     const user = await currentUser(testClient())

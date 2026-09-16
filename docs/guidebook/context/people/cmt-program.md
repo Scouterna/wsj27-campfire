@@ -2,7 +2,7 @@
 
 Program plans what the contingent does: the preparation of everyone, the round trip and the gatherings on the way, and the Swedish contributions at camp. The jamboree's own program belongs to ZHP and WOSM; what Program owns is everything around it.
 
-The register calls the function **Program**, and its color in the contingent's identity is blue – the contingent's default.
+The participants service calls the function **Program**, and its color in the contingent's identity is blue – the contingent's default.
 
 ## At camp and before it
 
@@ -12,7 +12,7 @@ That is a calendar spread over eighteen months, and it is a calendar the whole c
 
 ## In the application
 
-Program gets the unscoped register like the other CMT functions, and a person's page carries the one field that is genuinely theirs: how that person travels. Rundresa, direktresa, or egen resa, as the register worded it.
+Program gets the unscoped list of participants like the other CMT functions, and a person's page carries the one field that is genuinely theirs: how that person travels. Rundresa, direktresa, or egen resa, as the list of participants worded it.
 
 The countdown on the home screen is the other piece. It counts to departure and to camp from an itinerary that is fixed and public, and therefore lives in the journey module rather than being fetched from anywhere – there is no service to fetch it from, and an itinerary that has been printed does not need one. It reads a person's travel choice to know whether to count down to the pre-trip or straight to the camp, so a leader on the rundresa and a leader traveling direct see different dates.
 
@@ -26,4 +26,4 @@ Nothing specified. Program is on the audience list so an issue can name them; a 
 
 Sign-in is ScoutID like everyone else's ([ADR 019](/decisions/019-authenticate-on-the-app-origin-through-scoutid)). The role `wsj27:cmt:program` marks the function, and the front-end reads it as management without distinguishing it from the other functions.
 
-Program reads the whole register at the basic level. The health answers stay behind [the health grants](./cmt-health), which Program does not carry.
+Program reads the whole list of participants at the basic level. The health answers stay behind [the health grants](./cmt-health), which Program does not carry.

@@ -4,7 +4,7 @@
  */
 export interface Unit {
   /**
-   * The unit's number, as the register keys it.
+   * The unit's number, as the list of participants keys it.
    */
   readonly number: number
 }

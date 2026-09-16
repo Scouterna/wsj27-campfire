@@ -15,7 +15,7 @@ export interface User {
    */
   readonly firstName: string
   /**
-   * The Scoutnet member number – what the register and the roles are keyed by.
+   * The Scoutnet member number – what the list of participants and the roles are keyed by.
    */
   readonly memberNo: string
   /**
@@ -28,8 +28,8 @@ export interface User {
    */
   readonly roles: readonly Role[]
   /**
-   * The unit the roles or the register place them in, where either does – a leader's
-   * comes from their role, anyone else's from the register, and plenty of people
+   * The unit the roles or the list of participants place them in, where either does –
+   * a leader's comes from their role, anyone else's from the list, and plenty of people
    * simply have none.
    */
   readonly unit?: Unit

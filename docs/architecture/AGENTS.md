@@ -67,7 +67,7 @@ A new style takes an existing hue from this table rather than introducing a colo
 
 ## Where new elements go
 
-- A **person** goes in `model/people.dsl`, tagged `user` when Campfire is built for them and `internal` when they build it. The register's participants are not people here: they are data, and Campfire has no surface for them.
+- A **person** goes in `model/people.dsl`, tagged `user` when Campfire is built for them and `internal` when they build it. The participants in the list are not people here: they are data, and Campfire has no surface for them.
 - A **back-end service** – ours to depend on, and nobody's here to build, because each is its own repository, image, and deployment – goes in `model/services.dsl`, tagged `service`. An **external system** nobody in this repository writes goes in `model/external.dsl`, tagged `external`.
 - A **container** goes inside the `campfire` system in `model/campfire.dsl`, in the group it belongs to, with a `technology`. The product a person reaches is tagged `product`, a shell `app`, a module or a library `module`, and one that is ours and never ships `development`.
 - A **deployment node** goes in the environment it belongs to in `model/deployment.dsl`, with a `technology`, holding an instance of each container or service that runs on it; the one origin of an environment is an `infrastructureNode` there, never a container of the system.

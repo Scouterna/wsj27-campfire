@@ -55,8 +55,8 @@ export function signOut(returnTo: string): void {
  * a returning session usually holds a live refresh cookie, and one `/api/auth/refresh`
  * round trip re-mints the token. Only when that also refuses is nobody signed in – one
  * retry, never a loop.
- * @param client The application's one query client, so the register read behind the
- * unit shares the cache every other read uses.
+ * @param client The application's one query client, so the participants-service read
+ * behind the unit shares the cache every other read uses.
  * @returns The signed-in user, or undefined when nobody is.
  */
 export async function currentUser(client: QueryClient): Promise<User | undefined> {
@@ -76,12 +76,13 @@ export async function currentUser(client: QueryClient): Promise<User | undefined
 }
 
 /**
- * Completes a user whose roles carry no unit by asking the register, through the
- * query cache. A placed leader never costs the request, and every failure is simply a
- * user without a unit – the answer is allowed to be nothing.
+ * Completes a user whose roles carry no unit by asking the participants service,
+ * through the query cache. A placed leader never costs the request, and every failure
+ * is simply a user without a unit – the answer is allowed to be nothing.
  * @param client The query client the read caches in.
  * @param user The decoded user, with whatever unit the roles gave.
- * @returns The user, with the register's unit where it had none and the register knows.
+ * @returns The user, with the unit the list of participants places them in, where the
+ * roles gave none and the list knows one.
  */
 async function withUnit(client: QueryClient, user: User): Promise<User> {
   if (user.unit !== undefined || user.memberNo === "") {

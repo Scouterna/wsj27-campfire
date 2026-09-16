@@ -2,7 +2,7 @@
 
 Communication owns the contingent's profile and its channels, markets the jamboree, keeps every audience informed before, during, and after it, and evaluates the experience afterwards. In practice that means the contingent's page on scouterna.se, its social accounts, the FAQ, and the mail that gets answered.
 
-The register calls the function **Kommunikation**, and its color in the contingent's identity is red.
+The participants service calls the function **Kommunikation**, and its color in the contingent's identity is red.
 
 ## At camp and before it
 
@@ -12,7 +12,7 @@ The day-to-day talking, though, happens on Discord. That is where the contingent
 
 ## In the application
 
-Communication gets the same application every other CMT function gets: the register, searchable and unscoped, with a person's page behind each row. There is no announcement surface, and none is being built: nothing in the application sends a message, publishes a post, or holds a piece of copy.
+Communication gets the same application every other CMT function gets: the list of participants, searchable and unscoped, with a person's page behind each row. There is no announcement surface, and none is being built: nothing in the application sends a message, publishes a post, or holds a piece of copy.
 
 What the application does carry that touches this function is the contingent's visual identity – the five unit colors and the Bravely Script display face taken from the jamboree's theme, both in `libraries/ui` – and the unit logotypes, in the unit identity table the participants module holds. That work is described in [Design](../../design/), and it is Communication's material as much as anyone's.
 

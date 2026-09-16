@@ -19,10 +19,10 @@ type UnitQueryKey = readonly ["authentication", "unit", string]
 const noUnit = null
 
 /**
- * Query options for the unit the register places somebody in.
+ * Query options for the unit the list of participants places somebody in.
  *
  * Every failure settles as no unit: a 403 (the caller may not see this much), a 404
- * (the register does not hold them), an unreachable service, and an answer that is not
+ * (the list of participants does not hold them), an unreachable service, and an answer that is not
  * JSON alike. The query function catches rather than rethrows, so the query settles
  * instead of retrying a refusal that will never become a yes – the application is
  * allowed not to know which unit somebody is in.

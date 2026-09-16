@@ -3,7 +3,7 @@
 # and these diagrams name the same groups rather than three overlapping sets.
 #
 # The contingent is about 2,600 people in 53 units, and the scouts are not on this
-# diagram: they are data in the register, not users of the app, and drawing them as
+# diagram: they are data in the list of participants, not users of the app, and drawing them as
 # people would promise a surface that does not exist.
 
 # The people Campfire is built for (8). Eight audiences, one app – what differs between

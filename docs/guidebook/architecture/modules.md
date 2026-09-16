@@ -18,7 +18,7 @@ Registration, not import, is how a module reaches the application, and that is w
 
 ## Authentication
 
-`modules/authentication` is the client half of the auth service's browser contract: the sign-in and sign-out addresses, the question of who is signed in and its one refresh retry, the defensive decode of the user payload – the flattened roles translated into the closed set `utils` declares – and the signed-in person: one `User`, the application's only definition of who is signed in, with the helpers that derive the greeting name and the unit the roles or the register place them in.
+`modules/authentication` is the client half of the auth service's browser contract: the sign-in and sign-out addresses, the question of who is signed in and its one refresh retry, the defensive decode of the user payload – the flattened roles translated into the closed set `utils` declares – and the signed-in person: one `User`, the application's only definition of who is signed in, with the helpers that derive the greeting name and the unit the roles or the list of participants place them in.
 
 It holds no token and never will. The session is httpOnly cookies the browser carries, so the module asks who is signed in and is told, or is not ([ADR 019](/decisions/019-authenticate-on-the-app-origin-through-scoutid)). [Sign in](./example-flows/sign-in) walks the whole round trip.
 
@@ -38,7 +38,7 @@ Its public surface is one countdown widget, placed on the start screen by the ap
 
 ## Participants
 
-`modules/participants` is the contingent's register, and the largest module by far: the list and the detail screens, the widgets other screens place, the query factories and DTO converters behind them, the unit identity table, and the avatar artwork.
+`modules/participants` is the contingent's list of participants, and the largest module by far: the list and the detail screens, the widgets other screens place, the query factories and DTO converters behind them, the unit identity table, and the avatar artwork.
 
 It is the only module that talks to the participants service, and one of the two with a data layer, beside authentication. Every field arrives typed `unknown` and is validated at the boundary, because the service will change shape over an eighteen-month build ([Data layer](./layers/data)). It also holds the first feature: a leader seeing the participants in their unit, walked through on [Show participants](./example-flows/show-participants).
 
