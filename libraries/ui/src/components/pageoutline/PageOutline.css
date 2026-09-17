@@ -1,0 +1,85 @@
+/* The page outline: an uppercase label over a rule-backed list, the entry being read
+   marked by a line that slides along the rail. Where the column sits, and how tall it
+   may grow, is the consumer's business. */
+
+@layer component {
+  .outline-label {
+    color: var(--color-ink-tertiary);
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.16em;
+    margin-bottom: var(--spacing-group);
+    text-transform: uppercase;
+  }
+
+  .outline-items {
+    border-left: 2px solid var(--color-divider);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    /* The marker positions along this box. */
+    position: relative;
+  }
+
+  /* The one marker, laid over the rail at the current entry's measured place – a
+     single element, so a change slides it there instead of blinking between two
+     borders. The geometry arrives as custom properties the component writes before
+     paint; sized zero until it has. */
+  .outline-marker {
+    background: var(--color-theme-ink);
+    height: var(--outline-marker-height, 0);
+    left: -2px;
+    position: absolute;
+    top: var(--outline-marker-top, 0);
+    transition:
+      height 200ms ease,
+      top 200ms ease;
+    width: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .outline-marker {
+      transition: none;
+    }
+  }
+
+  .outline-items button {
+    background: none;
+    border: none;
+    color: var(--color-ink-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--font-size-entry);
+    padding: var(--spacing-stack) var(--spacing-container) var(--spacing-stack)
+      calc(var(--spacing-container) - 2px);
+
+    /* The anchor for the focus ring below. */
+    position: relative;
+    text-align: left;
+  }
+
+  .outline-items button[aria-current] {
+    color: var(--color-theme-ink);
+    font-weight: var(--font-weight-strong);
+  }
+
+  /* The focus ring, drawn as a rounded border on a pseudo-element rather than an
+     outline: WebKit double-paints a rounded outline at a negative offset, and the
+     default ring would cross the rail and be clipped by the column's own scroll box.
+     The transparent outline is for forced colors, which ignores the pseudo-element's
+     colors and paints the outline in the system's instead. */
+  .outline-items button:focus-visible {
+    outline: 2px solid transparent;
+    outline-offset: -4px;
+  }
+
+  .outline-items button:focus-visible::after {
+    border: 2px solid var(--color-theme-bright);
+    border-radius: var(--border-radius-control);
+    content: "";
+    inset: 2px;
+    pointer-events: none;
+    position: absolute;
+  }
+}

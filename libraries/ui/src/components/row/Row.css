@@ -1,0 +1,70 @@
+/* The list row pattern: tile, text column, trailing chevron. */
+
+@layer component {
+  .row {
+    align-items: center;
+    border-top: 1px solid var(--color-divider);
+    display: grid;
+    gap: var(--spacing-container);
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    padding: var(--spacing-group) 0;
+  }
+
+  /* Inside a card the row bleeds to the card's edges: its inset is padding of its own
+     rather than the card's, so a press fills the whole row and the divider runs the
+     full width. */
+  .card .row {
+    margin: 0 calc(-1 * var(--spacing-section));
+    padding: var(--spacing-group) var(--spacing-container);
+  }
+
+  /* The first and last rows bleed to the card's top and bottom edges as well, carrying
+     the card's radius themselves so the fill never squares off a corner – and the
+     first row drops the divider, which only belongs between rows. */
+  .card > .row:first-child {
+    border-start-end-radius: var(--border-radius-surface);
+    border-start-start-radius: var(--border-radius-surface);
+    border-top: none;
+    margin-top: calc(-1 * var(--spacing-section));
+  }
+
+  .card > .row:last-child {
+    border-end-end-radius: var(--border-radius-surface);
+    border-end-start-radius: var(--border-radius-surface);
+    margin-bottom: calc(-1 * var(--spacing-section));
+  }
+  .row strong {
+    display: block;
+    font-weight: var(--font-weight-strong);
+  }
+
+  .row small {
+    color: var(--color-ink-secondary);
+    display: block;
+    font-size: var(--font-size-entry);
+    margin-top: 2px;
+  }
+
+  /* The chevron: the back glyph mirrored into "onward", quiet at the row's end. */
+  .row-chevron {
+    color: var(--color-ink-tertiary);
+    display: flex;
+    transform: scaleX(-1);
+  }
+
+  /* Only a row that goes somewhere reacts – a plain informational row stays still.
+     The feedback is a fill, so the whole bled row lights up like a native list cell. */
+  a.row {
+    transition: background 120ms ease;
+  }
+
+  @media (hover: hover) {
+    a.row:hover {
+      background: color-mix(in srgb, var(--color-theme-ink) 5%, transparent);
+    }
+  }
+
+  a.row:active {
+    background: color-mix(in srgb, var(--color-theme-ink) 11%, transparent);
+  }
+}

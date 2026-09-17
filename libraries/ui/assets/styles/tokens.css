@@ -9,6 +9,23 @@
     --color-paper: #f4f2ec;
     --color-ink: #1a1a1a;
 
+    /* The quieter inks: secondary for supporting text, tertiary for hints and the
+       labels above them. Mixed from the ink over the paper rather than picked, so they
+       stay neutral under every theme instead of leaning blue. */
+    --color-ink-secondary: color-mix(in srgb, var(--color-ink) 75%, var(--color-paper));
+    --color-ink-tertiary: color-mix(in srgb, var(--color-ink) 52%, var(--color-paper));
+
+    /* The white sheet a piece of chrome raises off the paper – the tab strip, and the
+       pill behind the section being read. */
+    --color-sheet: #fff;
+
+    /* The hairline between chrome and content: the ink at a tenth. */
+    --color-divider: rgb(26 26 26 / 10%);
+
+    /* The translucent glass a floating piece of chrome stands on – the condensed bar,
+       the overflow trigger – always over a backdrop blur. */
+    --color-glass: rgb(255 255 255 / 62%);
+
     /* The contingent's five unit colors – the exact outer-ring values from the five
        badge marks, which are the authoritative artwork for the color identities. */
     --color-theme-blue: #2a778a;
@@ -40,12 +57,38 @@
     /* Rhythm: the spaces between things, named for what they separate rather than for
        a size, so a step in the scale reads as a relationship. A screen's own tuned
        poster values stay in the screen; these are the systematic steps. */
-    --spacing-card: 20px;
+    --spacing-card: 24px;
     --spacing-container: 16px;
     --spacing-group: 12px;
     --spacing-inline: 4px;
     --spacing-section: 24px;
     --spacing-stack: 8px;
+
+    /* The type scale, each size in rem against the 17-point base so Dynamic Type
+       scales every role together – the rem-per-17 math lives here and nowhere else.
+       Named for the role a size plays, like the rhythm above: body is plain running
+       text and a card's heading, caption the uppercase label over a list, detail the
+       quiet line under a name, display the page title in the display face – full on a
+       desktop, small on a phone, mini in the condensed bar – entry a menu or outline
+       entry and a button's label, footnote an aside or the eyebrow over a title, name
+       the profile control's name, tab the tab strip's labels, and title a plain
+       heading. A screen's own tuned poster values stay in the screen. */
+    --font-size-body: calc(17rem / 17);
+    --font-size-caption: calc(10rem / 17);
+    --font-size-detail: calc(11.5rem / 17);
+    --font-size-display: calc(44rem / 17);
+    --font-size-display-mini: calc(22rem / 17);
+    --font-size-display-small: calc(30rem / 17);
+    --font-size-entry: calc(14rem / 17);
+    --font-size-footnote: calc(13rem / 17);
+    --font-size-name: calc(13.5rem / 17);
+    --font-size-tab: calc(10.5rem / 17);
+    --font-size-title: calc(28rem / 17);
+
+    /* The weight the scale is written in beside the regular: strong, for emphasized
+       chrome text – a lit tab, a name, a marked entry, a button's label. The display
+       face's own weight sits with the face below. */
+    --font-weight-strong: 700;
 
     /* The display face, for the wordmark and the headings that carry the brand. Only a
        regular weight is drawn, so the weight is a token too – asking for bold would have
@@ -61,6 +104,11 @@
   :root,
   [data-theme] {
     --color-theme-on-bright: #fff;
+
+    /* The wash behind the selected control – the lit tab's pill – the theme's ink
+       thinned onto the sheet, so it follows the unit color in force. Declared on every
+       themed scope for the same substitution reason as on-bright above. */
+    --color-theme-wash: color-mix(in srgb, var(--color-theme-ink) 12%, var(--color-sheet));
   }
 
   [data-theme="blue"] {

@@ -1,18 +1,21 @@
+import { ScreenDecorator } from "@scouterna/wsj27-campfire-ui"
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { fn } from "storybook/test"
 
 import { HomeScreen } from "./HomeScreen"
 
 const meta = {
   title: "Modules/Home/HomeScreen",
   component: HomeScreen,
-  args: { onSignOut: fn() },
+  decorators: [ScreenDecorator],
+  parameters: {
+    // A screen fills the frame, as sign-in's does – the decorator draws the page
+    // surface, so the canvas adds no padded box around it.
+    layout: "fullscreen",
+  },
 } satisfies Meta<typeof HomeScreen>
 
 export default meta
 
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {
-  args: { firstName: "Joakim" },
-}
+export const Default: Story = {}

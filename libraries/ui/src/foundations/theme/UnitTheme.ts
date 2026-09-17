@@ -1,7 +1,7 @@
 import type { Theme } from "./Theme"
 
 /**
- * The theme each unit works in – Campfire's own data, because the register knows only
+ * The theme each unit works in – Campfire's own data, because the list of participants knows only
  * the number. The colors are real; nothing here names a unit, and nothing here may: the
  * units' names and artwork are secret until the day the units learn them, and this
  * repository is public.
@@ -65,7 +65,7 @@ const unitThemes: Readonly<Record<number, Theme>> = {
 /**
  * The theme a unit works in.
  *
- * @param unitNumber The unit's number, as the register gives it.
+ * @param unitNumber The unit's number, as the list of participants gives it.
  * @returns The unit's theme, or blue – the contingent's default – for a unit the table
  * does not know.
  */

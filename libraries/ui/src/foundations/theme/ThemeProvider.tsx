@@ -60,8 +60,8 @@ function rememberTheme(theme: Theme): void {
  *
  * A theme asked for by address is remembered immediately, which is what makes it survive
  * the sign-in round trip and every later navigation without the parameter. From that
- * moment it is a stored preference like any other, so the register's answer still wins
- * once someone is signed in.
+ * moment it is a stored preference like any other, so the answer from the list of
+ * participants still wins once someone is signed in.
  */
 export function applyInitialTheme(): void {
   const requested = requestedTheme()

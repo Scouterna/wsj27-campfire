@@ -1,0 +1,57 @@
+/* The tab bar: one control per section, icon above label, the current one on a washed
+   pill in the theme's color. */
+
+@layer component {
+  .tabstrip {
+    align-items: center;
+    background: var(--color-sheet);
+    border-top: 1px solid var(--color-divider);
+    display: flex;
+
+    /* The strip has to end above a phone's home indicator, and the inset is the only
+       thing that knows how much room that costs. */
+    padding: 6px var(--spacing-inline) calc(6px + env(safe-area-inset-bottom));
+  }
+
+  .tabstrip a {
+    align-items: center;
+    border-radius: var(--border-radius-control);
+    color: var(--color-ink-secondary);
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    font-size: var(--font-size-tab);
+    gap: var(--spacing-inline);
+    height: 52px;
+    justify-content: center;
+    transition:
+      background 120ms ease,
+      opacity 100ms ease;
+  }
+
+  .tabstrip svg {
+    height: 22px;
+    stroke-width: 2;
+    width: 22px;
+  }
+
+  .tabstrip a[aria-current="page"] {
+    background: var(--color-theme-wash);
+    color: var(--color-theme-ink);
+    font-weight: var(--font-weight-strong);
+  }
+
+  .tabstrip a[aria-current="page"] svg {
+    stroke-width: 2.3;
+  }
+
+  @media (hover: hover) {
+    .tabstrip a:hover {
+      color: var(--color-theme-ink);
+    }
+  }
+
+  .tabstrip a:active {
+    opacity: 0.55;
+  }
+}

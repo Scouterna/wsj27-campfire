@@ -4,14 +4,15 @@ Navigation sits in no single layer. A module owns the addresses it answers at, t
 
 ## Routes are data
 
-The router is TanStack Router ([ADR 017](/decisions/017-route-and-load-data-with-tanstack-router-and-query)), and routes are declared as data, not as files. Each module exports a plain table of address to screen, and each entry says four things:
+The router is TanStack Router ([ADR 017](/decisions/017-route-and-load-data-with-tanstack-router-and-query)), and routes are declared as data, not as files. Each module exports a plain table of address to screen, and each entry says three things:
 
-| Field       | Means                                                             |
-| ----------- | ----------------------------------------------------------------- |
-| `Component` | What renders at this address                                      |
-| `title`     | What the screen is called, in the bar and in the document's title |
-| `tab`       | Which section lights up, by the id the menus use                  |
-| `parent`    | The address back leads to, if this screen has one above it        |
+| Field       | Means                                                      |
+| ----------- | ---------------------------------------------------------- |
+| `Component` | What renders at this address                               |
+| `tab`       | Which section lights up, by the id the menus use           |
+| `parent`    | The address back leads to, if this screen has one above it |
+
+The table places a screen; it does not name one. A page declares what it is called by rendering `PageTitle`, because the page is the one thing that knows its own name – a title that depends on who is reading, as the participants screen's does, cannot be written in a static table. The chrome reads the declaration for the bar and for the document's title alike.
 
 The application merges the modules' tables into one, and a helper in `libraries/ui` turns the merged table into routes under a single root. It returns a record keyed by path rather than an array, and that is the whole trick: an array collapses the routes into one union type and the router can no longer tell which address takes a parameter, while keyed by path each route keeps its own literal type and every link stays checked down to that detail.
 
@@ -32,9 +33,23 @@ declare module "@scouterna/wsj27-campfire-ui" {
 
 The brand is what makes a clash visible. Interface merging accepts a property declared twice with the same type, so a bare marker would let two modules quietly claim one address and the later import would win at runtime. Branding the entry with its owner makes the second declaration a different type, which is a compile error.
 
-Two addresses are the application's own, because the session belongs to no module: the start screen at `/`, and the signed-in person's own page.
+One address is the application's own: the start screen at `/`, because home is the one address that belongs to no single module.
 
 Registration is invisible machinery, and it is worth saying out loud: an address exists only because some module augmented an interface, and a module whose entry point is never imported registers nothing at all. It is the application depending on the package that turns it on.
+
+## Sections, and what an address answers
+
+A section is a top-level destination the menus offer, and the sections are the application's model rather than any module's: home for everyone, and the participants section for a leader and for the CMT Administration function. The application derives them from the session's roles, which is why a screen's table entry names a section by id and never decides who may see it.
+
+One predicate settles that for everything. `isGranted` maps a screen's `tab` to the section that owns it and asks whether the roles grant it, and the same call feeds three places, so they cannot drift apart:
+
+- The side menu and the tab bar list the sections it grants, so everything a menu offers is something the person can open.
+- The chrome resolves the marked section, the title, and the back control through it.
+- The screen guard mounts the real component through it, and the not-found page otherwise.
+
+It fails closed: a screen whose `tab` names no section is granted to nobody, so a typo hides a screen loudly rather than publishing it to everyone.
+
+The guard is what makes an address honest. An address matching no screen and an address matching a screen outside the person's sections show the same not-found page, so the application never reveals what exists for other roles – the hidden screen never mounts, runs no effect, fires no query, and never names itself, which is what keeps the two indistinguishable down to the document's title.
 
 ## Back, and what it means
 

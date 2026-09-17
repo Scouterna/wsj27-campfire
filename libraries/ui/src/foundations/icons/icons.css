@@ -1,0 +1,8 @@
+/* Icons take the color and size of the box they sit in – the one rule of their own
+   keeps a flex row from squeezing the glyph. */
+
+@layer component {
+  svg {
+    flex: none;
+  }
+}

@@ -20,6 +20,121 @@
   max-width: 400px;
 }
 
+/* A screen, framed as the application frames it: the bar over the content column, on
+   the page's own surface, filling the fullscreen canvas the screen stories ask for. */
+/* A screen's page column, mirroring where `apps/web`'s app.css puts a screen: the
+   heading and the content pad themselves at phone width, and from 768px the column
+   takes the padding over – the side menu's own at first, twice that once there is room.
+   Mirrored rather than shared, because where the chrome sits belongs to the application
+   and a library never imports an app. */
+.story-screen {
+  background: var(--color-paper);
+  min-height: 100dvh;
+}
+
+.story-screen-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-container);
+  padding: 0 var(--spacing-container) var(--spacing-section);
+}
+
+@media (min-width: 768px) {
+  .story-screen {
+    padding: 40px var(--spacing-card) var(--spacing-card);
+  }
+
+  .story-screen-content {
+    padding: 0 0 var(--spacing-section);
+  }
+}
+
+@media (min-width: 1024px) {
+  .story-screen {
+    padding-left: calc(var(--spacing-card) * 2);
+    padding-right: calc(var(--spacing-card) * 2);
+  }
+}
+
+/* A Docs page previews every story in its own block, which Storybook paints white –
+   the canvas shows the paper, so the Docs blocks wear it too. */
+.docs-story {
+  background: var(--color-paper);
+}
+
+/* A stand-in avatar tile for rows: initials in the theme's ink, at the row's 44-point
+   tile size. */
+.story-tile {
+  align-items: center;
+  background: var(--color-theme-ink);
+  border-radius: var(--border-radius-round);
+  color: var(--color-theme-on-ink);
+  display: flex;
+  font-size: var(--font-size-entry);
+  font-weight: var(--font-weight-strong);
+  height: 44px;
+  justify-content: center;
+  width: 44px;
+}
+
+/* The desktop pieces – the side menu, the outline – at the height they get on a page. */
+.story-menu {
+  display: flex;
+  height: 560px;
+}
+
+/* Prose used as filler around the component being shown, without the margin a card's
+   own prose carries. */
+.story-filler {
+  margin: 0;
+}
+
+/* What a headless component reported, printed beside it. */
+.story-readout {
+  color: var(--color-ink-secondary);
+  font-size: var(--font-size-detail);
+}
+
+/* --- The icon set --- */
+
+.story-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.story-icon {
+  color: var(--color-ink);
+  text-align: center;
+  width: 84px;
+}
+
+.story-icon-mark {
+  display: inline-block;
+  height: 24px;
+  width: 24px;
+}
+
+.story-icon-name {
+  color: var(--color-ink-secondary);
+  font-size: var(--font-size-caption);
+}
+
+.story-samples {
+  align-items: flex-end;
+  color: var(--color-ink);
+  display: flex;
+  gap: 28px;
+}
+
+.story-sample {
+  text-align: center;
+}
+
+.story-sample .story-icon-name {
+  margin-top: 8px;
+}
+
 /* The H1 of an MDX page – the Introduction – set in the contingent's display face, the
    same way the guidebook sets its page titles, so the two sites read as one. The face
    itself arrives with the design system's stylesheet, which preview.tsx loads. A
@@ -27,9 +142,9 @@
    a component's name is a word whose case means something. An MDX heading is a direct
    child of the content column, which keeps a heading inside a rendered story out too. */
 .sbdocs-content > h1:not(.sbdocs-title) {
-  font-family: "Bravely Script", cursive;
+  font-family: var(--typography-display-font_family);
   font-size: 3rem;
-  font-weight: 400;
+  font-weight: var(--typography-display-font_weight);
   letter-spacing: 0;
   line-height: 1.2;
 }
