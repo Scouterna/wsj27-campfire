@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client"
 
 import { wireNavigation } from "./navigation"
 import { router } from "./routes"
+import { wireServiceWorkerUpdates } from "./service-worker"
 
 // The theme goes on before the first paint: the sign-in screen must greet a returning
 // brown-unit leader in brown, not flash blue until React catches up. `?theme=brown`
@@ -15,6 +16,10 @@ applyInitialTheme()
 // The direction listeners go on before the router mounts, so the very first click is
 // already decided by its source.
 wireNavigation()
+
+// The update listeners go on before anything renders, so a deploy that takes over
+// during boot still reaches the page as one reload rather than staying invisible.
+wireServiceWorkerUpdates()
 
 // A back-forward cache restore is not a load: Safari brings the whole document back
 // with screens drawn for a session whose sign-out may have happened in another
