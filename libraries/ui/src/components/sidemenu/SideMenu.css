@@ -1,0 +1,82 @@
+/* The side menu: the mark, the sections as a pill list, and the footer under them. */
+
+@layer component {
+  .sidemenu {
+    /* Opaque, so the page sliding to the rear during a push genuinely disappears under
+       the menu instead of showing through it. */
+    background: var(--color-paper);
+    border-right: 1px solid var(--color-divider);
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-section) var(--spacing-card) var(--spacing-card);
+    width: 250px;
+  }
+
+  .sidemenu .logo {
+    display: block;
+    margin: var(--spacing-card) auto calc(var(--spacing-card) * 2);
+    width: 155px;
+  }
+
+  .sidemenu-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-inline);
+  }
+
+  .sidemenu-items a {
+    align-items: center;
+    border-radius: var(--border-radius-round);
+    color: var(--color-ink-secondary);
+    display: flex;
+    font-size: var(--font-size-entry);
+    font-weight: var(--font-weight-strong);
+    gap: var(--spacing-group);
+    height: 44px;
+    padding: 0 var(--spacing-container);
+    transition:
+      background 120ms ease,
+      opacity 100ms ease;
+  }
+
+  .sidemenu-items svg {
+    height: 18px;
+    stroke-width: 2.1;
+    width: 18px;
+  }
+
+  .sidemenu-items a[aria-current="page"] {
+    background: var(--color-sheet);
+    color: var(--color-theme-ink);
+  }
+
+  .sidemenu-items a[aria-current="page"] svg {
+    stroke-width: 2.3;
+  }
+
+  /* The what's-coming line: quiet, under a divider, plainly not a section. */
+  .sidemenu-teaser {
+    border-top: 1px solid var(--color-divider);
+    color: var(--color-ink-tertiary);
+    font-size: var(--font-size-footnote);
+    line-height: 1.45;
+    margin: var(--spacing-container) var(--spacing-inline) 0;
+    padding: var(--spacing-container) var(--spacing-stack) 0;
+  }
+
+  /* What the column ends on – the profile control – pushed to its foot. */
+  .sidemenu-footer {
+    margin-top: auto;
+    padding-top: var(--spacing-card);
+  }
+
+  @media (hover: hover) {
+    .sidemenu-items a:not([aria-current]):hover {
+      background: color-mix(in srgb, var(--color-theme-ink) 7%, transparent);
+    }
+  }
+
+  .sidemenu-items a:not([aria-current]):active {
+    background: color-mix(in srgb, var(--color-theme-ink) 14%, transparent);
+  }
+}

@@ -1,14 +1,20 @@
 import { applyInitialTheme } from "@scouterna/wsj27-campfire-ui"
+import { RouterProvider } from "@tanstack/react-router"
 import { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
 
-import { RequireSession } from "./RequireSession"
+import { wireNavigation } from "./navigation"
+import { router } from "./routes"
 
 // The theme goes on before the first paint: the sign-in screen must greet a returning
 // brown-unit leader in brown, not flash blue until React catches up. `?theme=brown`
 // seeds it for a visitor who has never been here, and is remembered from that point
 // like any other stored preference.
 applyInitialTheme()
+
+// The direction listeners go on before the router mounts, so the very first click is
+// already decided by its source.
+wireNavigation()
 
 // A back-forward cache restore is not a load: Safari brings the whole document back
 // with screens drawn for a session whose sign-out may have happened in another
@@ -25,11 +31,11 @@ if (!container) {
   throw new Error("index.html has no #root element to mount into")
 }
 
-// The composition root: the one place that knows every module, which is what lets a
-// module stay ignorant of its neighbors. Mounting happens here, never inside a module,
-// for the same reason.
+// The router owns the tree from here: the composition root is routes.tsx, the one
+// place that knows every module, and its AppChrome is the session gate in front of
+// every address.
 createRoot(container).render(
   <StrictMode>
-    <RequireSession />
+    <RouterProvider router={router} />
   </StrictMode>,
 )

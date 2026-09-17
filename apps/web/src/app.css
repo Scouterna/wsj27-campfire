@@ -1,16 +1,381 @@
-/* What the application itself owns: the page frame the screens are drawn into. What each
-   piece looks like belongs to the ui library, together with the tokens and the base. */
+/* Where the chrome sits: the desktop shell's columns, the sticky top bar, the pinned
+   tab strip, and the view transitions between pages. What each piece looks like belongs
+   to the ui library, together with the foundations and the component classes. */
 
 @import "@scouterna/wsj27-campfire-ui/styles.css";
 
 @layer screen {
   body {
-    /* One reading column, centered, on the paper the base layer already painted. The
-       accent is the unit color in force, so a control the design system has no component
-       for still reads as this unit's. */
+    /* The accent is the unit color in force, so a control the design system has no
+       component for still reads as this unit's. */
     accent-color: var(--color-theme-bright);
-    margin: 0 auto;
-    max-width: 640px;
-    padding: 24px 16px;
+  }
+
+  /* The not-found page's way home. Styled here because the page itself lives in
+     routes.tsx – the URL space's edges are the application's, not any module's. */
+  .not-found-home a {
+    color: var(--color-theme-ink);
+    font-weight: var(--font-weight-strong);
+  }
+}
+
+@layer component {
+  /* --- Browser chrome ---
+     The bar itself is the ui library's NavigationBar; where it sits is decided here,
+     scoped under .shell because the component's own stylesheet arrives after this one
+     and the placement rules need the higher specificity to decide. */
+
+  .shell .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  main {
+    /* Opaque and viewport-tall, so the view transition's snapshot is the whole page
+       surface and a push reads as the full page swooshing rather than loose pieces.
+       The bar is its first child, so the page's h1 sits inside the landmark. */
+    background: var(--color-paper);
+    min-height: 100dvh;
+  }
+
+  /* The screen's own blocks – loose fragments – as one column under the heading,
+     filling whatever the width gives. The 120 clears the pinned tab strip. */
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-container);
+    padding: 0 var(--spacing-container) 120px;
+  }
+
+  /* The bar itself is the ui library's TabBar; that it is pinned to the window's
+     bottom edge is decided here. */
+  .tabstrip {
+    inset: auto 0 0 0;
+    position: fixed;
+  }
+
+  /* --- Desktop chrome: the side menu and the outline, hidden at phone width ---
+     Scoped under .shell throughout: a component's own stylesheet arrives with the
+     component – after this file – so the placement rules need the higher specificity
+     to decide over the component's own display. */
+
+  .shell .sidemenu,
+  .shell .outline {
+    display: none;
+  }
+
+  /* Three breakpoints: below 768px the phone layout with the tab strip, from 768px –
+     an iPad in portrait included – the side menu replaces the strip, and from 1280px
+     the outline column joins in. The shell is a grid whose columns are structural, so
+     every page is exactly as wide as every other and a view transition never morphs
+     between two page widths. */
+
+  @media (min-width: 768px) {
+    /* The condensed bar is a phone's: a desktop's title never scrolls out of its own
+       column, and the side menu carries the profile control. */
+    .shell .tabstrip,
+    .shell .topbar {
+      display: none;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr);
+      grid-template-rows: 100%;
+      height: 100dvh;
+    }
+
+    .shell .sidemenu {
+      display: flex;
+    }
+
+    /* The content column is the scroll container, not the window: the shell is exactly
+       one viewport tall, so a scroll – and the rubberband at its ends – lives inside
+       this column while the side menu and the outline hold still. Opaque, because the
+       column is what a view transition slides. The sides match the side menu's own
+       padding at this width, and the content fills them – the reading measure arrives
+       with the outline. */
+    .page {
+      background: var(--color-paper);
+      min-width: 0;
+      overflow-y: auto;
+      padding: 40px var(--spacing-card) 48px;
+    }
+
+    .page main {
+      min-height: 0;
+    }
+
+    .page .content {
+      padding: 0 0 48px;
+    }
+
+    /* Its column never scrolls, so the outline needs no stickiness – only a scroll of
+       its own if a page has more headings than the viewport has room for. The 76 is
+       the column's 40 plus the heading's 36, so the label tops out with the title;
+       the gap to the content is the column's own side padding, so the content sits
+       between two equal breaths. */
+    .shell .outline {
+      margin: 76px var(--spacing-section) 0 calc(var(--spacing-card) * 2);
+      max-height: calc(100dvh - 96px);
+      overflow-y: auto;
+    }
+  }
+
+  /* With more room the column breathes: twice the side menu's padding, the same on
+     both sides. */
+  @media (min-width: 1024px) {
+    .page {
+      padding-left: calc(var(--spacing-card) * 2);
+      padding-right: calc(var(--spacing-card) * 2);
+    }
+  }
+
+  /* From 1280px the outline fits, right beside the content: a fixed content track, the
+     outline's track, and a flexible spacer that soaks up whatever width remains. The
+     outline's track is reserved even on a page with no headings – that is what keeps
+     every page the same width. On a window too narrow for the fixed tracks the content
+     track yields, and the measure yields with it – 608px is the side menu, the
+     outline's track, and the column's own padding. */
+  @media (min-width: 1280px) {
+    .shell {
+      /* The content track is the column's left padding plus the reading measure; the
+         outline's track is the matching gap, the column itself, and its right margin. */
+      grid-template-columns:
+        250px minmax(0, calc(var(--spacing-card) * 2 + 858px))
+        calc(var(--spacing-card) * 2 + 250px + var(--spacing-section)) 1fr;
+    }
+
+    .page {
+      /* What a narrower window leaves for the content: everything but the side menu,
+         the column's left padding, the equal gap, the outline, and its right margin. */
+      --content-measure: min(
+        858px,
+        calc(100vw - 500px - var(--spacing-card) * 4 - var(--spacing-section))
+      );
+
+      grid-column: 2 / -1;
+      grid-row: 1;
+      padding-right: 0;
+    }
+
+    /* The outline is the right side now, so the reading measure caps the content
+       instead of the column's own padding. */
+    .page .pageheading,
+    .page .content {
+      max-width: var(--content-measure);
+    }
+
+    .shell .outline {
+      display: block;
+      grid-column: 3;
+      grid-row: 1;
+    }
+  }
+}
+
+/* The full-page navigations cross-fade too: out to the identity provider's page and
+   back in, and the sign-out round trip – all same-origin, so opting both documents in
+   is all a cross-document view transition needs. The stand-in's picker page opts in on
+   its own side. */
+@view-transition {
+  navigation: auto;
+}
+
+/* --- View transitions ---
+   Direction comes from the data-nav attribute the chrome writes before each navigation:
+   forward slides in like a native push, back slides out like a pop, and fade (siblings,
+   like a tab switch) keeps the browser's default cross-fade.
+
+   Only `main`'s column slides. The chrome around it carries its own
+   view-transition-name, which snapshots each piece separately: an unchanged piece sits
+   still through the navigation, and the top bar's title cross-fades in place, the way a
+   native bar would.
+
+   The pseudo-elements live on the root, outside any class scope, so these rules sit
+   outside the layers. */
+
+@layer component {
+  .page {
+    view-transition-name: page;
+  }
+
+  .topbar {
+    view-transition-name: topbar;
+  }
+
+  .tabstrip {
+    view-transition-name: tabstrip;
+  }
+
+  .sidemenu {
+    view-transition-name: sidemenu;
+  }
+
+  .outline {
+    view-transition-name: outline;
+  }
+}
+
+/* The chrome always paints above the sliding page, so a swoosh passes under the bars
+   and the menus rather than over them. The group clips its own snapshots: a page
+   sliding out ends at the column's border – under the side menu on desktop – rather
+   than hanging over the neighboring columns until the animation pops it away. */
+::view-transition-group(page) {
+  overflow: clip;
+  z-index: 1;
+}
+
+::view-transition-group(topbar),
+::view-transition-group(tabstrip),
+::view-transition-group(sidemenu),
+::view-transition-group(outline) {
+  z-index: 2;
+}
+
+/* A pop the platform already animated – the browser's own back, an edge swipe – gets
+   no second animation from us: the transition still runs, but as a no-op. */
+html[data-nav="none"]::view-transition-group(page),
+html[data-nav="none"]::view-transition-old(page),
+html[data-nav="none"]::view-transition-new(page) {
+  animation: none;
+}
+
+/* The outline cross-fades in place: without this the group would morph its box from
+   the old page's outline to the new one's, which reads as a jump rather than a change. */
+::view-transition-group(outline) {
+  animation: none;
+}
+
+::view-transition-old(outline) {
+  animation: vt-fade-out 200ms ease both;
+}
+
+::view-transition-new(outline) {
+  animation: vt-fade-in 200ms ease both;
+}
+
+/* On a push or a pop the outline clears the stage: the old one hurries out before the
+   sliding page crosses its column, and the new one waits until the slide has landed. */
+html[data-nav="forward"]::view-transition-old(outline),
+html[data-nav="back"]::view-transition-old(outline) {
+  animation-duration: 120ms;
+}
+
+html[data-nav="forward"]::view-transition-new(outline),
+html[data-nav="back"]::view-transition-new(outline) {
+  animation-delay: 300ms;
+}
+
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* --- The crumb morph ---
+   On a push the leaving page's title shrinks into the arriving page's eyebrow – the
+   same string, tucking itself into the back control the way a native large title does –
+   and on a pop the eyebrow grows back into the title. One name, worn by the title in
+   the old state and by the eyebrow in the new: data-vt-new is written between the two
+   snapshots, which is what lets one stylesheet name each state's element differently
+   without ever naming both in the same snapshot. */
+
+html[data-nav="forward"]:not([data-vt-new]),
+html[data-nav="back"][data-vt-new] {
+  --crumb-title: crumb;
+}
+
+html[data-nav="forward"][data-vt-new],
+html[data-nav="back"]:not([data-vt-new]) {
+  --crumb-eyebrow: crumb;
+}
+
+@layer component {
+  .pageheading .eyebrow {
+    view-transition-name: var(--crumb-eyebrow, none);
+  }
+
+  .pageheading h1 {
+    view-transition-name: var(--crumb-title, none);
+  }
+}
+
+/* Above the bars, so the morphing text travels over the chrome rather than under it,
+   and on the page slide's clock so the two arrive together. */
+::view-transition-group(crumb) {
+  animation-duration: 300ms;
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0.35, 1);
+  z-index: 3;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(page),
+  ::view-transition-new(page) {
+    animation-duration: 300ms;
+    animation-timing-function: cubic-bezier(0.32, 0.72, 0.35, 1);
+  }
+
+  html[data-nav="forward"]::view-transition-old(page) {
+    animation-name: page-recede;
+  }
+
+  html[data-nav="forward"]::view-transition-new(page) {
+    animation-name: page-push-in;
+  }
+
+  /* On a pop the leaving page slides away on top of the one it returns to. */
+  html[data-nav="back"]::view-transition-old(page) {
+    animation-name: page-pop-out;
+    z-index: 2;
+  }
+
+  html[data-nav="back"]::view-transition-new(page) {
+    animation-name: page-return;
+  }
+}
+
+/* A reader who asked for reduced motion gets no animation at all – not even the
+   browser's default cross-fade, which still reads as movement (requirement 7.3). Every
+   group, because the bars and the root snapshot too and their default is a fade. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-image-pair(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none;
+  }
+}
+
+@keyframes page-push-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes page-recede {
+  to {
+    opacity: 0.6;
+    transform: translateX(-28%);
+  }
+}
+
+@keyframes page-pop-out {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes page-return {
+  from {
+    opacity: 0.6;
+    transform: translateX(-28%);
   }
 }

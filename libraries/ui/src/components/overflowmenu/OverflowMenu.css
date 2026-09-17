@@ -1,0 +1,80 @@
+/* The overflow menu: a round glass trigger, and the dropdown of the page's extra
+   actions hanging under its trailing edge. */
+
+@layer component {
+  .overflow {
+    position: relative;
+  }
+
+  /* Translucent glass, never an outline – the same treatment wherever the trigger
+     floats over content. */
+  .overflow-trigger {
+    align-items: center;
+    backdrop-filter: blur(22px) saturate(1.7);
+    background: var(--color-glass);
+    border: none;
+    border-radius: var(--border-radius-round);
+    color: var(--color-ink-secondary);
+    cursor: pointer;
+    display: flex;
+    height: 44px;
+    justify-content: center;
+    padding: 0;
+    width: 44px;
+  }
+
+  .overflow-panel {
+    background: var(--color-sheet);
+    border: 1px solid var(--color-divider);
+    border-radius: var(--border-radius-default);
+    min-width: 236px;
+    padding: var(--spacing-inline);
+    position: absolute;
+    right: 0;
+    top: 52px;
+    z-index: 5;
+  }
+
+  /* Each row rounds its own fill inside the panel's padding, so a hover reads as a
+     pill floating in the sheet rather than a bar jammed against the corners. */
+  .overflow-item {
+    align-items: center;
+    background: none;
+    border: none;
+    border-radius: var(--border-radius-control);
+    color: var(--color-ink);
+    cursor: pointer;
+    display: flex;
+    font-family: inherit;
+    font-size: var(--font-size-entry);
+    height: 42px;
+    padding: 0 var(--spacing-group);
+    text-align: left;
+    white-space: nowrap;
+    width: 100%;
+  }
+
+  .overflow-divider {
+    background: var(--color-divider);
+    height: 1px;
+    margin: var(--spacing-inline) 0;
+  }
+
+  @media (hover: hover) {
+    .overflow-trigger:hover {
+      color: var(--color-ink);
+    }
+
+    .overflow-item:hover {
+      background: color-mix(in srgb, var(--color-theme-ink) 7%, transparent);
+    }
+  }
+
+  .overflow-trigger:active {
+    opacity: 0.7;
+  }
+
+  .overflow-item:active {
+    background: color-mix(in srgb, var(--color-theme-ink) 14%, transparent);
+  }
+}

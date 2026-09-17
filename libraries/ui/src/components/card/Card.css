@@ -1,0 +1,18 @@
+/* The card: a white sheet raised off the paper, on the large surface radius, with an
+   optional heading above the sheet. */
+
+@layer component {
+  .card {
+    background: var(--color-sheet);
+    border-radius: var(--border-radius-surface);
+    padding: var(--spacing-section);
+  }
+
+  /* The heading is body-sized and strong – a label over the sheet, not a title
+     competing with the page's. */
+  .card-title {
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-strong);
+    margin: 0 0 var(--spacing-group);
+  }
+}

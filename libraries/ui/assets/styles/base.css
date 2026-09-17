@@ -2,8 +2,8 @@
    moment a rule needs a class it is a component. */
 
 @layer base {
-  /* Dynamic Type base: sizes are written as calc(<points>rem / 17), against iOS's
-     default 17px text size.
+  /* Dynamic Type base: every size in the --font-size-* scale is calc(<points>rem / 17),
+     against iOS's default 17px text size.
      See https://joakimkemeny.com/writing/2024-09-05-dynamic-size/. */
   html {
     font-size: calc(100% * 17 / 16);
@@ -21,8 +21,15 @@
     font-family: system-ui, sans-serif;
   }
 
+  /* A link is a control in this application, not underlined prose – the menus and the
+     rows are all links. A screen whose link should read as one styles it itself. */
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
   h1 {
-    font-size: calc(28rem / 17);
+    font-size: var(--font-size-title);
     line-height: 1.2;
   }
 

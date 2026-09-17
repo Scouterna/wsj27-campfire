@@ -1,0 +1,49 @@
+/* The condensed bar: transparent while the page's own heading shows, a translucent
+   glass strip with the small title once it has scrolled away. Where it sits – sticky
+   over the page – is the consumer's business. */
+
+@layer component {
+  .topbar {
+    align-items: center;
+    background: transparent;
+    border-bottom: 1px solid transparent;
+    display: flex;
+    gap: var(--spacing-group);
+    min-height: 44px;
+    padding: var(--spacing-stack) var(--spacing-container);
+  }
+
+  .topbar.is-condensed {
+    backdrop-filter: blur(22px) saturate(1.7);
+    background: var(--color-glass);
+    border-bottom-color: var(--color-divider);
+  }
+
+  .topbar-title {
+    color: var(--color-theme-ink);
+    flex: 1;
+    font-family: var(--typography-display-font_family);
+    font-size: var(--font-size-display-mini);
+    font-weight: var(--typography-display-font_weight);
+    line-height: 1;
+    margin-top: 2px;
+    min-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    transition: opacity 180ms ease;
+    white-space: nowrap;
+  }
+
+  .topbar.is-condensed .topbar-title {
+    opacity: 1;
+  }
+
+  .topbar-trailing {
+    align-items: center;
+    display: flex;
+    flex: none;
+    gap: var(--spacing-stack);
+  }
+}

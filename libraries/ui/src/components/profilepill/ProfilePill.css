@@ -1,0 +1,91 @@
+/* The profile pill: the initials in a filled circle on a white pill with the name and
+   the line under it – or, compact, the circle alone at the bar's size. */
+
+@layer component {
+  .profile,
+  .profile-compact {
+    align-items: center;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    font-family: inherit;
+    padding: 0;
+    text-align: left;
+    transition:
+      background 120ms ease,
+      opacity 100ms ease;
+  }
+
+  .profile {
+    background: var(--color-sheet);
+    border-radius: var(--border-radius-round);
+    gap: var(--spacing-stack);
+    height: 56px;
+    padding: 0 var(--spacing-stack);
+    width: 100%;
+  }
+
+  .profile-compact {
+    background: none;
+  }
+
+  .profile-avatar {
+    align-items: center;
+    background: var(--color-theme-ink);
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-on-ink);
+    display: flex;
+    flex: none;
+    font-size: var(--font-size-entry);
+    font-weight: var(--font-weight-strong);
+    height: 40px;
+    justify-content: center;
+    width: 40px;
+  }
+
+  .profile-compact .profile-avatar {
+    height: 44px;
+    width: 44px;
+  }
+
+  .profile-person {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .profile strong {
+    color: var(--color-ink);
+    display: block;
+    font-size: var(--font-size-name);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .profile small {
+    color: var(--color-ink-secondary);
+    display: block;
+    font-size: var(--font-size-detail);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @media (hover: hover) {
+    .profile:hover {
+      background: color-mix(in srgb, var(--color-theme-ink) 7%, var(--color-sheet));
+    }
+
+    .profile-compact:hover {
+      opacity: 0.8;
+    }
+  }
+
+  .profile:active {
+    opacity: 0.7;
+  }
+
+  .profile-compact:active {
+    opacity: 0.6;
+  }
+}

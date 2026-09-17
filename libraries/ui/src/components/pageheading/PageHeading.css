@@ -1,0 +1,105 @@
+/* The page's heading: the eyebrow back control over the title, and the title row's
+   trailing actions. Sized for a phone here – the large title small, the row's button
+   and menu hidden because the bar carries them – and the consumer's stylesheet grows
+   it at desktop widths, where the heading is the page's whole top. */
+
+@layer component {
+  .pageheading {
+    padding: 6px var(--spacing-container) 22px;
+
+    /* The eyebrow anchors to this box from outside the flow, so the title holds
+       exactly one position whether a screen offers a way back or not. */
+    position: relative;
+  }
+
+  .pageheading-row {
+    align-items: center;
+    display: flex;
+    gap: var(--spacing-section);
+  }
+
+  .pageheading h1 {
+    color: var(--color-theme-ink);
+    flex: 1;
+    font-family: var(--typography-display-font_family);
+    font-size: var(--font-size-display-small);
+    font-weight: var(--typography-display-font_weight);
+    line-height: 1;
+    margin: 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* The row's own actions belong to desktop; a phone's bar carries the menu, and the
+     primary action lives in the content until a design says otherwise. */
+  .pageheading-row .button,
+  .pageheading-row .overflow {
+    display: none;
+  }
+
+  /* The eyebrow: the parent's name behind a back chevron, floating above the title
+     rather than sitting in the flow – the heading never moves for it. */
+  .eyebrow {
+    align-items: center;
+    background: none;
+    border: none;
+    bottom: calc(100% + var(--spacing-inline));
+    color: var(--color-theme-ink);
+    cursor: pointer;
+    display: inline-flex;
+    font-family: inherit;
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-strong);
+    gap: var(--spacing-inline);
+    left: var(--spacing-container);
+    padding: 0;
+    position: absolute;
+    transition: opacity 100ms ease;
+  }
+
+  @media (hover: hover) {
+    .eyebrow:hover {
+      opacity: 0.7;
+    }
+  }
+
+  .eyebrow:active {
+    opacity: 0.5;
+  }
+
+  @media (min-width: 768px) {
+    .pageheading {
+      margin: 36px 0 32px;
+      padding: 0;
+    }
+
+    .eyebrow {
+      bottom: calc(100% + var(--spacing-stack));
+      left: 0;
+    }
+
+    .pageheading h1 {
+      font-size: var(--font-size-display);
+    }
+
+    /* The row's button hugs its label rather than filling the row, so the title keeps
+       the room – the 44-point height is the button's own, never taller than the title. */
+    .pageheading-row .button {
+      display: inline-flex;
+      flex: none;
+      width: auto;
+    }
+
+    .pageheading-row .overflow {
+      display: block;
+      flex: none;
+
+      /* Half the row's gap: the menu belongs to the action beside it, not to the
+         title's rhythm. */
+      margin-left: calc(var(--spacing-section) / -2);
+    }
+  }
+}
