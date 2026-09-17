@@ -13,5 +13,20 @@
 :8080 {
 	root * /srv
 	try_files {path} /index.html
+
+	# Stated rather than left to heuristics: with no Cache-Control, a browser may serve
+	# a file from cache for a tenth of its age without asking, which is how a deploy
+	# stays invisible for days. The split is safe because Vite hashes everything under
+	# /assets/ into its name – a changed file is a new address, so those can be immutable
+	# for a year – while the root files (index.html, sw.js, registerSW.js, the manifest,
+	# the icons) keep their names across deploys and must revalidate on every use.
+	# no-cache still allows caching: the browser asks with the ETag and gets a 304, so
+	# an unchanged file costs one round trip, and offline the service worker's precache
+	# answers instead.
+	@hashed path /assets/*
+	header @hashed Cache-Control "public, max-age=31536000, immutable"
+	@unhashed not path /assets/*
+	header @unhashed Cache-Control "no-cache"
+
 	file_server
 }

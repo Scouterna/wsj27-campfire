@@ -28,6 +28,14 @@ export default defineConfig({
       injectRegister: "script-defer",
 
       workbox: {
+        // Stated because the plugin does not derive them from `registerType` here: without
+        // them the generated worker only skips waiting on a SKIP_WAITING message nothing
+        // sends, and a deploy waits until every tab is closed. With them a new worker takes
+        // over as soon as it installs, which fires the `controllerchange` the application's
+        // own update wiring answers with one reload.
+        clientsClaim: true,
+        skipWaiting: true,
+
         globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2}"],
         // The worker answers every navigation with the precached shell, which is right
         // for a screen and wrong for the back-end: sign-in and sign-out are full-page
