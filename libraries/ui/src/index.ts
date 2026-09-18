@@ -32,7 +32,11 @@ export type { LogoProps } from "./components/logo/Logo"
 export { NavigationBar } from "./components/navigationbar/NavigationBar"
 export type { NavigationBarProps } from "./components/navigationbar/NavigationBar"
 export { OverflowMenu } from "./components/overflowmenu/OverflowMenu"
-export type { OverflowMenuItem, OverflowMenuProps } from "./components/overflowmenu/OverflowMenu"
+export type {
+  OverflowMenuItem,
+  OverflowMenuProps,
+  OverflowMenuReceipt,
+} from "./components/overflowmenu/OverflowMenu"
 export { PageActions, usePageActions } from "./components/pageactions/PageActions"
 export type { PageActionsProps } from "./components/pageactions/PageActions"
 export { PageHeading } from "./components/pageheading/PageHeading"
@@ -63,6 +67,7 @@ export type { IconProps } from "./foundations/icons/IconProps"
 export { BackIcon } from "./foundations/icons/set/BackIcon"
 export { ChatIcon } from "./foundations/icons/set/ChatIcon"
 export { CheckIcon } from "./foundations/icons/set/CheckIcon"
+export { CopyIcon } from "./foundations/icons/set/CopyIcon"
 export { HomeIcon } from "./foundations/icons/set/HomeIcon"
 export { IdCardIcon } from "./foundations/icons/set/IdCardIcon"
 export { MailIcon } from "./foundations/icons/set/MailIcon"

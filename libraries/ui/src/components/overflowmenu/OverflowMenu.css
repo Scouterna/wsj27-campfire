@@ -30,9 +30,34 @@
     min-width: 236px;
     padding: var(--spacing-inline);
     position: absolute;
-    right: 0;
-    top: 52px;
+    /* Past the trigger's trailing edge rather than flush with it: the trigger lines up
+       with the cards below, and a panel sharing that edge reads as one more card in
+       the column instead of something floating over it. */
+    right: -10px;
+    top: 54px;
     z-index: 5;
+  }
+
+  /* The pointer: a turned square whose upper half rises out of the panel under the
+     middle of the trigger, saying whose menu this is. Behind the entries and in front
+     of the panel's own border – which a negative index inside the panel's stacking
+     context is – so it breaks the border line where it leaves, and a hovered first
+     entry's fill passes over its lower half rather than being notched by it. The
+     trigger's middle is 32px in from the panel's trailing edge: the 10 the panel
+     overhangs, and half the trigger's 44. */
+  .overflow-panel::before {
+    background: var(--color-sheet);
+    border-left: 1px solid var(--color-divider);
+    border-top: 1px solid var(--color-divider);
+    border-top-left-radius: 3px;
+    content: "";
+    height: 12px;
+    position: absolute;
+    right: 25px;
+    top: -7px;
+    transform: rotate(45deg);
+    width: 12px;
+    z-index: -1;
   }
 
   /* Each row rounds its own fill inside the panel's padding, so a hover reads as a
@@ -47,7 +72,7 @@
     display: flex;
     font-family: inherit;
     font-size: var(--font-size-entry);
-    height: 42px;
+    min-height: 42px;
     padding: 0 var(--spacing-group);
     text-align: left;
     white-space: nowrap;
@@ -57,6 +82,119 @@
   /* The same row as a link: an anchor brings an underline, and a menu entry has none. */
   a.overflow-item {
     text-decoration: none;
+  }
+
+  /* The glyph ahead of the label. The slot is drawn for every entry once any entry has
+     an icon, so an entry without one is indented to where the others' labels start. */
+  .overflow-item-icon {
+    align-items: center;
+    color: var(--color-ink-secondary);
+    display: flex;
+    flex: none;
+    justify-content: center;
+    margin-right: var(--spacing-stack);
+    width: 20px;
+  }
+
+  .overflow-item-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  /* The label's line, a one-cell grid so the receipt can lie over the label instead of
+     replacing it: the label fades but keeps its width, and the panel it sized holds
+     still while the entry speaks. */
+  .overflow-item-line {
+    align-items: center;
+    display: grid;
+  }
+
+  .overflow-item-line > * {
+    grid-area: 1 / 1;
+  }
+
+  .overflow-item-label-answered {
+    opacity: 0;
+  }
+
+  /* What an entry's work came to, said where the label is – a badge in the unit's own
+     wash and ink, as every badge in the product is, so the menu speaks in the color the
+     person wears. A failure alone steps out of the theme into danger's tone: what went
+     wrong must not swing with the unit, and under the red theme it would read as
+     nothing out of the ordinary. */
+  .overflow-item-receipt {
+    background: var(--color-theme-wash);
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-strong);
+    justify-self: start;
+    padding: var(--spacing-inline) var(--spacing-group);
+  }
+
+  .overflow-item-receipt-failure {
+    background: var(--color-tone-danger-wash);
+    color: var(--color-tone-danger-ink);
+  }
+
+  /* An entry that cannot be chosen right now: the whole entry steps back, the label
+     still the larger of its two lines, and the reason a quiet note under it – wrapping
+     within the width the other labels set rather than widening the panel past a
+     phone's edge. */
+  .overflow-item-unavailable {
+    /* The icon belongs to the label's line, not to the middle of the two. */
+    align-items: flex-start;
+    color: var(--color-ink-tertiary);
+    cursor: default;
+    /* The air a one-line entry gets from its height, given here as padding: without it
+       a reason sits as close to the next entry's label as to its own, and two
+       unavailable entries in a row read as four loose lines. */
+    padding-bottom: var(--spacing-group);
+    padding-top: var(--spacing-group);
+  }
+
+  .overflow-item-unavailable .overflow-item-icon {
+    color: inherit;
+  }
+
+  /* Two steps under the label rather than one: the entry size and the footnote are a
+     point apart, which reads as two labels rather than a label and its note. */
+  .overflow-item-reason {
+    font-size: var(--font-size-detail);
+    white-space: normal;
+  }
+
+  /* The label gives way and the receipt arrives, rather than one blinking into the
+     other – for everybody who has not asked for stillness. */
+  @media (prefers-reduced-motion: no-preference) {
+    .overflow-item-label {
+      transition: opacity 120ms ease;
+    }
+
+    .overflow-item-receipt {
+      animation: overflow-receipt-arrive 160ms ease;
+    }
+  }
+
+  @keyframes overflow-receipt-arrive {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* Heard, not seen: the receipt's words for assistive technology, which the badge on
+     the entry says to everybody else. It exists only while the menu is open, so a page
+     is never left with a second, silent status region beside its own. Clipped rather than hidden, because a display of
+     none is announced to nobody. */
+  .overflow-announcement {
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
   }
 
   .overflow-divider {
@@ -70,7 +208,7 @@
       color: var(--color-ink);
     }
 
-    .overflow-item:hover {
+    .overflow-item:not(.overflow-item-unavailable):hover {
       background: color-mix(in srgb, var(--color-theme-ink) 7%, transparent);
     }
   }
@@ -79,7 +217,7 @@
     opacity: 0.7;
   }
 
-  .overflow-item:active {
+  .overflow-item:not(.overflow-item-unavailable):active {
     background: color-mix(in srgb, var(--color-theme-ink) 14%, transparent);
   }
 }
