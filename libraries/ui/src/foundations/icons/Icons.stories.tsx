@@ -5,6 +5,7 @@ import type { IconProps } from "./IconProps"
 import { BackIcon } from "./set/BackIcon"
 import { ChatIcon } from "./set/ChatIcon"
 import { CheckIcon } from "./set/CheckIcon"
+import { CopyIcon } from "./set/CopyIcon"
 import { HomeIcon } from "./set/HomeIcon"
 import { IdCardIcon } from "./set/IdCardIcon"
 import { MailIcon } from "./set/MailIcon"
@@ -23,6 +24,7 @@ const icons: readonly (readonly [string, (props: IconProps) => ReactElement])[] 
   ["Back", BackIcon],
   ["Chat", ChatIcon],
   ["Check", CheckIcon],
+  ["Copy", CopyIcon],
   ["Home", HomeIcon],
   ["Id card", IdCardIcon],
   ["Mail", MailIcon],

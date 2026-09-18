@@ -83,6 +83,13 @@
   height: 560px;
 }
 
+/* A component at the trailing edge and no wider than itself, the way the chrome places
+   the overflow menu – so a dropdown sizes itself to its entries as it does on a page. */
+.story-trailing {
+  display: flex;
+  justify-content: flex-end;
+}
+
 /* Prose used as filler around the component being shown, without the margin a card's
    own prose carries. */
 .story-filler {
