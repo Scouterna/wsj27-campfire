@@ -52,7 +52,7 @@ const storage: AsyncStorage = {
 const persister = createQueryPersister({
   // The cached shapes' version. A cache written by an older build cannot serve rows that
   // are missing today's fields, so a bump discards those entries and refetches instead.
-  buster: "2",
+  buster: "4",
   // Thirty days, not the library's twenty-four hours, and the same span as `gcTime` –
   // the default would drop the whole cache on the jamboree's second day, which is
   // exactly when the network is worst and the cache matters most.

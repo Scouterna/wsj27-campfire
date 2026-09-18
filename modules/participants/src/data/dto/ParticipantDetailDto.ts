@@ -19,7 +19,6 @@ import { isRecord } from "./validation"
  * access – absent for a caller without it, and for a `basic` fetch).
  */
 export interface ParticipantDetailDto extends ParticipantDto {
-  readonly contact_info?: unknown
   readonly forms_data?: unknown
   readonly participation_type?: unknown
 }

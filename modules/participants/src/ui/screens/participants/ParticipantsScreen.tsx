@@ -19,6 +19,7 @@ import { counted, personCount } from "../../counted"
 import { EmptyState } from "../../emptystate/EmptyState"
 import { PeopleList } from "./PeopleList"
 import { participantsSectionLabel } from "./section-label"
+import { useAddressMenu } from "./use-address-menu"
 import { useLetterJumps } from "./use-letter-jumps"
 import { useNarrowing } from "./use-narrowing"
 import { useParticipants } from "./use-participants"
@@ -145,6 +146,9 @@ export function ParticipantsScreen(): ReactElement {
   const nameOf = useUnitIdentities().name
   const found = useMemo(() => narrow(people, query, roll, nameOf), [nameOf, people, query, roll])
   const jumps = useLetterJumps(found)
+  // Mailing and copying act on the list as it is narrowed, so narrowing is how somebody
+  // chooses who to write to.
+  const addressMenu = useAddressMenu(found)
 
   const isNarrowed = query !== "" || roll !== undefined
   const isSettled = !isPending && error === null
@@ -170,7 +174,9 @@ export function ParticipantsScreen(): ReactElement {
     <>
       <PageTitle title={participantsSectionLabel(roles)} />
 
-      {isWholeContingent && <PageActions action={unitsAction} />}
+      {/* One declaration for both: the chrome holds a single one, so a second would
+          replace the first rather than join it. */}
+      <PageActions action={isWholeContingent ? unitsAction : undefined} menu={addressMenu} />
 
       <SearchField
         label="Sök deltagare"
