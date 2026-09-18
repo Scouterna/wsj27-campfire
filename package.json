@@ -30,7 +30,7 @@
     "format": "prettier --config config/prettier/prettier.config.ts --ignore-path config/prettier/prettier.ignore --write .",
     "format:android": "apps/android/gradlew -p apps/android ktlintFormat",
     "format:apple": "swiftformat --config config/swiftformat/.swiftformat apps/apple",
-    "format:svg": "svgo apps/*/assets/*.svg config/*/assets/*.svg libraries/*/assets/images/*.svg",
+    "format:svg": "svgo apps/*/assets/*.svg apps/*/assets/units/*.svg config/*/assets/*.svg libraries/*/assets/images/*.svg",
     "generate:apple": "xcodegen generate --spec apps/apple/project.yml --project apps/apple",
     "ide:android": "open -a 'Android Studio' apps/android",
     "ide:apple": "open apps/apple/Campfire.xcodeproj",

@@ -1,13 +1,12 @@
 import type { UnitIdentities } from "@scouterna/wsj27-campfire-ui"
 
 /**
- * Loads the units' identities – their names, and where their glyphs are served. The
- * identities are runtime data on purpose: the names and the artwork stay off the
- * public repository until the reveal, so a build without `assets/units/` – the
- * public clone, and production before the day – answers 404 here and every consumer
- * falls back to the number. The gate awaits this once per page, beside the cache
- * adoption it already awaits.
- * @returns The identities, knowing nothing when the assets are absent or unreadable.
+ * Loads the units' identities – their names, and where their glyphs are served –
+ * from the manifest in `assets/units/`. The identities are runtime data rather than
+ * code, so a manifest that is missing or unreadable costs the names and nothing
+ * else: every consumer falls back to the number. The gate awaits this once per
+ * page, beside the cache adoption it already awaits.
+ * @returns The identities, knowing nothing when the manifest is absent or unreadable.
  */
 export async function loadUnitIdentities(): Promise<UnitIdentities> {
   try {
