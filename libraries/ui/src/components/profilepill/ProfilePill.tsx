@@ -1,10 +1,16 @@
-import type { ReactElement } from "react"
+import type { ReactElement, ReactNode } from "react"
 
 import "./ProfilePill.css"
 
 export interface ProfilePillProps {
   /**
-   * Who is signed in. The first letters of the first two names are the avatar.
+   * The mark drawn in place of the initials – the signed-in person's unit avatar,
+   * once the application may show it. The initials stand in when nothing is given.
+   */
+  readonly avatar?: ReactNode
+  /**
+   * Who is signed in. The first letters of the first two names are the avatar's
+   * stand-in.
    */
   readonly name: string
   /**
@@ -28,8 +34,9 @@ export interface ProfilePillProps {
 }
 
 /**
- * Who is signed in, as a pressable control: the initials in a filled circle, and –
- * unless compact – a white pill with the name and the detail line. The visible label
+ * Who is signed in, as a pressable control: the given mark – or the initials in a
+ * filled circle – and, unless compact, a white pill with the name and the detail
+ * line. The visible label
  * is the person, not the action; the accessible name carries both.
  *
  * @param props The person, the accessible name, and what pressing does.
@@ -43,9 +50,11 @@ export function ProfilePill(props: ProfilePillProps): ReactElement {
       aria-label={props.label}
       onClick={props.onPress}
     >
-      <span className="profile-avatar" aria-hidden="true">
-        {initialsOf(props.name)}
-      </span>
+      {props.avatar ?? (
+        <span className="profile-avatar" aria-hidden="true">
+          {initialsOf(props.name)}
+        </span>
+      )}
       {props.compact ? null : (
         <span className="profile-person">
           <strong>{props.name}</strong>

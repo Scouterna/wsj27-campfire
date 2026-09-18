@@ -1,0 +1,42 @@
+/* The floating action button: a filled circle in the theme's ink, the icon white.
+   Where it floats is the consumer's stylesheet's decision. */
+
+@layer component {
+  .fab {
+    align-items: center;
+    background: var(--color-theme-ink);
+    border: none;
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-on-ink);
+    cursor: pointer;
+    display: flex;
+    flex: none;
+    height: 56px;
+    justify-content: center;
+    padding: 0;
+    text-decoration: none;
+    transition: background 120ms ease;
+    width: 56px;
+  }
+
+  /* Darkening steps mixed over the ink rather than picked per theme, so all five
+     respond to a press the same way. */
+  .fab:active {
+    background: color-mix(in srgb, var(--color-theme-ink) 72%, black);
+  }
+
+  @media (hover: hover) {
+    .fab:hover {
+      background: color-mix(in srgb, var(--color-theme-ink) 85%, black);
+    }
+  }
+
+  .fab-icon {
+    display: flex;
+  }
+
+  .fab:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: 2px;
+  }
+}

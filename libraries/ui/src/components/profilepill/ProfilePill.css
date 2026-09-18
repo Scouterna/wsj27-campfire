@@ -2,6 +2,18 @@
    the line under it – or, compact, the circle alone at the bar's size. */
 
 @layer component {
+  /* A unit mark in the avatar slot wears the pill's own circle sizes, so swapping the
+     initials for the mark never resizes the control. */
+  .profile .unit-avatar,
+  .profile .unit-avatar-leader {
+    --unit-avatar-size: 40px;
+  }
+
+  .profile-compact .unit-avatar,
+  .profile-compact .unit-avatar-leader {
+    --unit-avatar-size: 36px;
+  }
+
   .profile,
   .profile-compact {
     align-items: center;
@@ -43,9 +55,10 @@
     width: 40px;
   }
 
+  /* The bar's corner wears a smaller circle, so the bar stays a bar. */
   .profile-compact .profile-avatar {
-    height: 44px;
-    width: 44px;
+    height: 36px;
+    width: 36px;
   }
 
   .profile-person {

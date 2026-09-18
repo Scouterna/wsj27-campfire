@@ -1,12 +1,14 @@
+import { Link } from "@tanstack/react-router"
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactElement } from "react"
 
 import { MoreIcon } from "../../foundations/icons/set/MoreIcon"
+import type { LinkTarget } from "../../routing/routes"
 
 import "./OverflowMenu.css"
 
 /**
- * One entry in the menu – something to do, or the literal `"divider"` drawing a rule
- * between groups.
+ * One entry in the menu – something to do, somewhere to go, or the literal `"divider"`
+ * drawing a rule between groups.
  */
 export type OverflowMenuItem =
   | "divider"
@@ -19,6 +21,17 @@ export type OverflowMenuItem =
        * What choosing it does. The menu closes itself first.
        */
       readonly onSelect: () => void
+    }
+  | {
+      /**
+       * What the entry is called.
+       */
+      readonly label: string
+      /**
+       * Where the entry leads. Rendered as a real link, so the router treats choosing
+       * it as the navigation it is. The menu closes itself on the way.
+       */
+      readonly link: LinkTarget
     }
 
 export interface OverflowMenuProps {
@@ -134,26 +147,63 @@ export function OverflowMenu(props: OverflowMenuProps): ReactElement {
               // Position, not content: two dividers are indistinguishable.
               <div key={index} className="overflow-divider" role="separator" />
             ) : (
-              <button
-                key={item.label}
-                type="button"
-                className="overflow-item"
-                role="menuitem"
-                // The menu itself owns the arrow keys, so its entries stay out of the
-                // document's tab order and Tab means "leave" rather than "next entry".
-                tabIndex={-1}
-                onClick={() => {
-                  closeToTrigger()
-                  item.onSelect()
-                }}
-              >
-                {item.label}
-              </button>
+              <MenuEntry key={item.label} item={item} onChoose={closeToTrigger} />
             ),
           )}
         </div>
       ) : null}
     </div>
+  )
+}
+
+interface MenuEntryProps {
+  /**
+   * The entry to draw – something to do, or somewhere to go.
+   */
+  readonly item: Exclude<OverflowMenuItem, "divider">
+  /**
+   * Closes the menu, run on every choice before the entry's own effect.
+   */
+  readonly onChoose: () => void
+}
+
+/**
+ * One choosable entry: a real link where the entry leads somewhere, a button where it
+ * does something. Both stay out of the document's tab order – the menu itself owns the
+ * arrow keys, and Tab means "leave" rather than "next entry".
+ * @param props The entry, and how choosing closes the menu.
+ * @returns The entry, as the menu draws it.
+ */
+function MenuEntry(props: MenuEntryProps): ReactElement {
+  const item = props.item
+  if ("link" in item) {
+    return (
+      <Link
+        className="overflow-item"
+        role="menuitem"
+        tabIndex={-1}
+        to={item.link.to}
+        params={item.link.params ?? {}}
+        onClick={props.onChoose}
+      >
+        {item.label}
+      </Link>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      className="overflow-item"
+      role="menuitem"
+      tabIndex={-1}
+      onClick={() => {
+        props.onChoose()
+        item.onSelect()
+      }}
+    >
+      {item.label}
+    </button>
   )
 }
 
@@ -163,8 +213,8 @@ export function OverflowMenu(props: OverflowMenuProps): ReactElement {
  * @param panel The open panel, or null before it mounts.
  * @returns The entry buttons, in document order.
  */
-function entriesOf(panel: HTMLDivElement | null): readonly HTMLButtonElement[] {
-  return panel === null ? [] : [...panel.querySelectorAll<HTMLButtonElement>(".overflow-item")]
+function entriesOf(panel: HTMLDivElement | null): readonly HTMLElement[] {
+  return panel === null ? [] : [...panel.querySelectorAll<HTMLElement>(".overflow-item")]
 }
 
 /**
@@ -196,7 +246,7 @@ function didMoveFocus(panel: HTMLDivElement | null, key: string): boolean {
   const entries = entriesOf(panel)
   const next = nextIndex(
     key,
-    entries.indexOf(document.activeElement as HTMLButtonElement),
+    entries.indexOf(document.activeElement as HTMLElement),
     entries.length,
   )
   if (next === undefined) {

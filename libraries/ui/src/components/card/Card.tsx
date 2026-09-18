@@ -4,6 +4,12 @@ import "./Card.css"
 
 export interface CardProps {
   /**
+   * The quiet line at the heading row's trailing edge – a count, a date. Decorative
+   * beside the title, so assistive technology is given the fact some other way.
+   * Nothing without a `title`.
+   */
+  readonly aside?: string
+  /**
    * What the card holds.
    */
   readonly children: ReactNode
@@ -28,7 +34,14 @@ export function Card(props: CardProps): ReactElement {
 
   return (
     <section className="card-section">
-      <h2 className="card-title">{props.title}</h2>
+      <div className="card-heading">
+        <h2 className="card-title">{props.title}</h2>
+        {props.aside === undefined ? null : (
+          <span aria-hidden="true" className="card-aside">
+            {props.aside}
+          </span>
+        )}
+      </div>
       <div className="card">{props.children}</div>
     </section>
   )

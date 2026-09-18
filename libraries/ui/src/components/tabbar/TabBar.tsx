@@ -53,7 +53,7 @@ export interface TabBarProps {
  * @returns The strip.
  */
 export function TabBar(props: TabBarProps): ReactElement {
-  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const location = useRouterState({ select: (state) => state.location })
 
   return (
     <nav className="tabstrip" aria-label="Sektioner">
@@ -61,11 +61,14 @@ export function TabBar(props: TabBarProps): ReactElement {
         <Link
           key={item.id}
           to={item.path}
+          search={{}}
           aria-current={item.id === props.current ? "page" : undefined}
           onClick={(event) => {
             // The exact page this tab links to is already shown: the caller decides
-            // what that means – scrolling it up, typically. Any other page navigates.
-            if (pathname !== item.path) {
+            // what that means – scrolling it up, typically. Any other page – an
+            // address narrowed by search params included – navigates, so a tab
+            // always means the section's own clean start.
+            if (location.pathname !== item.path || location.searchStr !== "") {
               return
             }
 

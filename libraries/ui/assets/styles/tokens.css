@@ -48,6 +48,26 @@
        one is said once and never per theme. */
     --color-theme-on-ink: #fff;
 
+    /* The tones a fact wears when it says something about itself – positive for an
+       all-clear, caution for a question nobody answered, danger for the top of a
+       severity scale, info for a plain reading. They stand apart from the five unit
+       colors on purpose: what a fact means must not swing with the unit wearing it.
+       A tone carries only the roles a surface asks for – the wash a tinted plate sits
+       on, the ink read on that wash, and the mark a filled dot fills with – so a tone
+       with no plate has no wash. Empty is the unfilled step of a scale, mixed from the
+       ink so it stays neutral under every theme. */
+    --color-tone-caution-ink: #6b5432;
+    --color-tone-caution-mark: #c98a4b;
+    --color-tone-caution-wash: #f0e7dc;
+    --color-tone-danger-ink: #6b3a36;
+    --color-tone-danger-mark: #b4524b;
+    --color-tone-danger-wash: #f1e2e2;
+    --color-tone-empty: color-mix(in srgb, var(--color-ink) 14%, var(--color-paper));
+    --color-tone-info-ink: #456a72;
+    --color-tone-info-mark: #5e8a93;
+    --color-tone-positive-ink: #2e4b36;
+    --color-tone-positive-wash: #dce8de;
+
     /* The corners: a control, a default surface, a large surface, and the full pill. */
     --border-radius-control: 12px;
     --border-radius-default: 16px;
@@ -71,8 +91,10 @@
        quiet line under a name, display the page title in the display face – full on a
        desktop, small on a phone, mini in the condensed bar – entry a menu or outline
        entry and a button's label, footnote an aside or the eyebrow over a title, name
-       the profile control's name, tab the tab strip's labels, and title a plain
-       heading. A screen's own tuned poster values stay in the screen. */
+       the profile control's name, tab the tab strip's labels, title a plain heading,
+       and value the strong line one fact is stated in – a value lifted out of a card,
+       a contact's name, an address to reach them at. A screen's own tuned poster
+       values stay in the screen. */
     --font-size-body: calc(17rem / 17);
     --font-size-caption: calc(10rem / 17);
     --font-size-detail: calc(11.5rem / 17);
@@ -84,6 +106,7 @@
     --font-size-name: calc(13.5rem / 17);
     --font-size-tab: calc(10.5rem / 17);
     --font-size-title: calc(28rem / 17);
+    --font-size-value: calc(15rem / 17);
 
     /* The weight the scale is written in beside the regular: strong, for emphasized
        chrome text – a lit tab, a name, a marked entry, a button's label. The display

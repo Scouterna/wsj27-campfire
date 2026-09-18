@@ -64,7 +64,7 @@ export interface SideMenuProps {
  * @returns The menu column.
  */
 export function SideMenu(props: SideMenuProps): ReactElement {
-  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const location = useRouterState({ select: (state) => state.location })
 
   return (
     <nav className="sidemenu" aria-label="Sektioner">
@@ -74,9 +74,13 @@ export function SideMenu(props: SideMenuProps): ReactElement {
           <Link
             key={item.id}
             to={item.path}
+            search={{}}
             aria-current={item.id === props.current ? "page" : undefined}
             onClick={(event) => {
-              if (pathname !== item.path) {
+              // Swallowed only when the section's start is already exactly what is
+              // shown. An address narrowed by search params navigates instead, so a
+              // section link always means the section's own clean start.
+              if (location.pathname !== item.path || location.searchStr !== "") {
                 return
               }
 

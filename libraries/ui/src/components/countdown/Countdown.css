@@ -1,0 +1,71 @@
+/* The countdown: a plain white card, the clock in four tiles on the theme's own
+   color. */
+
+@layer component {
+  .countdown {
+    align-items: center;
+    background: var(--color-sheet);
+    border-radius: var(--border-radius-surface);
+    display: flex;
+    flex-direction: column;
+    padding: calc(var(--spacing-section) * 2) var(--spacing-section);
+    text-align: center;
+  }
+
+  .countdown-overline {
+    color: var(--color-theme-ink);
+    font-size: var(--font-size-entry);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.08em;
+    margin: 0 0 var(--spacing-section);
+    text-transform: uppercase;
+  }
+
+  .countdown-clock {
+    display: flex;
+    gap: var(--spacing-stack);
+    margin-bottom: var(--spacing-section);
+  }
+
+  .countdown-figure {
+    align-items: center;
+    background: var(--color-theme-wash);
+    border-radius: var(--border-radius-surface);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-inline);
+    min-width: 64px;
+    padding: var(--spacing-group) var(--spacing-stack);
+  }
+
+  .countdown-number {
+    color: var(--color-theme-ink);
+    font-size: var(--font-size-display-mini);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--font-weight-strong);
+    line-height: 1;
+  }
+
+  .countdown-unit {
+    color: var(--color-theme-ink);
+    font-size: var(--font-size-caption);
+    opacity: 0.8;
+  }
+
+  .countdown-hint {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+    max-width: 36ch;
+    text-wrap: balance;
+  }
+
+  /* Four tiles overflow the narrowest phones at their comfortable size, so the tiles
+     tighten before the clock would wrap. */
+  @media (max-width: 379px) {
+    .countdown-figure {
+      min-width: 56px;
+      padding: var(--spacing-stack);
+    }
+  }
+}

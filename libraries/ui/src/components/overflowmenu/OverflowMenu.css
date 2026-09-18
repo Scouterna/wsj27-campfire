@@ -54,6 +54,11 @@
     width: 100%;
   }
 
+  /* The same row as a link: an anchor brings an underline, and a menu entry has none. */
+  a.overflow-item {
+    text-decoration: none;
+  }
+
   .overflow-divider {
     background: var(--color-divider);
     height: 1px;

@@ -3,6 +3,7 @@ import type { ReactElement } from "react"
 import { BackIcon } from "../../foundations/icons/set/BackIcon"
 import { Button } from "../button/Button"
 import { OverflowMenu, type OverflowMenuItem } from "../overflowmenu/OverflowMenu"
+import type { PageActionsProps } from "../pageactions/PageActions"
 
 import "./PageHeading.css"
 
@@ -17,10 +18,11 @@ export interface PageHeadingProps {
    */
   readonly back?: { readonly label: string; readonly onBack: () => void } | undefined
   /**
-   * The page's one primary action, on the title row. Desktop only – a phone's actions
-   * live in the bar and the content.
+   * The page's one primary action, on the title row, pressing or leading exactly as
+   * the page declared it. Desktop only – a phone's actions live in the bar and the
+   * content.
    */
-  readonly action?: { readonly label: string; readonly onPress: () => void } | undefined
+  readonly action?: PageActionsProps["action"]
   /**
    * The page's extra actions, as the overflow menu on the title row. On a phone the
    * chrome places the same menu in the bar instead, so the consumer's stylesheet hides
@@ -48,7 +50,7 @@ export function PageHeading(props: PageHeadingProps): ReactElement {
       ) : null}
       <div className="pageheading-row">
         <h1>{props.title}</h1>
-        {props.action ? <Button label={props.action.label} onPress={props.action.onPress} /> : null}
+        {props.action ? <Button {...props.action} /> : null}
         {props.menu ? <OverflowMenu items={props.menu} /> : null}
       </div>
     </div>

@@ -19,6 +19,13 @@
     width: 100%;
   }
 
+  /* The same pill as a link: an anchor brings an underline and its own color, and
+     neither belongs on a button. */
+  a.button {
+    color: var(--color-theme-on-ink);
+    text-decoration: none;
+  }
+
   /* Darkening steps mixed over the ink rather than picked per theme, so all five
      respond to a press the same way. */
   .button:active:not(:disabled) {

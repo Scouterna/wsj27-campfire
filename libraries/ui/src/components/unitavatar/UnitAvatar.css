@@ -1,0 +1,85 @@
+/* The unit's mark: the bright ring, the ink disc, and the white glyph – drawn in the
+   surrounding theme, so a list of many units reads as one list and the glyph alone
+   carries the unit's identity. */
+
+@layer component {
+  .unit-avatar {
+    align-items: center;
+    background: var(--color-theme-bright);
+    border-radius: var(--border-radius-round);
+    display: flex;
+    flex: none;
+    height: var(--unit-avatar-size, 44px);
+    justify-content: center;
+    width: var(--unit-avatar-size, 44px);
+  }
+
+  .unit-avatar-disc {
+    align-items: center;
+    background: var(--color-theme-ink);
+    border-radius: var(--border-radius-round);
+    display: flex;
+    justify-content: center;
+
+    /* The ring is the sliver of bright left around the disc – the marks' own
+       proportions, at every size. */
+    height: 88%;
+    width: 88%;
+  }
+
+  .unit-avatar-glyph {
+    /* The glyphs vary in aspect, so both axes are bounded and the drawing centers. */
+    max-height: 62%;
+    max-width: 68%;
+  }
+
+  .unit-avatar-number {
+    color: var(--color-theme-on-ink);
+    font-weight: var(--font-weight-strong);
+    line-height: 1;
+  }
+
+  .unit-avatar-row .unit-avatar-number {
+    font-size: var(--font-size-entry);
+  }
+
+  .unit-avatar-profile {
+    --unit-avatar-size: 64px;
+  }
+
+  .unit-avatar-profile .unit-avatar-number {
+    font-size: var(--font-size-title);
+  }
+
+  /* A leader's mark: a star sitting in a notch masked out of the mark's corner, in
+     the theme's own ink. */
+  .unit-avatar-leader {
+    --unit-avatar-star: calc(var(--unit-avatar-size, 44px) * 0.3);
+
+    display: inline-flex;
+    flex: none;
+    position: relative;
+  }
+
+  .unit-avatar-leader-profile {
+    --unit-avatar-size: 64px;
+  }
+
+  .unit-avatar-leader > .unit-avatar {
+    mask: radial-gradient(
+      circle at calc(100% - var(--unit-avatar-star) / 2 + 1px)
+        calc(100% - var(--unit-avatar-star) / 2 + 1px),
+      transparent calc(var(--unit-avatar-star) / 2 + 2px),
+      #000 calc(var(--unit-avatar-star) / 2 + 3px)
+    );
+  }
+
+  .unit-avatar-star {
+    bottom: -1px;
+    color: var(--color-theme-ink);
+    height: var(--unit-avatar-star);
+    position: absolute;
+    right: -1px;
+    width: var(--unit-avatar-star);
+  }
+}
