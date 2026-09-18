@@ -20,8 +20,8 @@ const trailing = (
     compact
     name="Anna Björk"
     detail="Ledare · Avdelning 3"
-    label="Logga ut Anna Björk"
-    onPress={fn()}
+    label="Profil för Anna Björk"
+    link={{ to: "/profile" }}
   />
 )
 

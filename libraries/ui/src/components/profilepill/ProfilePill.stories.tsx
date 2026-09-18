@@ -1,12 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { fn } from "storybook/test"
 
 import { ProfilePill } from "./ProfilePill"
 
 const meta = {
   title: "Components/ProfilePill",
   component: ProfilePill,
-  args: { onPress: fn() },
+  args: { link: { to: "/profile" } },
 } satisfies Meta<typeof ProfilePill>
 
 export default meta
@@ -21,7 +20,7 @@ export const Full: Story = {
   args: {
     name: "Anna Björk",
     detail: "Ledare · Avdelning 3",
-    label: "Logga ut Anna Björk",
+    label: "Profil för Anna Björk",
   },
 }
 
@@ -33,7 +32,20 @@ export const Compact: Story = {
   args: {
     name: "Maria Kemeny",
     detail: "Kontingentledningen",
-    label: "Logga ut Maria Kemeny",
+    label: "Profil för Maria Kemeny",
     compact: true,
+  },
+}
+
+/**
+ * On the person's own page: the control stays, says it is the page showing, and a
+ * press does nothing.
+ */
+export const Current: Story = {
+  args: {
+    name: "Anna Björk",
+    detail: "Ledare · Avdelning 3",
+    label: "Profil för Anna Björk",
+    isCurrent: true,
   },
 }

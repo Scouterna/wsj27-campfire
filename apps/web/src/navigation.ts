@@ -252,7 +252,8 @@ export function useNavigationBookkeeping(pathname: string, title: string | undef
  * The listeners that decide direction, installed once. The source of the click decides
  * it, not the shape of the URL: the side menu and the tab strip cross-fade between
  * sections, and everything else – content, the top bar – pushes, however the paths
- * compare. Back is the back control's to set. One capture-phase listener sees every
+ * compare, unless the link declares a direction of its own, as the profile control
+ * does. Back is the back control's to set. One capture-phase listener sees every
  * link before the router does, so no module has to know navigations are animated.
  * @param event The click, seen at capture phase before the router acts on it.
  */

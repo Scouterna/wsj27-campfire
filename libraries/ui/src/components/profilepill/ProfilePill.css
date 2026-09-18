@@ -17,11 +17,7 @@
   .profile,
   .profile-compact {
     align-items: center;
-    border: none;
-    cursor: pointer;
     display: flex;
-    font-family: inherit;
-    padding: 0;
     text-align: left;
     transition:
       background 120ms ease,

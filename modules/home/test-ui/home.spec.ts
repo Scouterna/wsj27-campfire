@@ -9,7 +9,7 @@ import { closedMessagesKey, messages } from "../src/model/messages"
 // Home is the one section everyone has, so its walk carries the chrome-wide claims:
 // the shared layout at every width, the document title, the menus and the marked
 // section, the reselect behavior, the outline column, the not-found page, and the
-// profile control as the one way out. The participants section's role gating is the
+// profile control naming who is signed in. The participants section's role gating is the
 // participants module's walk.
 
 // The reveal is timed, and until its moment the whole participants surface is behind
@@ -207,24 +207,24 @@ test("lands a junk address on the not-found page, inside the layout", async ({ p
   await expect(page.getByRole("heading", { level: 1, name: "Välkommen" })).toBeVisible()
 })
 
-test("shows who is signed in, and the profile control is the one way out", async ({ page }) => {
+test("shows who is signed in, and the profile control ends nobody's session", async ({ page }) => {
   await page.goto("/")
   await signInAs(page, "Lars Lindberg")
 
-  // The pill names the person and their role; the accessible name says it signs out.
-  const pill = page.getByRole("button", { name: "Logga ut Lars Lindberg" })
+  // The pill names the person and their role; the accessible name says where it leads.
+  const pill = page.getByRole("link", { name: "Profil för Lars Lindberg" })
   await expect(pill).toBeVisible()
   await expect(pill).toContainText("Lars Lindberg")
   await expect(pill).toContainText("Ledare · Avdelning 1")
 
-  // Home no longer carries a sign-out control of its own. By role rather than by text:
-  // the wording exists only as the pill's accessible name, so a text search would pass
-  // against a screen that still had its own button.
-  await expect(page.getByRole("button", { name: /^Logga ut$/ })).toHaveCount(0)
+  // Nothing in the chrome or on home signs anybody out – the way out is the profile
+  // page's alone, which is the authentication module's walk.
+  await expect(page.getByRole("button", { name: /Logga ut/ })).toHaveCount(0)
 
-  // Pressing the pill runs the sign-out round trip, ending on the sign-in screen.
+  // Pressing the pill opens the profile page, still signed in.
   await pill.click()
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/Äventyret\s*börjar här/)
+  await expect(page.getByRole("heading", { level: 1, name: "Profil" })).toBeVisible()
+  await expect(page.locator(".profile-screen").getByText("Lars Lindberg")).toBeVisible()
 })
 
 test("moves without animating where the reader prefers reduced motion", async ({ page }) => {
@@ -305,7 +305,7 @@ test("keeps everything behind the curtain until the reveal", async ({ page }) =>
   await expect(page.getByText("dagar")).toBeVisible()
   await expect(page.getByRole("heading", { level: 2, name: "Resan" })).toHaveCount(0)
   await expect(page.getByRole("heading", { level: 2, name: "Min avdelning" })).toHaveCount(0)
-  await expect(page.locator(".sidemenu").getByRole("link")).toHaveCount(1)
+  await expect(page.locator(".sidemenu-items").getByRole("link")).toHaveCount(1)
   await expect(page.locator(".sidemenu").getByRole("link", { name: "Hem" })).toBeVisible()
 
   // The section's address answers exactly as one that matches nothing.
