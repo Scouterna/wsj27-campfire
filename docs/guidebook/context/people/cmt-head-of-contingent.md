@@ -22,6 +22,6 @@ Status reporting, when it exists, is the surface aimed at this person more than 
 
 ## Signing in, and what they see
 
-Sign-in is ScoutID like everyone else's ([ADR 019](/decisions/019-authenticate-on-the-app-origin-through-scoutid)). The role `wsj27:cmt:kontingentledare` marks the function, and the front-end reads it as management – identical to the other functions, wording included.
+Sign-in is ScoutID like everyone else's ([ADR 019](/decisions/019-authenticate-on-the-app-origin-through-scoutid)). The role `wsj27:cmt:hoc:hoc` marks the function, and the front-end reads it as management – identical to the other functions, wording included.
 
 Any `wsj27:cmt` role reads the whole list of participants at the basic level, the head of contingent's included. The health answers are not: they stay behind [the health grants](./cmt-health), and leading the contingent is deliberately not one of them.

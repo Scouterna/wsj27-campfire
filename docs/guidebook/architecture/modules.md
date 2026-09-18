@@ -38,7 +38,7 @@ Its public surface is one countdown widget, placed on the start screen by the ap
 
 ## Participants
 
-`modules/participants` is the contingent's list of participants, and the largest module by far: the list and the detail screens, the widgets other screens place, the query factories and DTO converters behind them, the unit identity table, and the avatar artwork.
+`modules/participants` is the contingent's list of participants, and the largest module by far: the list and the detail screens, the unit browser, the widgets other screens place, and the query factories and DTO converters behind them. The units' names and marks are deliberately not here: they are runtime data the application fetches at its gate, kept out of the repository until the reveal, and every surface falls back to the unit's number while they are unloaded.
 
 It is the only module that talks to the participants service, and one of the two with a data layer, beside authentication. Every field arrives typed `unknown` and is validated at the boundary, because the service will change shape over an eighteen-month build ([Data layer](./layers/data)). It also holds the first feature: a leader seeing the participants in their unit, walked through on [Show participants](./example-flows/show-participants).
 

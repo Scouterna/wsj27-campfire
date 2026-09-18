@@ -18,13 +18,13 @@ A screen that only learns its own name once data has arrived – a person's deta
 
 ## Widgets
 
-A widget is how one module's work appears on another module's screen without either importing the other. The providing module declares the widget's id and its props into `WidgetRegistry` from the widget's own file and exports it in a widget table; the application collects the tables; a screen draws it by id:
+A widget is how one module's work appears on another module's screen without either importing the other. The providing module exports the widget, the receiving screen offers a slot, and the composition root joins the two:
 
 ```tsx
-<Widget id="participants:unit-leaders" />
+<HomeScreen widget={isUnitsRevealed && isLeader ? <UnitWidget /> : undefined} />
 ```
 
-Because the registry is an interface every module augments, the id and the props are both checked at compile time – a screen naming a widget nobody provides, or passing the wrong props to one that exists, fails to compile. An id that is registered in the type system but absent from the build renders nothing, which is the honest behavior for a build assembled without that module.
+The screen types its slot as a `ReactNode` and never learns which module filled it, and the gating – who sees the widget, and from when – lives in the composition root beside the placement, the way the unit widget waits behind the units reveal. A `WidgetRegistry` of compile-checked ids remains the design for the day widgets multiply past what hand-placed props carry legibly; today's two do not.
 
 ## The session gate and the two chromes
 

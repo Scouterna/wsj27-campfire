@@ -4,7 +4,7 @@ Read the [root `AGENTS.md`](../AGENTS.md) first – it holds the conventions tha
 
 A module is one domain capability, whole: its data layer, its domain model, its screens, and its widgets. Four exist, and they are how the product grows – a new capability is a new module, not another folder inside an old one.
 
-Authentication is the first module with the full shape – a data layer, a model, and a screen, built by the sign-in feature. Home is the start screen the signed-in application mounts, journey is one screen deep waiting for its feature, and participants carries the first route table – the navigation feature gave its placeholder screen an address, a section, and the role-aware label the application's menus share. There is no widget anywhere under `modules/` yet. The rules below are in force for what exists, and each section says where it describes something no module holds yet.
+Authentication and participants carry the full shape – a data layer, a domain model, and screens – participants with the section's route table, four screens, and the leader's home widgets on top. Home is the start screen the signed-in application mounts, with the reveal countdown as its own widget, and journey is one screen deep waiting for its feature. The rules below are in force for what exists, and each section says where it describes something no module holds yet.
 
 ## The one rule that carries the rest
 
@@ -16,15 +16,17 @@ When the rule feels restrictive, it is doing its job. If home needs to know whet
 
 ## The shape of a module
 
-Today a module is a package, a screen, its stories, and a walk-through:
+The smallest module is a package, a screen, its stories, and a walk-through:
 
 ```text
 modules/home/
-├── package.json           @scouterna/wsj27-campfire-home, private, exports ./src/index.ts
+├── package.json               @scouterna/wsj27-campfire-home, private, exports ./src/index.ts
 ├── src/
-│   ├── index.ts           the public surface, and the only thing the application imports
-│   └── HomeScreen.tsx     the screen, with HomeScreen.stories.tsx beside it
-└── test-ui/home.spec.ts   the Playwright walk-through
+│   ├── index.ts               the public surface, and the only thing the application imports
+│   └── ui/
+│       ├── screens/home/      the screen, with its stories beside it
+│       └── widgets/reveal/    the reveal countdown the screen places
+└── test-ui/home.spec.ts       the Playwright walk-through
 ```
 
 A screen sits directly in `src/` while a module has one of them. The shape a module grows into is the guidebook's [layers page](../docs/guidebook/architecture/layers/index.md), and it arrives a directory at a time, when there is something to put in each:
@@ -35,9 +37,9 @@ modules/<name>/src/
 │   └── dto/      the wire shapes, every field typed unknown, and their converters
 ├── model/        the domain types and their pure functions
 ├── ui/
-│   ├── screens/  one directory per screen
-│   └── widgets/  one directory per widget, each augmenting WidgetRegistry
-├── storybook/    the decorators and fixtures the module's own stories need
+│   ├── screens/    one directory per screen
+│   ├── widgets/    one directory per widget, each augmenting WidgetRegistry
+│   └── storybook/  the decorators and fixtures the module's own stories need
 └── index.ts      the public surface – everything else is internal
 ```
 
@@ -47,15 +49,15 @@ modules/<name>/src/
 
 ## The public surface
 
-`src/index.ts` is a deliberate, narrow list, opening with a JSDoc block saying what the module hands out. Domain types, queries, and screens stay internal unless the application genuinely needs them – anything reaching for a domain type is reaching past the boundary rather than through it. Today home and journey export exactly one screen, authentication exports its screen beside the session client the gate asks and the `User` the answer decodes to, and participants exports its route table and section label – its screen mounts through the table rather than by name.
+`src/index.ts` is a deliberate, narrow list, opening with a JSDoc block saying what the module hands out. Domain types, queries, and screens stay internal unless the application genuinely needs them – anything reaching for a domain type is reaching past the boundary rather than through it. Today home and journey export exactly one screen, authentication exports its screen beside the session client the gate asks and the `User` the answer decodes to, and participants exports its route table and section label – its screens mount through the table rather than by name – plus the `UnitWidget` the composition root places on home, and the viewer machinery the gate seeds.
 
-Three kinds of thing leave a module, and one of them waits on machinery `libraries/ui` does not hold yet ([Navigation and routing](../docs/guidebook/architecture/layers/navigation.md), [Presentation layer](../docs/guidebook/architecture/layers/presentation.md)):
+Three kinds of thing leave a module ([Navigation and routing](../docs/guidebook/architecture/layers/navigation.md), [Presentation layer](../docs/guidebook/architecture/layers/presentation.md)):
 
 - **Routes** – augment `RouteRegistry` with each address the module owns, branded `Address<"<module>">`, and export a `Routes` table the application spreads into its own. The brand is what makes two modules claiming one path a compile error rather than a race the later import wins. Write the table with `satisfies`, never a type annotation: annotating widens the keys to every address the application knows, and the router stops knowing which ones this module answers at.
-- **Widgets** – augment `WidgetRegistry` in the widget's own file, and export a widget table. Ids read `module:widget`, for example `participants:unit-leaders`. An id registered in the type system but absent from the build renders nothing, which is the honest behavior for a build assembled without that module.
+- **Widgets** – a component another module's screen places without knowing who drew it. The providing module exports it, and the composition root hands it down as a prop – the way `UnitWidget` reaches the home screen's `widget` slot. A registry of widget ids stays the design for the day widgets multiply; one prop per slot carries the current two.
 - **Doorways** – a named hook or component for a fact another part of the product needs, such as how the signed-in person travels. A doorway is a promise, so add one when the application is about to walk through it, not before.
 
-Registration, not import, is how a module reaches the application. The application spreads the tables; it never reaches inside one.
+For routes, registration rather than import is how a module reaches the application: the application spreads the tables and never reaches inside one.
 
 ## Data at the boundary
 

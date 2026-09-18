@@ -42,11 +42,21 @@ sequenceDiagram
 
 It also composes. A leader asks for their own troop and is done. The contingent management walks the list of participants the only way the service offers it: the leaders' listing names every troop, then each troop, the IST, and the management itself are fetched and merged by member number. An empty listing answers as if nothing is there, which for a composed list means no rows rather than a failure.
 
+A listing that fails is retried once, alone. One that still fails fails the whole answer: the list's first job is answering "does this person exist", and a list quietly missing one unit answers that wrongly with full confidence. A visible failure with a way to try again is recoverable; a silent gap is not.
+
 **The DTO and its converter** were the boundary. Every field arrived typed `unknown`, and the converter decided whether what came back is usable: a row with no member number cannot be linked to, so it is dropped; a member type the domain has no role for is dropped, because a person shown in the wrong role is worse than a person missing from a list. The rest of the list still renders.
 
 The list of participants that comes back carries its own scope – everyone, one unit, or nobody – so the screen can say what it is showing rather than infer it from a row count.
 
 **The list** is virtual. Every one of the contingent's roughly 2,600 people scrolls as one list, and only the rows near the viewport have DOM nodes, so a filter change costs the same at forty rows as at four thousand ([ADR 017](/decisions/017-route-and-load-data-with-tanstack-router-and-query)).
+
+## Browsing by unit
+
+The management also gets a way in by unit, for when the question is about a unit rather than a person. The unit browser is derived from the already-assembled list – the units it shows, the IST and the management entries beside them, and every count are groupings of what was fetched, so opening it costs no request. An entry opens as a scoped list, ordered as any other.
+
+## Coming back to the list as it was
+
+The search text and the participation-role filter live in the address as search params, changed with `replace` so typing does not pollute history. Returning from a person pops to an entry whose address still carries the narrowing, and the navigation memory restores the reading position into the same narrowed list – while a fresh arrival, from the menu or a typed address, opens clean.
 
 ## Opening one person
 
@@ -76,9 +86,10 @@ Two costs come with that. A correction made in the list of participants can take
 
 ## When it fails
 
-| Failure                          | What happens                                                                     |
-| -------------------------------- | -------------------------------------------------------------------------------- |
-| A row does not convert           | That row is dropped, and the rest of the list is shown                           |
-| The request never reached anyone | The cached list of participants is shown if there is one, and a failure if not   |
-| The service refuses the listing  | The screen says the list of participants could not be read, not that it is empty |
-| The person is outside the scope  | The same answer as a person who does not exist – nothing to show                 |
+| Failure                          | What happens                                                                      |
+| -------------------------------- | --------------------------------------------------------------------------------- |
+| A row does not convert           | That row is dropped, and the rest of the list is shown                            |
+| The request never reached anyone | The cached list of participants is shown if there is one, and a failure if not    |
+| The service refuses the listing  | The screen says the list of participants could not be read, not that it is empty  |
+| One listing among many fails     | Retried once alone; still failing, the whole list reads as unreadable, with retry |
+| The person is outside the scope  | The same answer as a person who does not exist – nothing to show                  |

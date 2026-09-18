@@ -22,7 +22,7 @@ apps/web/
     └── app.css         the chrome layout, the view transitions, and the one import of the design system's stylesheet
 ```
 
-The six files are the design's: `routes.tsx` for the tables, the gate, and the chromes; `main.tsx` for the boot order before React; `navigation.ts` for the navigation memory; `outline.tsx` for the desktop outline column; `query.ts` for the query client and its persister; and `app.css`. Only `query.ts` still runs ahead of the tree – it carries no persister yet – so the persistence parts of the data section below are the design to build to.
+The six files are the design's: `routes.tsx` for the tables, the gate, and the chromes; `main.tsx` for the boot order before React; `navigation.ts` for the navigation memory; `outline.tsx` for the desktop outline column; `query.ts` for the query client, its per-query IndexedDB persister, and the cache-owner handover; and `app.css`.
 
 Everything else is a module or a library. See [`modules/AGENTS.md`](../../modules/AGENTS.md) and [`libraries/AGENTS.md`](../../libraries/AGENTS.md), and the guidebook's [Code organization](../../docs/guidebook/architecture/code-organization.md) for how the three divide the work.
 
@@ -33,7 +33,7 @@ Every module and library it composes is a `workspace:*` dependency in its `packa
 `src/routes.tsx` is the only file that knows every module, which is what lets no module know another ([ADR 016](../../docs/decisions/016-compose-the-web-application-from-feature-modules.md)). Two tables carry that:
 
 - `screens` – the application's own `/`, plus each module's exported route table spread in, every screen wrapped in the section guard
-- `widgets` – each module's exported widget table spread in, handed to `WidgetsProvider`; still ahead of the tree, because no module provides a widget yet
+- the widgets – a module's exported widget handed down as a prop where a screen offers a slot, the way `HomeRoute` places the participants module's `UnitWidget` in the home screen's `widget` slot. A `WidgetRegistry` with id-keyed tables stays the design for the day widgets multiply.
 
 Follow the shape when you add to it.
 
@@ -41,13 +41,13 @@ Follow the shape when you add to it.
 
 **The sections are the application's model.** They are derived from the session's roles, and one `isGranted` predicate feeds the menus, the chrome, and the screen guard, so an address outside the granted sections answers as not found – indistinguishable from an address that matches nothing, and the hidden screen never mounts. The predicate fails closed: a screen whose `tab` names no section is reachable by nobody.
 
-**A new widget** is registered the same way: the providing module augments `WidgetRegistry` in the widget's own file, exports it in its widget table, and a screen draws it with `<Widget id="module:name" />`. An unregistered id renders nothing, which is the honest behavior for a build assembled without that module.
+**A new widget** is exported by the module that owns its data, and the composition root places it: the receiving screen offers a `ReactNode` slot and never learns which module filled it. Gating belongs here too – `HomeRoute` withholds the unit widget until the units reveal is open and the viewer leads a unit.
 
 **A cross-module fact travels as a prop.** The home screen shows a countdown and a unit's people without knowing the journey or participants modules – the application reads the hook and hands the value down. If a module needs another module's type, the composition is wrong, not the rule.
 
 ## The gate and the two chromes
 
-`AppChrome` is the router's `InnerWrap` and the session gate, in `routes.tsx`. It asks `currentUser(queryClient)` once per page load, renders nothing until the answer – no spinner, and no flash of the sign-in screen past a signed-in person – and then mounts the sign-in screen in the remembered theme or the signed-in application: the theme resolved unit-first, the roles made ambient through `RolesProvider`, and one branch on `host.tier` (`adoptCacheOwner` arrives with the persister):
+`AppChrome` is the router's `InnerWrap` and the session gate, in `routes.tsx`. It asks `currentUser(queryClient)` once per page load, renders nothing until the answer – no spinner, and no flash of the sign-in screen past a signed-in person – and then mounts the sign-in screen in the remembered theme or the signed-in application: the theme resolved unit-first, the roles made ambient through `RolesProvider`, and one branch on `host.tier` – after `adoptCacheOwner` has handed the cache to the signed-in member number:
 
 - `ShellChrome` draws no chrome at all. Its job is the bridge conversation: reporting the session, the theme name, and the current screen, and subscribing to what the native bars send back ([ADR 018](../../docs/decisions/018-bridge-the-web-application-and-the-shells-with-versioned-messages.md)). The conversation is still ahead of the tree – today it draws the bare content column, so the branch exists as the seam the bridge feature fills.
 - `BrowserChrome` draws the side menu, the navigation bar, the content column, the outline, and the tab strip, and the profile control that signs the person out – at the side menu's foot on a desktop, compact at the bar's trailing edge on a phone.
@@ -63,7 +63,7 @@ The branch is computed before the first render, so chrome belonging to the other
 - Persistence is per query, into IndexedDB, rather than one serialized snapshot of the whole cache. When a cached payload's shape changes, bump the store's buster – a stale shape read as a fresh one is worse than a cold cache.
 - `adoptCacheOwner` wipes both the in-memory client and the store when the signed-in member number changes. A leader's cached health answers must never survive to the next sign-in on a shared device.
 
-The client and its defaults are real: `src/query.ts` holds the one `QueryClient`, and **every service read goes through it** – the gate hands it to `currentUser`, and a screen's hooks mount it in a provider the day the first one arrives. The utils `fetch` is the transport inside a query function, never a path around the cache. Persistence and `adoptCacheOwner` are still design ahead of the tree. [Data layer](../../docs/guidebook/architecture/layers/data.md) is the whole design, down to the DTO boundary the authentication module already validates at.
+The client and its defaults are real: `src/query.ts` holds the one `QueryClient`, and **every service read goes through it** – the gate hands it to `currentUser`, and the screens' hooks read it from the provider the gate mounts. The utils `fetch` is the transport inside a query function, never a path around the cache. The per-query persister and `adoptCacheOwner` live beside the client, buster and all. [Data layer](../../docs/guidebook/architecture/layers/data.md) is the whole design, down to the DTO boundary the converters validate at.
 
 ## Styles, themes, and the PWA
 
