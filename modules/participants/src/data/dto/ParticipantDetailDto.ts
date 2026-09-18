@@ -1,12 +1,13 @@
 import { stringOrFallback } from "@scouterna/wsj27-campfire-utils"
 
-import type { ContactDetails, ContactPerson, EmergencyContact } from "../../model/ContactDetails"
+import type { ContactDetails, EmergencyContact } from "../../model/ContactDetails"
 import type { Experience } from "../../model/Experience"
 import type { Note } from "../../model/Note"
 import type { ParticipantDetail } from "../../model/ParticipantDetail"
 import type { Travel } from "../../model/Participation"
 import type { Readiness } from "../../model/Readiness"
 import { answer, flattenAnswers, type Answers } from "./answers"
+import { toContactPerson, toPrimaryEmail, toRelatives } from "./contact"
 import { toHealthProfile } from "./HealthProfileDto"
 import { toParticipant, type ParticipantDto } from "./ParticipantDto"
 import { isRecord } from "./validation"
@@ -172,39 +173,14 @@ function toExperience(answers: Answers): Experience | undefined {
 function toContactDetails(dto: ParticipantDetailDto, answers: Answers): ContactDetails {
   const alternateEmail = answer(answers, "alternateEmail")
   return {
-    email: answer(answers, "email") ?? stringOrFallback(dto.email),
+    email: toPrimaryEmail(dto.email, answers) ?? "",
     phone: answer(answers, "mobilePhone") ?? stringOrFallback(dto.mobile),
     ...(alternateEmail !== undefined && { alternateEmail }),
-    nextOfKin: [
-      toContactPerson(answers, "nextOfKin1"),
-      toContactPerson(answers, "nextOfKin2"),
-    ].filter((person): person is ContactPerson => person !== undefined),
+    relatives: toRelatives(answers),
     emergencyContacts: [
       toEmergencyContact(answers, "emergencyContact1", "primary"),
       toEmergencyContact(answers, "emergencyContact2", "secondary"),
     ].filter((contact): contact is EmergencyContact => contact !== undefined),
-  }
-}
-
-/**
- * A contact exists when their name was given – the other fields follow it.
- * @param answers The flattened answers.
- * @param prefix The question keys' shared prefix, such as `nextOfKin1`.
- * @returns The contact, or undefined when no name was given.
- */
-function toContactPerson(answers: Answers, prefix: string): ContactPerson | undefined {
-  const name = answer(answers, `${prefix}Name`)
-  if (name === undefined) {
-    return undefined
-  }
-  const relation = answer(answers, `${prefix}Relation`)
-  const phone = answer(answers, `${prefix}Phone`)
-  const email = answer(answers, `${prefix}Email`)
-  return {
-    name,
-    ...(relation !== undefined && { relation }),
-    ...(phone !== undefined && { phone }),
-    ...(email !== undefined && { email }),
   }
 }
 
