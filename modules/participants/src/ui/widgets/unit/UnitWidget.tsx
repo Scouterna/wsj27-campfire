@@ -1,4 +1,11 @@
-import { BackIcon, Card, Row, UnitAvatar, useUnitIdentities } from "@scouterna/wsj27-campfire-ui"
+import {
+  BackIcon,
+  Card,
+  Row,
+  UnitAvatar,
+  useUnitIdentities,
+  type WidgetFrom,
+} from "@scouterna/wsj27-campfire-ui"
 import { Link } from "@tanstack/react-router"
 import type { ReactElement } from "react"
 
@@ -64,13 +71,22 @@ function PeopleCard(props: PeopleCardProps): ReactElement | null {
   )
 }
 
+declare module "@scouterna/wsj27-campfire-ui" {
+  interface WidgetRegistry {
+    /**
+     * A leader's own unit: the unit itself, its participants, and its leader team.
+     */
+    "participants:unit": WidgetFrom<"participants">
+  }
+}
+
 /**
  * The leader's unit on the home screen, as three cards: the unit itself – its mark, its
  * number, and its name once one is public – then the
  * deltagare and the ledarteam, each row a doorway into the person. Reads the same list
  * the participants section holds, so opening the section afterwards costs no request.
  *
- * The composition root mounts it for a leader and for nobody else; a viewer without a
+ * The start screen places it for a leader and for nobody else; a viewer without a
  * unit renders nothing, so a misplaced mount stays blank rather than wrong.
  *
  * @returns The cards, or nothing without a unit in scope.

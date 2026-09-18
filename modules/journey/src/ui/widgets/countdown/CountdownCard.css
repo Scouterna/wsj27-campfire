@@ -1,0 +1,162 @@
+/* The Resan card: the count beside the heading, the day-by-day bar, and the legend
+   naming each leg at the width its days occupy. The heading row itself is the Card's. */
+
+@layer component {
+  /* The count, in the card's aside: the label and its figures on the heading's own
+     baseline. */
+  .countdown-status {
+    align-items: baseline;
+    display: inline-flex;
+    font-size: var(--font-size-footnote);
+    flex-wrap: wrap;
+    gap: 0 var(--spacing-stack);
+    justify-content: flex-end;
+  }
+
+  /* A figure and its unit never part, but the line may break between figures when a
+     reader's larger text leaves a phone no room for them all. */
+  .countdown-status > span {
+    align-items: baseline;
+    display: inline-flex;
+    gap: 2px;
+    white-space: nowrap;
+  }
+
+  /* The figures stand at the heading's own size, so the row reads as one line. */
+  .countdown-status b {
+    color: var(--color-theme-ink);
+    font-size: var(--font-size-body);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .countdown-status small {
+    color: var(--color-ink-tertiary);
+    font-size: var(--font-size-detail);
+  }
+
+  /* The days of the trip. The days stand on one baseline and today is the taller
+     segment, so it grows up out of the row rather than straddling it. */
+  .countdown-bar {
+    align-items: flex-end;
+    display: flex;
+    gap: 3px;
+  }
+
+  /* The pips' own radii and heights are the bar's tuned poster values: at one day of
+     width the token steps read as shapeless. */
+  .countdown-bar span {
+    border-radius: 6px;
+    flex: 1;
+    height: 34px;
+  }
+
+  /* A day still planned: an empty, dashed slot. */
+  .countdown-bar .is-planned {
+    outline: 1.5px dashed color-mix(in srgb, var(--color-theme-ink) 40%, transparent);
+    outline-offset: -1.5px;
+  }
+
+  /* A road day behind the contingent, apart from the camp's own days. */
+  .countdown-bar .is-travel {
+    background: var(--color-tone-info-mark);
+  }
+
+  /* A camp day behind the contingent, in the theme's own bright. */
+  .countdown-bar .is-camp {
+    background: var(--color-theme-bright);
+  }
+
+  .countdown-bar .is-remaining {
+    background: color-mix(in srgb, var(--color-theme-ink) 10%, transparent);
+  }
+
+  /* The homecoming day ahead: part of the theme's family, not a status – a strength
+     between the future days' wash and the filled days. */
+  .countdown-bar .is-home {
+    background: color-mix(in srgb, var(--color-theme-bright) 28%, transparent);
+  }
+
+  /* Home, reached: the one all-clear in the bar, in the positive tone's own pair. */
+  .countdown-bar .is-home-done {
+    align-items: center;
+    background: var(--color-tone-positive-ink);
+    color: var(--color-sheet);
+    display: flex;
+    font-size: var(--font-size-detail);
+    justify-content: center;
+  }
+
+  .countdown-bar .is-today {
+    background: var(--color-theme-ink);
+    border-radius: 8px;
+    height: 44px;
+  }
+
+  .countdown-legend {
+    display: flex;
+    gap: 3px;
+    margin-top: var(--spacing-group);
+  }
+
+  .countdown-legend strong {
+    display: block;
+    font-size: var(--font-size-footnote);
+    line-height: 1.35;
+  }
+
+  .countdown-legend small {
+    color: var(--color-ink-tertiary);
+    display: block;
+    font-size: var(--font-size-detail);
+    margin-top: 2px;
+  }
+
+  /* Each leg is as wide as the days it spans: eight on the road, twelve at the camp. */
+  .countdown-legend .is-travel-leg {
+    flex: 8;
+  }
+
+  .countdown-legend .is-camp-leg {
+    flex: 12;
+  }
+
+  .countdown-legend .is-muted strong {
+    color: var(--color-ink-secondary);
+  }
+
+  .countdown-legend .is-success strong {
+    color: var(--color-tone-positive-ink);
+  }
+
+  .countdown-legend .is-end {
+    flex: 1;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .countdown-caveat {
+    color: var(--color-ink-tertiary);
+    font-size: var(--font-size-detail);
+    margin: var(--spacing-group) 0 0;
+  }
+
+  /* At phone width three legend columns do not fit, so the legs stack in journey
+     order – the same order as the bar above them – and a leg's width stops meaning
+     its days. The homecoming stands down: it is the day after the camp leg's last
+     date, and the bar's last pip already marks it. */
+  @media (max-width: 560px) {
+    .countdown-legend {
+      flex-direction: column;
+      gap: var(--spacing-stack);
+    }
+
+    .countdown-legend > .is-travel-leg,
+    .countdown-legend > .is-camp-leg {
+      flex: none;
+    }
+
+    .countdown-legend > .is-end {
+      display: none;
+    }
+  }
+}

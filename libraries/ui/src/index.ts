@@ -106,3 +106,6 @@ export type {
   ScreenSpec,
 } from "./routing/routes"
 export { ScreenDecorator } from "./storybook/ScreenDecorator"
+export { Widget, WidgetsProvider } from "./widgets/Widget"
+export type { WidgetProps, WidgetsProviderProps } from "./widgets/Widget"
+export type { WidgetFrom, WidgetId, WidgetRegistry, Widgets, WidgetsFrom } from "./widgets/widgets"
