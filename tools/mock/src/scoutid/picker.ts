@@ -15,7 +15,7 @@ const roleLabels = new Map<string, string>([
   ["halsa", "Hälsa"],
   ["ist-support", "IST-support"],
   ["kommunikation", "Kommunikation"],
-  ["kontingentledare", "Kontingentledare"],
+  ["hoc", "HoC"],
   ["program", "Program"],
   ["support", "Support"],
 ])

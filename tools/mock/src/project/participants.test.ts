@@ -178,9 +178,9 @@ describe("the troop listing", () => {
     ).toBe(true)
     expect(troop.every((row) => row.forms_data === undefined)).toBe(true)
 
-    expect(await listing("/participants/troopinfo/2", "program@wsj.se")).toHaveLength(4)
+    expect(await listing("/participants/troopinfo/2", "program@wsj.se")).toHaveLength(40)
     const leaders = await listing("/participants/troopinfo/al", "program@wsj.se")
-    expect(leaders).toHaveLength(3)
+    expect(leaders).toHaveLength(6)
     expect(leaders.every((row) => row.contact_info === undefined)).toBe(true)
     const ist = await listing("/participants/troopinfo/ist", "program@wsj.se")
     expect(ist.every((row) => row.member_type === "IST" && row.troop === "")).toBe(true)
@@ -284,7 +284,7 @@ describe("the role map", () => {
       text.startsWith('{"participants": {"1100101": ["wsj27:al:1"], "1100201": ["wsj27:al:2"], '),
     ).toBe(true)
     const { participants } = JSON.parse(text) as { participants: Record<string, string[]> }
-    expect(Object.keys(participants)).toHaveLength(12)
+    expect(Object.keys(participants)).toHaveLength(15)
     expect(participants["1200002"]).toEqual([
       "wsj27:cmt:support",
       "wsj27:access:Hälsa plus intern information",

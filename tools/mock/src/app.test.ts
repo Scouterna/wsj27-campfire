@@ -26,7 +26,7 @@ describe("the mock's own surface", () => {
       expect(await response.json()).toEqual({
         status: "ok",
         service: "wsj27-auth-api",
-        roles: { members: 12, last_refresh: time.now() / 1000, stale: false },
+        roles: { members: 15, last_refresh: time.now() / 1000, stale: false },
       })
     }
   })
