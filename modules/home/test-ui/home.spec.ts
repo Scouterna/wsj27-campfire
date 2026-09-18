@@ -4,6 +4,7 @@ import { expect, test, type Page } from "@playwright/test"
 // component stylesheets along, which the test runner cannot swallow.
 // eslint-disable-next-line import-x/no-relative-packages -- see above
 import { unitsReveal } from "../../../libraries/ui/src/foundations/reveal/reveals"
+import { closedMessagesKey, messages } from "../src/model/messages"
 
 // Home is the one section everyone has, so its walk carries the chrome-wide claims:
 // the shared layout at every width, the document title, the menus and the marked
@@ -14,10 +15,18 @@ import { unitsReveal } from "../../../libraries/ui/src/foundations/reveal/reveal
 // The reveal is timed, and until its moment the whole participants surface is behind
 // the curtain. These walks are about what the surface does once it is open, so each
 // page opens with the development bypass set – exactly as a developer works.
+//
+// And every message starts closed. An unread message is a section of its own on the
+// start screen, and these walks are about the chrome around a bare one – the outline's
+// no-headings fallback most of all. The messages have their own walk beside this one.
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => {
-    localStorage.setItem("campfire-reveal", JSON.stringify(["units"]))
-  })
+  await page.addInitScript(
+    ({ closed, key }) => {
+      localStorage.setItem("campfire-reveal", JSON.stringify(["units"]))
+      localStorage.setItem(key, JSON.stringify(closed))
+    },
+    { closed: messages.map((message) => message.id), key: closedMessagesKey },
+  )
 })
 
 /**
