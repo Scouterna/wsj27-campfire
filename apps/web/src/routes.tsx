@@ -3,7 +3,6 @@ import {
   keepSessionAlive,
   SignInScreen,
   signOut,
-  type User,
 } from "@scouterna/wsj27-campfire-authentication"
 import { HomeScreen } from "@scouterna/wsj27-campfire-home"
 import { host } from "@scouterna/wsj27-campfire-host"
@@ -59,7 +58,9 @@ import {
   leaderUnit,
   RolesProvider,
   useRoles,
+  UserProvider,
   type Role,
+  type User,
 } from "@scouterna/wsj27-campfire-utils"
 import { QueryClientProvider } from "@tanstack/react-query"
 import { createRouter, Link, useRouterState, type RouteComponent } from "@tanstack/react-router"
@@ -316,7 +317,8 @@ function viewerFor(user: User): Viewer {
 
 /**
  * Everything a signed-in session shows: the keep-alive, the cache's owner, the resolved
- * theme, the ambient roles, the query client, the viewer, and the tier's chrome. All of
+ * theme, the ambient roles and user, the query client, the viewer, and the tier's
+ * chrome. All of
  * it is mounted here, at the gate, because there is exactly one session; the tier branch
  * is a constant computed before the first render, so chrome belonging to the other tier
  * is never briefly visible.
@@ -354,23 +356,25 @@ function SignedInChrome(props: SignedInProps): ReactElement {
   return (
     <ThemeProvider theme={themeFor(props.user)}>
       <RolesProvider roles={props.user.roles}>
-        <QueryClientProvider client={queryClient}>
-          <ViewerProvider viewer={viewerFor(props.user)}>
-            <UnitIdentitiesProvider identities={identities}>
-              {/* The design system's curtains, hung once over the chrome and the
-                screens alike: each closed until its moment, opening live for
-                everything under it. The next reveal is another catalog entry, not
-                another mechanism. */}
-              <RevealProvider reveals={reveals}>
-                {host.tier === "shell" ? (
-                  <ShellChrome user={props.user}>{props.children}</ShellChrome>
-                ) : (
-                  <BrowserChrome user={props.user}>{props.children}</BrowserChrome>
-                )}
-              </RevealProvider>
-            </UnitIdentitiesProvider>
-          </ViewerProvider>
-        </QueryClientProvider>
+        <UserProvider user={props.user}>
+          <QueryClientProvider client={queryClient}>
+            <ViewerProvider viewer={viewerFor(props.user)}>
+              <UnitIdentitiesProvider identities={identities}>
+                {/* The design system's curtains, hung once over the chrome and the
+                  screens alike: each closed until its moment, opening live for
+                  everything under it. The next reveal is another catalog entry, not
+                  another mechanism. */}
+                <RevealProvider reveals={reveals}>
+                  {host.tier === "shell" ? (
+                    <ShellChrome user={props.user}>{props.children}</ShellChrome>
+                  ) : (
+                    <BrowserChrome user={props.user}>{props.children}</BrowserChrome>
+                  )}
+                </RevealProvider>
+              </UnitIdentitiesProvider>
+            </ViewerProvider>
+          </QueryClientProvider>
+        </UserProvider>
       </RolesProvider>
     </ThemeProvider>
   )
@@ -449,44 +453,6 @@ function backControlFor(
 }
 
 /**
- * What each management function is called, and the order a person holding more than
- * one is named by: the head of contingent leads, then the functions as the role
- * vocabulary lists them. The words are the application's – the role set carries kinds,
- * never labels.
- */
-const cmtFunctions: readonly (readonly [Role["kind"], string])[] = [
-  ["headOfContingent", "HoC"],
-  ["admin", "Admin"],
-  ["communication", "Kommunikation"],
-  ["health", "Hälsosupport"],
-  ["istSupport", "IST-support"],
-  ["program", "Program"],
-  ["unitSupport", "Avdelningssupport"],
-]
-
-/**
- * The line under the profile control's name: the role, and the unit or the management
- * function that places them. The leader reading wins when the roles carry both.
- * @param user The signed-in person.
- * @param isRevealed Whether the launch curtain is open – the unit number waits for it.
- * @returns The role line.
- */
-function roleLineFor(user: User, isRevealed: boolean): string {
-  if (hasAnyRole(user.roles, "leader")) {
-    // The unit number joins the line only once the reveal is open – which unit a
-    // leader leads is part of the surprise.
-    const unit =
-      user.unit === undefined || !isRevealed ? "" : ` · Avdelning ${String(user.unit.number)}`
-    return `Ledare${unit}`
-  }
-  if (hasAnyRole(user.roles, "cmt")) {
-    const named = cmtFunctions.find(([kind]) => hasAnyRole(user.roles, kind))
-    return named === undefined ? "CMT" : `CMT · ${named[1]}`
-  }
-  return "Deltagare"
-}
-
-/**
  * The page's declared primary action as the phone's floating button, or nothing – an
  * action without a glyph has no floating form, and the heading's own button still
  * carries it on a desktop.
@@ -501,27 +467,6 @@ function fabFor(action: PageActionsProps["action"]): ReactElement | null {
     return <Fab icon={action.icon} label={action.label} onPress={action.onPress} />
   }
   return <Fab icon={action.icon} label={action.label} link={action.link} />
-}
-
-/**
- * The mark the profile pill wears: the person's own unit's – a leader's with the
- * star – or the management's, and only once the reveal may show them. Undefined
- * keeps the pill on its initials.
- * @param user The signed-in person.
- * @param isUnitsRevealed Whether the units reveal is open.
- * @returns The mark, or undefined for the initials.
- */
-function pillAvatarFor(user: User, isUnitsRevealed: boolean): ReactElement | undefined {
-  if (!isUnitsRevealed) {
-    return undefined
-  }
-  if (user.unit !== undefined) {
-    return <UnitAvatar isLeader={hasAnyRole(user.roles, "leader")} unitNumber={user.unit.number} />
-  }
-  if (hasAnyRole(user.roles, "cmt")) {
-    return <UnitAvatar unitNumber={cmtAvatarNumber} />
-  }
-  return undefined
 }
 
 /**
@@ -566,7 +511,17 @@ function BrowserChrome(props: SignedInProps): ReactElement {
     }))
   const currentTab = isGrantedScreen ? found.spec.tab : undefined
 
-  const pillAvatar = pillAvatarFor(user, isRevealed(unitsReveal.id))
+  // Which unit somebody belongs to is part of the surprise: the mark and the unit on
+  // the role line both wait for the units reveal, and the pill keeps its initials and
+  // the bare line until then.
+  const isUnitShown = isRevealed(unitsReveal.id)
+  const pillAvatar =
+    isUnitShown && user.mark !== undefined ? (
+      <UnitAvatar
+        isLeader={user.mark.isLeader}
+        unitNumber={user.mark.unitNumber ?? cmtAvatarNumber}
+      />
+    ) : undefined
 
   // Both placements render; which one is visible is the stylesheet's breakpoint's
   // decision. Pressing either runs the sign-out round trip, which ends on the sign-in
@@ -575,7 +530,7 @@ function BrowserChrome(props: SignedInProps): ReactElement {
     <ProfilePill
       avatar={pillAvatar}
       compact={isCompact}
-      detail={roleLineFor(user, isRevealed(unitsReveal.id))}
+      detail={isUnitShown ? user.roleLineWithUnit : user.roleLine}
       label={`Logga ut ${user.name}`}
       name={user.name}
       onPress={() => {
