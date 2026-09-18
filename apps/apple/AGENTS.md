@@ -93,7 +93,7 @@ There is no Apple workflow in continuous integration, on purpose: no macOS runne
 
 - Deployment target iOS 26, iPhone only. `supportedDestinations` and `TARGETED_DEVICE_FAMILY` both say so, and both are needed or an iPad build ships. iPadOS, macOS, watchOS, tvOS, and visionOS are out of scope.
 - `LM_SKIP_METADATA_EXTRACTION` is on because no target links AppIntents. It comes back the day an App Intent is added.
-- The version is CalVer, `2026.3.0`, the same string the root `package.json` and the Android `versionName` carry, so one release reads the same everywhere. Bump it in `Shared.xcconfig`, which is why that file exists.
+- The version is CalVer, `2026.4.0`, the same string the root `package.json` and the Android `versionName` carry, so one release reads the same everywhere. Bump it in `Shared.xcconfig`, which is why that file exists.
 - The next two bullets describe no code in this tree – the tabs and the display face both arrive with the bridge – but they are the contract the two shells are built to, so they are written down before either is built.
 - Activating every tab on sign-in, so first switches show rendered pages, is to be an Apple-side choice. Android builds a tab's webview when it is first shown – that is a difference chosen on each platform's terms, not drift.
 - Bravely Script is to be the Apple shell's alone, for the large title, and the Android shell is to have no counterpart. Today the face is bundled by neither: it lives in `libraries/ui` as a web font. Each shell holds the tonal blue behind its launch screen, and draws its one screen in white or black to follow the system appearance.
