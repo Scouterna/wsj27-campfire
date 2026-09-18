@@ -23,7 +23,7 @@ The [software guidebook](docs/guidebook/index.md) and the [decisions](docs/decis
 
 The feature set beyond the first feature is still genuinely open. Say what is undecided rather than inventing it.
 
-What is in the tree today is the skeleton. Every tool is wired and runnable and the mock back-end is complete, while the web application, the four modules, the three libraries, and the two shells hold one trivial screen or helper each – no router, no data layer, no bridge, no sign-in. The guidebook does not say so: it describes the first version as built. Read the package before you describe the code, and read the guidebook for the version the code is becoming.
+The tree carries the first version's web application: the router, the query cache and its IndexedDB persistence, ScoutID sign-in, and the participants feature whole – the list, the detail, the unit browser, and the home widgets. The two shells still hold a trivial screen each, and the bridge between them and the web application is design, not code. Where the guidebook and the tree disagree, read the code for what exists and the guidebook for the version the code is becoming.
 
 The pnpm layer is the web application, the modules, the libraries, the tools, and the shared checks. The shells build with Gradle and Xcode, which the root scripts drive and pnpm does not manage.
 

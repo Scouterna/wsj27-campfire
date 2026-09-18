@@ -26,7 +26,9 @@ A URL space is flat, so it has to be described by one type – which is not the 
 declare module "@scouterna/wsj27-campfire-ui" {
   interface RouteRegistry {
     "/participants": Address<"participants">
-    "/participants/$id": Address<"participants">
+    "/participants/$memberNo": Address<"participants">
+    "/participants/units": Address<"participants">
+    "/participants/units/$unit": Address<"participants">
   }
 }
 ```
@@ -39,7 +41,7 @@ Registration is invisible machinery, and it is worth saying out loud: an address
 
 ## Sections, and what an address answers
 
-A section is a top-level destination the menus offer, and the sections are the application's model rather than any module's: home for everyone, and the participants section for a leader and for the CMT Administration function. The application derives them from the session's roles, which is why a screen's table entry names a section by id and never decides who may see it.
+A section is a top-level destination the menus offer, and the sections are the application's model rather than any module's: home for everyone, and the participants section for a leader and for any contingent management function. The application derives them from the session's roles – and from the reveals, so the participants section stays out of every menu until the units reveal opens – which is why a screen's table entry names a section by id and never decides who may see it.
 
 One predicate settles that for everything. `isGranted` maps a screen's `tab` to the section that owns it and asks whether the roles grant it, and the same call feeds three places, so they cannot drift apart:
 
@@ -74,6 +76,6 @@ Each tab is its own webview with its own history, and the shell owns the tab bar
 
 The web reports the other direction – the screen's title, whether back applies, and the session's tabs – so the bars are drawn natively from what the web already knows. Nothing about a route is duplicated in a shell.
 
-## The other registry
+## Widgets travel as props
 
-Widgets work the same way, one level down: the providing module augments `WidgetRegistry` and the application collects the tables, so a screen can place another module's contribution by id without importing it ([Presentation layer](./presentation)). The difference is the failure: a widget id nobody registered renders nothing, which is right for an optional module and wrong for a typo, and nothing tells the two apart.
+Widgets cross module boundaries one level down from routes, but as values rather than registrations: the providing module exports the widget, and the composition root places it in a slot the receiving screen offers – a `ReactNode` prop, so the screen never learns which module filled it ([Presentation layer](./presentation)). With two widgets in the product, one prop per slot carries them; a `WidgetRegistry` of id-keyed tables is the design to grow into when placing by hand stops scaling.
