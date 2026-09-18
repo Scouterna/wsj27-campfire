@@ -73,8 +73,8 @@ campfire = softwareSystem "Campfire" {
 
     # The smallest module, and deliberately so. It owns the start screen's layout, the
     # contingent's notices, and nothing else – the countdown and the unit widgets are
-    # other modules', mounted through the widget registry, and every decision it draws
-    # on is handed to it as a prop.
+    # other modules', mounted through the widget registry, and who sees which, and from
+    # when, is the screen's own decision – read from the reveal and the ambient session.
     homeModule = container "Home" {
       description "The module that owns the start screen and what it shows."
       technology "TypeScript, React 19"
@@ -90,8 +90,7 @@ campfire = softwareSystem "Campfire" {
       tags "module"
     }
 
-    # The contingent's list of participants, and the largest module. It is the only one that talks
-    # to the participants service, and the only one with a data layer – every field
+    # The contingent's list of participants, and the largest module. Every field it reads
     # arrives typed `unknown` and is validated at the boundary, because the service will
     # change shape over an eighteen-month build.
     participantsModule = container "Participants" {
@@ -132,9 +131,11 @@ campfire = softwareSystem "Campfire" {
       }
     }
 
-    # One export so far, and the bar for the next is that a second package already wants it.
+    # The bar for adding something is that a second package already wants it. The
+    # session's own vocabulary – the roles and the signed-in person – lives here too,
+    # because it is the one place every module may read it from (ADR 032).
     utilsLibrary = container "Utils" {
-      description "The library of small pure helpers every package may reach for."
+      description "The library of small helpers, and the ambient session, every package may reach for."
       technology "TypeScript"
       tags "module"
       properties {
@@ -231,9 +232,12 @@ campfire = softwareSystem "Campfire" {
   homeModule -> uiLibrary "Builds its screens from"
   journeyModule -> uiLibrary "Builds its screens from"
   participantsModule -> uiLibrary "Builds its screens from"
+  webApp -> utilsLibrary "Mounts the session through"
   authenticationModule -> utilsLibrary "Calls the service with"
+  homeModule -> utilsLibrary "Reads the session's roles from"
+  journeyModule -> utilsLibrary "Reads the signed-in person from"
   participantsModule -> utilsLibrary "Calls the service with"
   authenticationModule -> authService "Signs in and reads the session over /api/auth"
-  authenticationModule -> participantsService "Reads the signed-in member's unit over /api/project"
+  authenticationModule -> participantsService "Reads the member's unit and travel over /api/project"
   participantsModule -> participantsService "Reads the list of participants over /api/project"
 }
