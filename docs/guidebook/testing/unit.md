@@ -14,7 +14,7 @@ That configuration lists one project per package that has tests, written out by 
 | `ui`             | `libraries/ui`           | The theme names and checks, and the unit-to-theme table                |
 | `host`           | `libraries/host`         | Tier detection from the User-Agent, and its answer with no `navigator` |
 | `authentication` | `modules/authentication` | The session client, the role translation, and the DTO converters       |
-| `home`           | `modules/home`           | The module's public surface – home has no model and fetches nothing    |
+| `home`           | `modules/home`           | The message list, which of it is unread, and reading what was closed   |
 | `journey`        | `modules/journey`        | The trip's phase and countdown, pure functions over its fixed dates    |
 | `participants`   | `modules/participants`   | The unit identity table and the DTO converters                         |
 | `mock`           | `tools/mock`             | [The mock back-end](./mock) itself – its routes, through `createApp()` |

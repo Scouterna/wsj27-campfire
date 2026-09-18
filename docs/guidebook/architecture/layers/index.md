@@ -25,7 +25,7 @@ modules/<name>/src/
 └── index.ts          the public surface – everything else is internal
 ```
 
-Not every module needs all three. Journey has a model and no data layer, because the trip's dates are fixed and public and are written down rather than fetched. Home has neither: it places what other modules provide and fetches nothing. A module with presentation alone is a legitimate shape, not a shortcut around the rule – the directory arrives when there is something to put in it.
+Not every module needs all three. Journey has a model and no data layer, because the trip's dates are fixed and public and are written down rather than fetched. Home is the same shape, smaller: a one-file model holding the contingent's messages, and no data layer, because it places what other modules provide and fetches nothing. A module missing a layer is a legitimate shape, not a shortcut around the rule – the directory arrives when there is something to put in it.
 
 Until a module has more than one screen, the screen sits directly in `src/` beside `index.ts`.
 
