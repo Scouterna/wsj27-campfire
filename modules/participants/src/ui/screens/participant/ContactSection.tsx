@@ -139,7 +139,7 @@ export function ContactSection(props: ContactSectionProps): ReactElement {
         </div>
       </Card>
 
-      {emergency.length + contact.nextOfKin.length === 0 ? null : (
+      {emergency.length + contact.relatives.length === 0 ? null : (
         <div className="person-contacts">
           {emergency.map((person) => (
             <ContactCard
@@ -152,7 +152,7 @@ export function ContactSection(props: ContactSectionProps): ReactElement {
               {...reachability(person)}
             />
           ))}
-          {contact.nextOfKin.map((person, index) => (
+          {contact.relatives.map((person, index) => (
             <ContactCard
               // The index too, because two närstående can share a name and the list
               // never reorders within a render.

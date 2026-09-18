@@ -16,7 +16,7 @@ Before camp there is a year of preparation. Leaders are notified in spring 2026,
 
 Signing in with ScoutID drops a leader on the home screen. Below the greeting sit the countdown to departure, then the contingent's notices, then their unit's leaders, their unit's scouts, and a tap-to-call plate of emergency numbers that only leaders see.
 
-The section menu gives them two places: the start screen, and their own unit – the list of participants scoped to the unit they lead. That view needs neither the search field nor the role filters the wider list of participants has, because a list of forty people needs neither. Opening a person shows what the back-end chose to send: contact details and next of kin, travel, diet and health, languages, readiness, and experience.
+The section menu gives them two places: the start screen, and their own unit – the list of participants scoped to the unit they lead. That view needs neither the search field nor the role filters the wider list of participants has, because a list of forty people needs neither. Opening a person shows what the back-end chose to send: contact details and relatives, travel, diet and health, languages, readiness, and experience.
 
 The whole application takes the unit's color. Each unit has one of the five colors the [design system](../../design/) carries, and the theme is stamped on the document before first paint, so a returning brown-unit leader never flashes blue.
 

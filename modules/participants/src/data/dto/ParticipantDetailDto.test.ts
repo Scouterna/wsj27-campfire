@@ -101,7 +101,7 @@ describe("reading one person in full", () => {
     expect(contact?.email).toBe("lars@example.se")
     expect(contact?.phone).toBe("070-000 00 00")
     expect(contact?.alternateEmail).toBe("lars.privat@example.se")
-    expect(contact?.nextOfKin).toEqual([
+    expect(contact?.relatives).toEqual([
       { name: "Johannes Norberg", relation: "Förälder", phone: "070-384 64 98" },
     ])
     expect(contact?.emergencyContacts).toEqual([

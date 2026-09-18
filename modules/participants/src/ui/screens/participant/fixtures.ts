@@ -25,7 +25,7 @@ export const complete: ParticipantDetail = {
     email: "anna.bjork@example.se",
     phone: "070-123 45 67",
     alternateEmail: "anna.privat@example.se",
-    nextOfKin: [
+    relatives: [
       {
         name: "Johannes Norberg",
         relation: "Partner",
@@ -129,7 +129,7 @@ export const withoutHealth: ParticipantDetail = {
   contact: {
     email: "vilgot.ek@example.se",
     phone: "070-556 12 03",
-    nextOfKin: [{ name: "Karin Ek", relation: "Vårdnadshavare", phone: "070-118 92 70" }],
+    relatives: [{ name: "Karin Ek", relation: "Vårdnadshavare", phone: "070-118 92 70" }],
     emergencyContacts: [],
   },
   notes: [],
@@ -149,7 +149,7 @@ export const sparse: ParticipantDetail = {
   contact: {
     email: "",
     phone: "",
-    nextOfKin: [{ name: "Bo Nyström" }],
+    relatives: [{ name: "Bo Nyström" }],
     emergencyContacts: [],
   },
   health: {

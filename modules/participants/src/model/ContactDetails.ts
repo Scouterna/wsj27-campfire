@@ -54,7 +54,7 @@ export interface ContactDetails {
   /**
    * The närstående they named, in the order the form asks for them.
    */
-  readonly nextOfKin: readonly ContactPerson[]
+  readonly relatives: readonly ContactPerson[]
   /**
    * The contacts to try in an emergency, ranked.
    */
