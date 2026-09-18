@@ -75,11 +75,18 @@ services:
       # the Keycloak client's. Without them the service runs and serves nobody.
       SCOUTNET_PROJECTS: "${SCOUTNET_PROJECTS:-[]}"
       SCOUTNET_BODYLIST_KEY: "${SCOUTNET_BODYLIST_KEY:-}"
+      # The CMT roster that splits wsj27:cmt into wsj27:cmt:<funktion>:<roll>. The
+      # file is gitignored – real people – and the service logs a warning and keeps
+      # the plain role when the mount holds nothing.
+      CMT_ROLES_FILE: /app/cmt-roles.csv
       # No POSTGRES_DSN: the /cases feature stays off, and everything else works.
     volumes:
       # The fetched Scoutnet data survives a restart, so the service can start from
       # its disk cache when Scoutnet is slow or unreachable.
       - project_persist:/app/persist
+      # On a machine without the roster Docker mounts an empty directory in its
+      # place, which the service reads as the file being absent.
+      - ./cmt-roles.csv:/app/cmt-roles.csv:ro
 
   # The web application's dev server, hot reload included: the repository is
   # bind-mounted, so an edit on the host reaches Vite in the container and HMR flows

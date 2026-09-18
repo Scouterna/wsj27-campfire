@@ -51,3 +51,14 @@ docs/architecture/.structurizr/
 
 # Scratch space for reference material under study – never committed.
 temp/
+
+# The units' names and artwork stay off the public repository until the reveal.
+# Commit the folder, and drop these lines, the day the curtain opens.
+apps/web/assets/units/
+
+# The CMT roster the project API mints detail roles from – real people's member
+# numbers and names, so it stays off the public repository. Get the file from the
+# back-end team and put it in the dev environment; prod reaches it through the
+# committed symlink beside its compose file. Without it CMT members keep the
+# plain role.
+config/environments/dev/cmt-roles.csv
