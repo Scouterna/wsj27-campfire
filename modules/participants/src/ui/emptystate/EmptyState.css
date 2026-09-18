@@ -1,0 +1,40 @@
+/* The empty state: a mark in the theme's wash, the answer under it, and the hint under
+   that – centered in the space the rows would have filled. */
+
+@layer component {
+  .empty-state {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    /* Twice the section gap above and below: the block stands in for a whole list, and
+       at one gap it reads as a squeezed-in footnote rather than the answer. */
+    padding: calc(var(--spacing-section) * 2) var(--spacing-group);
+    text-align: center;
+  }
+
+  .empty-state-mark {
+    align-items: center;
+    background: var(--color-theme-wash);
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    display: flex;
+    height: 64px;
+    justify-content: center;
+    margin-bottom: var(--spacing-group);
+    width: 64px;
+  }
+
+  .empty-state-title {
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-strong);
+    margin: 0;
+  }
+
+  .empty-state-hint {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: var(--spacing-inline) 0 0;
+    max-width: 34ch;
+    text-wrap: balance;
+  }
+}

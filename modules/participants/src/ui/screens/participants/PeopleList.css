@@ -1,0 +1,45 @@
+/* The virtual list: the container is as tall as every row would be and the few rows that
+   exist are placed by the virtualizer, so the scrollbar and the scroll position read as
+   one long list. Both heights come from the virtualizer as inline values – they are
+   per-render measurements no rule could state. */
+
+@layer component {
+  .people-list {
+    position: relative;
+  }
+
+  .people-row {
+    inset-inline: 0;
+    position: absolute;
+    top: 0;
+  }
+
+  /* Rows are no longer the card's direct children, so the card's own edge rules do not
+     reach them: the card gives up its vertical padding so the list fills its height, and
+     clips so a pressed edge row is cut to the radius. Selected by what the card holds,
+     because the card takes no class of its own. */
+  .card:has(> .people-list) {
+    overflow: clip;
+    padding-block: 0;
+  }
+
+  /* The divider belongs between rows, so the first one drops it – the rule the card
+     applies to a first child, applied to the first row the virtualizer drew. */
+  .people-row[data-index="0"] .row {
+    border-top: none;
+  }
+
+  /* The funktionsansvarig's mark: a small chip after the name, in the theme's own
+     wash, so responsibility reads at a glance without shouting. */
+  .person-fa {
+    background: var(--color-theme-wash);
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.04em;
+    margin-left: var(--spacing-stack);
+    padding: 2px 8px;
+    vertical-align: 2px;
+  }
+}

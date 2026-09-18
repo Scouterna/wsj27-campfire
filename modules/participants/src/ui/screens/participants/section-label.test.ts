@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { participantsSectionLabel } from "./ParticipantsScreen"
+import { participantsSectionLabel } from "./section-label"
 
 describe("what the participants section is called", () => {
   it("names a leader's section their own unit", () => {
@@ -11,9 +11,13 @@ describe("what the participants section is called", () => {
     expect(participantsSectionLabel([{ kind: "cmt" }, { kind: "admin" }])).toBe("Deltagare")
   })
 
-  it("lets the leader's name win when the roles carry both", () => {
+  it("lets the management's name win when the roles carry both", () => {
     expect(participantsSectionLabel([{ kind: "leader" }, { kind: "cmt" }, { kind: "admin" }])).toBe(
-      "Min avdelning",
+      "Deltagare",
     )
+  })
+
+  it("names it Deltagare for roles that carry neither", () => {
+    expect(participantsSectionLabel([])).toBe("Deltagare")
   })
 })

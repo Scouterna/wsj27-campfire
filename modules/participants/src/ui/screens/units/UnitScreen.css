@@ -1,0 +1,20 @@
+/* One unit's own screen: the count over the rows, and whatever the screen has to say in
+   its place. */
+
+@layer screen {
+  .unit-status {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+  }
+
+  /* Heard, never seen: the count lives in the lists' own headings. */
+  .unit-status-spoken {
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+}

@@ -33,6 +33,7 @@ describe("translating a provider spelling into roles", () => {
   })
 
   it("grants head of contingent its own kind plus cmt", () => {
+    expect(toRoles("wsj27:cmt:hoc:hoc")).toEqual(toRoles("wsj27:cmt:kontingentledare"))
     expect(toRoles("wsj27:cmt:kontingentledare")).toEqual([
       { kind: "cmt" },
       { kind: "headOfContingent" },

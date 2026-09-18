@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { JourneyScreen } from "./JourneyScreen"
 
 const meta: Meta<typeof JourneyScreen> = {
-  title: "Modules/Journey/JourneyScreen",
+  title: "Modules/Journey/Screens/JourneyScreen",
   component: JourneyScreen,
   decorators: [ScreenDecorator],
   parameters: {

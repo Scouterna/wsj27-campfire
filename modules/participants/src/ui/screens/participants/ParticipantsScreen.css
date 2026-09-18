@@ -1,0 +1,24 @@
+/* The section root: the search, the chips under it, and the line that says what the rows
+   below add up to. */
+
+@layer screen {
+  /* The count, and every other thing the screen has to say in its place. Quiet, because
+     it labels the list rather than competing with it. */
+  .participants-status {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+  }
+
+  /* Spoken, not shown: the empty states carry a designed block of their own, so the
+     status line steps out of the picture while it keeps announcing. Clipped rather than
+     hidden, because a display of none is read by nobody either. */
+  .participants-status-spoken {
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+}

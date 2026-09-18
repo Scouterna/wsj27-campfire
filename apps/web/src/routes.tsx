@@ -10,11 +10,16 @@ import { host } from "@scouterna/wsj27-campfire-host"
 import {
   participantsRoutes,
   participantsSectionLabel,
+  UnitWidget,
+  ViewerProvider,
+  type Viewer,
 } from "@scouterna/wsj27-campfire-participants"
 import {
   Card,
+  cmtAvatarNumber,
   cmtTheme,
   expectPop,
+  Fab,
   HomeIcon,
   matchScreen,
   mountRoutes,
@@ -24,23 +29,39 @@ import {
   PageTitle,
   ParticipantsIcon,
   ProfilePill,
+  RevealProvider,
+  reveals,
   rootRoute,
   setNavDirection,
   SideMenu,
   storedTheme,
   TabBar,
   ThemeProvider,
+  UnitAvatar,
+  UnitIdentitiesProvider,
+  unitsReveal,
   unitTheme,
+  useIsRevealed,
   usePageActions,
   usePageTitle,
+  useRevealLookup,
   type Address,
   type AppPath,
+  type PageActionsProps,
   type Routes,
   type ScreenSpec,
   type SideMenuItem,
   type Theme,
+  type UnitIdentities,
 } from "@scouterna/wsj27-campfire-ui"
-import { hasAnyRole, RolesProvider, useRoles, type Role } from "@scouterna/wsj27-campfire-utils"
+import {
+  hasAnyRole,
+  leaderUnit,
+  RolesProvider,
+  useRoles,
+  type Role,
+} from "@scouterna/wsj27-campfire-utils"
+import { QueryClientProvider } from "@tanstack/react-query"
 import { createRouter, Link, useRouterState, type RouteComponent } from "@tanstack/react-router"
 import { useEffect, useState, type ReactElement, type ReactNode } from "react"
 
@@ -54,7 +75,8 @@ import {
   useNavigationBookkeeping,
 } from "./navigation"
 import { Outline } from "./outline"
-import { queryClient } from "./query"
+import { adoptCacheOwner, forgetCache, queryClient } from "./query"
+import { loadUnitIdentities } from "./units"
 
 /**
  * The route tree, and the chrome around it. This is the composition root: the one place
@@ -72,12 +94,28 @@ declare module "@scouterna/wsj27-campfire-ui" {
 }
 
 /**
+ * The start screen with what the composition root places on it: a leader's own unit,
+ * drawn by the participants module – home never learns which module drew it (ADR
+ * 016). For everyone else the slot stays empty – and before the reveal home itself
+ * shows nothing handed in, so every widget waits behind the same curtain.
+ * @returns The composed home screen.
+ */
+function HomeRoute(): ReactElement {
+  const roles = useRoles()
+  // Each widget waits behind the reveal that governs it – the unit widget behind the
+  // units reveal – and home shows the countdowns until then.
+  const isUnitsRevealed = useIsRevealed(unitsReveal.id)
+  const isLeader = leaderUnit(roles) !== undefined
+  return <HomeScreen widget={isUnitsRevealed && isLeader ? <UnitWidget /> : undefined} />
+}
+
+/**
  * Every screen this build answers at, gathered from the modules and wrapped in the
  * section guard. The table only places screens – every page declares its own name
  * through `PageTitle`, because the page is what knows what it is called.
  */
 const screens = guardScreens({
-  "/": { Component: HomeScreen, tab: "home" },
+  "/": { Component: HomeRoute, tab: "home" },
   ...participantsRoutes,
 } satisfies Routes)
 
@@ -94,9 +132,10 @@ interface AppSection {
    */
   readonly id: string
   /**
-   * Whether the roles grant the section.
+   * Whether the roles grant the section, under the reveals as they stand – the
+   * lookup answers by a reveal's id.
    */
-  readonly isGranted: (roles: readonly Role[]) => boolean
+  readonly isGranted: (roles: readonly Role[], isRevealed: (id: string) => boolean) => boolean
   /**
    * The menu label, given the roles – a leader's participants section wears their own
    * unit's name.
@@ -110,15 +149,19 @@ interface AppSection {
 
 /**
  * The sections, in menu order: home for everyone, and the participants section for a
- * leader and for the CMT Administration function – for nobody else. The list grows as
- * modules land.
+ * leader and for any management function – for nobody else. The list grows as modules
+ * land.
  */
 const sections: readonly AppSection[] = [
   { icon: <HomeIcon />, id: "home", isGranted: () => true, label: () => "Hem", path: "/" },
   {
     icon: <ParticipantsIcon />,
     id: "participants",
-    isGranted: (roles) => hasAnyRole(roles, "leader", "admin"),
+    // The reveal gates the section for everyone: until the moment, the contingent's
+    // people are offered to nobody, and the address answers as not found. A curtain,
+    // not a lock – the service's own gates scope the data itself.
+    isGranted: (roles, isRevealed) =>
+      hasAnyRole(roles, "leader", "cmt") && isRevealed(unitsReveal.id),
     label: participantsSectionLabel,
     path: "/participants",
   },
@@ -132,11 +175,16 @@ const sections: readonly AppSection[] = [
  * than publishing it to everyone.
  * @param tab The screen's declared section id.
  * @param roles The signed-in person's roles.
+ * @param isRevealed Which reveals are open, by id, from the nearest provider.
  * @returns True when the roles grant the named section.
  */
-function isGranted(tab: string | undefined, roles: readonly Role[]): boolean {
+function isGranted(
+  tab: string | undefined,
+  roles: readonly Role[],
+  isRevealed: (id: string) => boolean,
+): boolean {
   const section = sections.find((candidate) => candidate.id === tab)
-  return section?.isGranted(roles) ?? false
+  return section?.isGranted(roles, isRevealed) ?? false
 }
 
 /**
@@ -163,9 +211,12 @@ function guardScreens<const TRoutes extends Routes>(routes: TRoutes): TRoutes {
 function withGuard(spec: ScreenSpec): RouteComponent {
   const Component = spec.Component
   function GuardedScreen(): ReactElement {
-    // Ambient below the gate, which always resolves before any screen mounts.
+    // Ambient below the gate, which always resolves before any screen mounts. The
+    // curtain is live, so a screen the reveal ungates replaces its not-found the
+    // moment the application opens – nobody reloads their way in.
     const roles = useRoles()
-    return isGranted(spec.tab, roles) ? <Component /> : <NotFoundRoute />
+    const isRevealed = useRevealLookup()
+    return isGranted(spec.tab, roles, isRevealed) ? <Component /> : <NotFoundRoute />
   }
   return GuardedScreen
 }
@@ -234,6 +285,8 @@ function AppChrome(props: AppChromeProps): ReactElement {
  * @returns The theme to wear.
  */
 function themeFor(user: User): Theme {
+  // The unit's color dresses the application from the first sign-in, reveal or not –
+  // a color among five names no unit. Only the number waits for the moment.
   if (user.unit !== undefined) {
     return unitTheme(user.unit.number)
   }
@@ -244,28 +297,80 @@ function themeFor(user: User): Theme {
 }
 
 /**
- * Everything a signed-in session shows: the keep-alive, the resolved theme, the
- * ambient roles, and the tier's chrome. The roles are mounted here, at the gate,
- * because there is exactly one session; the tier branch is a constant computed before
- * the first render, so chrome belonging to the other tier is never briefly visible.
+ * Who is reading the list of participants, distilled from the signed-in identity. The
+ * participants service has no "give me what I may see" endpoint, so the module is handed
+ * the scope to ask within: a leader's own unit, the contingent management's everyone,
+ * and whether health answers are theirs to read beyond that unit.
+ * @param user The signed-in person.
+ * @returns The viewer the participants module reads as.
+ */
+function viewerFor(user: User): Viewer {
+  const unitNumber = leaderUnit(user.roles)
+  return {
+    memberNo: user.memberNo,
+    readsEveryone: hasAnyRole(user.roles, "cmt"),
+    readsHealth: hasAnyRole(user.roles, "health"),
+    ...(unitNumber !== undefined && { unitNumber }),
+  }
+}
+
+/**
+ * Everything a signed-in session shows: the keep-alive, the cache's owner, the resolved
+ * theme, the ambient roles, the query client, the viewer, and the tier's chrome. All of
+ * it is mounted here, at the gate, because there is exactly one session; the tier branch
+ * is a constant computed before the first render, so chrome belonging to the other tier
+ * is never briefly visible.
  * @param props The signed-in user, and the routed screens.
- * @returns The themed, role-aware application.
+ * @returns The themed, role-aware application, once the cache is this person's.
  */
 function SignedInChrome(props: SignedInProps): ReactElement {
+  const memberNo = props.user.memberNo
+  const [adopted, setAdopted] = useState(false)
+  const [identities, setIdentities] = useState<UnitIdentities>()
+
+  // The cache changes hands before anything under it renders – a screen that mounted
+  // first would read whatever the last person to use this device left behind – and
+  // the units' identities load alongside, so an avatar never flashes its number
+  // before wearing its glyph.
+  useEffect(() => {
+    async function adopt(): Promise<void> {
+      const [, loaded] = await Promise.all([adoptCacheOwner(memberNo), loadUnitIdentities()])
+      setIdentities(loaded)
+      setAdopted(true)
+    }
+    void adopt()
+  }, [memberNo])
+
   // The auth service's own loop, once per page – an active session refreshes rather
   // than expiring mid-use.
   useEffect(() => {
     keepSessionAlive()
   }, [])
 
+  if (!adopted || identities === undefined) {
+    return <></>
+  }
+
   return (
     <ThemeProvider theme={themeFor(props.user)}>
       <RolesProvider roles={props.user.roles}>
-        {host.tier === "shell" ? (
-          <ShellChrome user={props.user}>{props.children}</ShellChrome>
-        ) : (
-          <BrowserChrome user={props.user}>{props.children}</BrowserChrome>
-        )}
+        <QueryClientProvider client={queryClient}>
+          <ViewerProvider viewer={viewerFor(props.user)}>
+            <UnitIdentitiesProvider identities={identities}>
+              {/* The design system's curtains, hung once over the chrome and the
+                screens alike: each closed until its moment, opening live for
+                everything under it. The next reveal is another catalog entry, not
+                another mechanism. */}
+              <RevealProvider reveals={reveals}>
+                {host.tier === "shell" ? (
+                  <ShellChrome user={props.user}>{props.children}</ShellChrome>
+                ) : (
+                  <BrowserChrome user={props.user}>{props.children}</BrowserChrome>
+                )}
+              </RevealProvider>
+            </UnitIdentitiesProvider>
+          </ViewerProvider>
+        </QueryClientProvider>
       </RolesProvider>
     </ThemeProvider>
   )
@@ -350,10 +455,10 @@ function backControlFor(
  * never labels.
  */
 const cmtFunctions: readonly (readonly [Role["kind"], string])[] = [
-  ["headOfContingent", "Kontingentledare"],
-  ["admin", "Administration"],
+  ["headOfContingent", "HoC"],
+  ["admin", "Admin"],
   ["communication", "Kommunikation"],
-  ["health", "Hälsa"],
+  ["health", "Hälsosupport"],
   ["istSupport", "IST-support"],
   ["program", "Program"],
   ["unitSupport", "Avdelningssupport"],
@@ -363,11 +468,15 @@ const cmtFunctions: readonly (readonly [Role["kind"], string])[] = [
  * The line under the profile control's name: the role, and the unit or the management
  * function that places them. The leader reading wins when the roles carry both.
  * @param user The signed-in person.
+ * @param isRevealed Whether the launch curtain is open – the unit number waits for it.
  * @returns The role line.
  */
-function roleLineFor(user: User): string {
+function roleLineFor(user: User, isRevealed: boolean): string {
   if (hasAnyRole(user.roles, "leader")) {
-    const unit = user.unit === undefined ? "" : ` · Avdelning ${String(user.unit.number)}`
+    // The unit number joins the line only once the reveal is open – which unit a
+    // leader leads is part of the surprise.
+    const unit =
+      user.unit === undefined || !isRevealed ? "" : ` · Avdelning ${String(user.unit.number)}`
     return `Ledare${unit}`
   }
   if (hasAnyRole(user.roles, "cmt")) {
@@ -375,6 +484,44 @@ function roleLineFor(user: User): string {
     return named === undefined ? "CMT" : `CMT · ${named[1]}`
   }
   return "Deltagare"
+}
+
+/**
+ * The page's declared primary action as the phone's floating button, or nothing – an
+ * action without a glyph has no floating form, and the heading's own button still
+ * carries it on a desktop.
+ * @param action The action the page declared, if any.
+ * @returns The floating button, or null.
+ */
+function fabFor(action: PageActionsProps["action"]): ReactElement | null {
+  if (action?.icon === undefined) {
+    return null
+  }
+  if (action.link === undefined) {
+    return <Fab icon={action.icon} label={action.label} onPress={action.onPress} />
+  }
+  return <Fab icon={action.icon} label={action.label} link={action.link} />
+}
+
+/**
+ * The mark the profile pill wears: the person's own unit's – a leader's with the
+ * star – or the management's, and only once the reveal may show them. Undefined
+ * keeps the pill on its initials.
+ * @param user The signed-in person.
+ * @param isUnitsRevealed Whether the units reveal is open.
+ * @returns The mark, or undefined for the initials.
+ */
+function pillAvatarFor(user: User, isUnitsRevealed: boolean): ReactElement | undefined {
+  if (!isUnitsRevealed) {
+    return undefined
+  }
+  if (user.unit !== undefined) {
+    return <UnitAvatar isLeader={hasAnyRole(user.roles, "leader")} unitNumber={user.unit.number} />
+  }
+  if (hasAnyRole(user.roles, "cmt")) {
+    return <UnitAvatar unitNumber={cmtAvatarNumber} />
+  }
+  return undefined
 }
 
 /**
@@ -386,9 +533,12 @@ function roleLineFor(user: User): string {
  */
 function BrowserChrome(props: SignedInProps): ReactElement {
   const user = props.user
+  // Live, so the menus, the marked section, and the pill's unit line all switch the
+  // moment a reveal opens – the whole chrome changes as one, with no reload.
+  const isRevealed = useRevealLookup()
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   const found = matchScreen(pathname, screens)
-  const isGrantedScreen = found !== undefined && isGranted(found.spec.tab, user.roles)
+  const isGrantedScreen = found !== undefined && isGranted(found.spec.tab, user.roles, isRevealed)
 
   // The page names itself through PageTitle – the not-found page included, which is
   // what keeps an ungranted address named exactly as one that matches nothing
@@ -407,7 +557,7 @@ function BrowserChrome(props: SignedInProps): ReactElement {
 
   const back = isGrantedScreen ? backControlFor(found.spec.parent, user.roles) : undefined
   const items: readonly SideMenuItem[] = sections
-    .filter((section) => section.isGranted(user.roles))
+    .filter((section) => section.isGranted(user.roles, isRevealed))
     .map((section) => ({
       icon: section.icon,
       id: section.id,
@@ -416,17 +566,20 @@ function BrowserChrome(props: SignedInProps): ReactElement {
     }))
   const currentTab = isGrantedScreen ? found.spec.tab : undefined
 
+  const pillAvatar = pillAvatarFor(user, isRevealed(unitsReveal.id))
+
   // Both placements render; which one is visible is the stylesheet's breakpoint's
   // decision. Pressing either runs the sign-out round trip, which ends on the sign-in
   // screen – the one way out (requirement 6.5).
   const pill = (isCompact: boolean): ReactElement => (
     <ProfilePill
+      avatar={pillAvatar}
       compact={isCompact}
-      detail={roleLineFor(user)}
+      detail={roleLineFor(user, isRevealed(unitsReveal.id))}
       label={`Logga ut ${user.name}`}
       name={user.name}
       onPress={() => {
-        signOut(location.origin)
+        void signOutAndForget()
       }}
     />
   )
@@ -456,9 +609,28 @@ function BrowserChrome(props: SignedInProps): ReactElement {
         </main>
       </div>
       <Outline key={pathname} title={title} />
+      {/* The page's primary action floats at phone width – the same declared action
+          the heading's row draws as its button on a desktop. Only an action that
+          brought a glyph floats; where it floats is app.css's decision. */}
+      {fabFor(declared?.action)}
       <TabBar items={items} current={currentTab} onReselect={scrollToTop} />
     </div>
   )
+}
+
+/**
+ * Leave the session, and leave nothing of it behind. The cache is forgotten before the
+ * round trip starts – signing out is the one deliberate start over a person has – and the
+ * round trip leaves whichever way the wipe ended, because a browser that refuses its own
+ * storage must not be able to hold somebody inside a session.
+ * @returns Nothing – the sign-out navigates the document away.
+ */
+async function signOutAndForget(): Promise<void> {
+  try {
+    await forgetCache()
+  } finally {
+    signOut(location.origin)
+  }
 }
 
 /**
