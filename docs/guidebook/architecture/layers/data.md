@@ -2,7 +2,7 @@
 
 Where the outside world is dealt with – the participants service, the wire shapes, the cache – and turned into the types [the domain](./domain) declares.
 
-Only the module that owns a capability has a data layer, and only two modules have one at all: authentication, which asks the auth service who is signed in and reads the signed-in person's own unit from the participants service, and participants, which reads the list of participants. No other module talks to a service, and the C4 model draws exactly those three edges.
+Only the module that owns a capability has a data layer, and only two modules have one at all: authentication, which asks the auth service who is signed in and reads the signed-in person's own registration – their unit, and how they travel – from the participants service, and participants, which reads the list of participants. No other module talks to a service, and the C4 model draws exactly those three edges.
 
 ## Query factories
 

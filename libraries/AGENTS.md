@@ -6,13 +6,13 @@ Three libraries exist, and each one is generic by construction:
 
 - `host` – which tier the application is running in, a browser or a shell's webview. No dependencies at all, not even React.
 - `ui` – the design system: the tokens, the five themes and their machinery, the display face, the icons, the route machinery, Storybook's own scaffolding, and the components.
-- `utils` – what more than one package needs: the string reader, the `fetch` wrapper, and the session's role vocabulary with its ambient provider.
+- `utils` – what more than one package needs: the string reader, the `fetch` wrapper, and the ambient session – the role vocabulary and the signed-in `User`, each with its provider.
 
 ## The line between a library and a module
 
 **A library that knows a feature is a feature module in the wrong place.** `ui` knows what a wordmark is; it does not know what a participant is. `host` knows what a tier is; it does not know which screens care. When a component starts taking a domain type as a prop, it belongs to the module that owns that type.
 
-The test is portability: a package that would still make sense in a product that is not Campfire is a library, and a package that only makes sense here is a module.
+The test is portability: a package that would still make sense in a product that is not Campfire is a library, and a package that only makes sense here is a module. `utils` carries the one deliberate exception – the session's own vocabulary, the roles and the signed-in `User`. It names the contingent's words, but it has to live where every module may import it, because a module can never import the module that resolved it ([ADR 032](../docs/decisions/032-hold-the-signed-in-person-in-utils.md)). The exception is the session and nothing else: a participant, a unit's people, or a trip's dates are a module's.
 
 Libraries do not import modules, they do not import an app, and they do not import each other. A library that needs something another library has is a sign that the something belongs in the one that already has the dependents.
 
@@ -50,7 +50,8 @@ libraries/ui/
     ├── foundations/icons/         the shared stroke frame and its props, with the glyphs in set/, one file per icon
     ├── foundations/theme/         the five names, the provider machinery, the unit-to-theme table
     ├── routing/                   RouteRegistry, the branded Address, matchScreen, mountRoutes, and the root route
-    └── storybook/                 the four decorators, stories.css, Introduction.mdx
+    ├── storybook/                 the four decorators, stories.css, Introduction.mdx
+    └── widgets/                   WidgetRegistry, the branded WidgetFrom, WidgetsProvider, and the Widget that places by id
 ```
 
 - **Where a file goes.** A stylesheet, font, or image that belongs to no single component goes in `assets/`. A component's own `Name.css` stays beside its `Name.tsx` and `Name.stories.tsx`, and the component imports it, so the CSS arrives with the component rather than from a central list. `assets/styles.css` gathers the global sheets and nothing else, and its order is load-bearing – tokens first, because every rule below reads them with no fallback.
@@ -64,7 +65,7 @@ libraries/ui/
 - **One display face.** Bravely Script is the jamboree's face and the only one shipped; body text is `system-ui` on purpose. Only a regular weight is drawn, so the weight is a token too – asking for bold would have the browser synthesize one, and a synthesized script is a smear.
 - **Storybook's own files sit in `src/storybook/`.** `ThemeDecorator` wraps every story in the unit color the toolbar picked, on a wrapper rather than on the document, so a story that themes itself still wins locally. `RouterDecorator` gives every story a memory-history router of its own, with the story as the screen at every address, so a component that links or reads the location renders outside the application. `ColumnDecorator` wraps a full-width component's story in the phone-width column from `stories.css`, applied per story file. `ScreenDecorator` wraps a whole screen's story in the chrome slice a screen renders under – the navigation bar reading the title the screen declares through `PageTitle` – and is the one storybook file on the public surface, because the modules' screen stories apply it. `stories.css` holds the canvas furniture any story may use, and `Introduction.mdx` is the landing page. None of it ships, which is why `stories.css` is not in `assets/`, and the theme and router decorators are registered once in `config/storybook/preview.tsx` rather than story by story.
 - **`src/assets.d.ts`** tells TypeScript that a `.css` import is Vite's business. Declare a new asset type here rather than relying on another package's declaration – the repository type-checks as one program, so a missing declaration can be invisible until the day that package moves.
-- **The route registry lives in `src/routing/`** ([Navigation and routing](../docs/guidebook/architecture/layers/navigation.md)): `RouteRegistry`, the branded `Address` type, `matchScreen`, `mountRoutes`, and the root route every application route hangs under. The types keep a literal type per path, which is what makes every link in the product checked, so preserve the generics: widening one to a catch-all silently turns the whole product's routing into `any`. A registry is augmented by the module that owns the address, never here. `WidgetRegistry` is the same pattern one level down and is still the design ([Presentation layer](../docs/guidebook/architecture/layers/presentation.md)) – it lands with the first widget.
+- **The route registry lives in `src/routing/`** ([Navigation and routing](../docs/guidebook/architecture/layers/navigation.md)): `RouteRegistry`, the branded `Address` type, `matchScreen`, `mountRoutes`, and the root route every application route hangs under. The types keep a literal type per path, which is what makes every link in the product checked, so preserve the generics: widening one to a catch-all silently turns the whole product's routing into `any`. A registry is augmented by the module that owns the address, never here. `WidgetRegistry` in `src/widgets/` is the same pattern one level down ([Presentation layer](../docs/guidebook/architecture/layers/presentation.md)): a module declares an id branded `WidgetFrom`, the application hands the merged tables to `WidgetsProvider`, and a screen places one with `<Widget id="…" />` – an unregistered id renders nothing.
 
 ## utils
 
@@ -73,7 +74,8 @@ The bar for adding something is that a second package already wants it. A helper
 - `stringOrFallback(value, fallback)` reads a string out of untyped input – a JSON body, a query parameter, a build setting – so "the key was missing" and "the key held a number" reach the caller as the same harmless answer rather than as two different crashes.
 - The `fetch` wrapper distinguishes three outcomes – the request reached nothing, the service answered a refusal, the answer was not JSON – names the URL in the error and keeps `cause`, and the refusal carries its status, because a caller telling a 403 from a 404 is the difference between a second request and a wrong screen. It is the transport inside a query function, never a way around the application's query cache ([Data layer](../docs/guidebook/architecture/layers/data.md)).
 - The role vocabulary – the closed `Role` set, the helpers, and the ambient `RolesProvider`/`useRoles` the application mounts at its session gate – lives here because this is the one package every module may import. Translating a provider's spellings into the set is not here: that is the authentication module's data layer.
-- React appears here for exactly one reason, the ambient provider. Everything else stays free of React and the DOM, and a helper that needs either is not a utility.
+- The signed-in person – the `User` type with its `Unit`, `Travel`, and `UserMark`, and the ambient `UserProvider`/`useUser` – lives here for the same reason: the authentication module decodes the user and the journey module counts on how they travel, and neither may import the other. Filling a `User` in stays the authentication module's converter's job; a fact a second module needs is a new field there, not a new provider here and not a prop computed in `apps/web`.
+- React appears here for exactly one reason, the ambient providers. Everything else stays free of React and the DOM, and a helper that needs either is not a utility.
 
 ## Stories, tests, and handing back
 

@@ -11,14 +11,14 @@ They rest on three libraries in `libraries/`, generic code that knows no feature
 Three kinds of thing leave a module:
 
 - **Routes.** The module augments `RouteRegistry` with each address it owns, branded with its own name, and exports a table of address to screen that the application spreads into its own. The brand makes two modules claiming one path a compile error. See [Navigation and routing](./layers/navigation).
-- **Widgets.** The module augments `WidgetRegistry` in the widget's own file and exports a widget table. Ids read `module:widget` – `participants:unit-leaders`. See [Presentation layer](./layers/presentation).
-- **Doorways.** A named hook or component for a fact another part of the product needs, such as how the signed-in person travels or which theme they wear. A doorway is a promise, so one is added when the application is about to walk through it, not before.
+- **Widgets.** The module augments `WidgetRegistry` in the widget's own file and exports a widget table. Ids read `module:widget` – `participants:unit`. See [Presentation layer](./layers/presentation).
+- **Doorways.** A named hook or component for a fact another part of the product needs, such as which theme the signed-in person wears. A fact about the person themselves is a field on `User`, read with `utils`' `useUser`. A doorway is a promise, so one is added when the application is about to walk through it, not before.
 
 Registration, not import, is how a module reaches the application, and that is what lets a module stay ignorant of its neighbors.
 
 ## Authentication
 
-`modules/authentication` is the client half of the auth service's browser contract: the sign-in and sign-out addresses, the question of who is signed in and its one refresh retry, the defensive decode of the user payload – the flattened roles translated into the closed set `utils` declares – and the signed-in person: one `User`, the application's only definition of who is signed in, with the helpers that derive the greeting name and the unit the roles or the list of participants place them in.
+`modules/authentication` is the client half of the auth service's browser contract: the sign-in and sign-out addresses, the question of who is signed in and its one refresh retry, the defensive decode of the user payload – the flattened roles translated into the closed set `utils` declares – and the signed-in person: one `User`, the application's only definition of who is signed in, filled in whole here – the greeting name, the unit the roles or the list of participants place them in, how they travel, the line that says what they are, and the mark they wear. The type itself is `utils`', beside `useUser`, so any module can read who is signed in without importing this one.
 
 It holds no token and never will. The session is httpOnly cookies the browser carries, so the module asks who is signed in and is told, or is not ([ADR 019](/decisions/019-authenticate-on-the-app-origin-through-scoutid)). [Sign in](./example-flows/sign-in) walks the whole round trip.
 
@@ -28,13 +28,13 @@ It exports `SignInScreen`, the screen the session gate shows when nobody is sign
 
 `modules/home` is the smallest module, and deliberately so. It owns the start screen's layout, the contingent's notices, and the emergency numbers a leader needs, and it fetches nothing.
 
-The countdown and the unit widgets on that screen are other modules', mounted by id through the widget registry, and every decision the screen draws on is handed to it as a prop. That is the rule doing its job: home shows a countdown and a unit's people without knowing that the journey or participants modules exist.
+The countdown and the unit widgets on that screen are other modules', mounted by id through the widget registry, and who sees which – and from when – is the screen's own decision, read from the reveal and the ambient roles. That is the rule doing its job: home shows a countdown and a unit's people without knowing that the journey or participants modules exist.
 
 ## Journey
 
 `modules/journey` is the trip itself: departure, the camp, and the way home. The dates are fixed and public, so they are written down rather than fetched, and the phase and the countdown are pure functions over them – there is nothing to load and nothing to cache.
 
-Its public surface is one countdown widget, placed on the start screen by the application.
+Its public surface is one countdown widget, registered by id and placed by the start screen itself.
 
 ## Participants
 
@@ -52,6 +52,6 @@ A library that knows a feature is a feature module in the wrong place. The test 
 
 - **`host`** answers which tier the application is running in, a browser or a shell's webview, and carries the versioned bridge to the shells. It has no dependencies at all, not even React, because everything it does is message passing and JSON.
 - **`ui`** is the design system: components, icons, tokens, the five themes, the route and widget registries, and the behavior helpers. It knows what a row is; it does not know what a participant is.
-- **`utils`** holds the small pure helpers more than one package needs, and the bar for adding one is that a second package already wants it. `stringOrFallback` reads a string out of untyped input, and the `fetch` wrapper the [data layer](./layers/data) is built around tells a request that never reached anything, a refusal carrying its status, and an answer that was not JSON apart. It also holds the session's role vocabulary – the closed `Role` set and the `hasAnyRole`, `hasAllRoles`, and `leaderUnit` helpers – with the `RolesProvider` the application mounts at the session gate, so any module reads `useRoles()` instead of having answers threaded down as props. The translation from the provider's spellings into that set is not here: it is the authentication module's, in its data layer.
+- **`utils`** holds the small pure helpers more than one package needs, and the bar for adding one is that a second package already wants it. `stringOrFallback` reads a string out of untyped input, and the `fetch` wrapper the [data layer](./layers/data) is built around tells a request that never reached anything, a refusal carrying its status, and an answer that was not JSON apart. It also holds the session's role vocabulary – the closed `Role` set and the `hasAnyRole`, `hasAllRoles`, and `leaderUnit` helpers – with the `RolesProvider` the application mounts at the session gate, so any module reads `useRoles()` instead of having answers threaded down as props. The signed-in person is here the same way: the `User` type, with its unit, travel choice, role line, and mark, and the `UserProvider` that lets any module read `useUser()`. The translation from the provider's spellings into that set is not here: it is the authentication module's, in its data layer.
 
 Libraries do not import modules, and they do not import each other.

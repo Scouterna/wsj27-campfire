@@ -51,11 +51,11 @@ Hiding them inside one container would hide the rule the whole front-end rests o
 
 One file knows every module exists, and that is what lets no module know another. It merges each module's route table into one `screens` object and each module's widgets into one `widgets` object, and hands both to the router and to the widget provider.
 
-Modules do not import each other, so anything one module knows and another needs travels through the application. The participants module exposes a hook saying how the signed-in person travels; the application calls it and passes the answer to the home screen as a prop. Home never learns that participants exists.
+Modules do not import each other, so anything one module knows and another needs lives in a library both may import. The authentication module decodes the signed-in `User` – how they travel included – the application hands it to `utils`' `UserProvider` once, and the journey's countdown reads it with `useUser`. The application passes nothing along and works nothing out, and journey never learns that authentication exists.
 
 Two registries make that safe at compile time, and both live in `libraries/ui`:
 
 - **`RouteRegistry`** is an empty interface each module augments with the addresses it owns, branded with its owner, so two modules claiming `/participants` is a type error rather than a race the later import wins. See [Navigation and routing](./layers/navigation).
-- **`WidgetRegistry`** works the same way for widgets. A screen draws another module's contribution with `<Widget id="participants:unit-leaders" />`, and an unregistered id renders nothing – the honest behavior for a build assembled without that module. See [Presentation layer](./layers/presentation).
+- **`WidgetRegistry`** works the same way for widgets. A screen draws another module's contribution with `<Widget id="participants:unit" />`, and an unregistered id renders nothing – the honest behavior for a build assembled without that module. See [Presentation layer](./layers/presentation).
 
 Registration, not import, is how a module reaches the application. The application spreads the tables; it never reaches inside a module.

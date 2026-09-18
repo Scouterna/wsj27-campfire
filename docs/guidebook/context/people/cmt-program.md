@@ -14,7 +14,7 @@ That is a calendar spread over eighteen months, and it is a calendar the whole c
 
 Program gets the unscoped list of participants like the other CMT functions, and a person's page carries the one field that is genuinely theirs: how that person travels. Rundresa, direktresa, or egen resa, as the list of participants worded it.
 
-The countdown on the home screen is the other piece. It counts to departure and to camp from an itinerary that is fixed and public, and therefore lives in the journey module rather than being fetched from anywhere – there is no service to fetch it from, and an itinerary that has been printed does not need one. It reads a person's travel choice to know whether to count down to the pre-trip or straight to the camp, so a leader on the rundresa and a leader traveling direct see different dates.
+The countdown on the home screen is the other piece. It counts down to the first day of a person's journey, and through the days once it has begun, from an itinerary that is fixed and public, and therefore lives in the journey module rather than being fetched from anywhere – there is no service to fetch it from, and an itinerary that has been printed does not need one. It reads a person's travel choice to know whether to count down to the pre-trip or straight to the camp, so a leader on the rundresa and a leader traveling direct see different dates.
 
 No schedule, activity, förträff, or attendance is designed anywhere in the application.
 

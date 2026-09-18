@@ -33,9 +33,9 @@ Until a module has more than one screen, the screen sits directly in `src/` besi
 
 There is no dependency container and no injection framework. A module is a set of components and hooks, and what they need reaches them three ways:
 
-- **Through props**, from the composition root. Everything that crosses a module boundary travels this way – the application asks one module and hands the answer to another's screen. That coupling is a line in the one file that gets the most attention, rather than an import nobody reads.
-- **Through context**, mounted once above the screens. The theme, the unit identities, and who is reading the list of participants are each stated once at the top and read wherever they are needed, so a test can replace one by mounting a different provider.
-- **Through registration**, for routes. A module declares the addresses it owns into an interface in `libraries/ui`, and the application collects the tables. The library never learns which modules exist, and two modules claiming one address still collide at compile time. Widgets stay on the props path above: exported by their module, placed by the composition root.
+- **Through props**, inside a module. A screen hands its own components what they draw, the way the countdown widget hands its card the moment. Nothing crosses a module boundary as a prop: the application composes, and computes nothing on a module's behalf.
+- **Through context**, mounted once above the screens. The signed-in `User` and their roles, the theme, the unit identities, the merged widget table, and who is reading the list of participants are each stated once at the session gate and read wherever they are needed, so a test or a story can replace one by mounting a different provider. This is how a fact one module resolved reaches another: the authentication module decodes the `User`, `utils` holds it, and the journey's countdown reads how the person travels with `useUser`.
+- **Through registration**, for routes and widgets. A module declares the addresses and the widget ids it owns into interfaces in `libraries/ui`, and the application collects the tables. The library never learns which modules exist, and two modules claiming one address or one id still collide at compile time. A screen places another module's widget by id, and decides for itself who sees it.
 
 A hook is the unit that gets tested and reused, not a class. A screen calls one hook, gets the state it renders, and decides nothing about where the state came from.
 

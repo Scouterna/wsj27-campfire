@@ -4,15 +4,15 @@ Read the [root `AGENTS.md`](../AGENTS.md) first – it holds the conventions tha
 
 A module is one domain capability, whole: its data layer, its domain model, its screens, and its widgets. Four exist, and they are how the product grows – a new capability is a new module, not another folder inside an old one.
 
-Authentication and participants carry the full shape – a data layer, a domain model, and screens – participants with the section's route table, four screens, and the leader's home widgets on top. Home is the start screen the signed-in application mounts, with the reveal countdown as its own widget, and journey is one screen deep waiting for its feature. The rules below are in force for what exists, and each section says where it describes something no module holds yet.
+Authentication and participants carry the full shape – a data layer, a domain model, and screens – participants with the section's route table, four screens, and the leader's home widgets on top. Home is the start screen the signed-in application mounts, with the reveal countdown as its own widget and the other modules' widgets placed by id and gated by the screen itself, and journey is its fixed dates, the pure functions over them, and the countdown widget they feed. The rules below are in force for what exists, and each section says where it describes something no module holds yet.
 
 ## The one rule that carries the rest
 
-**A module never imports another module.** A module depends on `libraries/*` and on third-party packages, and on nothing else in this repository. `apps/web` is the only place that knows them all, and it is where a fact from one module reaches another – as a prop, in the application's own types.
+**A module never imports another module.** A module depends on `libraries/*` and on third-party packages, and on nothing else in this repository. `apps/web` is the only place that knows them all, and all it does with that knowledge is compose: it spreads the modules' tables and mounts the providers. The logic stays in the module that owns it.
 
 Two checks keep that true. A relative path into another module would otherwise resolve and work, so ESLint refuses it – `import-x/no-relative-packages` in `eslint.config.ts` rejects any relative import that crosses into another package. A package name cannot resolve at all, because a module is private and is nobody's declared dependency, so `pnpm check:types` fails on it.
 
-When the rule feels restrictive, it is doing its job. If home needs to know whether the signed-in person is on the pre-trip, the application asks participants and hands home a boolean. Home never learns that participants exists.
+When the rule feels restrictive, the answer is a library, never the application. The home screen decides for itself who sees which widget, and the countdown works out for itself whether the pre-trip is the signed-in person's – because the reveal is `ui`'s, and the roles and the signed-in `User` are ambient in `utils`. A hook a module needs and cannot reach is a hook in the wrong package: move it to the library, rather than moving the module's logic up into `apps/web`. Home never learns that journey or participants exist.
 
 ## The shape of a module
 
@@ -40,6 +40,8 @@ modules/<name>/src/
 │   ├── screens/    one directory per screen
 │   ├── widgets/    one directory per widget, each augmenting WidgetRegistry
 │   └── storybook/  the decorators and fixtures the module's own stories need
+├── routes.tsx    the route table, for a module that answers at addresses
+├── widgets.ts    the widget table, for a module that fills widget ids
 └── index.ts      the public surface – everything else is internal
 ```
 
@@ -49,19 +51,19 @@ modules/<name>/src/
 
 ## The public surface
 
-`src/index.ts` is a deliberate, narrow list, opening with a JSDoc block saying what the module hands out. Domain types, queries, and screens stay internal unless the application genuinely needs them – anything reaching for a domain type is reaching past the boundary rather than through it. Today home and journey export exactly one screen, authentication exports its screen beside the session client the gate asks and the `User` the answer decodes to, and participants exports its route table and section label – its screens mount through the table rather than by name – plus the `UnitWidget` the composition root places on home, and the viewer machinery the gate seeds.
+`src/index.ts` is a deliberate, narrow list, opening with a JSDoc block saying what the module hands out. Domain types, queries, and screens stay internal unless the application genuinely needs them – anything reaching for a domain type is reaching past the boundary rather than through it. Today home exports its one screen, journey exports its screen and its widget table, authentication exports its screen beside the session client the gate asks – the `User` the answer decodes to is `utils`' type, so every module can read it – and participants exports its route table and section label – its screens mount through the table rather than by name – plus its widget table, and the viewer machinery the gate seeds.
 
 Three kinds of thing leave a module ([Navigation and routing](../docs/guidebook/architecture/layers/navigation.md), [Presentation layer](../docs/guidebook/architecture/layers/presentation.md)):
 
 - **Routes** – augment `RouteRegistry` with each address the module owns, branded `Address<"<module>">`, and export a `Routes` table the application spreads into its own. The brand is what makes two modules claiming one path a compile error rather than a race the later import wins. Write the table with `satisfies`, never a type annotation: annotating widens the keys to every address the application knows, and the router stops knowing which ones this module answers at.
-- **Widgets** – a component another module's screen places without knowing who drew it. The providing module exports it, and the composition root hands it down as a prop – the way `UnitWidget` reaches the home screen's `widget` slot. A registry of widget ids stays the design for the day widgets multiply; one prop per slot carries the current two.
-- **Doorways** – a named hook or component for a fact another part of the product needs, such as how the signed-in person travels. A doorway is a promise, so add one when the application is about to walk through it, not before.
+- **Widgets** – a component another module's screen places without knowing who drew it. Augment `WidgetRegistry` in the widget's own file with an id that reads `module:widget`, branded `WidgetFrom<"<module>">`, and export a `Widgets` table – `src/widgets.ts`, written with `satisfies` – that the application spreads into its own. The placing screen writes `<Widget id="journey:countdown" />` and owns the gating around it. A widget takes no props: what it needs it reads where it is used, from its own queries or from the ambient session in `utils`.
+- **Doorways** – a named hook or component for a fact another part of the product needs. A fact about the signed-in person that another module reads is a field on `User`, read with `utils`' `useUser`, because a module cannot import the module that resolved it. A doorway is a promise, so add one when the application is about to walk through it, not before.
 
-For routes, registration rather than import is how a module reaches the application: the application spreads the tables and never reaches inside one.
+Registration rather than import is how a module reaches the application: the application spreads the tables and never reaches inside one.
 
 ## Data at the boundary
 
-The authentication module fetches today – the session, and the signed-in person's unit – against the contract the [mock](../tools/mock/AGENTS.md) serves locally, and every module that follows lands the same way ([Data layer](../docs/guidebook/architecture/layers/data.md)):
+The authentication module fetches today – the session, and the signed-in person's registration: their unit, and how they travel – against the contract the [mock](../tools/mock/AGENTS.md) serves locally, and every module that follows lands the same way ([Data layer](../docs/guidebook/architecture/layers/data.md)):
 
 - **Every service read goes through the application's one query client** ([ADR 017](../docs/decisions/017-route-and-load-data-with-tanstack-router-and-query.md)). A factory in `data/` returns the query options; the utils `fetch` is the transport inside its query function, never a path around the cache. The composition root owns the client and hands it in – to a screen's hook, or to a plain function the way the gate hands it to `currentUser` – so one cache holds every answer. A read that calls `fetch` directly is wrong even when it works, because it answers without being cached, deduplicated, or owned.
 - **One model type per thing, and it is ours.** `model/` holds the application's definition, filled in whole by the converter – derivations included, the way `User` carries `firstName` and `unit` rather than helpers that compute them downstream. The provider's vocabulary stops in `data/dto/`, and nothing has two types for one thing: a session shape beside a profile shape is the smell that a converter stopped halfway.

@@ -76,6 +76,6 @@ Each tab is its own webview with its own history, and the shell owns the tab bar
 
 The web reports the other direction – the screen's title, whether back applies, and the session's tabs – so the bars are drawn natively from what the web already knows. Nothing about a route is duplicated in a shell.
 
-## Widgets travel as props
+## Widgets register too
 
-Widgets cross module boundaries one level down from routes, but as values rather than registrations: the providing module exports the widget, and the composition root places it in a slot the receiving screen offers – a `ReactNode` prop, so the screen never learns which module filled it ([Presentation layer](./presentation)). With two widgets in the product, one prop per slot carries them; a `WidgetRegistry` of id-keyed tables is the design to grow into when placing by hand stops scaling.
+Widgets cross module boundaries one level down from routes, the same way: the providing module declares an id in `WidgetRegistry` and exports a table, the application merges the tables, and the receiving screen places a widget by id, so it never learns which module filled it ([Presentation layer](./presentation)).

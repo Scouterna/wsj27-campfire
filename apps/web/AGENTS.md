@@ -33,7 +33,7 @@ Every module and library it composes is a `workspace:*` dependency in its `packa
 `src/routes.tsx` is the only file that knows every module, which is what lets no module know another ([ADR 016](../../docs/decisions/016-compose-the-web-application-from-feature-modules.md)). Two tables carry that:
 
 - `screens` – the application's own `/`, plus each module's exported route table spread in, every screen wrapped in the section guard
-- the widgets – a module's exported widget handed down as a prop where a screen offers a slot, the way `HomeRoute` places the participants module's `UnitWidget` in the home screen's `widget` slot. A `WidgetRegistry` with id-keyed tables stays the design for the day widgets multiply.
+- `widgets` – each module's exported widget table spread into one, and handed to `WidgetsProvider` at the session gate, so a screen places another module's widget by id
 
 Follow the shape when you add to it.
 
@@ -41,9 +41,9 @@ Follow the shape when you add to it.
 
 **The sections are the application's model.** They are derived from the session's roles, and one `isGranted` predicate feeds the menus, the chrome, and the screen guard, so an address outside the granted sections answers as not found – indistinguishable from an address that matches nothing, and the hidden screen never mounts. The predicate fails closed: a screen whose `tab` names no section is reachable by nobody.
 
-**A new widget** is exported by the module that owns its data, and the composition root places it: the receiving screen offers a `ReactNode` slot and never learns which module filled it. Gating belongs here too – `HomeRoute` withholds the unit widget until the units reveal is open and the viewer leads a unit.
+**A new widget** belongs to the module that owns its data. The module augments `WidgetRegistry` with its id, branded `WidgetFrom<"module">`, exports a `Widgets` table, and the application spreads it into `widgets`. Placing it – where, for whom, and from when – is the receiving screen's own business, in its own module: the home screen gates its widgets behind the units reveal and the leader role itself. Nothing about a screen's content is decided here.
 
-**A cross-module fact travels as a prop.** The home screen shows a countdown and a unit's people without knowing the journey or participants modules – the application reads the hook and hands the value down. If a module needs another module's type, the composition is wrong, not the rule.
+**A cross-module fact is ambient, not threaded.** A fact about the signed-in person that a module needs is on the `User`, which the gate hands to `utils`' `UserProvider` once, and the module reads it with `useUser` where it uses it – the way the journey's countdown reads `useUser()?.travel`. A new fact is a new field on `User`, filled in by the authentication module's converter, not a new provider. The application does not compute on a module's behalf: if this file is working something out for a screen, the logic belongs in that screen's module, and if it is deriving something from the signed-in person, it belongs on `User`. What stays here is translation between packages that may not know each other – `themeFor` turns the `User` into `ui`'s theme, `viewerFor` into the participants module's `Viewer`, and the chrome into `ui`'s avatar – because `utils` can import neither, and that joining is exactly what a composition root is for. If a module needs another module's type, the composition is wrong, not the rule.
 
 ## The gate and the two chromes
 
