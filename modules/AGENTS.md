@@ -4,7 +4,7 @@ Read the [root `AGENTS.md`](../AGENTS.md) first – it holds the conventions tha
 
 A module is one domain capability, whole: its data layer, its domain model, its screens, and its widgets. Four exist, and they are how the product grows – a new capability is a new module, not another folder inside an old one.
 
-Authentication and participants carry the full shape – a data layer, a domain model, and screens – participants with the section's route table, four screens, and the leader's home widgets on top. Home is the start screen the signed-in application mounts, with the reveal countdown and the contingent's messages as its own widgets, the message list as its model, and the other modules' widgets placed by id and gated by the screen itself, and journey is its fixed dates, the pure functions over them, and the countdown widget they feed. The rules below are in force for what exists, and each section says where it describes something no module holds yet.
+Authentication and participants carry the full shape – a data layer, a domain model, and screens – authentication with the sign-in screen and the profile page, participants with the section's route table, four screens, and the leader's home widgets on top. Home is the start screen the signed-in application mounts, with the reveal countdown and the contingent's messages as its own widgets, the message list as its model, and the other modules' widgets placed by id and gated by the screen itself, and journey is its fixed dates, the pure functions over them, and the countdown widget they feed. The rules below are in force for what exists, and each section says where it describes something no module holds yet.
 
 ## The one rule that carries the rest
 
@@ -52,7 +52,7 @@ modules/<name>/src/
 
 ## The public surface
 
-`src/index.ts` is a deliberate, narrow list, opening with a JSDoc block saying what the module hands out. Domain types, queries, and screens stay internal unless the application genuinely needs them – anything reaching for a domain type is reaching past the boundary rather than through it. Today home exports its one screen, journey exports its screen and its widget table, authentication exports its screen beside the session client the gate asks – the `User` the answer decodes to is `utils`' type, so every module can read it – and participants exports its route table and section label – its screens mount through the table rather than by name – plus its widget table, and the viewer machinery the gate seeds.
+`src/index.ts` is a deliberate, narrow list, opening with a JSDoc block saying what the module hands out. Domain types, queries, and screens stay internal unless the application genuinely needs them – anything reaching for a domain type is reaching past the boundary rather than through it. Today home exports its one screen, journey exports its screen and its widget table, authentication exports its sign-in screen beside the session client the gate asks, the route table that holds the profile page, and the `SignOutProvider` the gate hands that page its way out through – the `User` the answer decodes to is `utils`' type, so every module can read it – and participants exports its route table and section label – its screens mount through the table rather than by name – plus its widget table, and the viewer machinery the gate seeds.
 
 Three kinds of thing leave a module ([Navigation and routing](../docs/guidebook/architecture/layers/navigation.md), [Presentation layer](../docs/guidebook/architecture/layers/presentation.md)):
 

@@ -82,4 +82,4 @@ Every failure reads as "nobody is signed in", and the screen behind that is the 
 
 Reading a network failure as "signed out" is a deliberate simplification: the screen behind it decides the same thing either way, and signing in is what proves the connection works.
 
-Signing out is the same mechanism in reverse – a full-page navigation to `/api/auth/logout`, which drops the session and signs out of ScoutID too, and in a shell it walks through the same modal flow.
+Signing out starts on the profile page, the one place that offers it: the application forgets its query cache, and then the same mechanism runs in reverse – a full-page navigation to `/api/auth/logout`, which drops the session and signs out of ScoutID too, and in a shell it walks through the same modal flow.
