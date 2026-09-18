@@ -80,7 +80,7 @@ export function UnitsScreen(): ReactElement {
           Ingen att visa.
         </p>
       ) : (
-        <Card aside={counted(entries.length)} title="Alla">
+        <Card aside={<span aria-hidden="true">{counted(entries.length)}</span>} title="Alla">
           {entries.map((entry) => (
             <Row
               key={entry.key}

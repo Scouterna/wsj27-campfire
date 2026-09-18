@@ -45,3 +45,21 @@ export const WithAside: Story = {
     </Card>
   ),
 }
+
+/**
+ * An aside with markup of its own, long enough to drop under the title at phone width.
+ */
+export const WithMarkupAside: Story = {
+  render: (): ReactElement => (
+    <Card
+      aside={
+        <>
+          Uppdaterad <b>för 4 minuter sedan</b> av kontingentledningen
+        </>
+      }
+      title="Dagens läge"
+    >
+      <p className="story-filler">Raden vid kanten kan bära egen markup.</p>
+    </Card>
+  ),
+}

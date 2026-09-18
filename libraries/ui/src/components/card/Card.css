@@ -20,10 +20,13 @@
     }
   }
 
-  /* The heading row: the title leading, and the quiet aside at the trailing edge. */
+  /* The heading row: the title leading, and the quiet aside at the trailing edge –
+     wrapping under the title where a phone, or a reader's larger text, cannot hold both. */
   .card-heading {
     align-items: baseline;
     display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-inline) var(--spacing-group);
     justify-content: space-between;
     margin: 0 0 var(--spacing-group);
   }

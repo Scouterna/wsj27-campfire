@@ -216,7 +216,7 @@ export function ParticipantsScreen(): ReactElement {
               virtualized rows are not in the document for the outline to scan. */}
           <PageJumps current={jumps.current} entries={jumps.entries} onJump={jumps.onJump} />
           <Card
-            aside={counted(found.length, people.length)}
+            aside={<span aria-hidden="true">{counted(found.length, people.length)}</span>}
             title={offered.find((segment) => segment.filter === roll)?.label ?? "Alla"}
           >
             <PeopleList
