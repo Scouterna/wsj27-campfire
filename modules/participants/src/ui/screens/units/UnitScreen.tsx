@@ -44,7 +44,11 @@ function GroupedManagement(props: GroupedManagementProps): ReactElement {
   return (
     <>
       {cmtSections(props.people).map((section) => (
-        <Card aside={counted(section.people.length)} key={section.label} title={section.label}>
+        <Card
+          aside={<span aria-hidden="true">{counted(section.people.length)}</span>}
+          key={section.label}
+          title={section.label}
+        >
           {section.people.map((person) => (
             <PersonRow key={person.memberNo} person={person} />
           ))}
@@ -125,7 +129,10 @@ export function UnitScreen(props: UnitScreenProps): ReactElement {
           {/* The outline's stops over the name-sorted rows – declared, because the
               virtualized rows are not in the document for the outline to scan. */}
           <PageJumps current={jumps.current} entries={jumps.entries} onJump={jumps.onJump} />
-          <Card aside={counted(group.people.length)} title="Personer">
+          <Card
+            aside={<span aria-hidden="true">{counted(group.people.length)}</span>}
+            title="Personer"
+          >
             <PeopleList
               onFirstVisibleChange={jumps.onFirstVisible}
               people={group.people}

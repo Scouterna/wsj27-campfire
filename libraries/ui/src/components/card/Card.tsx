@@ -4,11 +4,12 @@ import "./Card.css"
 
 export interface CardProps {
   /**
-   * The quiet line at the heading row's trailing edge – a count, a date. Decorative
-   * beside the title, so assistive technology is given the fact some other way.
-   * Nothing without a `title`.
+   * The quiet line at the heading row's trailing edge – a count, a date. Phrasing
+   * content only: it is drawn inside a `span`, outside the heading, so the page outline
+   * lists the title alone and assistive technology reads the aside after it. Drops
+   * under the title where the row cannot hold both. Nothing without a `title`.
    */
-  readonly aside?: string
+  readonly aside?: ReactNode
   /**
    * What the card holds.
    */
@@ -36,11 +37,7 @@ export function Card(props: CardProps): ReactElement {
     <section className="card-section">
       <div className="card-heading">
         <h2 className="card-title">{props.title}</h2>
-        {props.aside === undefined ? null : (
-          <span aria-hidden="true" className="card-aside">
-            {props.aside}
-          </span>
-        )}
+        {props.aside === undefined ? null : <span className="card-aside">{props.aside}</span>}
       </div>
       <div className="card">{props.children}</div>
     </section>
