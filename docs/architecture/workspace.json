@@ -5,14 +5,16 @@
   "description" : "The digital companion for the leaders and the contingent management team of Scouterna's Swedish contingent to the World Scout Jamboree 2027.",
   "documentation" : { },
   "id" : 1,
-  "lastModifiedDate" : "2026-09-16T23:25:48Z",
+  "lastModifiedAgent" : "structurizr/diagrams/3c153b0b-faeb-4314-8ae4-676e6a9c4f70",
+  "lastModifiedDate" : "2026-09-18T14:42:36Z",
+  "lastModifiedUser" : "1054532543",
   "model" : {
     "deploymentNodes" : [ {
       "children" : [ {
         "containerInstances" : [ {
           "containerId" : "17",
           "environment" : "Local",
-          "id" : "82",
+          "id" : "85",
           "instanceId" : 1,
           "properties" : {
             "structurizr.dsl.identifier" : "localWeb"
@@ -21,11 +23,11 @@
         } ],
         "description" : "The web application's dev server, on port 3000.",
         "environment" : "Local",
-        "id" : "81",
+        "id" : "84",
         "instances" : "1",
         "name" : "Vite",
         "properties" : {
-          "structurizr.dsl.identifier" : "70763631-ec4c-4d60-8681-4279604ec112"
+          "structurizr.dsl.identifier" : "075e8050-e845-4c88-82b7-1ecb6d891562"
         },
         "tags" : "Element,Deployment Node",
         "technology" : "Node.js 24, Vite"
@@ -33,7 +35,7 @@
         "containerInstances" : [ {
           "containerId" : "27",
           "environment" : "Local",
-          "id" : "84",
+          "id" : "87",
           "instanceId" : 1,
           "properties" : {
             "structurizr.dsl.identifier" : "localMock"
@@ -42,11 +44,11 @@
         } ],
         "description" : "The mock's own process, on port 8003.",
         "environment" : "Local",
-        "id" : "83",
+        "id" : "86",
         "instances" : "1",
         "name" : "Node.js",
         "properties" : {
-          "structurizr.dsl.identifier" : "839d998f-695b-49b2-ade3-871167b6e742"
+          "structurizr.dsl.identifier" : "d8b54dc3-8653-4a5e-8f2e-be6bf3680f77"
         },
         "tags" : "Element,Deployment Node",
         "technology" : "Node.js 24"
@@ -54,33 +56,33 @@
         "containerInstances" : [ {
           "containerId" : "18",
           "environment" : "Local",
-          "id" : "86",
+          "id" : "89",
           "instanceId" : 1,
           "properties" : {
             "structurizr.dsl.identifier" : "localApple"
           },
           "relationships" : [ {
             "description" : "Hosts in one webview per tab",
-            "destinationId" : "82",
-            "id" : "87",
+            "destinationId" : "85",
+            "id" : "90",
             "linkedRelationshipId" : "58",
-            "sourceId" : "86"
+            "sourceId" : "89"
           }, {
             "description" : "Loads the application from",
-            "destinationId" : "80",
-            "id" : "93",
-            "sourceId" : "86",
+            "destinationId" : "83",
+            "id" : "96",
+            "sourceId" : "89",
             "tags" : "Relationship"
           } ],
           "tags" : "Container Instance"
         } ],
         "description" : "The Apple shell, pointed at localhost.",
         "environment" : "Local",
-        "id" : "85",
+        "id" : "88",
         "instances" : "1",
         "name" : "iOS Simulator",
         "properties" : {
-          "structurizr.dsl.identifier" : "76b5b265-e426-4a0c-b095-2104e4408c6c"
+          "structurizr.dsl.identifier" : "35a4de6c-5c9f-44da-866d-26003397eca0"
         },
         "tags" : "Element,Deployment Node",
         "technology" : "Xcode"
@@ -88,59 +90,59 @@
         "containerInstances" : [ {
           "containerId" : "19",
           "environment" : "Local",
-          "id" : "89",
+          "id" : "92",
           "instanceId" : 1,
           "properties" : {
             "structurizr.dsl.identifier" : "localAndroid"
           },
           "relationships" : [ {
             "description" : "Hosts in one webview per tab",
-            "destinationId" : "82",
-            "id" : "90",
+            "destinationId" : "85",
+            "id" : "93",
             "linkedRelationshipId" : "59",
-            "sourceId" : "89"
+            "sourceId" : "92"
           }, {
             "description" : "Loads the application from",
-            "destinationId" : "80",
-            "id" : "94",
-            "sourceId" : "89",
+            "destinationId" : "83",
+            "id" : "97",
+            "sourceId" : "92",
             "tags" : "Relationship"
           } ],
           "tags" : "Container Instance"
         } ],
         "description" : "The Android shell, with port 8000 reversed to the host.",
         "environment" : "Local",
-        "id" : "88",
+        "id" : "91",
         "instances" : "1",
         "name" : "Android emulator",
         "properties" : {
-          "structurizr.dsl.identifier" : "a04ea7ea-ae55-4e30-b806-2770f4cc7a12"
+          "structurizr.dsl.identifier" : "2f705768-ce62-4da2-a830-526ae0fa696f"
         },
         "tags" : "Element,Deployment Node",
         "technology" : "Android SDK"
       } ],
       "description" : "The one machine that runs the whole stack behind localhost.",
       "environment" : "Local",
-      "id" : "79",
+      "id" : "82",
       "infrastructureNodes" : [ {
         "description" : "The one origin, on port 8000.",
         "environment" : "Local",
-        "id" : "80",
+        "id" : "83",
         "name" : "Caddy",
         "properties" : {
           "structurizr.dsl.identifier" : "localCaddy"
         },
         "relationships" : [ {
           "description" : "Proxies every other path to",
-          "destinationId" : "82",
-          "id" : "91",
-          "sourceId" : "80",
+          "destinationId" : "85",
+          "id" : "94",
+          "sourceId" : "83",
           "tags" : "Relationship"
         }, {
           "description" : "Proxies /api/auth and /api/project to",
-          "destinationId" : "84",
-          "id" : "92",
-          "sourceId" : "80",
+          "destinationId" : "87",
+          "id" : "95",
+          "sourceId" : "83",
           "tags" : "Relationship"
         } ],
         "tags" : "Element,Infrastructure Node",
@@ -149,7 +151,7 @@
       "instances" : "1",
       "name" : "Developer's machine",
       "properties" : {
-        "structurizr.dsl.identifier" : "018bc501-b58b-4d25-be88-65e56b31a240"
+        "structurizr.dsl.identifier" : "626f2137-3e8b-493f-b6bb-65309d5c3048"
       },
       "tags" : "Element,Deployment Node",
       "technology" : "macOS"
@@ -159,7 +161,7 @@
           "containerInstances" : [ {
             "containerId" : "17",
             "environment" : "Dev",
-            "id" : "99",
+            "id" : "102",
             "instanceId" : 1,
             "properties" : {
               "structurizr.dsl.identifier" : "devWeb"
@@ -168,36 +170,36 @@
           } ],
           "description" : "The published web image, serving the built application.",
           "environment" : "Dev",
-          "id" : "98",
+          "id" : "101",
           "instances" : "1",
           "name" : "Web",
           "properties" : {
-            "structurizr.dsl.identifier" : "dfe3e510-b338-4fe8-832a-12719ddad701"
+            "structurizr.dsl.identifier" : "d3ac88cc-3e83-45db-aac6-264fcd220c05"
           },
           "tags" : "Element,Deployment Node",
           "technology" : "Caddy 2, container"
         }, {
           "description" : "The auth service's own image.",
           "environment" : "Dev",
-          "id" : "100",
+          "id" : "103",
           "instances" : "1",
           "name" : "Auth service",
           "properties" : {
-            "structurizr.dsl.identifier" : "b9c2af31-06ee-4e90-bfdf-76dadcd880af"
+            "structurizr.dsl.identifier" : "06ed609a-5f8b-48b9-b8bc-87af06933a36"
           },
           "softwareSystemInstances" : [ {
             "environment" : "Dev",
-            "id" : "101",
+            "id" : "104",
             "instanceId" : 1,
             "properties" : {
               "structurizr.dsl.identifier" : "devAuth"
             },
             "relationships" : [ {
               "description" : "Runs the OpenID round trip with",
-              "destinationId" : "113",
-              "id" : "114",
+              "destinationId" : "116",
+              "id" : "117",
               "linkedRelationshipId" : "51",
-              "sourceId" : "101"
+              "sourceId" : "104"
             } ],
             "softwareSystemId" : "13",
             "tags" : "Software System Instance"
@@ -207,25 +209,25 @@
         }, {
           "description" : "The participants service's own image.",
           "environment" : "Dev",
-          "id" : "102",
+          "id" : "105",
           "instances" : "1",
           "name" : "Participants service",
           "properties" : {
-            "structurizr.dsl.identifier" : "bb411460-5f27-4dc5-bb4f-f8961ef4fc96"
+            "structurizr.dsl.identifier" : "844befe5-8b1b-4b88-9955-86d72d6ff213"
           },
           "softwareSystemInstances" : [ {
             "environment" : "Dev",
-            "id" : "103",
+            "id" : "106",
             "instanceId" : 1,
             "properties" : {
               "structurizr.dsl.identifier" : "devProject"
             },
             "relationships" : [ {
               "description" : "Reads the contingent's member data from",
-              "destinationId" : "117",
-              "id" : "118",
+              "destinationId" : "120",
+              "id" : "121",
               "linkedRelationshipId" : "53",
-              "sourceId" : "103"
+              "sourceId" : "106"
             } ],
             "softwareSystemId" : "14",
             "tags" : "Software System Instance"
@@ -235,32 +237,32 @@
         } ],
         "description" : "The cluster that runs the web image and the two services.",
         "environment" : "Dev",
-        "id" : "96",
+        "id" : "99",
         "infrastructureNodes" : [ {
           "description" : "The one origin, over HTTPS.",
           "environment" : "Dev",
-          "id" : "97",
+          "id" : "100",
           "name" : "Ingress",
           "properties" : {
             "structurizr.dsl.identifier" : "devIngress"
           },
           "relationships" : [ {
             "description" : "Routes every other path to",
-            "destinationId" : "99",
-            "id" : "104",
-            "sourceId" : "97",
+            "destinationId" : "102",
+            "id" : "107",
+            "sourceId" : "100",
             "tags" : "Relationship"
           }, {
             "description" : "Routes /api/auth to",
-            "destinationId" : "101",
-            "id" : "105",
-            "sourceId" : "97",
+            "destinationId" : "104",
+            "id" : "108",
+            "sourceId" : "100",
             "tags" : "Relationship"
           }, {
             "description" : "Routes /api/project to",
-            "destinationId" : "103",
-            "id" : "106",
-            "sourceId" : "97",
+            "destinationId" : "106",
+            "id" : "109",
+            "sourceId" : "100",
             "tags" : "Relationship"
           } ],
           "tags" : "Element,Infrastructure Node",
@@ -269,18 +271,18 @@
         "instances" : "1",
         "name" : "Kubernetes cluster",
         "properties" : {
-          "structurizr.dsl.identifier" : "a5991ac7-cfe3-466b-a819-c258930836be"
+          "structurizr.dsl.identifier" : "aabc5ce4-791b-49a3-9ef7-9991f30548ff"
         },
         "tags" : "Element,Deployment Node",
         "technology" : "Kubernetes"
       } ],
       "description" : "The deployed dev environment, at campfire.wsj27.scouterna.net.",
       "environment" : "Dev",
-      "id" : "95",
+      "id" : "98",
       "instances" : "1",
       "name" : "Azure",
       "properties" : {
-        "structurizr.dsl.identifier" : "65ccb8ea-2029-4f52-8c75-cf3dfb9bf371"
+        "structurizr.dsl.identifier" : "f12bb995-7b76-477a-bd4f-3cb73e295b5f"
       },
       "tags" : "Element,Deployment Node",
       "technology" : "Microsoft Azure"
@@ -288,101 +290,101 @@
       "containerInstances" : [ {
         "containerId" : "18",
         "environment" : "Dev",
-        "id" : "108",
+        "id" : "111",
         "instanceId" : 1,
         "properties" : {
           "structurizr.dsl.identifier" : "devApple"
         },
         "relationships" : [ {
           "description" : "Hosts in one webview per tab",
-          "destinationId" : "99",
-          "id" : "109",
+          "destinationId" : "102",
+          "id" : "112",
           "linkedRelationshipId" : "58",
-          "sourceId" : "108"
+          "sourceId" : "111"
         }, {
           "description" : "Opens sign-in in a modal webview",
-          "destinationId" : "113",
-          "id" : "115",
+          "destinationId" : "116",
+          "id" : "118",
           "linkedRelationshipId" : "62",
-          "sourceId" : "108"
+          "sourceId" : "111"
         }, {
           "description" : "Loads the application from",
-          "destinationId" : "97",
-          "id" : "120",
-          "sourceId" : "108",
+          "destinationId" : "100",
+          "id" : "123",
+          "sourceId" : "111",
           "tags" : "Relationship"
         } ],
         "tags" : "Container Instance"
       }, {
         "containerId" : "19",
         "environment" : "Dev",
-        "id" : "110",
+        "id" : "113",
         "instanceId" : 1,
         "properties" : {
           "structurizr.dsl.identifier" : "devAndroid"
         },
         "relationships" : [ {
           "description" : "Hosts in one webview per tab",
-          "destinationId" : "99",
-          "id" : "111",
+          "destinationId" : "102",
+          "id" : "114",
           "linkedRelationshipId" : "59",
-          "sourceId" : "110"
+          "sourceId" : "113"
         }, {
           "description" : "Opens sign-in in a modal sheet",
-          "destinationId" : "113",
-          "id" : "116",
+          "destinationId" : "116",
+          "id" : "119",
           "linkedRelationshipId" : "63",
-          "sourceId" : "110"
+          "sourceId" : "113"
         }, {
           "description" : "Loads the application from",
-          "destinationId" : "97",
-          "id" : "121",
-          "sourceId" : "110",
+          "destinationId" : "100",
+          "id" : "124",
+          "sourceId" : "113",
           "tags" : "Relationship"
         } ],
         "tags" : "Container Instance"
       } ],
       "description" : "A leader's or a CMT member's own phone.",
       "environment" : "Dev",
-      "id" : "107",
+      "id" : "110",
       "instances" : "1",
       "name" : "Member's phone",
       "properties" : {
-        "structurizr.dsl.identifier" : "c53be7fd-ade3-4249-8678-3a57845ebbf0"
+        "structurizr.dsl.identifier" : "018ea182-7e7c-4ad5-930f-bd7700c5bcd5"
       },
       "tags" : "Element,Deployment Node",
       "technology" : "iOS 26 or Android"
     }, {
       "description" : "Scouterna's own systems, with ScoutID's dev realm.",
       "environment" : "Dev",
-      "id" : "112",
+      "id" : "115",
       "instances" : "1",
       "name" : "Scouterna",
       "properties" : {
-        "structurizr.dsl.identifier" : "a6fe6f41-eacd-4776-beea-279e048460d6"
+        "structurizr.dsl.identifier" : "89e77def-cca4-4c27-a95b-ff799efde86d"
       },
       "softwareSystemInstances" : [ {
         "environment" : "Dev",
-        "id" : "113",
+        "id" : "116",
         "instanceId" : 1,
         "properties" : {
-          "structurizr.dsl.identifier" : "d7002e2a-3f99-454c-adaa-05969a66aafa"
+          "structurizr.dsl.identifier" : "23ecb08e-5d7c-4bfb-bfd8-11ab95e5941d"
         },
         "relationships" : [ {
           "description" : "Verifies sign-ins against",
-          "destinationId" : "117",
-          "id" : "119",
+          "destinationId" : "120",
+          "id" : "122",
           "linkedRelationshipId" : "52",
-          "sourceId" : "113"
+          "sourceId" : "116"
         } ],
         "softwareSystemId" : "10",
         "tags" : "Software System Instance"
       }, {
         "environment" : "Dev",
-        "id" : "117",
+        "id" : "120",
         "instanceId" : 1,
         "properties" : {
-          "structurizr.dsl.identifier" : "bb4bef4a-9bd1-4468-80c3-5e1e13ad4a7e"
+          "structurizr.dsl.identifier" : "3f4447d5-1e9c-44ff-bab7-e30f547d44bc"
         },
         "softwareSystemId" : "11",
         "tags" : "Software System Instance"
@@ -395,7 +397,7 @@
           "containerInstances" : [ {
             "containerId" : "17",
             "environment" : "Prod",
-            "id" : "126",
+            "id" : "129",
             "instanceId" : 1,
             "properties" : {
               "structurizr.dsl.identifier" : "prodWeb"
@@ -404,36 +406,36 @@
           } ],
           "description" : "The published web image, serving the built application.",
           "environment" : "Prod",
-          "id" : "125",
+          "id" : "128",
           "instances" : "1",
           "name" : "Web",
           "properties" : {
-            "structurizr.dsl.identifier" : "91eb8c02-f899-4475-b016-74a3e65e6b08"
+            "structurizr.dsl.identifier" : "3f52d197-4784-4d1c-929a-5516a997e4aa"
           },
           "tags" : "Element,Deployment Node",
           "technology" : "Caddy 2, container"
         }, {
           "description" : "The auth service's own image.",
           "environment" : "Prod",
-          "id" : "127",
+          "id" : "130",
           "instances" : "1",
           "name" : "Auth service",
           "properties" : {
-            "structurizr.dsl.identifier" : "deab3d44-710d-4f0a-87e6-a0668e685dff"
+            "structurizr.dsl.identifier" : "becbc0f6-776d-4375-bbcc-812dde6fa73e"
           },
           "softwareSystemInstances" : [ {
             "environment" : "Prod",
-            "id" : "128",
+            "id" : "131",
             "instanceId" : 1,
             "properties" : {
               "structurizr.dsl.identifier" : "prodAuth"
             },
             "relationships" : [ {
               "description" : "Runs the OpenID round trip with",
-              "destinationId" : "140",
-              "id" : "141",
+              "destinationId" : "143",
+              "id" : "144",
               "linkedRelationshipId" : "51",
-              "sourceId" : "128"
+              "sourceId" : "131"
             } ],
             "softwareSystemId" : "13",
             "tags" : "Software System Instance"
@@ -443,25 +445,25 @@
         }, {
           "description" : "The participants service's own image.",
           "environment" : "Prod",
-          "id" : "129",
+          "id" : "132",
           "instances" : "1",
           "name" : "Participants service",
           "properties" : {
-            "structurizr.dsl.identifier" : "78464fe9-06e0-4f05-a953-a19fcac64640"
+            "structurizr.dsl.identifier" : "4ed948b2-beb0-4678-88c3-cf9cefb95212"
           },
           "softwareSystemInstances" : [ {
             "environment" : "Prod",
-            "id" : "130",
+            "id" : "133",
             "instanceId" : 1,
             "properties" : {
               "structurizr.dsl.identifier" : "prodProject"
             },
             "relationships" : [ {
               "description" : "Reads the contingent's member data from",
-              "destinationId" : "144",
-              "id" : "145",
+              "destinationId" : "147",
+              "id" : "148",
               "linkedRelationshipId" : "53",
-              "sourceId" : "130"
+              "sourceId" : "133"
             } ],
             "softwareSystemId" : "14",
             "tags" : "Software System Instance"
@@ -471,32 +473,32 @@
         } ],
         "description" : "The cluster that runs the web image and the two services.",
         "environment" : "Prod",
-        "id" : "123",
+        "id" : "126",
         "infrastructureNodes" : [ {
           "description" : "The one origin, over HTTPS.",
           "environment" : "Prod",
-          "id" : "124",
+          "id" : "127",
           "name" : "Ingress",
           "properties" : {
             "structurizr.dsl.identifier" : "prodIngress"
           },
           "relationships" : [ {
             "description" : "Routes every other path to",
-            "destinationId" : "126",
-            "id" : "131",
-            "sourceId" : "124",
+            "destinationId" : "129",
+            "id" : "134",
+            "sourceId" : "127",
             "tags" : "Relationship"
           }, {
             "description" : "Routes /api/auth to",
-            "destinationId" : "128",
-            "id" : "132",
-            "sourceId" : "124",
+            "destinationId" : "131",
+            "id" : "135",
+            "sourceId" : "127",
             "tags" : "Relationship"
           }, {
             "description" : "Routes /api/project to",
-            "destinationId" : "130",
-            "id" : "133",
-            "sourceId" : "124",
+            "destinationId" : "133",
+            "id" : "136",
+            "sourceId" : "127",
             "tags" : "Relationship"
           } ],
           "tags" : "Element,Infrastructure Node",
@@ -505,18 +507,18 @@
         "instances" : "1",
         "name" : "Kubernetes cluster",
         "properties" : {
-          "structurizr.dsl.identifier" : "e068dd08-582d-45aa-9f6a-7da7b3bb0e08"
+          "structurizr.dsl.identifier" : "267fca21-e379-4f04-af03-12e4482feda4"
         },
         "tags" : "Element,Deployment Node",
         "technology" : "Kubernetes"
       } ],
       "description" : "The production environment, at campfire.wsj27.se.",
       "environment" : "Prod",
-      "id" : "122",
+      "id" : "125",
       "instances" : "1",
       "name" : "Azure",
       "properties" : {
-        "structurizr.dsl.identifier" : "f0071496-1e5c-4b61-9ab8-528db6d4641e"
+        "structurizr.dsl.identifier" : "65f1e68d-a412-42db-999a-e200cd678a82"
       },
       "tags" : "Element,Deployment Node",
       "technology" : "Microsoft Azure"
@@ -524,101 +526,101 @@
       "containerInstances" : [ {
         "containerId" : "18",
         "environment" : "Prod",
-        "id" : "135",
+        "id" : "138",
         "instanceId" : 1,
         "properties" : {
           "structurizr.dsl.identifier" : "prodApple"
         },
         "relationships" : [ {
           "description" : "Hosts in one webview per tab",
-          "destinationId" : "126",
-          "id" : "136",
+          "destinationId" : "129",
+          "id" : "139",
           "linkedRelationshipId" : "58",
-          "sourceId" : "135"
+          "sourceId" : "138"
         }, {
           "description" : "Opens sign-in in a modal webview",
-          "destinationId" : "140",
-          "id" : "142",
+          "destinationId" : "143",
+          "id" : "145",
           "linkedRelationshipId" : "62",
-          "sourceId" : "135"
+          "sourceId" : "138"
         }, {
           "description" : "Loads the application from",
-          "destinationId" : "124",
-          "id" : "147",
-          "sourceId" : "135",
+          "destinationId" : "127",
+          "id" : "150",
+          "sourceId" : "138",
           "tags" : "Relationship"
         } ],
         "tags" : "Container Instance"
       }, {
         "containerId" : "19",
         "environment" : "Prod",
-        "id" : "137",
+        "id" : "140",
         "instanceId" : 1,
         "properties" : {
           "structurizr.dsl.identifier" : "prodAndroid"
         },
         "relationships" : [ {
           "description" : "Hosts in one webview per tab",
-          "destinationId" : "126",
-          "id" : "138",
+          "destinationId" : "129",
+          "id" : "141",
           "linkedRelationshipId" : "59",
-          "sourceId" : "137"
+          "sourceId" : "140"
         }, {
           "description" : "Opens sign-in in a modal sheet",
-          "destinationId" : "140",
-          "id" : "143",
+          "destinationId" : "143",
+          "id" : "146",
           "linkedRelationshipId" : "63",
-          "sourceId" : "137"
+          "sourceId" : "140"
         }, {
           "description" : "Loads the application from",
-          "destinationId" : "124",
-          "id" : "148",
-          "sourceId" : "137",
+          "destinationId" : "127",
+          "id" : "151",
+          "sourceId" : "140",
           "tags" : "Relationship"
         } ],
         "tags" : "Container Instance"
       } ],
       "description" : "A leader's or a CMT member's own phone.",
       "environment" : "Prod",
-      "id" : "134",
+      "id" : "137",
       "instances" : "1",
       "name" : "Member's phone",
       "properties" : {
-        "structurizr.dsl.identifier" : "57cb2089-8bc6-4a26-ad9c-84f4e7310a8a"
+        "structurizr.dsl.identifier" : "3e006208-7a4f-49b1-9cdd-172e36b9ba79"
       },
       "tags" : "Element,Deployment Node",
       "technology" : "iOS 26 or Android"
     }, {
       "description" : "Scouterna's own systems, with ScoutID's production realm.",
       "environment" : "Prod",
-      "id" : "139",
+      "id" : "142",
       "instances" : "1",
       "name" : "Scouterna",
       "properties" : {
-        "structurizr.dsl.identifier" : "221771b9-322c-41da-9224-7712fb0782a0"
+        "structurizr.dsl.identifier" : "81732fdd-2abd-47cd-9b1c-30ab8e09dfdd"
       },
       "softwareSystemInstances" : [ {
         "environment" : "Prod",
-        "id" : "140",
+        "id" : "143",
         "instanceId" : 1,
         "properties" : {
-          "structurizr.dsl.identifier" : "9b13cefa-03b6-436c-aeea-b9385a7f35cb"
+          "structurizr.dsl.identifier" : "90fd0381-a58e-4e91-b68c-996f384ca52f"
         },
         "relationships" : [ {
           "description" : "Verifies sign-ins against",
-          "destinationId" : "144",
-          "id" : "146",
+          "destinationId" : "147",
+          "id" : "149",
           "linkedRelationshipId" : "52",
-          "sourceId" : "140"
+          "sourceId" : "143"
         } ],
         "softwareSystemId" : "10",
         "tags" : "Software System Instance"
       }, {
         "environment" : "Prod",
-        "id" : "144",
+        "id" : "147",
         "instanceId" : 1,
         "properties" : {
-          "structurizr.dsl.identifier" : "f0b6aca5-a853-4992-b342-0a2382be7359"
+          "structurizr.dsl.identifier" : "5db65a64-45f7-4158-b2a0-f32f8a3f95ca"
         },
         "softwareSystemId" : "11",
         "tags" : "Software System Instance"
@@ -964,6 +966,12 @@
           "id" : "69",
           "sourceId" : "17",
           "tags" : "Relationship"
+        }, {
+          "description" : "Mounts the session through",
+          "destinationId" : "26",
+          "id" : "74",
+          "sourceId" : "17",
+          "tags" : "Relationship"
         } ],
         "tags" : "Element,Container",
         "technology" : "React 19, TypeScript, Vite"
@@ -1045,19 +1053,19 @@
         }, {
           "description" : "Calls the service with",
           "destinationId" : "26",
-          "id" : "74",
+          "id" : "75",
           "sourceId" : "20",
           "tags" : "Relationship"
         }, {
           "description" : "Signs in and reads the session over /api/auth",
           "destinationId" : "13",
-          "id" : "76",
+          "id" : "79",
           "sourceId" : "20",
           "tags" : "Relationship"
         }, {
-          "description" : "Reads the signed-in member's unit over /api/project",
+          "description" : "Reads the member's unit and travel over /api/project",
           "destinationId" : "14",
-          "id" : "77",
+          "id" : "80",
           "sourceId" : "20",
           "tags" : "Relationship"
         } ],
@@ -1078,6 +1086,12 @@
           "id" : "71",
           "sourceId" : "21",
           "tags" : "Relationship"
+        }, {
+          "description" : "Reads the session's roles from",
+          "destinationId" : "26",
+          "id" : "76",
+          "sourceId" : "21",
+          "tags" : "Relationship"
         } ],
         "tags" : "Element,Container,module",
         "technology" : "TypeScript, React 19"
@@ -1094,6 +1108,12 @@
           "description" : "Builds its screens from",
           "destinationId" : "25",
           "id" : "72",
+          "sourceId" : "22",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Reads the signed-in person from",
+          "destinationId" : "26",
+          "id" : "77",
           "sourceId" : "22",
           "tags" : "Relationship"
         } ],
@@ -1117,13 +1137,13 @@
         }, {
           "description" : "Calls the service with",
           "destinationId" : "26",
-          "id" : "75",
+          "id" : "78",
           "sourceId" : "23",
           "tags" : "Relationship"
         }, {
           "description" : "Reads the list of participants over /api/project",
           "destinationId" : "14",
-          "id" : "78",
+          "id" : "81",
           "sourceId" : "23",
           "tags" : "Relationship"
         } ],
@@ -1154,7 +1174,7 @@
         "tags" : "Element,Container,module",
         "technology" : "TypeScript, React 19, CSS"
       }, {
-        "description" : "The library of small pure helpers every package may reach for.",
+        "description" : "The library of small helpers, and the ambient session, every package may reach for.",
         "documentation" : { },
         "group" : "The libraries",
         "id" : "26",
@@ -1227,33 +1247,24 @@
     "structurizr.inspection.model.softwaresystem.documentation" : "ignore",
     "structurizr.inspection.model.softwaresystem.decisions" : "ignore",
     "structurizr.inspection.info" : "0",
-    "structurizr.inspection.ignore" : "87",
+    "structurizr.inspection.ignore" : "90",
     "structurizr.inspection.warning" : "0"
   },
   "views" : {
     "configuration" : {
       "lastSavedView" : "containers",
+      "metadataSymbols" : "SquareBrackets",
       "styles" : {
         "elements" : [ {
           "background" : "#ce4a17",
           "color" : "#ffffff",
-          "shape" : "RoundedBox",
-          "tag" : "Container"
-        }, {
-          "background" : "#9a3616",
-          "color" : "#ffffff",
-          "shape" : "Person",
-          "tag" : "Person"
-        }, {
-          "background" : "#ce4a17",
-          "color" : "#ffffff",
-          "shape" : "RoundedBox",
-          "tag" : "Software System"
-        }, {
-          "background" : "#ce4a17",
-          "color" : "#ffffff",
           "shape" : "MobileDevicePortrait",
           "tag" : "app"
+        }, {
+          "background" : "#ce4a17",
+          "color" : "#ffffff",
+          "shape" : "RoundedBox",
+          "tag" : "Container"
         }, {
           "background" : "#7d6a4f",
           "color" : "#ffffff",
@@ -1272,6 +1283,11 @@
           "shape" : "RoundedBox",
           "tag" : "module"
         }, {
+          "background" : "#9a3616",
+          "color" : "#ffffff",
+          "shape" : "Person",
+          "tag" : "Person"
+        }, {
           "background" : "#ce4a17",
           "color" : "#ffffff",
           "shape" : "RoundedBox",
@@ -1280,6 +1296,11 @@
           "background" : "#2f6377",
           "color" : "#ffffff",
           "tag" : "service"
+        }, {
+          "background" : "#ce4a17",
+          "color" : "#ffffff",
+          "shape" : "RoundedBox",
+          "tag" : "Software System"
         }, {
           "background" : "#9a3616",
           "color" : "#ffffff",
@@ -1471,21 +1492,21 @@
           "y" : 3410
         } ]
       }, {
-        "id" : "76",
+        "id" : "79",
         "position" : 75
       }, {
-        "id" : "77",
+        "id" : "80",
         "position" : 75,
         "vertices" : [ {
-          "x" : 1085,
-          "y" : 3620
+          "x" : 1220,
+          "y" : 3740
         }, {
-          "x" : 1550,
-          "y" : 3915
+          "x" : 1525,
+          "y" : 3955
         } ]
       }, {
-        "id" : "78",
-        "position" : 75
+        "id" : "81",
+        "position" : 25
       } ],
       "softwareSystemId" : "15"
     } ],
@@ -1496,43 +1517,43 @@
         "width" : 1940
       },
       "elements" : [ {
-        "id" : "79",
+        "id" : "82",
         "x" : 0,
         "y" : 0
       }, {
-        "id" : "80",
+        "id" : "83",
         "x" : 744,
         "y" : 1292
       }, {
-        "id" : "81",
+        "id" : "84",
         "x" : 0,
         "y" : 0
       }, {
-        "id" : "82",
+        "id" : "85",
         "x" : 744,
         "y" : 712
       }, {
-        "id" : "83",
+        "id" : "86",
         "x" : 0,
         "y" : 0
       }, {
-        "id" : "84",
+        "id" : "87",
         "x" : 744,
         "y" : 1807
-      }, {
-        "id" : "85",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "86",
-        "x" : 299,
-        "y" : 242
       }, {
         "id" : "88",
         "x" : 0,
         "y" : 0
       }, {
         "id" : "89",
+        "x" : 299,
+        "y" : 242
+      }, {
+        "id" : "91",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "92",
         "x" : 1339,
         "y" : 242
       } ],
@@ -1541,20 +1562,20 @@
       "name" : "Deployment View: Campfire - Local",
       "order" : 3,
       "relationships" : [ {
-        "id" : "91",
+        "id" : "94",
         "position" : 25
       }, {
-        "id" : "92",
+        "id" : "95",
         "position" : 45
       }, {
-        "id" : "93",
+        "id" : "96",
         "position" : 60,
         "vertices" : [ {
           "x" : 554,
           "y" : 1442
         } ]
       }, {
-        "id" : "94",
+        "id" : "97",
         "position" : 60,
         "vertices" : [ {
           "x" : 1379,
@@ -1569,63 +1590,63 @@
         "width" : 2571
       },
       "elements" : [ {
-        "id" : "95",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "96",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "97",
-        "x" : 1077,
-        "y" : 937
-      }, {
         "id" : "98",
         "x" : 0,
         "y" : 0
       }, {
         "id" : "99",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "100",
+        "x" : 1077,
+        "y" : 937
+      }, {
+        "id" : "101",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "102",
         "x" : 1077,
         "y" : 1452
       }, {
-        "id" : "100",
+        "id" : "103",
         "x" : 0,
         "y" : 0
       }, {
-        "id" : "101",
+        "id" : "104",
         "x" : 1530,
         "y" : 2004
       }, {
-        "id" : "102",
+        "id" : "105",
         "x" : 0,
         "y" : 0
       }, {
-        "id" : "103",
+        "id" : "106",
         "x" : 625,
         "y" : 2004
       }, {
-        "id" : "107",
+        "id" : "110",
         "x" : 0,
         "y" : 0
       }, {
-        "id" : "108",
+        "id" : "111",
         "x" : 700,
         "y" : 192
       }, {
-        "id" : "110",
+        "id" : "113",
         "x" : 1605,
         "y" : 192
       }, {
-        "id" : "112",
+        "id" : "115",
         "x" : 0,
         "y" : 0
       }, {
-        "id" : "113",
+        "id" : "116",
         "x" : 1530,
         "y" : 2910
       }, {
-        "id" : "117",
+        "id" : "120",
         "x" : 625,
         "y" : 2910
       } ],
@@ -1634,17 +1655,17 @@
       "name" : "Deployment View: Campfire - Dev",
       "order" : 4,
       "relationships" : [ {
-        "id" : "104",
+        "id" : "107",
         "position" : 40
       }, {
-        "id" : "105"
+        "id" : "108"
       }, {
-        "id" : "106"
+        "id" : "109"
       }, {
-        "id" : "114",
+        "id" : "117",
         "position" : 75
       }, {
-        "id" : "115",
+        "id" : "118",
         "position" : 65,
         "vertices" : [ {
           "x" : 295,
@@ -1654,26 +1675,26 @@
           "y" : 3400
         } ]
       }, {
-        "id" : "116",
+        "id" : "119",
         "position" : 15,
         "vertices" : [ {
           "x" : 2275,
           "y" : 550
         } ]
       }, {
-        "id" : "118",
+        "id" : "121",
         "position" : 65,
         "vertices" : [ {
           "x" : 415,
           "y" : 2240
         } ]
       }, {
-        "id" : "119"
+        "id" : "122"
       }, {
-        "id" : "120",
+        "id" : "123",
         "position" : 20
       }, {
-        "id" : "121",
+        "id" : "124",
         "position" : 20
       } ],
       "softwareSystemId" : "15"
@@ -1684,63 +1705,63 @@
         "width" : 2511
       },
       "elements" : [ {
-        "id" : "122",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "123",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "124",
-        "x" : 1090,
-        "y" : 912
-      }, {
         "id" : "125",
         "x" : 0,
         "y" : 0
       }, {
         "id" : "126",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "127",
+        "x" : 1090,
+        "y" : 912
+      }, {
+        "id" : "128",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "129",
         "x" : 1090,
         "y" : 1417
       }, {
-        "id" : "127",
+        "id" : "130",
         "x" : 0,
         "y" : 0
       }, {
-        "id" : "128",
+        "id" : "131",
         "x" : 1540,
         "y" : 1962
       }, {
-        "id" : "129",
+        "id" : "132",
         "x" : 0,
         "y" : 0
       }, {
-        "id" : "130",
+        "id" : "133",
         "x" : 640,
         "y" : 1962
       }, {
-        "id" : "134",
+        "id" : "137",
         "x" : 0,
         "y" : 0
       }, {
-        "id" : "135",
+        "id" : "138",
         "x" : 715,
         "y" : 192
       }, {
-        "id" : "137",
+        "id" : "140",
         "x" : 1615,
         "y" : 192
       }, {
-        "id" : "139",
+        "id" : "142",
         "x" : 0,
         "y" : 0
       }, {
-        "id" : "140",
+        "id" : "143",
         "x" : 1540,
         "y" : 2829
       }, {
-        "id" : "144",
+        "id" : "147",
         "x" : 640,
         "y" : 2829
       } ],
@@ -1749,17 +1770,17 @@
       "name" : "Deployment View: Campfire - Prod",
       "order" : 5,
       "relationships" : [ {
-        "id" : "131",
+        "id" : "134",
         "position" : 40
       }, {
-        "id" : "132"
+        "id" : "135"
       }, {
-        "id" : "133"
+        "id" : "136"
       }, {
-        "id" : "141",
+        "id" : "144",
         "position" : 80
       }, {
-        "id" : "142",
+        "id" : "145",
         "position" : 65,
         "vertices" : [ {
           "x" : 295,
@@ -1769,26 +1790,26 @@
           "y" : 3320
         } ]
       }, {
-        "id" : "143",
+        "id" : "146",
         "position" : 85,
         "vertices" : [ {
           "x" : 2215,
           "y" : 445
         } ]
       }, {
-        "id" : "145",
+        "id" : "148",
         "position" : 65,
         "vertices" : [ {
           "x" : 430,
           "y" : 2135
         } ]
       }, {
-        "id" : "146"
+        "id" : "149"
       }, {
-        "id" : "147",
+        "id" : "150",
         "position" : 20
       }, {
-        "id" : "148",
+        "id" : "151",
         "position" : 15
       } ],
       "softwareSystemId" : "15"
