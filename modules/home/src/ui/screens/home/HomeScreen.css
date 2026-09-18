@@ -1,0 +1,11 @@
+/* The start screen's own rhythm. Every other screen stacks the sections of one subject,
+   and the shared content column spaces those; the start screen stacks widgets that have
+   nothing to do with each other, so they stand a step further apart. */
+
+@layer screen {
+  .home {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-section);
+  }
+}

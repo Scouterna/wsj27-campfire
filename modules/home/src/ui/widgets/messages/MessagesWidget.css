@@ -1,0 +1,101 @@
+/* The messages widget: a plate in the theme's bright color, the way the sign-in hero
+   wears it, with the headline, the text, and the one close control all on it. */
+
+@layer component {
+  .messages {
+    background: var(--color-theme-bright);
+    border-radius: var(--border-radius-surface);
+
+    /* White on every theme, the yellow included. `--color-theme-on-bright` would put the
+       yellow's ink here instead, and a gold paragraph on yellow reads worse than a
+       white one – the plate is one look across the five units, by decision. */
+    color: #fff;
+    padding: var(--spacing-section);
+  }
+
+  /* The headline leading and the close control at the trailing edge, top-aligned so a
+     headline that wraps grows downward and the control stays in the corner. */
+  .messages-heading {
+    align-items: flex-start;
+    display: flex;
+    gap: var(--spacing-group);
+    justify-content: space-between;
+    margin: 0 0 var(--spacing-group);
+  }
+
+  /* The headline carries the contingent's voice, so it wears the display face – the
+     same face as the page's title above it, a step smaller. */
+  .messages-headline {
+    font-family: var(--typography-display-font_family);
+    font-size: var(--font-size-title);
+    font-weight: var(--typography-display-font_weight);
+    letter-spacing: 0.02em;
+    line-height: 1.05;
+    margin: 0;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+
+  /* A small white pill in the corner, its word in the theme's ink. The pseudo-element
+     stretches the touch target to 44 points without the pill itself growing. */
+  .messages-close {
+    background: var(--color-sheet);
+    border: none;
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    cursor: pointer;
+    flex: none;
+    font-family: inherit;
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-strong);
+    line-height: 1;
+    padding: 8px var(--spacing-group);
+    position: relative;
+    transition: background 120ms ease;
+  }
+
+  .messages-close::after {
+    content: "";
+    inset: -8px 0;
+    position: absolute;
+  }
+
+  /* Only where a pointer can hover, so a touch never leaves a hover state stuck on. */
+  @media (hover: hover) {
+    .messages-close:hover {
+      background: color-mix(in srgb, var(--color-sheet) 85%, transparent);
+    }
+  }
+
+  /* The page's ink rather than the theme's or the text's white: it is the one color
+     here that clears a focus indicator's 3:1 against all five bright fills – white
+     disappears into the yellow, and a theme's ink into its own bright. */
+  .messages-close:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+
+  /* A paragraph has to read: a measure, and no margin of its own – the plate's padding
+     and the blocks' spacing place it. */
+  .messages-text {
+    font-size: var(--font-size-value);
+    line-height: 1.5;
+    margin: 0;
+    max-width: 80ch;
+    text-wrap: pretty;
+  }
+
+  /* A later message on the same plate: its own title in the body face, over a hairline
+     thinned from whatever the text color is. */
+  .messages-later {
+    border-top: 1px solid color-mix(in srgb, currentcolor 30%, transparent);
+    margin-top: var(--spacing-container);
+    padding-top: var(--spacing-container);
+  }
+
+  .messages-title {
+    font-size: var(--font-size-value);
+    font-weight: var(--font-weight-strong);
+    margin: 0 0 var(--spacing-inline);
+  }
+}

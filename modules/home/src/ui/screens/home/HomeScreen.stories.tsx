@@ -3,6 +3,7 @@ import { RolesProvider } from "@scouterna/wsj27-campfire-utils"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import type { ReactElement } from "react"
 
+import { forgetClosedMessages } from "../../widgets/messages/use-closed-messages"
 import { HomeScreen } from "./HomeScreen"
 
 const meta = {
@@ -14,6 +15,9 @@ const meta = {
     // surface, so the canvas adds no padded box around it.
     layout: "fullscreen",
   },
+  // Closing is remembered on the device, and the canvas is a device: without this the
+  // screen's messages would be gone from the story the first time somebody closed them.
+  beforeEach: forgetClosedMessages,
 } satisfies Meta<typeof HomeScreen>
 
 export default meta
