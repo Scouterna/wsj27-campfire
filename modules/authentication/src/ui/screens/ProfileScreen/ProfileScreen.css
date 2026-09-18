@@ -1,0 +1,32 @@
+/* The profile page: the mark beside the name and the role under it, and the way out
+   beneath the card. */
+
+@layer screen {
+  .profile-screen {
+    align-items: center;
+    display: flex;
+    gap: var(--spacing-container);
+  }
+
+  .profile-screen-person {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-inline);
+    min-width: 0;
+  }
+
+  .profile-screen-person strong {
+    color: var(--color-ink);
+    font-size: var(--font-size-display-mini);
+    overflow-wrap: anywhere;
+  }
+
+  .profile-screen-person span {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-value);
+  }
+
+  .profile-screen-sign-out {
+    margin-top: var(--spacing-section);
+  }
+}
