@@ -38,8 +38,8 @@ export interface UnitAvatarProps {
  * unit's white glyph – the badge the whole identity system draws from. Every mark
  * wears the surrounding theme rather than its unit's own, so a mixed list – the whole
  * contingent under the management's red – reads as one list, and the glyph alone says
- * which unit it is. While the identities are unloaded – before the reveal ships them
- * – the disc carries the unit's number instead, in the same dress.
+ * which unit it is. While the identities are unloaded, the disc carries the unit's
+ * number instead, in the same dress.
  *
  * Decorative on purpose: every surface that draws the avatar says the unit or the
  * person in text beside it, so the mark is hidden from assistive technology.

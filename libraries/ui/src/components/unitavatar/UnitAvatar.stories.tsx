@@ -4,8 +4,8 @@ import { UnitIdentitiesProvider } from "../../foundations/units/UnitIdentities"
 import { UnitAvatar } from "./UnitAvatar"
 
 /**
- * A stand-in glyph, inlined so the catalog never touches the real artwork – the
- * units' own marks are secret until the reveal ships them.
+ * A stand-in glyph, inlined because nothing in Storybook touches a network – the
+ * units' own marks are files the application serves.
  */
 const starGlyph = `data:image/svg+xml,${encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#fff" d="M12 2l2.9 6.26L21 9.27l-4.5 4.38L17.8 20 12 16.77 6.2 20l1.3-6.35L3 9.27l6.1-1.01z"/></svg>',

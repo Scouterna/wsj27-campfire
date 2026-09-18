@@ -3,9 +3,8 @@ import { createContext, useContext, type ReactElement, type ReactNode } from "re
 /**
  * What is publicly known about the units' identities: their names, and where their
  * glyphs are served. The identities are data the application loads at runtime rather
- * than code, because the names and the artwork stay off the public repository until
- * the reveal – an application without them answers undefined for everything, and
- * every consumer falls back to the number.
+ * than code – an application that could not load them answers undefined for
+ * everything, and every consumer falls back to the number.
  */
 export interface UnitIdentities {
   /**
@@ -25,8 +24,8 @@ function unknown(): undefined {
 }
 
 /**
- * The identities before anything is known – what a story, a test, and a build
- * without the identity assets read.
+ * The identities before anything is known – what a story and a test read outside a
+ * provider.
  */
 const nothingKnown: UnitIdentities = {
   glyphSrc: unknown,
