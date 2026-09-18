@@ -18,13 +18,20 @@ A screen that only learns its own name once data has arrived – a person's deta
 
 ## Widgets
 
-A widget is how one module's work appears on another module's screen without either importing the other. The providing module exports the widget, the receiving screen offers a slot, and the composition root joins the two:
+A widget is how one module's work appears on another module's screen without either importing the other. The providing module declares an id in `WidgetRegistry` and exports the table that fills it, the application merges the modules' tables into one `WidgetsProvider`, and the receiving screen places the widget by id:
 
 ```tsx
-<HomeScreen widget={isUnitsRevealed && isLeader ? <UnitWidget /> : undefined} />
+{
+  isUnitsRevealed && <Widget id="journey:countdown" />
+}
+{
+  isUnitsRevealed && isLeader && <Widget id="participants:unit" />
+}
 ```
 
-The screen types its slot as a `ReactNode` and never learns which module filled it, and the gating – who sees the widget, and from when – lives in the composition root beside the placement, the way the unit widget waits behind the units reveal. A `WidgetRegistry` of compile-checked ids remains the design for the day widgets multiply past what hand-placed props carry legibly; today's two do not.
+That is the home screen, and everything about it is home's own: what goes where, who sees it, and from when – both widgets wait behind the units reveal, and the unit widget is a leader's alone. The screen never learns which module drew what, and an id nobody registered renders nothing, which is what a story or a build assembled without that module should do.
+
+A widget takes no props. What it needs it reads where it is used – its own queries, or the ambient session `utils` holds, the way the countdown reads the signed-in person with `useUser` to know whether the pre-trip is theirs. Nothing is threaded through the screen that places it.
 
 ## The session gate and the two chromes
 

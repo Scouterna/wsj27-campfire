@@ -4,6 +4,10 @@
 <p><Badge type="tip" text="Accepted" /> <Badge type="info" text="2026-09-15" /></p>
 :::
 
+::: warning A later record moved part of this
+[ADR 032](032-hold-the-signed-in-person-in-utils.md) supersedes two statements below: a fact two modules share no longer travels through the application as a prop, and the signed-in user is one type in `utils` rather than a shape each module writes for itself. Everything else here stands.
+:::
+
 ## Context
 
 [ADR 002](002-organize-as-a-single-monorepo.md) gave `apps/`, `libraries/`, and `modules/` their meaning and said nothing about how a module is shaped, what it may reach for, or how its screens end up in the application. That is the part a compiler can be made to enforce, and two forces make enforcing it worth more than agreeing on it. A large share of this code is written by agents, and an agent that can import something will import it – review attention is the scarce resource ([ADR 006](006-lint-and-format-with-a-shared-strict-toolchain.md)), and a boundary the compiler holds costs no review at all. And the feature scope is open: whatever Campfire turns out to be for the management team arrives as more modules, so adding one has to be a small, local act. And the parts most likely to survive into a later event – a design system, a bridge, a set of utilities – are exactly the parts that must not learn anything about this jamboree's features.

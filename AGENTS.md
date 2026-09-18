@@ -176,7 +176,7 @@ Packages are named `@scouterna/wsj27-campfire-<name>`, and `apps/*`, `libraries/
 
 ## Architecture and decisions
 
-Campfire is built on decisions made explicitly and written down, so the reasoning stays understandable over time. Significant decisions are recorded as ADRs under [`docs/decisions/`](docs/decisions/index.md) – [ADR 001](docs/decisions/001-record-architecture-decisions.md) through [ADR 031](docs/decisions/031-adopt-the-agent-driven-working-process.md) so far, so the next record is 032; the system is described in the [guidebook](docs/guidebook/index.md); the C4 model lives in [`docs/architecture/`](docs/architecture/AGENTS.md).
+Campfire is built on decisions made explicitly and written down, so the reasoning stays understandable over time. Significant decisions are recorded as ADRs under [`docs/decisions/`](docs/decisions/index.md) – [ADR 001](docs/decisions/001-record-architecture-decisions.md) through [ADR 032](docs/decisions/032-hold-the-signed-in-person-in-utils.md) so far, so the next record is 033; the system is described in the [guidebook](docs/guidebook/index.md); the C4 model lives in [`docs/architecture/`](docs/architecture/AGENTS.md).
 
 - Read the decisions and the guidebook before a change that touches architecture.
 - Record a significant decision as a new ADR – context, choice, consequences, alternatives. Copy `docs/decisions/template.md`, take the next number, add a row to the index. Never renumber.
