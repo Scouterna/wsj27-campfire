@@ -3,9 +3,15 @@ import type { ReactElement } from "react"
 
 import type { IconProps } from "./IconProps"
 import { BackIcon } from "./set/BackIcon"
+import { ChatIcon } from "./set/ChatIcon"
+import { CheckIcon } from "./set/CheckIcon"
 import { HomeIcon } from "./set/HomeIcon"
+import { IdCardIcon } from "./set/IdCardIcon"
+import { MailIcon } from "./set/MailIcon"
 import { MoreIcon } from "./set/MoreIcon"
 import { ParticipantsIcon } from "./set/ParticipantsIcon"
+import { PhoneIcon } from "./set/PhoneIcon"
+import { SearchIcon } from "./set/SearchIcon"
 
 const meta: Meta = {
   title: "Foundations/Icons",
@@ -15,14 +21,20 @@ export default meta
 
 const icons: readonly (readonly [string, (props: IconProps) => ReactElement])[] = [
   ["Back", BackIcon],
+  ["Chat", ChatIcon],
+  ["Check", CheckIcon],
   ["Home", HomeIcon],
+  ["Id card", IdCardIcon],
+  ["Mail", MailIcon],
   ["More", MoreIcon],
   ["Participants", ParticipantsIcon],
+  ["Phone", PhoneIcon],
+  ["Search", SearchIcon],
 ]
 
 /**
- * The whole set, at the 24-point size the grid is drawn on. Two icons so far – the
- * sections' – and the set grows with the screens that draw more.
+ * The whole set, at the 24-point size the grid is drawn on. The set grows with the
+ * screens that draw more.
  */
 export const All: StoryObj = {
   render: (): ReactElement => (

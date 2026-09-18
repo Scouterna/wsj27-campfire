@@ -1,0 +1,44 @@
+/* The dot meter: a reading on a short scale, muted so a page of them stays calm. */
+
+@layer component {
+  .meter {
+    display: inline-flex;
+    gap: var(--spacing-inline);
+  }
+
+  .meter span {
+    background: var(--color-tone-empty);
+    border-radius: var(--border-radius-round);
+    height: 15px;
+    width: 15px;
+  }
+
+  .meter-caution .meter-filled {
+    background: var(--color-tone-caution-mark);
+  }
+
+  .meter-danger .meter-filled {
+    background: var(--color-tone-danger-mark);
+  }
+
+  .meter-info .meter-filled {
+    background: var(--color-tone-info-mark);
+  }
+
+  /* The small dots sit inside a washed pill rather than on the sheet, so they leave the
+     tones behind and read in the unit's own color: the fills in its ink, the empties in
+     a thinning of the same, which keeps them visible on the wash under them. */
+  .meter-small {
+    gap: 2.5px;
+  }
+
+  .meter-small span {
+    background: color-mix(in srgb, var(--color-theme-ink) 20%, transparent);
+    height: 7px;
+    width: 7px;
+  }
+
+  .meter-small .meter-filled {
+    background: var(--color-theme-ink);
+  }
+}

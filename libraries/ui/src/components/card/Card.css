@@ -3,9 +3,29 @@
 
 @layer component {
   .card {
+    /* The sheet's inner padding, held in one custom property so anything that bleeds
+       to the card's edge can follow it. It tracks the page margin: a phone's tighter
+       margin gets a tighter sheet, and the roomier padding arrives with the wider
+       layout. */
+    --card-padding: var(--spacing-container);
+
     background: var(--color-sheet);
     border-radius: var(--border-radius-surface);
-    padding: var(--spacing-section);
+    padding: var(--card-padding);
+  }
+
+  @media (min-width: 768px) {
+    .card {
+      --card-padding: var(--spacing-section);
+    }
+  }
+
+  /* The heading row: the title leading, and the quiet aside at the trailing edge. */
+  .card-heading {
+    align-items: baseline;
+    display: flex;
+    justify-content: space-between;
+    margin: 0 0 var(--spacing-group);
   }
 
   /* The heading is body-sized and strong – a label over the sheet, not a title
@@ -13,6 +33,12 @@
   .card-title {
     font-size: var(--font-size-body);
     font-weight: var(--font-weight-strong);
-    margin: 0 0 var(--spacing-group);
+    margin: 0;
+  }
+
+  .card-aside {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-value);
+    font-variant-numeric: tabular-nums;
   }
 }

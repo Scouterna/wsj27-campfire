@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router"
 import type { ReactElement, ReactNode } from "react"
 
 import { BackIcon } from "../../foundations/icons/set/BackIcon"
-import type { AppPath } from "../../routing/routes"
+import type { LinkTarget } from "../../routing/routes"
 
 import "./Row.css"
 
@@ -10,12 +10,7 @@ export interface RowProps {
   /**
    * Where the row leads. A row without it does not react to a press.
    */
-  readonly link?: {
-    /**
-     * The address the row opens.
-     */
-    readonly to: AppPath
-  }
+  readonly link?: LinkTarget
   /**
    * The tile at the head of the row – an avatar, a mark.
    */
@@ -62,7 +57,7 @@ export function Row(props: RowProps): ReactElement {
   const className = props.className === undefined ? "row" : `row ${props.className}`
 
   return props.link ? (
-    <Link className={className} to={props.link.to}>
+    <Link className={className} to={props.link.to} params={props.link.params ?? {}}>
       {content}
     </Link>
   ) : (

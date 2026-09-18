@@ -39,6 +39,23 @@ export type Address<TOwner extends string> = TOwner
 export type AppPath = keyof RouteRegistry
 
 /**
+ * Where a navigating component leads – the address, and the parameters a `$param`
+ * segment in it needs. The shape every link-bearing component takes, so a row, a
+ * button, and a menu entry address the router the same way.
+ */
+export interface LinkTarget {
+  /**
+   * The address to open.
+   */
+  readonly to: AppPath
+  /**
+   * The path parameters the address needs – the member number for a `$memberNo`
+   * segment. Left out for an address without parameters.
+   */
+  readonly params?: Readonly<Record<string, string>>
+}
+
+/**
  * One screen: the component that answers at an address, and what the chrome needs to
  * place it – which section lights up, and where back leads. What the screen is called
  * is the screen's own to say: it declares its name with `PageTitle`, because the page
@@ -57,6 +74,14 @@ export interface ScreenSpec {
    * offers no back control.
    */
   readonly parent?: AppPath
+  /**
+   * Parses the address's search params into the object the screen reads – the router
+   * runs it on every navigation and keeps only what it returns, so a screen that
+   * carries state in its address names it here. A screen without one carries none.
+   * The result is deliberately wide: the declaring module re-reads it through its own
+   * parser, which is what keeps a stale or hand-typed address harmless.
+   */
+  readonly validateSearch?: (search: Record<string, unknown>) => Record<string, unknown>
 }
 
 /**
@@ -127,12 +152,17 @@ function isParameter(segment: string): boolean {
  * router versions. Inferring it from a real call is both shorter and more durable than
  * spelling it out.
  * @param path The address the route answers at.
- * @param component The screen that renders there.
+ * @param spec The screen that renders there, with the search schema it declares.
  * @returns The route, typed by its own path.
  */
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type -- inferred on purpose; see above
-function make<TPath extends AppPath>(path: TPath, component: RouteComponent) {
-  return createRoute({ getParentRoute: () => rootRoute, path, component })
+function make<TPath extends AppPath>(path: TPath, spec: ScreenSpec) {
+  return createRoute({
+    getParentRoute: () => rootRoute,
+    path,
+    component: spec.Component,
+    validateSearch: spec.validateSearch,
+  })
 }
 
 /**
@@ -155,7 +185,7 @@ export function mountRoutes<const TRoutes extends Routes>(
 ): { [TPath in keyof TRoutes]: RouteFor<TPath & AppPath> } {
   const mounted: [string, AnyRoute][] = Object.entries(routes).map(([path, spec]) => [
     path,
-    make(path as AppPath, spec.Component),
+    make(path as AppPath, spec),
   ])
 
   // Through `unknown`: at runtime this is one uniform record, while the declared type

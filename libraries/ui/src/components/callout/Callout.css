@@ -1,0 +1,50 @@
+/* The callout: one fact lifted out of a card, on a plate washed in the unit's color. */
+
+@layer component {
+  .callout {
+    align-items: center;
+    background: var(--color-theme-wash);
+    border-radius: var(--border-radius-default);
+    display: flex;
+    gap: var(--spacing-group);
+    padding: var(--spacing-group) var(--spacing-container);
+  }
+
+  /* The tile is the white sheet again, so the glyph reads out of the wash rather than
+     in it. */
+  .callout-tile {
+    align-items: center;
+    background: var(--color-sheet);
+    border-radius: var(--border-radius-control);
+    color: var(--color-theme-ink);
+    display: flex;
+    flex: none;
+    height: 38px;
+    justify-content: center;
+    width: 38px;
+  }
+
+  .callout-tile svg {
+    height: 19px;
+    width: 19px;
+  }
+
+  .callout-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .callout-text small {
+    color: var(--color-theme-ink);
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-strong);
+  }
+
+  .callout-text strong {
+    font-size: var(--font-size-value);
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
+}

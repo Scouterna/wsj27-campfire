@@ -1,0 +1,62 @@
+/* The search field: a round sheet on the paper, its leading mark, and the input that
+   fills the rest of it. */
+
+@layer component {
+  .searchfield {
+    align-items: center;
+    background: var(--color-sheet);
+    border-radius: var(--border-radius-round);
+    cursor: text;
+    display: flex;
+    gap: var(--spacing-group);
+    min-height: 48px;
+    padding: 0 var(--spacing-container);
+  }
+
+  /* The accessible name, carried in the markup and kept out of the picture: clipped
+     rather than hidden, because a display of none is read by nobody either. */
+  .searchfield-label {
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+
+  .searchfield-mark {
+    color: var(--color-ink-tertiary);
+    display: flex;
+  }
+
+  .searchfield-input {
+    background: transparent;
+    border: none;
+    color: inherit;
+    flex: 1;
+    font-family: inherit;
+    font-size: var(--font-size-body);
+
+    /* An input's default width is its size attribute's worth of characters, and a flex
+       item never shrinks below its own content. Without this the whole field refuses
+       to go under roughly 250px. */
+    min-width: 0;
+  }
+
+  /* The ring belongs on the pill rather than on the input inside it, so the focused
+     field reads as one shape. */
+  .searchfield:focus-within {
+    outline: 2px solid var(--color-theme-bright);
+    outline-offset: 2px;
+  }
+
+  .searchfield-input:focus-visible {
+    outline: none;
+  }
+
+  /* WebKit draws its own clear control inside a search input, in a shape the design
+     does not use and on top of the trailing slot. */
+  .searchfield-input::-webkit-search-cancel-button {
+    appearance: none;
+  }
+}

@@ -1,0 +1,69 @@
+/* The chip: a filter in a row of them, or a badge stating a fact on a card. */
+
+@layer component {
+  /* The filter row. It wraps rather than scrolls, so a chip is never half off the
+     screen with nothing saying so. */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-stack);
+  }
+
+  .chip {
+    align-items: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--border-radius-round);
+    color: var(--color-ink-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    font-family: inherit;
+    font-size: var(--font-size-entry);
+    height: 38px;
+    padding: 0 var(--spacing-container);
+    transition: background 120ms ease;
+  }
+
+  .chip[aria-pressed="true"] {
+    background: var(--color-theme-wash);
+    color: var(--color-theme-ink);
+    font-weight: var(--font-weight-strong);
+  }
+
+  /* Only the chip that is not already in force reacts, and only where a pointer can
+     hover – a touch would otherwise leave a hover state stuck on. */
+  @media (hover: hover) {
+    .chip[aria-pressed="false"]:hover {
+      background: color-mix(in srgb, var(--color-theme-ink) 5%, transparent);
+    }
+  }
+
+  .chip[aria-pressed="false"]:active {
+    background: color-mix(in srgb, var(--color-theme-ink) 11%, transparent);
+  }
+
+  /* A badge states a fact – it takes no press, so it wears its tone's wash and none of
+     the filter's states. */
+  .chip-badge {
+    background: var(--color-theme-wash);
+    color: var(--color-theme-ink);
+    cursor: default;
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-strong);
+    height: auto;
+    padding: var(--spacing-inline) var(--spacing-group);
+    transition: none;
+  }
+
+  .chip-positive {
+    background: var(--color-tone-positive-wash);
+    color: var(--color-tone-positive-ink);
+  }
+
+  /* A warning badge wears the danger tone – the strongest of the tones, because this
+     is the badge that says something needs acting on. */
+  .chip-warning {
+    background: var(--color-tone-danger-wash);
+    color: var(--color-tone-danger-ink);
+  }
+}

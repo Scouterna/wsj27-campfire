@@ -1,0 +1,78 @@
+/* The status row: one answered – or unanswered – question, in the tone of its answer. */
+
+@layer component {
+  .status-row {
+    align-items: center;
+    display: flex;
+    font-size: var(--font-size-name);
+    font-weight: var(--font-weight-strong);
+    gap: var(--spacing-group);
+  }
+
+  .status-row-mark {
+    align-items: center;
+    background: var(--color-tone-positive-wash);
+    border-radius: var(--border-radius-round);
+    color: var(--color-tone-positive-ink);
+    display: flex;
+    flex: none;
+    font-size: var(--font-size-entry);
+    height: 28px;
+    justify-content: center;
+    width: 28px;
+  }
+
+  .status-row-mark svg {
+    height: 13px;
+    width: 13px;
+  }
+
+  .status-row-label {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .status-row-no .status-row-mark {
+    background: var(--color-tone-danger-wash);
+    color: var(--color-tone-danger-ink);
+  }
+
+  .status-row-no .status-row-label {
+    color: var(--color-tone-danger-ink);
+  }
+
+  .status-row-unanswered .status-row-mark {
+    background: var(--color-tone-caution-wash);
+    color: var(--color-tone-caution-ink);
+  }
+
+  .status-row-unanswered .status-row-label {
+    color: var(--color-tone-caution-ink);
+  }
+
+  /* A row nobody answered says so in quiet type: the absence is a fact about the
+     record, not an answer, so it reads lighter than one. */
+  .status-row em {
+    color: var(--color-ink-tertiary);
+    font-size: var(--font-size-detail);
+    font-weight: 400;
+  }
+
+  .status-row-trailing {
+    background: var(--color-theme-wash);
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    font-size: var(--font-size-detail);
+    padding: 3px var(--spacing-stack);
+  }
+
+  /* Heard, never seen: the mark says it to the eye. */
+  .status-row-spoken {
+    block-size: 1px;
+    clip-path: inset(50%);
+    inline-size: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+  }
+}

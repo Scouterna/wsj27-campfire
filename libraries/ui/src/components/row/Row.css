@@ -14,7 +14,7 @@
      rather than the card's, so a press fills the whole row and the divider runs the
      full width. */
   .card .row {
-    margin: 0 calc(-1 * var(--spacing-section));
+    margin: 0 calc(-1 * var(--card-padding, var(--spacing-section)));
     padding: var(--spacing-group) var(--spacing-container);
   }
 
@@ -25,13 +25,13 @@
     border-start-end-radius: var(--border-radius-surface);
     border-start-start-radius: var(--border-radius-surface);
     border-top: none;
-    margin-top: calc(-1 * var(--spacing-section));
+    margin-top: calc(-1 * var(--card-padding, var(--spacing-section)));
   }
 
   .card > .row:last-child {
     border-end-end-radius: var(--border-radius-surface);
     border-end-start-radius: var(--border-radius-surface);
-    margin-bottom: calc(-1 * var(--spacing-section));
+    margin-bottom: calc(-1 * var(--card-padding, var(--spacing-section)));
   }
   .row strong {
     display: block;

@@ -1,0 +1,35 @@
+/* The field list: a record's label-value pairs as a grid that reflows on its own, so a
+   card holding two facts and one holding ten read the same way. */
+
+@layer component {
+  .fields {
+    column-gap: var(--spacing-card);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    margin: 0;
+    row-gap: var(--spacing-group);
+  }
+
+  .fields dt {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin-bottom: var(--spacing-inline);
+  }
+
+  .fields dd {
+    font-size: var(--font-size-value);
+    line-height: 1.4;
+    margin: 0;
+  }
+
+  /* The person's own words under a value: quieter than the label above it, indented and
+     quoted, so it reads as a quotation rather than as a second value. */
+  .fields .field-quote {
+    color: var(--color-ink-tertiary);
+    font-size: var(--font-size-footnote);
+    line-height: 1.45;
+    margin-top: var(--spacing-inline);
+    padding-inline-start: var(--spacing-group);
+    text-wrap: pretty;
+  }
+}

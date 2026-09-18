@@ -13,6 +13,18 @@
     padding: var(--spacing-stack) var(--spacing-container);
   }
 
+  /* At rest the bar is invisible over the page, so its empty strip must not eat the
+     taps meant for what shows through it – the back eyebrow floats exactly there at
+     phone width. Its own controls stay tappable, and the condensed, frosted bar takes
+     the surface back whole. */
+  .topbar:not(.is-condensed) {
+    pointer-events: none;
+  }
+
+  .topbar:not(.is-condensed) .topbar-trailing {
+    pointer-events: auto;
+  }
+
   .topbar.is-condensed {
     backdrop-filter: blur(22px) saturate(1.7);
     background: var(--color-glass);

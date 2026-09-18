@@ -38,7 +38,15 @@ const preview: Preview = {
     // Alphabetical, which is the default, would open on Components and sort Foundations
     // after them.
     options: {
-      storySort: { order: ["Introduction", "Foundations", "Components", "Modules"] },
+      storySort: {
+        order: [
+          "Introduction",
+          "Foundations",
+          "Components",
+          "Modules",
+          ["*", ["Components", "Widgets", "Screens"]],
+        ],
+      },
     },
     // The snippet is the JSX the story actually rendered. Left on "auto" a story with a
     // `render` function shows the story object itself – the `render:` key and all. The

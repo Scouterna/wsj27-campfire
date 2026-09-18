@@ -1,0 +1,90 @@
+/* The segmented control: one tonal track, the segment in force raised on a pill that
+   slides between the choices. */
+
+@layer component {
+  .segmented {
+    background: var(--color-theme-wash);
+    border-radius: var(--border-radius-round);
+    display: inline-flex;
+    gap: var(--spacing-inline);
+
+    /* On a screen too narrow for every segment, the track scrolls rather than wraps –
+       a control split over two lines stops reading as one control. */
+    max-width: 100%;
+    overflow-x: auto;
+    padding: var(--spacing-inline);
+    position: relative;
+    scrollbar-width: none;
+  }
+
+  .segmented::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* The raised pill under the segment in force. The geometry arrives as custom
+     properties the component writes before paint; sized zero until it has. */
+  .segmented-pill {
+    background: var(--color-sheet);
+    border-radius: var(--border-radius-round);
+    inset-block: var(--spacing-inline);
+    left: var(--segmented-pill-left, 0);
+    position: absolute;
+    transition:
+      left 200ms ease,
+      width 200ms ease;
+    width: var(--segmented-pill-width, 0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .segmented-pill {
+      transition: none;
+    }
+  }
+
+  /* The segments ride above the pill, so the pill slides under an unmoving label. */
+  .segmented button {
+    background: none;
+    border: none;
+    border-radius: var(--border-radius-round);
+    color: var(--color-ink-secondary);
+    cursor: pointer;
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    font-family: inherit;
+    font-size: var(--font-size-entry);
+    height: 38px;
+    justify-content: center;
+    padding: 0 var(--spacing-card);
+    position: relative;
+    transition: color 200ms ease;
+  }
+
+  /* An invisible bold copy of the label reserves the emphasized width, so picking a
+     segment never shifts its neighbors. */
+  .segmented button::after {
+    content: attr(data-label);
+    font-weight: var(--font-weight-strong);
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+  }
+
+  .segmented button[aria-pressed="true"] {
+    color: var(--color-theme-ink);
+    font-weight: var(--font-weight-strong);
+  }
+
+  /* Only a segment not already in force reacts, and only where a pointer can hover –
+     a touch would otherwise leave a hover state stuck on. */
+  @media (hover: hover) {
+    .segmented button[aria-pressed="false"]:hover {
+      color: var(--color-ink);
+    }
+  }
+
+  .segmented button:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: -2px;
+  }
+}

@@ -34,3 +34,14 @@ export const WithTitle: Story = {
     </Card>
   ),
 }
+
+/**
+ * The quiet aside at the heading row's trailing edge – a count, a date.
+ */
+export const WithAside: Story = {
+  render: (): ReactElement => (
+    <Card aside="59 st" title="Deltagare">
+      <p className="story-filler">Rubriken bär också en stilla siffra vid kanten.</p>
+    </Card>
+  ),
+}

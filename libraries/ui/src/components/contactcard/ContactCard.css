@@ -1,0 +1,75 @@
+/* The contact card: who someone is, how to reach them, and the one control that does
+   it. */
+
+@layer component {
+  .contact-card {
+    align-items: center;
+    background: var(--color-sheet);
+    border-radius: var(--border-radius-surface);
+    display: flex;
+    gap: var(--spacing-group);
+    padding: var(--spacing-container) var(--spacing-card);
+  }
+
+  .contact-card-text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .contact-card-text small {
+    color: var(--color-ink-tertiary);
+    font-size: var(--font-size-detail);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .contact-card-text strong {
+    font-size: var(--font-size-value);
+    margin-top: 3px;
+  }
+
+  /* An address has no spaces to break at, so it breaks anywhere rather than pushing
+     the card wider than the screen. */
+  .contact-card-text span {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin-top: 2px;
+    overflow-wrap: anywhere;
+  }
+
+  /* Dressed like the floating action button – the ink with a white glyph – rather
+     than the bright, whose white counterpart goes dark on yellow. One dress keeps the
+     glyph white in all five themes. */
+  .contact-card-action {
+    align-items: center;
+    background: var(--color-theme-ink);
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-on-ink);
+    display: flex;
+    flex: none;
+    height: 42px;
+    justify-content: center;
+    transition: background 120ms ease;
+    width: 42px;
+  }
+
+  .contact-card-action svg {
+    height: 18px;
+    width: 18px;
+  }
+
+  /* Darkening steps mixed over the bright rather than picked per theme, so all five
+     respond to a press the same way. */
+  @media (hover: hover) {
+    .contact-card-action:hover {
+      background: color-mix(in srgb, var(--color-theme-ink) 85%, black);
+    }
+  }
+
+  .contact-card-action:active {
+    background: color-mix(in srgb, var(--color-theme-ink) 72%, black);
+  }
+}
