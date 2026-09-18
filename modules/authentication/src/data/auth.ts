@@ -1,9 +1,10 @@
-import { fetch, leaderUnit, stringOrFallback } from "@scouterna/wsj27-campfire-utils"
+import { fetch, leaderUnit, stringOrFallback, type User } from "@scouterna/wsj27-campfire-utils"
 import type { QueryClient } from "@tanstack/react-query"
 
-import type { User } from "../model/User"
+import type { Registration } from "../model/Registration"
+import { markFor, roleLineFor, roleLineWithUnitFor } from "../model/User"
 import { toRoles } from "./dto/RoleDto"
-import { fetchUnitQuery } from "./fetch-unit"
+import { fetchRegistrationQuery } from "./fetch-registration"
 
 /**
  * The client half of wsj27-auth-api's browser contract.
@@ -56,13 +57,13 @@ export function signOut(returnTo: string): void {
  * round trip re-mints the token. Only when that also refuses is nobody signed in – one
  * retry, never a loop.
  * @param client The application's one query client, so the participants-service read
- * behind the unit shares the cache every other read uses.
+ * behind the unit and the travel choice shares the cache every other read uses.
  * @returns The signed-in user, or undefined when nobody is.
  */
 export async function currentUser(client: QueryClient): Promise<User | undefined> {
   const first = await ask()
   if (first !== undefined) {
-    return withUnit(client, first)
+    return withRegistration(client, first)
   }
 
   try {
@@ -72,25 +73,50 @@ export async function currentUser(client: QueryClient): Promise<User | undefined
   }
 
   const second = await ask()
-  return second === undefined ? undefined : withUnit(client, second)
+  return second === undefined ? undefined : withRegistration(client, second)
 }
 
 /**
- * Completes a user whose roles carry no unit by asking the participants service,
- * through the query cache. A placed leader never costs the request, and every failure
- * is simply a user without a unit – the answer is allowed to be nothing.
+ * Completes the user from the list of participants, through the query cache: the unit
+ * where the roles gave none, and how they travel – a fact only the list holds, so even
+ * a placed leader costs the one cached read. Every failure is simply a user without
+ * the facts – the answer is allowed to be nothing, and nobody is put on a bus the list
+ * did not book. Only a refusal is remembered; a service that could not be reached is
+ * asked again the next time.
  * @param client The query client the read caches in.
  * @param user The decoded user, with whatever unit the roles gave.
- * @returns The user, with the unit the list of participants places them in, where the
- * roles gave none and the list knows one.
+ * @returns The user, completed with whatever the list of participants knows.
  */
-async function withUnit(client: QueryClient, user: User): Promise<User> {
-  if (user.unit !== undefined || user.memberNo === "") {
+async function withRegistration(client: QueryClient, user: User): Promise<User> {
+  if (user.memberNo === "") {
     return user
   }
 
-  const unit = await client.query(fetchUnitQuery(user.memberNo))
-  return unit === null ? user : { ...user, unit }
+  let registration: Registration | null
+  try {
+    registration = await client.query(fetchRegistrationQuery(user.memberNo))
+  } catch {
+    // The service could not be asked at all. The session goes on without the facts,
+    // and because the query threw rather than settled, the next ask tries again.
+    return user
+  }
+  if (registration === null) {
+    return user
+  }
+
+  // The roles' unit wins where both know one: the role is the appointment, the list a
+  // reading of it.
+  const unit = user.unit ?? registration.unit
+  // A unit the list supplied changes the mark the person wears, and – for a leader
+  // whose role named no unit – the line that names it.
+  const mark = markFor(user.roles, unit)
+  return {
+    ...user,
+    roleLineWithUnit: roleLineWithUnitFor(user.roles, unit),
+    ...(mark !== undefined && { mark }),
+    ...(registration.travel !== undefined && { travel: registration.travel }),
+    ...(unit !== undefined && { unit }),
+  }
 }
 
 /**
@@ -164,6 +190,8 @@ export function decodeUser(payload: unknown): User | undefined {
     typeof spelling === "string" ? toRoles(spelling) : [],
   )
   const leaderUnitNumber = leaderUnit(roles)
+  const unit = leaderUnitNumber === undefined ? undefined : { number: leaderUnitNumber }
+  const mark = markFor(roles, unit)
 
   return {
     // The greeting name, derived once here: the given name the provider sent, or the
@@ -172,9 +200,12 @@ export function decodeUser(payload: unknown): User | undefined {
     firstName: givenName === "" ? (name.trim().split(/\s+/u, 1)[0] ?? "") : givenName,
     memberNo: stringOrFallback(record["memberNo"]),
     name,
+    roleLine: roleLineFor(roles),
+    roleLineWithUnit: roleLineWithUnitFor(roles, unit),
     roles,
     // Spread rather than assigned: an absent unit is a missing key, not a key holding
     // undefined, which is the distinction `exactOptionalPropertyTypes` holds the code to.
-    ...(leaderUnitNumber !== undefined && { unit: { number: leaderUnitNumber } }),
+    ...(mark !== undefined && { mark }),
+    ...(unit !== undefined && { unit }),
   }
 }

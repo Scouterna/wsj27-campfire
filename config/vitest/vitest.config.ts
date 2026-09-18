@@ -88,6 +88,7 @@ export default defineConfig({
         // A component, proved by the Playwright walks rather than a unit test – like
         // every component outside the denominator.
         "libraries/utils/src/roles/RolesProvider.tsx",
+        "libraries/utils/src/user/UserProvider.tsx",
         "**/*.test.ts",
       ],
       // A ratchet, not a target: each number sits just below what the suite achieves

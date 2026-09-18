@@ -52,6 +52,14 @@ function testClient(): QueryClient {
 }
 
 /**
+ * A client that keeps an answer fresh the way the application's own does, so what gets
+ * asked a second time is exactly what was not remembered.
+ */
+function rememberingClient(): QueryClient {
+  return new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity } } })
+}
+
+/**
  * Stands in for the browser's navigation, recording where the code tried to go.
  */
 function navigationAnswers(): readonly string[] {
@@ -74,8 +82,13 @@ describe("reading the user the auth service reports", () => {
 
     expect(user).toEqual({
       firstName: "Lars",
+      // How the person reads is derived at the decode too, so nothing downstream works
+      // it out again.
+      mark: { isLeader: true, unitNumber: 1 },
       memberNo: "1001",
       name: "Lars Larsson",
+      roleLine: "Ledare",
+      roleLineWithUnit: "Ledare · Avdelning 1",
       roles: [{ kind: "leader", unitNumber: 1 }],
       // A leader's unit comes straight from the roles, at the decode.
       unit: { number: 1 },
@@ -89,8 +102,28 @@ describe("reading the user the auth service reports", () => {
       firstName: "Lars",
       memberNo: "",
       name: "Lars Larsson",
+      roleLine: "Deltagare",
+      roleLineWithUnit: "Deltagare",
       roles: [],
     })
+  })
+
+  it("names a management function on the role line, the head of contingent first", () => {
+    const program = decodeUser(userPayload({ roles: ["wsj27:cmt", "wsj27:cmt:program"] }))
+    const plain = decodeUser(userPayload({ roles: ["wsj27:cmt"] }))
+
+    expect(program?.roleLine).toBe("CMT · Program")
+    expect(program?.roleLineWithUnit).toBe("CMT · Program")
+    // The management wears its own mark, which is no unit's.
+    expect(program?.mark).toEqual({ isLeader: false })
+    expect(plain?.roleLine).toBe("CMT")
+  })
+
+  it("reads as a leader when the roles carry a management function too", () => {
+    const user = decodeUser(userPayload({ roles: ["wsj27:al:1", "wsj27:cmt:program"] }))
+
+    expect(user?.roleLineWithUnit).toBe("Ledare · Avdelning 1")
+    expect(user?.mark).toEqual({ isLeader: true, unitNumber: 1 })
   })
 
   it("derives the greeting name from the full name when no given name arrives", () => {
@@ -162,13 +195,13 @@ describe("composing the sign-in address", () => {
 })
 
 describe("asking who is signed in", () => {
-  it("asks once when the first answer is a session", async () => {
+  it("asks the session once when the first answer is one", async () => {
     const asked = networkAnswers({ "/api/auth/user": [Response.json(userPayload({}))] })
 
     const user = await currentUser(testClient())
 
     expect(user?.name).toBe("Lars Larsson")
-    expect(asked).toEqual(["/api/auth/user"])
+    expect(asked.filter((url) => url === "/api/auth/user")).toHaveLength(1)
   })
 
   it("re-mints the token and asks again when the first answer is a refusal", async () => {
@@ -183,7 +216,7 @@ describe("asking who is signed in", () => {
     const user = await currentUser(testClient())
 
     expect(user?.name).toBe("Anna Andersson")
-    expect(asked).toEqual(["/api/auth/user", "/api/auth/refresh", "/api/auth/user"])
+    expect(asked.slice(0, 3)).toEqual(["/api/auth/user", "/api/auth/refresh", "/api/auth/user"])
   })
 
   it("answers nobody when the refresh refuses too, without retrying it", async () => {
@@ -213,19 +246,26 @@ describe("asking who is signed in", () => {
     await expect(currentUser(testClient())).resolves.toBeUndefined()
   })
 
-  it("completes the unit from the list of participants when the roles carry none", async () => {
+  it("completes the unit and the travel choice from the list of participants when the roles carry none", async () => {
     const asked = networkAnswers({
       "/api/auth/user": [Response.json(userPayload({ roles: ["wsj27:cmt"] }))],
-      "/api/project/participants/individual/1001": [Response.json({ troop: "2" })],
+      "/api/project/participants/individual/1001": [
+        Response.json({ participation_type: "Direktresa", troop: "2" }),
+      ],
     })
 
     const user = await currentUser(testClient())
 
     expect(user?.unit).toEqual({ number: 2 })
+    // The unit the list supplied is the mark they wear – without a star, and without
+    // joining the role line, which only ever names a leader's unit.
+    expect(user?.mark).toEqual({ isLeader: false, unitNumber: 2 })
+    expect(user?.roleLineWithUnit).toBe("CMT")
+    expect(user?.travel).toBe("direktresa")
     expect(asked).toContain("/api/project/participants/individual/1001")
   })
 
-  it("answers a user without a unit when the participants service refuses", async () => {
+  it("answers a user without the facts when the participants service refuses", async () => {
     networkAnswers({
       "/api/auth/user": [Response.json(userPayload({ roles: ["wsj27:cmt"] }))],
       "/api/project/participants/individual/1001": [new Response("{}", { status: 404 })],
@@ -235,6 +275,7 @@ describe("asking who is signed in", () => {
 
     expect(user).toBeDefined()
     expect(user?.unit).toBeUndefined()
+    expect(user?.travel).toBeUndefined()
   })
 
   it("answers nobody when the refresh succeeds but the second ask still refuses", async () => {
@@ -275,12 +316,86 @@ describe("asking who is signed in", () => {
     expect(asked).toContain("/api/project/participants/individual/10%2F01")
   })
 
-  it("never asks the participants service for a leader whose roles carry the unit", async () => {
-    const asked = networkAnswers({ "/api/auth/user": [Response.json(userPayload({}))] })
+  it("asks the list even for a placed leader – their travel choice lives only there", async () => {
+    const asked = networkAnswers({
+      "/api/auth/user": [Response.json(userPayload({}))],
+      "/api/project/participants/individual/1001": [
+        Response.json({ participation_type: "Rundresa", troop: "1" }),
+      ],
+    })
 
     const user = await currentUser(testClient())
 
     expect(user?.unit).toEqual({ number: 1 })
+    expect(user?.travel).toBe("rundresa")
+    expect(asked).toContain("/api/project/participants/individual/1001")
+  })
+
+  it("keeps the roles' unit when the list disagrees", async () => {
+    // The role is the appointment, the list a reading of it.
+    networkAnswers({
+      "/api/auth/user": [Response.json(userPayload({}))],
+      "/api/project/participants/individual/1001": [Response.json({ troop: "2" })],
+    })
+
+    const user = await currentUser(testClient())
+
+    expect(user?.unit).toEqual({ number: 1 })
+    expect(user?.mark).toEqual({ isLeader: true, unitNumber: 1 })
+    expect(user?.roleLineWithUnit).toBe("Ledare · Avdelning 1")
+  })
+
+  it("names the unit the list supplied for a leader whose role carried none", async () => {
+    networkAnswers({
+      "/api/auth/user": [Response.json(userPayload({ roles: ["wsj27:al"] }))],
+      "/api/project/participants/individual/1001": [Response.json({ troop: "2" })],
+    })
+
+    const user = await currentUser(testClient())
+
+    // The mark and the line agree: a starred unit 2 beside "Ledare · Avdelning 2".
+    expect(user?.mark).toEqual({ isLeader: true, unitNumber: 2 })
+    expect(user?.roleLine).toBe("Ledare")
+    expect(user?.roleLineWithUnit).toBe("Ledare · Avdelning 2")
+  })
+
+  it("does not remember a service it could not reach as nothing known", async () => {
+    const client = rememberingClient()
+    const asked = networkAnswers({
+      "/api/auth/user": [Response.json(userPayload({})), Response.json(userPayload({}))],
+      // The first ask meets a dead network; the second is answered.
+      "/api/project/participants/individual/1001": [],
+    })
+
+    const first = await currentUser(client)
+    expect(first?.travel).toBeUndefined()
+
+    networkAnswers({
+      "/api/auth/user": [Response.json(userPayload({}))],
+      "/api/project/participants/individual/1001": [
+        Response.json({ participation_type: "Rundresa", troop: "1" }),
+      ],
+    })
+    const second = await currentUser(client)
+
+    expect(asked).toContain("/api/project/participants/individual/1001")
+    expect(second?.travel).toBe("rundresa")
+  })
+
+  it("remembers a refusal, which asking again would not change", async () => {
+    const client = rememberingClient()
+    networkAnswers({
+      "/api/auth/user": [Response.json(userPayload({}))],
+      "/api/project/participants/individual/1001": [new Response("{}", { status: 403 })],
+    })
+    await currentUser(client)
+
+    const asked = networkAnswers({
+      "/api/auth/user": [Response.json(userPayload({}))],
+      "/api/project/participants/individual/1001": [Response.json({ troop: "1" })],
+    })
+    await currentUser(client)
+
     expect(asked).toEqual(["/api/auth/user"])
   })
 })

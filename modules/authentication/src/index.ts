@@ -1,12 +1,10 @@
 /**
  * The authentication module's public surface: the screen anyone who is not signed in
- * lands on, the session client the application's gate asks, and the signed-in person
- * the answer decodes to, with the helpers that derive from them. The wire shapes, the
- * unit read, and the provider's own spellings stay inside. The role vocabulary is
- * `utils`' to hand out, not this module's.
+ * lands on, and the session client the application's gate asks. The wire shapes, the
+ * registration read, and the provider's own spellings stay inside. The `User` the
+ * answer decodes to and the role vocabulary are `utils`' to hand out, not this
+ * module's – every module may ask who is signed in.
  */
 
 export { currentUser, keepSessionAlive, signOut } from "./data/auth"
-export type { Unit } from "./model/Unit"
-export type { User } from "./model/User"
 export { SignInScreen } from "./ui/screens/SignInScreen/SignInScreen"
