@@ -4,7 +4,7 @@ Read the [root `AGENTS.md`](../AGENTS.md) first – it holds the conventions tha
 
 A module is one domain capability, whole: its data layer, its domain model, its screens, and its widgets. Four exist, and they are how the product grows – a new capability is a new module, not another folder inside an old one.
 
-Authentication and participants carry the full shape – a data layer, a domain model, and screens – participants with the section's route table, four screens, and the leader's home widgets on top. Home is the start screen the signed-in application mounts, with the reveal countdown as its own widget and the other modules' widgets placed by id and gated by the screen itself, and journey is its fixed dates, the pure functions over them, and the countdown widget they feed. The rules below are in force for what exists, and each section says where it describes something no module holds yet.
+Authentication and participants carry the full shape – a data layer, a domain model, and screens – participants with the section's route table, four screens, and the leader's home widgets on top. Home is the start screen the signed-in application mounts, with the reveal countdown and the contingent's messages as its own widgets, the message list as its model, and the other modules' widgets placed by id and gated by the screen itself, and journey is its fixed dates, the pure functions over them, and the countdown widget they feed. The rules below are in force for what exists, and each section says where it describes something no module holds yet.
 
 ## The one rule that carries the rest
 
@@ -16,17 +16,18 @@ When the rule feels restrictive, the answer is a library, never the application.
 
 ## The shape of a module
 
-The smallest module is a package, a screen, its stories, and a walk-through:
+A small module is a package, a screen, its stories, and a walk-through – home adds a one-file model and two widgets of its own:
 
 ```text
 modules/home/
 ├── package.json               @scouterna/wsj27-campfire-home, private, exports ./src/index.ts
 ├── src/
 │   ├── index.ts               the public surface, and the only thing the application imports
+│   ├── model/messages.ts      the contingent's messages, and reading which a device closed
 │   └── ui/
 │       ├── screens/home/      the screen, with its stories beside it
-│       └── widgets/reveal/    the reveal countdown the screen places
-└── test-ui/home.spec.ts       the Playwright walk-through
+│       └── widgets/           the reveal countdown and the messages, which the screen places
+└── test-ui/                   the Playwright walk-throughs – the chrome's, and the messages'
 ```
 
 A screen sits directly in `src/` while a module has one of them. The shape a module grows into is the guidebook's [layers page](../docs/guidebook/architecture/layers/index.md), and it arrives a directory at a time, when there is something to put in each:

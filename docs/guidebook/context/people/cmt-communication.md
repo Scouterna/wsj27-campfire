@@ -12,13 +12,15 @@ The day-to-day talking, though, happens on Discord. That is where the contingent
 
 ## In the application
 
-Communication gets the same application every other CMT function gets: the list of participants, searchable and unscoped, with a person's page behind each row. There is no announcement surface, and none is being built: nothing in the application sends a message, publishes a post, or holds a piece of copy.
+Communication gets the same application every other CMT function gets: the list of participants, searchable and unscoped, with a person's page behind each row. There is no broadcast surface, and none is being built: nothing in the application sends anything, publishes a post, or lets somebody compose one.
 
-What the application does carry that touches this function is the contingent's visual identity – the five unit colors and the Bravely Script display face taken from the jamboree's theme, both in `libraries/ui` – and the unit logotypes, in the unit identity table the participants module holds. That work is described in [Design](../../design/), and it is Communication's material as much as anyone's.
+The one piece of copy the application holds is the start screen's messages – a welcome saying what Campfire is, and after it only the rare thing that has to be said to somebody with the application open. They are written into the application and arrive with a release, and they are never news: what is new in Campfire is announced on Discord to the leaders and on Teams to the management, and each welcome points its reader to the right one. Their wording is Communication's to have a say in.
+
+What the application also carries that touches this function is the contingent's visual identity – the five unit colors and the Bravely Script display face taken from the jamboree's theme, both in `libraries/ui` – and the unit logotypes, in the unit identity table the participants module holds. That work is described in [Design](../../design/), and it is Communication's material as much as anyone's.
 
 ## What it is meant to give them
 
-Open. Communication is on the audience list so an issue can be addressed to them, and an announcement or broadcast surface has never been specified. If one is ever wanted, the first question is why it is not Discord, and the answer has to be written down before the screen is.
+Open. Communication is on the audience list so an issue can be addressed to them, and a surface where the function publishes on its own has never been specified. The start screen's messages answered why they are not Discord before they were built – they reach a person at the moment they open Campfire, and they say what Campfire is – and a publishing surface owes the same answer, written down before the screen is.
 
 ## Signing in, and what they see
 

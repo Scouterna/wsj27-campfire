@@ -26,7 +26,9 @@ It exports `SignInScreen`, the screen the session gate shows when nobody is sign
 
 ## Home
 
-`modules/home` is the smallest module, and deliberately so. It owns the start screen's layout, the contingent's notices, and the emergency numbers a leader needs, and it fetches nothing.
+`modules/home` is the smallest module, and deliberately so. It owns the start screen's layout, the contingent's messages, and the emergency numbers a leader needs, and it fetches nothing.
+
+A message is a title and a text the contingent has for the people who open Campfire, addressed by role and starting with a welcome for each – what a leader can do with their unit, and what the management can do with everyone. The messages are a list in the module's own model, shipped with a release rather than fetched. Once the units reveal has opened, the start screen shows the ones for the reader's roles that this device has not closed over every other widget, together on one plate in the theme's bright color and under one close control, and remembers the closed ones in the device's storage – which it never trusts, so a value it cannot read shows a message again rather than breaking the screen.
 
 The countdown and the unit widgets on that screen are other modules', mounted by id through the widget registry, and who sees which – and from when – is the screen's own decision, read from the reveal and the ambient roles. That is the rule doing its job: home shows a countdown and a unit's people without knowing that the journey or participants modules exist.
 

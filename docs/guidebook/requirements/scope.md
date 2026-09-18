@@ -18,7 +18,7 @@ Neither anchor is specified. Both are named here because they are where Campfire
 
 ## What version 1 is made of
 
-- **Four feature modules.** `authentication` signs a person in and out through the auth service, `home` owns the start screen with the contingent's notices and emergency numbers, `journey` knows the trip's dates and puts a countdown on that screen, and `participants` holds the contingent's list of participants – its list and detail screens. The web application composes them in one place, and none of them imports another ([Modules](../architecture/modules)).
+- **Four feature modules.** `authentication` signs a person in and out through the auth service, `home` owns the start screen with the contingent's messages and emergency numbers, `journey` knows the trip's dates and puts a countdown on that screen, and `participants` holds the contingent's list of participants – its list and detail screens. The web application composes them in one place, and none of them imports another ([Modules](../architecture/modules)).
 - **A design system.** The tokens, the five unit themes, the display face, and the components built on them, cataloged in Storybook ([Design](../design/)).
 - **Two shells that host the application.** The Apple and the Android shell each open the one origin in a webview, draw the native navigation bar and tab bar, and carry the sign-in round trip in a modal, with the origin they load carried in a build setting ([Applications](../architecture/applications)).
 - **A seeded mock that answers as both services.** `tools/mock` serves the sign-in contract behind a persona picker and the list of participants behind the real service's gates, under the prefixes the deployed ingress serves ([The mock back-end](../testing/mock)).
