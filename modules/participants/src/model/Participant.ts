@@ -2,9 +2,10 @@ import { type ParticipantRole } from "./ParticipantRole"
 import type { CmtFunktion } from "./Participation"
 
 /**
- * A person as the list of participants shows them – what a row needs and nothing more.
- * How to reach them, and everything they answered when they signed up, belongs to
- * `ParticipantDetail` and is fetched only when somebody is opened.
+ * A person as the list of participants shows them – what a row needs, and the addresses
+ * the list mails and copies. Every other way to reach them, and everything they answered
+ * when they signed up, belongs to `ParticipantDetail` and is fetched only when somebody
+ * is opened.
  */
 export interface Participant {
   /**
@@ -39,6 +40,16 @@ export interface Participant {
    * The scoutkår the person belongs to at home. Absent when the registry holds none.
    */
   readonly memberGroup?: string
+  /**
+   * The address to write to them at – the one the detail shows as theirs. Absent when
+   * neither the registration nor Scoutnet holds one.
+   */
+  readonly email?: string
+  /**
+   * The addresses of the närstående they named, in the order the form asks for them.
+   * Absent when none gave one, and when the viewer may not read them.
+   */
+  readonly relativeEmails?: readonly string[]
   /**
    * The function a management member serves in, read out of the record's minted roles.
    * Absent for everyone else, and for a management member the roster has not detailed.

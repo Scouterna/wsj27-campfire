@@ -9,7 +9,8 @@ import type { Readiness } from "./Readiness"
 
 /**
  * One person in full: their own fields, and everything they answered when they signed up.
- * A list carries none of this – it is fetched only when somebody is opened.
+ * A list carries none of this beyond the addresses it mails – it is fetched only when
+ * somebody is opened.
  *
  * A section whose field is absent is not rendered. Absent means the same whatever the
  * reason – not asked on their form, not answered, or not the viewer's to see – so a

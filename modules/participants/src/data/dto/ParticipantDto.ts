@@ -1,6 +1,8 @@
 import type { Participant } from "../../model/Participant"
 import type { ParticipantRole } from "../../model/ParticipantRole"
 import type { CmtFunktion } from "../../model/Participation"
+import { flattenAnswers } from "./answers"
+import { toPrimaryEmail, toRelatives } from "./contact"
 
 /**
  * One participant as the participants service sends them – the basic block that
@@ -25,6 +27,11 @@ export interface ParticipantDto {
   readonly access_level?: unknown
   readonly troop?: unknown
   readonly roles?: unknown
+  /**
+   * The contact answers, which the service sends with a listing as well as with a person
+   * – and leaves out of a leader's row for a caller who may not read a leader's own.
+   */
+  readonly contact_info?: unknown
 }
 
 // Scoutnet's member types, mapped to the domain's roles. A type invented by a later
@@ -171,6 +178,15 @@ export function toParticipant(dto: ParticipantDto): Participant | undefined {
 
   const cmtDetail = toCmtDetail(dto.roles)
 
+  // The addresses the list mails and copies, read exactly as the detail reads them so
+  // the two never disagree. The alternative email and the emergency contacts are left
+  // where they are: nothing acts on them from a list.
+  const answers = flattenAnswers(dto.contact_info, undefined)
+  const email = toPrimaryEmail(dto.email, answers)
+  const relativeEmails = toRelatives(answers)
+    .map((person) => person.email)
+    .filter((address): address is string => address !== undefined)
+
   return {
     memberNo,
     ...name,
@@ -180,6 +196,8 @@ export function toParticipant(dto: ParticipantDto): Participant | undefined {
     ...(unitNumber !== undefined && { unitNumber }),
     ...(birthDate !== undefined && { birthDate }),
     ...(memberGroup !== undefined && { memberGroup }),
+    ...(email !== undefined && { email }),
+    ...(relativeEmails.length > 0 && { relativeEmails }),
     ...cmtDetail,
   }
 }

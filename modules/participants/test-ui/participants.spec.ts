@@ -25,6 +25,15 @@ async function signInAs(page: Page, persona: string): Promise<void> {
   await page.getByRole("link", { name: persona }).click()
 }
 
+/**
+ * The link a mail entry opens: every address a hidden copy, and nobody any other way.
+ * @param addresses The addresses, encoded as the link carries them.
+ * @returns The `mailto:` address.
+ */
+function hiddenCopies(addresses: readonly string[]): string {
+  return `mailto:?bcc=${addresses.join(",")}`
+}
+
 test("shows a leader their own unit, with the unit's own filter", async ({ page }) => {
   await page.goto("/")
   await signInAs(page, "Lars Lindberg")
@@ -223,4 +232,76 @@ test("gives a management function the whole section, in the management's name", 
   // whole, which is the one place a CMT member's line differs from a leader's.
   const pill = page.getByRole("button", { name: "Logga ut Pernilla Palm" })
   await expect(pill).toContainText("CMT · Program")
+})
+
+test("mails and copies the addresses of the list as it is narrowed", async ({ context, page }) => {
+  // The clipboard is the browser's to grant, and a walk has nobody to ask.
+  await context.grantPermissions(["clipboard-read", "clipboard-write"])
+
+  await page.goto("/participants")
+  await signInAs(page, "Lars Lindberg")
+  await expect(page.getByRole("status")).toHaveText("8 personer i avdelningen")
+
+  // Four entries, acting on the unit's eight people – every address a hidden copy.
+  const trigger = page.getByRole("button", { name: "Fler åtgärder" })
+  await trigger.click()
+  await expect(page.getByRole("menuitem")).toHaveText([
+    "Mejla personerna i listan",
+    "Kopiera e-postadresserna",
+    "Mejla deras närstående",
+    "Kopiera närståendes e-postadresser",
+  ])
+  const everyone = await page
+    .getByRole("menuitem", { name: "Mejla personerna i listan" })
+    .getAttribute("href")
+  expect(everyone).toMatch(/^mailto:\?bcc=/u)
+  expect(everyone?.split(",")).toHaveLength(8)
+  expect(everyone).toContain("leo.str%C3%B6m@example.se")
+
+  // The närstående who gave an address, and nobody's emergency contacts.
+  const relatives = await page
+    .getByRole("menuitem", { name: "Mejla deras närstående" })
+    .getAttribute("href")
+  expect(relatives).toBe(
+    hiddenCopies([
+      "katarina.axelsson@example.se",
+      "maria.str%C3%B6m@example.se",
+      "bj%C3%B6rn.str%C3%B6m@example.se",
+    ]),
+  )
+  await page.keyboard.press("Escape")
+
+  // Narrowing the list is choosing who to write to: the two leaders, whose own
+  // närstående a fellow leader may not read – so those entries stay, and say why.
+  await page.getByRole("button", { name: "Ledare", pressed: false }).click()
+  await expect(page.getByRole("status")).toHaveText("2 av 8 personer")
+  await trigger.click()
+  await expect(page.getByRole("menuitem", { name: "Mejla personerna i listan" })).toHaveAttribute(
+    "href",
+    hiddenCopies(["hanna.hellstr%C3%B6m@example.se", "lars.lindberg@example.se"]),
+  )
+  const noRelatives = page.getByRole("menuitem", { name: /^Mejla deras närstående/u })
+  await expect(noRelatives).toHaveAttribute("aria-disabled", "true")
+  await expect(noRelatives).toContainText("Inga e-postadresser i listan.")
+  // Chosen anyway, it does nothing – the menu stays as it was. By keyboard, because the
+  // entry stays reachable that way, and the browser driver declines to click what is
+  // announced as disabled.
+  await noRelatives.focus()
+  await page.keyboard.press("Enter")
+  await expect(page.getByRole("menu")).toBeVisible()
+
+  // A copy lands on the clipboard ready to paste, and the entry itself says that it did
+  // – where the press landed – before the menu closes by itself.
+  await page.getByRole("menuitem", { name: "Kopiera e-postadresserna" }).click()
+  await expect(page.getByRole("menuitem", { name: "2 adresser kopierade" })).toBeVisible()
+  expect(await page.evaluate(async () => navigator.clipboard.readText())).toBe(
+    "hanna.hellström@example.se, lars.lindberg@example.se",
+  )
+  await expect(page.getByRole("menu")).toHaveCount(0)
+  await expect(trigger).toBeFocused()
+
+  // Nobody shown is nobody to write to: the menu goes with the list.
+  await page.getByRole("searchbox", { name: "Sök deltagare" }).fill("zzz")
+  await expect(page.getByRole("status")).toHaveText("Inga träffar.")
+  await expect(trigger).toHaveCount(0)
 })

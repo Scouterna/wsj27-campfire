@@ -42,6 +42,8 @@ Its public surface is one countdown widget, placed on the start screen by the ap
 
 It is the only module that talks to the participants service, and one of the two with a data layer, beside authentication. Every field arrives typed `unknown` and is validated at the boundary, because the service will change shape over an eighteen-month build ([Data layer](./layers/data)). It also holds the first feature: a leader seeing the participants in their unit, walked through on [Show participants](./example-flows/show-participants).
 
+The list is also how somebody chooses who to write to. Its overflow menu mails the people it shows, or copies their addresses, and does the same for their relatives – acting on the list as it is searched and narrowed, from the addresses the listing already carries, so nobody is fetched to be written to. A mail opens with every address as a hidden copy, and a recipient list too long for a mail link is one to copy instead.
+
 The fetch behind those queries comes from `libraries/utils`.
 
 ## The libraries
