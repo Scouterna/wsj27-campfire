@@ -1,4 +1,4 @@
-import { PageOutline } from "@scouterna/wsj27-campfire-ui"
+import { PageOutline, usePageJumps } from "@scouterna/wsj27-campfire-ui"
 import { useRouterState } from "@tanstack/react-router"
 import { useEffect, useRef, useState, type ReactElement } from "react"
 
@@ -30,6 +30,11 @@ export function Outline(props: OutlineProps): ReactElement | null {
   const [headings, setHeadings] = useState<readonly string[]>([])
   const [current, setCurrent] = useState(0)
   const holdUntil = useRef(0)
+
+  // A page whose sections are not in the document – a virtualized list – declares its
+  // own stops through `PageJumps`, and the declaration wins over the heading scan: the
+  // page knows where its content is, and the spy below can only see rendered rows.
+  const jumps = usePageJumps()
 
   useEffect(() => {
     // The outline can only be read from the DOM the page just rendered, so the scan
@@ -90,6 +95,10 @@ export function Outline(props: OutlineProps): ReactElement | null {
       column.removeEventListener("scroll", onScroll)
     }
   }, [pathname])
+
+  if (jumps !== undefined && jumps.entries.length > 0) {
+    return <PageOutline entries={jumps.entries} current={jumps.current} onSelect={jumps.onJump} />
+  }
 
   const entries = headings.length > 0 ? headings : [props.title]
   // The heading the spy last chose can fall off when the page shortens the list.

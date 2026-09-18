@@ -10,6 +10,15 @@ import { expect, test, type Page } from "@playwright/test"
 // stand-in's alike – lives in cookies each test's own browser context keeps, so the
 // walks cannot sign each other in or out and run in parallel like every other spec.
 
+// The reveal is timed, and until its moment a leader's unit – its color included – is
+// behind the curtain. These walks are about the sign-in round trip and the theming
+// that follows it, so each page opens with the development bypass set.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("campfire-reveal", JSON.stringify(["units"]))
+  })
+})
+
 /**
  * The sign-in screen's one action, and the picker's way back into the application.
  * @param page The page standing on the sign-in screen.

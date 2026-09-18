@@ -13,6 +13,9 @@ import type { Role } from "@scouterna/wsj27-campfire-utils"
  */
 const managementFunctions = new Map<string, Role>([
   ["admin", { kind: "admin" }],
+  // The roster spells the head of contingent "HoC", which the service slugs to "hoc";
+  // the longer spelling is kept as a tolerated alias from before the roster existed.
+  ["hoc", { kind: "headOfContingent" }],
   ["kommunikation", { kind: "communication" }],
   ["kontingentledare", { kind: "headOfContingent" }],
   ["program", { kind: "program" }],

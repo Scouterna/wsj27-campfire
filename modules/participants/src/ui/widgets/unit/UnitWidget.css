@@ -1,0 +1,102 @@
+/* The unit widget: the identity row dresses itself, and the people read as a compact
+   ledger inside their cards. */
+
+@layer component {
+  .unit-widget-note {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: var(--spacing-group) 0 0;
+  }
+
+  /* The people as a ledger: one column on a phone, two on a desktop – never more, so
+     the names stay long enough to read. */
+  .unit-widget-people {
+    display: grid;
+    gap: var(--spacing-stack);
+
+    /* minmax(0, …), never a bare 1fr: a bare track's minimum is the widest pill's
+       min-content, so one long name and kår would burst the columns out of the card
+       instead of truncating. */
+    grid-template-columns: minmax(0, 1fr);
+
+    /* Bled to the row pattern's inset rather than the card's own padding – on every
+       side, so the pills sit as close to the card's top and bottom as to its edges,
+       and their edges line up with the identity row's mark in the card above. */
+    margin: calc(var(--spacing-container) - var(--card-padding, var(--spacing-section)));
+  }
+
+  /* Two columns only from 1024px: at 768 the side menu has already taken its track,
+     and two columns in what remains truncate more names than they show. */
+  @media (min-width: 1024px) {
+    .unit-widget-people {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+  }
+
+  /* Every person a pill in the theme's lightest wash, pressed like a button – the
+     44-point height is the touch target's – with the chevron saying it leads somewhere. */
+  .unit-widget-person {
+    align-items: center;
+    background: color-mix(in srgb, var(--color-theme-wash) 45%, transparent);
+    border-radius: var(--border-radius-control);
+    color: var(--color-ink);
+    display: flex;
+    gap: var(--spacing-stack);
+    min-height: 44px;
+    padding-inline: var(--spacing-group);
+    text-decoration: none;
+    transition: background 120ms ease;
+  }
+
+  .unit-widget-person-chevron {
+    color: var(--color-ink-tertiary);
+    display: flex;
+    flex: none;
+    transform: scaleX(-1);
+  }
+
+  .unit-widget-person-text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    padding-block: var(--spacing-stack);
+  }
+
+  .unit-widget-person-name {
+    font-size: var(--font-size-value);
+    font-weight: var(--font-weight-strong);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* The kår at home, under the name in quiet ink. */
+  .unit-widget-person-group {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-detail);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* The age rides quietly at the trailing edge – a fact, not a second label. */
+  .unit-widget-person-age {
+    color: var(--color-ink-secondary);
+    flex: none;
+    font-size: var(--font-size-footnote);
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (hover: hover) {
+    .unit-widget-person:hover {
+      background: var(--color-theme-wash);
+    }
+  }
+
+  .unit-widget-person:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: -2px;
+  }
+}

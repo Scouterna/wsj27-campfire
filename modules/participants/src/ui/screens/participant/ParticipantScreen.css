@@ -1,0 +1,325 @@
+/* One person's record: the name is the chrome's title, and the screen reads on as
+   sections – a heading outside each white card. The root is the container the wide
+   pairings query, since the screen cannot know how wide the chrome made it. */
+
+@layer screen {
+  .person {
+    container-type: inline-size;
+    display: flex;
+    flex-direction: column;
+    /* The stack keeps the chrome's rhythm: the same gap the content column puts between
+       cards. */
+    gap: var(--spacing-container);
+  }
+
+  /* A heading over more than one card, where the card's own heading would only title the
+     first of them. Drawn exactly as a card heading is. */
+  .person-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-group);
+  }
+
+  .person-section-heading {
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-strong);
+    margin: 0;
+  }
+
+  /* --- Profil --- */
+
+  .person-profile {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .person-profile-identity {
+    align-items: center;
+    display: flex;
+    gap: var(--spacing-container);
+  }
+
+  .person-profile-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+  }
+
+  .person-profile-lines p {
+    color: var(--color-ink);
+    font-size: var(--font-size-value);
+    margin: 0;
+  }
+
+  .person-profile-lines span {
+    color: var(--color-ink-secondary);
+  }
+
+  .person-profile-grid {
+    border-top: 1px solid var(--color-divider);
+    display: grid;
+    gap: var(--spacing-container);
+
+    /* Two facts per row, and four on a wide card below – never three, which strands
+       a fourth fact on a row of its own. */
+    grid-template-columns: 1fr 1fr;
+    padding-top: var(--spacing-container);
+  }
+
+  .person-profile-grid small {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+  }
+
+  .person-profile-grid em,
+  .person-profile-grid strong {
+    display: block;
+    font-size: var(--font-size-value);
+    margin-top: 2px;
+    overflow-wrap: anywhere;
+  }
+
+  /* Nothing on record: the same quiet ink the icon field's absent state wears. */
+  .person-profile-grid em {
+    color: var(--color-ink-tertiary);
+    font-size: var(--font-size-entry);
+  }
+
+  /* --- Kontakt --- */
+
+  .person-channels {
+    display: grid;
+    gap: var(--spacing-container);
+    grid-template-columns: 1fr;
+  }
+
+  .person-contacts {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: 1fr;
+  }
+
+  /* --- Kost och allergier --- */
+
+  .person-diet {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .person-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-stack);
+  }
+
+  .person-severities {
+    align-items: center;
+    border-top: 1px solid var(--color-divider);
+    display: grid;
+    gap: var(--spacing-stack) 14px;
+    grid-template-columns: minmax(100px, auto) 1fr auto;
+    padding-top: 14px;
+  }
+
+  .person-severities strong {
+    font-size: var(--font-size-entry);
+  }
+
+  .person-severities span {
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-strong);
+  }
+
+  .person-severity-caution {
+    color: var(--color-tone-caution-ink);
+  }
+
+  .person-severity-danger {
+    color: var(--color-tone-danger-ink);
+  }
+
+  .person-severity-info {
+    color: var(--color-tone-info-ink);
+  }
+
+  .person-diet-notes {
+    border-top: 1px solid var(--color-divider);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-top: 14px;
+  }
+
+  .person-free-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .person-free-text small {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+  }
+
+  .person-free-text strong {
+    font-size: var(--font-size-value);
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
+
+  /* --- Hälsa --- */
+
+  .person-health {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-group);
+  }
+
+  /* --- Aktivitetsberedskap ---
+     The tile wears a tone rather than a color: positive for an answered yes, danger for a
+     no. Each tone is pointed at once, so the warning rule repoints the pair instead of
+     restating every rule that reads it. */
+
+  .person-readiness {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+  }
+
+  .person-readiness-tile {
+    --readiness-ink: var(--color-tone-positive-ink);
+    --readiness-wash: var(--color-tone-positive-wash);
+
+    align-items: center;
+    background: var(--readiness-wash);
+    border-radius: var(--border-radius-control);
+    color: var(--readiness-ink);
+    display: flex;
+    font-size: var(--font-size-entry);
+    font-weight: var(--font-weight-strong);
+    gap: 10px;
+    padding: 10px 13px;
+  }
+
+  .person-readiness-warning {
+    --readiness-ink: var(--color-tone-danger-ink);
+    --readiness-wash: var(--color-tone-danger-wash);
+  }
+
+  .person-readiness-mark {
+    align-items: center;
+    background: var(--readiness-ink);
+    border-radius: var(--border-radius-round);
+    color: var(--color-sheet);
+    display: flex;
+    flex: none;
+    font-size: var(--font-size-entry);
+    height: 26px;
+    justify-content: center;
+    width: 26px;
+  }
+
+  .person-readiness-mark svg {
+    height: 13px;
+    width: 13px;
+  }
+
+  .person-clarification {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+  }
+
+  /* --- Vaccinationer --- */
+
+  .person-vaccinations {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+  }
+
+  /* --- Språk --- */
+
+  .person-languages {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-stack);
+  }
+
+  .person-language {
+    align-items: center;
+    background: var(--color-theme-wash);
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    display: inline-flex;
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-strong);
+    gap: 7px;
+    padding: 6px 13px;
+  }
+
+  /* --- Erfarenhet --- */
+
+  .person-experience {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .person-fact small {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+  }
+
+  .person-fact strong {
+    display: block;
+    font-size: var(--font-size-value);
+    margin-top: 2px;
+  }
+
+  /* --- The wide layout ---
+     Sections that pair on a wide screen: the cards stretch so the pair reads as one band,
+     and the contact grids go two-up. */
+
+  .person-pair {
+    display: grid;
+    gap: var(--spacing-container);
+    grid-template-columns: 1fr;
+  }
+
+  /* A grid stretches the section, not the sheet inside it, so the sheet is told to take
+     what the stretch gave – otherwise two paired cards end level at the top and ragged at
+     the bottom. */
+  .person-pair .card-section {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .person-pair .card {
+    flex: 1;
+  }
+
+  @container (min-width: 640px) {
+    .person-channels,
+    .person-contacts,
+    .person-pair {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .person-profile-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    /* An odd count's last card takes the whole row rather than half of it – a person
+       with one contact gets a full-width card, and three contacts leave no hole. The
+       paired sections span the same way, so an odd tail – Vaccinationer alone, or
+       Språk as the third – fills the band. */
+    .person-contacts > :last-child:nth-child(odd),
+    .person-pair > :last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+    }
+  }
+}

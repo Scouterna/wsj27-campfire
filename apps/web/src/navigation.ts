@@ -64,13 +64,57 @@ export function scrollBehavior(): ScrollBehavior {
 }
 
 /**
+ * How far a scripted return to the top may glide. Past this it lands instantly: a
+ * glide across thousands of pixels of virtualized rows shows only a blur, and rows
+ * measuring themselves mid-flight write to the scroller, which cancels the glide.
+ */
+const glideWithinPx = 10_000
+
+/**
  * Scroll whichever of the window and the content column scrolls at this width to the
- * top – the answer to tapping the section control of the page already shown.
+ * top – the answer to tapping the section control of the page already shown. Nearby
+ * it glides and far away it lands at once – and either way it settles: a virtual
+ * list measuring its rows can cancel a glide mid-flight, so a scroll that stalls
+ * short of the top is finished with an instant write rather than left hanging.
  */
 export function scrollToTop(): void {
-  const behavior = scrollBehavior()
+  const column = document.querySelector(".page")
+  const columnTop = column instanceof HTMLElement ? column.scrollTop : 0
+  const distance = Math.max(scrollY, columnTop)
+  const behavior: ScrollBehavior = distance > glideWithinPx ? "instant" : scrollBehavior()
+
   scrollTo({ top: 0, behavior })
-  document.querySelector(".page")?.scrollTo({ top: 0, behavior })
+  column?.scrollTo({ top: 0, behavior })
+
+  // The settle: follow the scroll frame by frame, and the moment it stands still
+  // anywhere but the top – a canceled glide, a late measurement nudge – finish the
+  // move instantly. Bounded, so a reader who starts scrolling somewhere else mid-way
+  // is never fought for long.
+  const startedAt = performance.now()
+  let lastSeen = -1
+  let stillFrames = 0
+  const settle = (): void => {
+    const settling = document.querySelector(".page")
+    const position = Math.max(scrollY, settling instanceof HTMLElement ? settling.scrollTop : 0)
+    if (position === 0 || performance.now() - startedAt > 1200) {
+      return
+    }
+    if (position === lastSeen) {
+      stillFrames += 1
+    } else {
+      stillFrames = 0
+      lastSeen = position
+    }
+    if (stillFrames >= 3) {
+      scrollTo(0, 0)
+      if (settling instanceof HTMLElement) {
+        settling.scrollTop = 0
+      }
+      return
+    }
+    requestAnimationFrame(settle)
+  }
+  requestAnimationFrame(settle)
 }
 
 /**
@@ -89,6 +133,44 @@ const windowScrollTrail = new Map<number, number>()
 const lastNavigation: { type: "push" | "pop" | "replace"; index: number | undefined } = {
   type: "push",
   index: undefined,
+}
+
+/**
+ * How long a pop's restore keeps trying before accepting where the page is. Long
+ * enough for the router to mount the arriving screen and a virtual list to size
+ * itself; short enough that the reader's own scrolling is never fought for long.
+ */
+const restoreWindowMs = 800
+
+/**
+ * Put both scrollers back where the entry left them, retrying frame by frame until
+ * the position sticks or the window closes – the arriving screen's content mounts a
+ * beat after the location changes, and until it does the position has nowhere to go.
+ * A newer navigation ends the retry at once, so a quick second pop is never fought.
+ * @param index The history entry being restored.
+ * @param windowTop Where the window had scrolled.
+ * @param columnTop Where the content column had scrolled.
+ */
+function restoreScroll(index: number, windowTop: number, columnTop: number): void {
+  const startedAt = performance.now()
+  const apply = (): void => {
+    if (lastNavigation.index !== undefined && lastNavigation.index !== index) {
+      return
+    }
+    scrollTo(0, windowTop)
+    const column = document.querySelector(".page")
+    if (column instanceof HTMLElement) {
+      column.scrollTop = columnTop
+    }
+    const isColumnSettled =
+      !(column instanceof HTMLElement) || Math.abs(column.scrollTop - columnTop) < 1
+    const isWindowSettled = Math.abs(scrollY - windowTop) < 1
+    if ((isColumnSettled && isWindowSettled) || performance.now() - startedAt > restoreWindowMs) {
+      return
+    }
+    requestAnimationFrame(apply)
+  }
+  apply()
 }
 
 /**
@@ -123,15 +205,18 @@ export function useNavigationBookkeeping(pathname: string, title: string | undef
 
     // Scroll restoration, ours alone: a pop returns to where the scroller was left; a
     // push or replace starts at the top. Written before paint, so the position is what
-    // the view transition snapshots.
-    const column = document.querySelector(".page")
+    // the view transition snapshots – and, on a pop, kept warm for a moment: the
+    // router swaps the outlet a beat after the location changes, so at this point the
+    // leaving screen still decides the scroller's height and a tall position clamps
+    // to nothing. The retry re-applies it once the arriving screen has the height.
     if (isPop) {
-      scrollTo(0, windowScrollTrail.get(index) ?? 0)
+      restoreScroll(index, windowScrollTrail.get(index) ?? 0, scrollTrail.get(index) ?? 0)
     } else {
       scrollTo(0, 0)
-    }
-    if (column instanceof HTMLElement) {
-      column.scrollTop = isPop ? (scrollTrail.get(index) ?? 0) : 0
+      const column = document.querySelector(".page")
+      if (column instanceof HTMLElement) {
+        column.scrollTop = 0
+      }
     }
 
     // The root trail: a pending section switch is resolved to the entry it landed on.
@@ -209,9 +294,20 @@ const onPop = (): void => {
   delete document.documentElement.dataset["vtNew"]
 }
 
+// Registered at module evaluation rather than in wireNavigation: the router
+// subscribes to popstate when routes.tsx creates it, popstate listeners run in
+// registration order, and React flushes the pop's render – restore included –
+// synchronously inside the router's own handler. A listener registered after the
+// router learns about the pop only after the restore already ran as a push and
+// scrolled the page to its top. routes.tsx imports this module, so evaluating here
+// is what puts this listener first.
+// eslint-disable-next-line unicorn/no-top-level-side-effects -- the registration order against the router is the whole point; see above
+addEventListener("popstate", onPop)
+
 // Every scroll writes the entry's position; a passive listener keeps it free. On the
-// document, because the column does not exist until the first signed-in screen renders
-// – and scroll events bubble to it from every scroller.
+// document and in the capture phase, because the column does not exist until the first
+// signed-in screen renders – and scroll events do not bubble, so only capture sees
+// every scroller's events from above.
 const onScroll = (event: Event): void => {
   const index = historyIndex()
   if (index === undefined) {
@@ -225,6 +321,16 @@ const onScroll = (event: Event): void => {
   }
 }
 
+// Whether a replacement state is one the current entry's stamp has to be carried into.
+// Anything that is not an object is passed on as it came – the trails simply have no key
+// on such an entry, which is what a state nobody here wrote already means.
+function requiresIndex(data: unknown): data is Record<string, unknown> {
+  if (typeof data !== "object" || data === null) {
+    return false
+  }
+  return !("__index" in data) || data.__index === undefined
+}
+
 /**
  * Install the listeners, once, at startup.
  */
@@ -234,8 +340,18 @@ export function wireNavigation(): void {
   // what puts the painted page out of step with where taps land.
   history.scrollRestoration = "manual"
 
+  // A replace navigation – a screen writing its state into the address – hands the
+  // router's own state object to `replaceState`, and that object carries no `__index`.
+  // Without carrying the stamp across, the entry loses the key its scroll and title
+  // trails are kept under, so back lands nameless at the top of the page.
+  const replaceState = history.replaceState.bind(history)
+  history.replaceState = (data: unknown, unused: string, url?: string | URL | null): void => {
+    const index = historyIndex()
+    const carried = index !== undefined && requiresIndex(data) ? { ...data, __index: index } : data
+    replaceState(carried, unused, url)
+  }
+
   document.addEventListener("click", onClick, { capture: true })
-  addEventListener("popstate", onPop)
   document.addEventListener("scroll", onScroll, { capture: true, passive: true })
 
   // A view transition in a hidden tab is skipped by the browser, and the router's

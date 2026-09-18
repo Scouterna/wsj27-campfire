@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { HomeScreen } from "./HomeScreen"
 
 const meta = {
-  title: "Modules/Home/HomeScreen",
+  title: "Modules/Home/Screens/HomeScreen",
   component: HomeScreen,
   decorators: [ScreenDecorator],
   parameters: {

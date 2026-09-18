@@ -55,6 +55,23 @@
     position: fixed;
   }
 
+  /* The page's floating action, above the tab bar's corner. Phone chrome only – the
+     desktop draws the same action as the heading's button, so past the breakpoint the
+     float folds away. Scoped under .shell like the rest of the placement rules: the
+     component's own stylesheet arrives after this file, and the scope outweighs it. */
+  .shell .fab {
+    bottom: 80px;
+    position: fixed;
+    right: var(--spacing-container);
+    z-index: 4;
+  }
+
+  @media (min-width: 768px) {
+    .shell .fab {
+      display: none;
+    }
+  }
+
   /* --- Desktop chrome: the side menu and the outline, hidden at phone width ---
      Scoped under .shell throughout: a component's own stylesheet arrives with the
      component – after this file – so the placement rules need the higher specificity
