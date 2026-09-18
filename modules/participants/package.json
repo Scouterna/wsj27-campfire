@@ -1,6 +1,6 @@
 {
   "name": "@scouterna/wsj27-campfire-participants",
-  "version": "2026.2.1",
+  "version": "2026.3.0",
   "private": true,
   "type": "module",
   "exports": {

@@ -2,7 +2,7 @@
 // version bump touches one line rather than one line per environment.
 // Three segments, matching the CalVer shape the root package.json and the Android
 // versionName carry, so the same release reads the same everywhere.
-CAMPFIRE_VERSION_NUMBER = 2026.2.1
+CAMPFIRE_VERSION_NUMBER = 2026.3.0
 CAMPFIRE_BUILD_NUMBER = 1
 
 // One identity across all three environments. The three cannot sit on a phone side by
