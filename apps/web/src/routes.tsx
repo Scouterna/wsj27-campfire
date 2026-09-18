@@ -6,10 +6,11 @@ import {
 } from "@scouterna/wsj27-campfire-authentication"
 import { HomeScreen } from "@scouterna/wsj27-campfire-home"
 import { host } from "@scouterna/wsj27-campfire-host"
+import { journeyWidgets } from "@scouterna/wsj27-campfire-journey"
 import {
   participantsRoutes,
   participantsSectionLabel,
-  UnitWidget,
+  participantsWidgets,
   ViewerProvider,
   type Viewer,
 } from "@scouterna/wsj27-campfire-participants"
@@ -40,10 +41,10 @@ import {
   UnitIdentitiesProvider,
   unitsReveal,
   unitTheme,
-  useIsRevealed,
   usePageActions,
   usePageTitle,
   useRevealLookup,
+  WidgetsProvider,
   type Address,
   type AppPath,
   type PageActionsProps,
@@ -52,6 +53,7 @@ import {
   type SideMenuItem,
   type Theme,
   type UnitIdentities,
+  type Widgets,
 } from "@scouterna/wsj27-campfire-ui"
 import {
   hasAnyRole,
@@ -95,20 +97,10 @@ declare module "@scouterna/wsj27-campfire-ui" {
 }
 
 /**
- * The start screen with what the composition root places on it: a leader's own unit,
- * drawn by the participants module – home never learns which module drew it (ADR
- * 016). For everyone else the slot stays empty – and before the reveal home itself
- * shows nothing handed in, so every widget waits behind the same curtain.
- * @returns The composed home screen.
+ * Every widget a screen can place by id, gathered from the modules that fill them.
+ * The placing screen names an id and never learns which module drew it (ADR 016).
  */
-function HomeRoute(): ReactElement {
-  const roles = useRoles()
-  // Each widget waits behind the reveal that governs it – the unit widget behind the
-  // units reveal – and home shows the countdowns until then.
-  const isUnitsRevealed = useIsRevealed(unitsReveal.id)
-  const isLeader = leaderUnit(roles) !== undefined
-  return <HomeScreen widget={isUnitsRevealed && isLeader ? <UnitWidget /> : undefined} />
-}
+const widgets = { ...journeyWidgets, ...participantsWidgets } satisfies Widgets
 
 /**
  * Every screen this build answers at, gathered from the modules and wrapped in the
@@ -116,7 +108,7 @@ function HomeRoute(): ReactElement {
  * through `PageTitle`, because the page is what knows what it is called.
  */
 const screens = guardScreens({
-  "/": { Component: HomeRoute, tab: "home" },
+  "/": { Component: HomeScreen, tab: "home" },
   ...participantsRoutes,
 } satisfies Routes)
 
@@ -317,8 +309,8 @@ function viewerFor(user: User): Viewer {
 
 /**
  * Everything a signed-in session shows: the keep-alive, the cache's owner, the resolved
- * theme, the ambient roles and user, the query client, the viewer, and the tier's
- * chrome. All of
+ * theme, the ambient roles and user, the query client, the viewer, the widget table,
+ * and the tier's chrome. All of
  * it is mounted here, at the gate, because there is exactly one session; the tier branch
  * is a constant computed before the first render, so chrome belonging to the other tier
  * is never briefly visible.
@@ -365,11 +357,13 @@ function SignedInChrome(props: SignedInProps): ReactElement {
                   everything under it. The next reveal is another catalog entry, not
                   another mechanism. */}
                 <RevealProvider reveals={reveals}>
-                  {host.tier === "shell" ? (
-                    <ShellChrome user={props.user}>{props.children}</ShellChrome>
-                  ) : (
-                    <BrowserChrome user={props.user}>{props.children}</BrowserChrome>
-                  )}
+                  <WidgetsProvider widgets={widgets}>
+                    {host.tier === "shell" ? (
+                      <ShellChrome user={props.user}>{props.children}</ShellChrome>
+                    ) : (
+                      <BrowserChrome user={props.user}>{props.children}</BrowserChrome>
+                    )}
+                  </WidgetsProvider>
                 </RevealProvider>
               </UnitIdentitiesProvider>
             </ViewerProvider>

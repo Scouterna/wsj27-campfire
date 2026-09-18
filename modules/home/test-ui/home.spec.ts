@@ -69,8 +69,8 @@ async function scrollOf(page: Page): Promise<number> {
 test("wraps the start screen in the shared layout at desktop width", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.goto("/")
-  // Anna rather than a leader: her start screen carries no widget, so the outline's
-  // no-headings fallback below stays observable.
+  // Anna rather than a leader: her start screen carries the countdown and nothing
+  // else, so the outline below lists exactly the one heading.
   await signInAs(page, "Anna Almgren")
 
   // The page's one h1 is the heading's, not the bar's – the bar carries a copy of the
@@ -79,13 +79,13 @@ test("wraps the start screen in the shared layout at desktop width", async ({ pa
   await expect(page).toHaveTitle("Välkommen – Campfire")
 
   // Desktop: the side menu with the current section marked, no tab bar – and at this
-  // width the outline column beside the content, with the page's title as its single
-  // entry because the greeting has no headings.
+  // width the outline column beside the content, reading the countdown card's heading
+  // off the page as rendered.
   const menu = page.locator(".sidemenu")
   await expect(menu).toBeVisible()
   await expect(menu.getByRole("link", { name: "Hem" })).toHaveAttribute("aria-current", "page")
   await expect(page.locator(".tabstrip")).toBeHidden()
-  await expect(page.locator(".outline").getByRole("button", { name: "Välkommen" })).toBeVisible()
+  await expect(page.locator(".outline").getByRole("button", { name: "Resan" })).toBeVisible()
 })
 
 test("keeps the side menu but drops the outline below the widest width", async ({ page }) => {
@@ -146,18 +146,23 @@ test("lists the page's own headings in the outline, and moves between them", asy
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.goto("/")
   // Anna rather than a leader: a leader's start screen brings the unit widget's own
-  // heading, and this walk is about the scan alone.
+  // headings, and this walk is about the scan alone.
   await signInAs(page, "Anna Almgren")
   await expect(page.getByRole("heading", { level: 1, name: "Välkommen" })).toBeVisible()
 
   const outline = page.locator(".outline")
-  // With no headings the column shows the page's own title, so it never sits empty.
-  await expect(outline.getByRole("button")).toHaveText(["Välkommen"])
+  // The countdown card's heading, read from the page as rendered.
+  await expect(outline.getByRole("button")).toHaveText(["Resan"])
 
-  await giveThePageSections(page, ["Resan", "Avdelningen", "Packning"])
+  await giveThePageSections(page, ["Maten", "Avdelningen", "Packning"])
 
   // Read from the page as rendered – no module declared any of this.
-  await expect(outline.getByRole("button")).toHaveText(["Resan", "Avdelningen", "Packning"])
+  await expect(outline.getByRole("button")).toHaveText([
+    "Resan",
+    "Maten",
+    "Avdelningen",
+    "Packning",
+  ])
 
   // Choosing an entry scrolls the content to that section, and the outline marks the
   // section being read.
@@ -167,6 +172,12 @@ test("lists the page's own headings in the outline, and moves between them", asy
     "aria-current",
     "true",
   )
+
+  // With no headings at all the column shows the page's own title, so it never sits
+  // empty – the not-found page is the one signed-in screen bare enough to prove it.
+  await page.goto("/nagon/annan/plats")
+  await expect(page.getByRole("heading", { level: 1, name: "Sidan finns inte" })).toBeVisible()
+  await expect(outline.getByRole("button")).toHaveText(["Sidan finns inte"])
 })
 
 test("lands a junk address on the not-found page, inside the layout", async ({ page }) => {
@@ -278,10 +289,12 @@ test("keeps everything behind the curtain until the reveal", async ({ page }) =>
   await page.goto("/")
   await signInAs(page, "Lars Lindberg")
 
-  // The start screen holds the countdown and nothing else, and the menus offer only
-  // home – the participants section does not exist yet, for anybody.
+  // The start screen holds the reveal's countdown and nothing else – the journey's
+  // card included waits behind the curtain – and the menus offer only home: the
+  // participants section does not exist yet, for anybody.
   await expect(page.getByText("Lördag 19 september 19.30")).toBeVisible()
   await expect(page.getByText("dagar")).toBeVisible()
+  await expect(page.getByRole("heading", { level: 2, name: "Resan" })).toHaveCount(0)
   await expect(page.getByRole("heading", { level: 2, name: "Min avdelning" })).toHaveCount(0)
   await expect(page.locator(".sidemenu").getByRole("link")).toHaveCount(1)
   await expect(page.locator(".sidemenu").getByRole("link", { name: "Hem" })).toBeVisible()
