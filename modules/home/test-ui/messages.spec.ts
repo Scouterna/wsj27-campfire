@@ -54,6 +54,17 @@ async function signInAs(page: Page, persona: string): Promise<void> {
 }
 
 /**
+ * The way out: the profile control leads to the profile page, which holds the one
+ * action that ends the session – back on the sign-in screen at the front door.
+ * @param page The page standing anywhere in the signed-in application.
+ * @param persona The signed-in persona, as the profile control names them.
+ */
+async function signOut(page: Page, persona: string): Promise<void> {
+  await page.getByRole("link", { name: `Profil för ${persona}` }).click()
+  await page.getByRole("button", { name: "Logga ut" }).click()
+}
+
+/**
  * The welcome's heading – the plate's own `h2`, so a section the outline lists.
  * @param page The page showing the start screen.
  * @returns The level-two heading carrying the welcome's title.
@@ -141,14 +152,14 @@ test("stays closed through a reload and a new sign-in, and closes nobody else's"
 
   // A new sign-in on the same device: what was closed is the device's, not the
   // session's.
-  await page.getByRole("button", { name: "Logga ut Lars Lindberg" }).click()
+  await signOut(page, "Lars Lindberg")
   await signInAs(page, "Lars Lindberg")
   await expect(page.getByRole("heading", { level: 2, name: "Min avdelning" })).toBeVisible()
   await expect(welcomeHeading(page)).toHaveCount(0)
 
   // And somebody from the management on that same device still gets theirs: a leader
   // closed the leaders' welcome, which is a different message.
-  await page.getByRole("button", { name: "Logga ut Lars Lindberg" }).click()
+  await signOut(page, "Lars Lindberg")
   await signInAs(page, "Anna Almgren")
   await expect(page.getByText(managementWelcome.text)).toBeVisible()
 })

@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState, type ReactElement } from "react"
-import { fn } from "storybook/test"
 
 import { HomeIcon } from "../../foundations/icons/set/HomeIcon"
 import { ParticipantsIcon } from "../../foundations/icons/set/ParticipantsIcon"
@@ -37,8 +36,8 @@ export const Default: Story = {
           <ProfilePill
             name="Anna Björk"
             detail="Ledare · Avdelning 3"
-            label="Logga ut Anna Björk"
-            onPress={fn()}
+            label="Profil för Anna Björk"
+            link={{ to: "/profile" }}
           />
         }
       />
@@ -67,8 +66,8 @@ export const ForALeader: Story = {
           <ProfilePill
             name="Anna Björk"
             detail="Ledare · Avdelning 3"
-            label="Logga ut Anna Björk"
-            onPress={fn()}
+            label="Profil för Anna Björk"
+            link={{ to: "/profile" }}
           />
         }
       />

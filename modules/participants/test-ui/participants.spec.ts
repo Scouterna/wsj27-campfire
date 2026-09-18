@@ -196,7 +196,7 @@ test("hides the section from a person outside the contingent, indistinguishably"
   await signInAs(page, "Olle Ohlsson")
 
   // No participants entry anywhere in the menus – home is his one section.
-  await expect(page.locator(".sidemenu").getByRole("link")).toHaveCount(1)
+  await expect(page.locator(".sidemenu-items").getByRole("link")).toHaveCount(1)
   await expect(page.locator(".sidemenu").getByRole("link", { name: "Hem" })).toBeVisible()
 
   // His opening the section's address answers exactly as an address that matches
@@ -230,7 +230,7 @@ test("gives a management function the whole section, in the management's name", 
 
   // The profile control names the management function rather than the management as a
   // whole, which is the one place a CMT member's line differs from a leader's.
-  const pill = page.getByRole("button", { name: "Logga ut Pernilla Palm" })
+  const pill = page.getByRole("link", { name: "Profil för Pernilla Palm" })
   await expect(pill).toContainText("CMT · Program")
 })
 

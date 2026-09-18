@@ -1,8 +1,10 @@
 import {
+  authenticationRoutes,
   currentUser,
   keepSessionAlive,
   SignInScreen,
   signOut,
+  SignOutProvider,
 } from "@scouterna/wsj27-campfire-authentication"
 import { HomeScreen } from "@scouterna/wsj27-campfire-home"
 import { host } from "@scouterna/wsj27-campfire-host"
@@ -109,6 +111,7 @@ const widgets = { ...journeyWidgets, ...participantsWidgets } satisfies Widgets
  */
 const screens = guardScreens({
   "/": { Component: HomeScreen, tab: "home" },
+  ...authenticationRoutes,
   ...participantsRoutes,
 } satisfies Routes)
 
@@ -309,8 +312,8 @@ function viewerFor(user: User): Viewer {
 
 /**
  * Everything a signed-in session shows: the keep-alive, the cache's owner, the resolved
- * theme, the ambient roles and user, the query client, the viewer, the widget table,
- * and the tier's chrome. All of
+ * theme, the ambient roles and user, the way out, the query client, the viewer, the
+ * widget table, and the tier's chrome. All of
  * it is mounted here, at the gate, because there is exactly one session; the tier branch
  * is a constant computed before the first render, so chrome belonging to the other tier
  * is never briefly visible.
@@ -349,25 +352,29 @@ function SignedInChrome(props: SignedInProps): ReactElement {
     <ThemeProvider theme={themeFor(props.user)}>
       <RolesProvider roles={props.user.roles}>
         <UserProvider user={props.user}>
-          <QueryClientProvider client={queryClient}>
-            <ViewerProvider viewer={viewerFor(props.user)}>
-              <UnitIdentitiesProvider identities={identities}>
-                {/* The design system's curtains, hung once over the chrome and the
+          {/* The profile page's way out. Handed in because the cache it forgets is the
+            application's, and the round trip the authentication module's. */}
+          <SignOutProvider onSignOut={leave}>
+            <QueryClientProvider client={queryClient}>
+              <ViewerProvider viewer={viewerFor(props.user)}>
+                <UnitIdentitiesProvider identities={identities}>
+                  {/* The design system's curtains, hung once over the chrome and the
                   screens alike: each closed until its moment, opening live for
                   everything under it. The next reveal is another catalog entry, not
                   another mechanism. */}
-                <RevealProvider reveals={reveals}>
-                  <WidgetsProvider widgets={widgets}>
-                    {host.tier === "shell" ? (
-                      <ShellChrome user={props.user}>{props.children}</ShellChrome>
-                    ) : (
-                      <BrowserChrome user={props.user}>{props.children}</BrowserChrome>
-                    )}
-                  </WidgetsProvider>
-                </RevealProvider>
-              </UnitIdentitiesProvider>
-            </ViewerProvider>
-          </QueryClientProvider>
+                  <RevealProvider reveals={reveals}>
+                    <WidgetsProvider widgets={widgets}>
+                      {host.tier === "shell" ? (
+                        <ShellChrome user={props.user}>{props.children}</ShellChrome>
+                      ) : (
+                        <BrowserChrome user={props.user}>{props.children}</BrowserChrome>
+                      )}
+                    </WidgetsProvider>
+                  </RevealProvider>
+                </UnitIdentitiesProvider>
+              </ViewerProvider>
+            </QueryClientProvider>
+          </SignOutProvider>
         </UserProvider>
       </RolesProvider>
     </ThemeProvider>
@@ -518,18 +525,17 @@ function BrowserChrome(props: SignedInProps): ReactElement {
     ) : undefined
 
   // Both placements render; which one is visible is the stylesheet's breakpoint's
-  // decision. Pressing either runs the sign-out round trip, which ends on the sign-in
-  // screen – the one way out (requirement 6.5).
+  // decision. Either leads to the profile page, which holds the one way out – and on
+  // that page they stay, marked as the page showing, so the chrome holds still.
   const pill = (isCompact: boolean): ReactElement => (
     <ProfilePill
       avatar={pillAvatar}
       compact={isCompact}
       detail={isUnitShown ? user.roleLineWithUnit : user.roleLine}
-      label={`Logga ut ${user.name}`}
+      isCurrent={found?.path === "/profile"}
+      label={`Profil för ${user.name}`}
+      link={{ to: "/profile" }}
       name={user.name}
-      onPress={() => {
-        void signOutAndForget()
-      }}
     />
   )
 
@@ -580,6 +586,14 @@ async function signOutAndForget(): Promise<void> {
   } finally {
     signOut(location.origin)
   }
+}
+
+/**
+ * The way out as the profile page presses it – the same round trip, with nothing to
+ * wait for, because it ends by leaving the document.
+ */
+function leave(): void {
+  void signOutAndForget()
 }
 
 /**
