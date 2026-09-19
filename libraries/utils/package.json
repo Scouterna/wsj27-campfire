@@ -1,6 +1,6 @@
 {
   "name": "@scouterna/wsj27-campfire-utils",
-  "version": "2026.7.0",
+  "version": "2026.7.1",
   "private": true,
   "type": "module",
   "exports": {
