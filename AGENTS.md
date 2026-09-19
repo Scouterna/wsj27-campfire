@@ -305,7 +305,7 @@ docs: record the back-end direction as an ADR
 
 ## Versioning
 
-The version in `package.json` is `2026.7.0`. The project uses [Calendar Versioning (CalVer)](https://calver.org/) with the shape `YEAR.FEATURE.PATCH`:
+The version in `package.json` is `2026.7.1`. The project uses [Calendar Versioning (CalVer)](https://calver.org/) with the shape `YEAR.FEATURE.PATCH`:
 
 - `2026` – the year of the feature release. The first feature release in a new year adopts that year; a patch release stays on the year of the feature it patches and never advances it.
 - `1` – the feature release, bumped for a `feat`.
