@@ -85,6 +85,22 @@ function deltagare(wsj: Record<string, unknown>): Record<string, unknown> {
   })
 }
 
+/**
+ * Somebody whose diet section is the only thing they answered, for the allergy grades.
+ * @param diet The answers that section carries.
+ * @returns The record, with nothing else declared.
+ */
+function allergies(diet: Record<string, unknown>): Record<string, unknown> {
+  return record({
+    contact_info: {},
+    forms_data: {
+      avdelningsledare_kontingentledning: {
+        Hälsoinformation: { "Diet och födoämnesallergier": diet },
+      },
+    },
+  })
+}
+
 describe("reading one person in full", () => {
   it("keeps the listing row and reads the birth date", () => {
     const person = toParticipantDetail(record())
@@ -148,6 +164,24 @@ describe("reading one person in full", () => {
       kinds: ["adhd", "ocd"],
       details: "Behöver tydliga rutiner.",
     })
+  })
+
+  it("leaves out an allergen graded 1, which the scale reads as no allergy", () => {
+    const health = toParticipantDetail(
+      allergies({ hasFoodAllergy: "Ja", foodAllergyGluten: "1", foodAllergyNuts: "5" }),
+    )?.health
+
+    expect(health?.foodAllergy).toEqual({ severities: [{ allergen: "nuts", severity: 5 }] })
+  })
+
+  it("keeps a food allergy graded 1 across the board, with nothing graded", () => {
+    // The fact that it was declared outlives the grades: the screens say so rather than
+    // let a leader read the silence as no allergy at all.
+    const health = toParticipantDetail(
+      allergies({ hasFoodAllergy: "Ja", foodAllergyGluten: "1", foodAllergyLactose: "1" }),
+    )?.health
+
+    expect(health?.foodAllergy).toEqual({ severities: [] })
   })
 
   it("reads the free-text messages as notes with their audience", () => {

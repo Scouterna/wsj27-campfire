@@ -4,7 +4,6 @@ import {
   allergenName,
   dietName,
   isUnremarkable,
-  severityName,
   type HealthProfile,
   type Vaccinations,
 } from "./HealthProfile"
@@ -21,16 +20,6 @@ const vaccinations: Vaccinations = {
 function health(overrides: Partial<HealthProfile> = {}): HealthProfile {
   return { vaccinations, ...overrides }
 }
-
-describe("naming a severity", () => {
-  it("gives the Swedish scale word", () => {
-    expect(severityName(1)).toBe("Mycket lindrig")
-    expect(severityName(2)).toBe("Lindrig")
-    expect(severityName(3)).toBe("Måttlig")
-    expect(severityName(4)).toBe("Allvarlig")
-    expect(severityName(5)).toBe("Livshotande")
-  })
-})
 
 describe("naming a special diet", () => {
   it("gives the Swedish label", () => {

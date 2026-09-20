@@ -81,7 +81,8 @@ function toDiet(answers: Answers): Diet | undefined {
 /**
  * The graded allergens. Only a numeric value carries a severity – the participant form's
  * "Övriga" is a yes/no, so a "Ja" adds no entry, and the free text is where that answer
- * shows up.
+ * shows up. A 1 is dropped rather than kept as the mildest grade: the form's scale calls
+ * it "Inte allergisk / intolerant", so it is an allergen somebody ruled out.
  * @param answers The flattened answers.
  * @returns The graded allergens and the free text around them.
  */
@@ -89,7 +90,7 @@ function toFoodAllergy(answers: Answers): FoodAllergy {
   const severities: AllergenSeverity[] = []
   for (const [key, allergen] of allergenByKey) {
     const severity = Number(answer(answers, key))
-    if (Number.isSafeInteger(severity) && severity >= 1 && severity <= 5) {
+    if (Number.isSafeInteger(severity) && severity >= 2 && severity <= 5) {
       severities.push({ allergen, severity: severity as Severity })
     }
   }
