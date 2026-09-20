@@ -148,7 +148,7 @@ export function ParticipantsScreen(): ReactElement {
   const jumps = useLetterJumps(found)
   // Mailing and copying act on the list as it is narrowed, so narrowing is how somebody
   // chooses who to write to.
-  const addressMenu = useAddressMenu(found)
+  const addressMenu = useAddressMenu(found, roles)
 
   const isNarrowed = query !== "" || roll !== undefined
   const isSettled = !isPending && error === null

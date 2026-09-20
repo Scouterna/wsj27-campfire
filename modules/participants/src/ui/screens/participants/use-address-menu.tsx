@@ -1,3 +1,5 @@
+import { hasAnyRole, type Role } from "@scouterna/wsj27-campfire-utils"
+
 import {
   CopyIcon,
   MailIcon,
@@ -13,12 +15,17 @@ import {
   mailLink,
   type AddressSetKind,
 } from "../../../model/addresses"
+import { contactSheet, contactSheetName } from "../../../model/contact-sheet"
 import type { Participant } from "../../../model/Participant"
 
 // Constructed once: a formatter is expensive to build and free to reuse.
 const swedish = new Intl.NumberFormat("sv-SE")
 
 const nobodyReason = "Inga e-postadresser i listan."
+
+// Long enough for any browser to have taken the blob, short enough that the memory is
+// not held for a session.
+const revokeMs = 60_000
 const tooLongReason = "För många adresser för ett mejl – kopiera dem i stället."
 
 /**
@@ -71,6 +78,34 @@ async function copy(addresses: readonly string[]): Promise<OverflowMenuReceipt> 
 }
 
 /**
+ * Hand the sheet to the browser as a file to save. Never throws: a refusal is a receipt
+ * like any other, and the menu says it on the entry that was chosen.
+ * @param found The people the list shows.
+ * @returns How many rows were written, or that they could not be.
+ */
+function save(found: readonly Participant[]): OverflowMenuReceipt {
+  try {
+    const url = URL.createObjectURL(
+      new Blob([contactSheet(found)], { type: "text/csv;charset=utf-8" }),
+    )
+    const link = document.createElement("a")
+    link.download = contactSheetName(new Date())
+    link.href = url
+    link.click()
+    // Released a turn later rather than here: a browser that has not finished reading the
+    // blob when the url is revoked cancels the download it just started.
+    setTimeout(() => {
+      URL.revokeObjectURL(url)
+    }, revokeMs)
+    return {
+      words: found.length === 1 ? "1 rad hämtad" : `${swedish.format(found.length)} rader hämtade`,
+    }
+  } catch {
+    return { isFailure: true, words: "Kunde inte hämtas" }
+  }
+}
+
+/**
  * One kind's two entries: mail, then copy. Both unavailable where nobody shown has an
  * address, and mail alone where the link would be too long to trust.
  * @param found The people the list shows.
@@ -98,21 +133,42 @@ function entriesFor(
 }
 
 /**
- * The entries that mail and copy the addresses of the list as it is shown – searched and
- * narrowed – so narrowing the list is how somebody chooses who to write to. Everything
- * comes from the rows the list already holds; nobody is fetched to be written to.
+ * The entries that mail, copy, and save the addresses of the list as it is shown –
+ * searched and narrowed – so narrowing the list is how somebody chooses who to write to,
+ * and who to export. Everything comes from the rows the list already holds; nobody is
+ * fetched to be written to.
+ *
+ * The sheet is a leader's alone. It is the unit's whole roster in a file, which is what
+ * a leader keeps beside them on a trip – the management reads the list of participants
+ * in Campfire rather than carrying it around.
  * @param found The people the list shows, from `narrow`.
- * @returns The four entries, or undefined while the list shows nobody. The same array for
- *   as long as the list is the same one, because the chrome republishes what it is handed.
+ * @param roles The roles the reader holds, which decide whether the sheet is offered.
+ * @returns The entries, or undefined while the list shows nobody. The same array for as
+ *   long as the list is the same one, because the chrome republishes what it is handed.
  */
 export function useAddressMenu(
   found: readonly Participant[],
+  roles: readonly Role[],
 ): readonly OverflowMenuItem[] | undefined {
+  const isLeader = hasAnyRole(roles, "leader")
   return useMemo(
     () =>
       found.length === 0
         ? undefined
-        : [...entriesFor(found, "people"), "divider", ...entriesFor(found, "contacts")],
-    [found],
+        : [
+            ...entriesFor(found, "people"),
+            "divider",
+            ...entriesFor(found, "contacts"),
+            ...(isLeader
+              ? ([
+                  "divider",
+                  {
+                    label: "Exportera till Excel",
+                    onPerform: () => Promise.resolve(save(found)),
+                  },
+                ] as const)
+              : []),
+          ],
+    [found, isLeader],
   )
 }
