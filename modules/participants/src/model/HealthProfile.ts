@@ -123,34 +123,11 @@ export function allergenName(allergen: Allergen): string {
 }
 
 /**
- * How serious a reaction is, on the registration's 1–5 scale.
+ * How serious a reaction is, on the registration's 1–5 scale. A 1 is that scale's own
+ * "Inte allergisk / intolerant" – the answer that there is no allergy – so it never becomes
+ * a severity, and the grades that do run 2 to 5.
  */
-export type Severity = 1 | 2 | 3 | 4 | 5
-
-/**
- * What a severity is called in Swedish, as the registration's scale words it.
- * @param severity The severity to name.
- * @returns The Swedish scale word.
- */
-export function severityName(severity: Severity): string {
-  switch (severity) {
-    case 1: {
-      return "Mycket lindrig"
-    }
-    case 2: {
-      return "Lindrig"
-    }
-    case 3: {
-      return "Måttlig"
-    }
-    case 4: {
-      return "Allvarlig"
-    }
-    case 5: {
-      return "Livshotande"
-    }
-  }
-}
+export type Severity = 2 | 3 | 4 | 5
 
 /**
  * One allergen and how badly this person reacts to it.

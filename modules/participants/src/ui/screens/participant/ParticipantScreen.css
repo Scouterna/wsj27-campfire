@@ -133,6 +133,31 @@
     font-weight: var(--font-weight-strong);
   }
 
+  /* The scale's two ends, keyed under the rows they explain. */
+  .person-severities dl {
+    column-gap: 6px;
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: auto 1fr;
+    margin: 0;
+    row-gap: 3px;
+  }
+
+  .person-severities dt,
+  .person-severities dd {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+  }
+
+  .person-severities dt {
+    font-weight: var(--font-weight-strong);
+    justify-self: end;
+  }
+
+  .person-severities dd {
+    margin: 0;
+  }
+
   .person-severity-caution {
     color: var(--color-tone-caution-ink);
   }

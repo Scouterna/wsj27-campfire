@@ -4,7 +4,6 @@ import { Fragment, type ReactElement } from "react"
 import {
   allergenName,
   dietName,
-  severityName,
   type HealthProfile,
   type Severity,
 } from "../../../model/HealthProfile"
@@ -17,8 +16,8 @@ export interface DietSectionProps {
 }
 
 /**
- * The dot color family for a severity: danger for the life-threatening top of the scale,
- * caution just under it, info for the mild end.
+ * The dot color family for a severity: danger for the top of the scale, caution just
+ * under it, info for the milder grades.
  * @param severity The graded severity.
  * @returns The tone the meter and its reading wear.
  */
@@ -102,11 +101,17 @@ export function DietSection(props: DietSectionProps): ReactElement {
               <Fragment key={allergen}>
                 <strong>{allergenName(allergen)}</strong>
                 <DotMeter filled={severity} total={5} tone={severityTone(severity)} />
-                <span className={`person-severity-${severityTone(severity)}`}>
-                  {severity} · {severityName(severity)}
-                </span>
+                <span className={`person-severity-${severityTone(severity)}`}>{severity} av 5</span>
               </Fragment>
             ))}
+            {/* The form names only the ends of its scale, so a grade is read as a number
+                and the two ends are keyed under the rows rather than named on them. */}
+            <dl>
+              <dt>1 =</dt>
+              <dd>Inte allergisk eller intolerant</dd>
+              <dt>5 =</dt>
+              <dd>Väldigt allergisk eller intolerant</dd>
+            </dl>
           </div>
         )}
 

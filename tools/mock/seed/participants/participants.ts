@@ -4,9 +4,10 @@ import type { Participant } from "../../src/types.ts"
  * The contingent's list of participants as wsj27-project-api holds it before it decodes a row – two units
  * of leaders, deltagare, and IST, plus the contingent management. Unit 1's rows are each
  * here for a case, and unit 2 is grown to a realistic 36 deltagare and 4 ledare so the
- * screens are exercised at a unit's true size. The cases: a food allergy with severities, medication with medical
- * equipment, mobility aids, a diagnosis, a mental health condition, a phobia, incomplete
- * vaccinations, special diets, the youngest and oldest deltagare, a leader's record full of
+ * screens are exercised at a unit's true size. The cases: a food allergy with severities, an
+ * allergen graded 1 beside them and a food allergy graded 1 across the board, medication
+ * with medical equipment, mobility aids, a diagnosis, a mental health condition, a phobia,
+ * incomplete vaccinations, special diets, the youngest and oldest deltagare, a leader's record full of
  * holes, and a personal grant beside a function's own. Every answer is keyed by the form
  * template's question key and carries the label Scoutnet would export – "Ja", "Nej", the diet
  * option texts, "1"–"5" severities, and a list where the question takes several options.
@@ -147,6 +148,7 @@ export const participants: readonly Participant[] = [
       foodAllergyNuts: "5",
       foodAllergyEgg: "4",
       foodAllergyGluten: "3",
+      foodAllergyLactose: "1",
       foodAllergyDetails:
         "Nötter ger anafylaxi – bär alltid EpiPen. Ägg och gluten ger magbesvär och utslag.",
       otherAllergyDetails: "Kraftig björkpollenallergi på våren, tar antihistamin dagligen.",
@@ -351,7 +353,7 @@ export const participants: readonly Participant[] = [
       nextOfKin2Relation: "Förälder",
       nextOfKin2Phone: "070-535 69 71",
       specialDiet: "Ingen specialkost",
-      hasFoodAllergy: "Nej",
+      hasFoodAllergy: "Ja",
       hasOtherAllergy: "Nej",
       childhoodVaccinationsComplete: "Ja",
       usesPrescriptionMedication: "Nej",
@@ -364,6 +366,8 @@ export const participants: readonly Participant[] = [
       sensitivityToUnpredictability: "Nej",
       canSwim200m: "Ja",
       comfortableInLargeCrowds: "Ja",
+      foodAllergyFruit: "1",
+      foodAllergyLactose: "1",
       mentalHealthDetails: "Återkommande ångest – har regelbunden kontakt med kurator.",
     },
   },
