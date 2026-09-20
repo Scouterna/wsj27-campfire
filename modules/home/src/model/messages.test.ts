@@ -9,30 +9,43 @@ const management: readonly Role[] = [{ kind: "cmt" }, { kind: "health" }]
 const forLeaders: Message = {
   audience: ["leader"],
   id: "leaders",
-  text: "Till ledare.",
+  kind: "welcome",
+  paragraphs: ["Till ledare."],
   title: "Ledare",
 }
 const forManagement: Message = {
   audience: ["cmt"],
   id: "management",
-  text: "Till lagerledningen.",
+  kind: "welcome",
+  paragraphs: ["Till lagerledningen."],
   title: "Lagerledningen",
 }
 const forBoth: Message = {
   audience: ["cmt", "leader"],
   id: "both",
-  text: "Till alla.",
+  kind: "news",
+  paragraphs: ["Till alla."],
   title: "Alla",
 }
 const list = [forLeaders, forManagement, forBoth]
 
 describe("the message list", () => {
-  it("opens with a welcome for each audience", () => {
+  it("opens with a welcome for each audience, and the contact note under it", () => {
     expect(unreadMessages(messages, leader, new Set()).map((message) => message.id)).toEqual([
       "welcome-leader-2026-09",
+      "contact-details-2026-09",
     ])
     expect(unreadMessages(messages, management, new Set()).map((message) => message.id)).toEqual([
       "welcome-cmt-2026-09",
+      "contact-details-2026-09",
+    ])
+  })
+
+  it("brings a message added later alone to whoever closed the earlier ones", () => {
+    const closed = new Set(["welcome-leader-2026-09"])
+
+    expect(unreadMessages(messages, leader, closed).map((message) => message.id)).toEqual([
+      "contact-details-2026-09",
     ])
   })
 
@@ -57,7 +70,7 @@ describe("the message list", () => {
 
     expect(managementMessages.length).toBeGreaterThan(0)
     for (const message of managementMessages) {
-      expect(message.text.toLocaleLowerCase("sv-SE")).not.toContain("allerg")
+      expect(message.paragraphs.join(" ").toLocaleLowerCase("sv-SE")).not.toContain("allerg")
     }
   })
 })

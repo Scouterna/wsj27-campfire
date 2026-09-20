@@ -1,6 +1,14 @@
 import { hasAnyRole, type Role } from "@scouterna/wsj27-campfire-utils"
 
 /**
+ * What kind of thing a message is, which is what decides how loudly the plate says it.
+ * A welcome introduces Campfire and is the only one that proclaims; an important one
+ * has to be noticed without being celebrated; news is the quietest, and the kind there
+ * will be most of.
+ */
+export type MessageKind = "important" | "news" | "welcome"
+
+/**
  * Something the contingent says to the people who open Campfire. The id is what a
  * closed message is remembered by, so it never changes once a message has shipped – a
  * message reissued later gets a new id and shows again.
@@ -12,14 +20,24 @@ export interface Message {
    */
   readonly audience: readonly Role["kind"][]
   /**
+   * The day it was written, as an ISO date. Absent on a welcome, which is not news and
+   * wants no timestamp – for the other kinds the plate draws it beside the label.
+   */
+  readonly date?: string
+  /**
    * The message's identity, carrying the month it shipped so a reissue has an obvious
    * next name.
    */
   readonly id: string
   /**
-   * What the message says, as plain text.
+   * How much weight the message carries, which the plate draws rather than the words.
    */
-  readonly text: string
+  readonly kind: MessageKind
+  /**
+   * What the message says, one entry per paragraph. Plain text – the plate draws each
+   * entry as its own paragraph, so a message longer than a few sentences can breathe.
+   */
+  readonly paragraphs: readonly string[]
   /**
    * The message's heading.
    */
@@ -45,27 +63,49 @@ export const closedMessagesKey = "campfire.messages.closed"
  * both sit under a page title that already says välkommen, so their own title says
  * something else. Somebody who holds both roles reads both, one under the other: each
  * is true for them, as the participants section gives them the unit and everyone.
+ *
+ * The contact note that follows goes to both, because both write to the addresses it is
+ * about. It is written to be read once and closed, and it says what was wrong rather
+ * than how the reading works – a leader cannot act on which source we prefer.
  */
 export const messages: readonly Message[] = [
   {
     audience: ["leader"],
     id: "welcome-leader-2026-09",
-    text:
+    kind: "welcome",
+    paragraphs: [
       "Campfire är kontingentens egen app. Här ser du din avdelning – vilka som är med, " +
-      "hur du når dem och deras närstående, och vilka allergier du behöver ha koll på. " +
-      "Du kan mejla hela avdelningen på en gång och följa nedräkningen till avresan. " +
-      "Mer är på väg och när det kommer något nytt säger vi till på Discord.",
+        "hur du når dem och deras närstående, och vilka allergier du behöver ha koll på. " +
+        "Du kan mejla hela avdelningen på en gång och följa nedräkningen till avresan. " +
+        "Mer är på väg och när det kommer något nytt säger vi till på Discord.",
+    ],
     title: "Det här är Campfire!",
   },
   {
     audience: ["cmt"],
     id: "welcome-cmt-2026-09",
-    text:
+    kind: "welcome",
+    paragraphs: [
       "Campfire är kontingentens egen app. Här hittar du alla deltagare – sök bland dem, " +
-      "bläddra bland avdelningarna och gå in på en avdelning för att se vilka som är " +
-      "med. Du kan mejla dem du har i listan och följa nedräkningen till avresan. Mer " +
-      "är på väg och när det kommer något nytt säger vi till på Teams.",
+        "bläddra bland avdelningarna och gå in på en avdelning för att se vilka som är " +
+        "med. Du kan mejla dem du har i listan och följa nedräkningen till avresan. Mer " +
+        "är på väg och när det kommer något nytt säger vi till på Teams.",
+    ],
     title: "Det här är Campfire!",
+  },
+  {
+    audience: ["cmt", "leader"],
+    date: "2026-09-20",
+    id: "contact-details-2026-09",
+    kind: "important",
+    paragraphs: [
+      "Kontaktuppgifterna kunde i vissa fall visa det som fanns i Scoutnet vid anmälan i " +
+        "stället för det som gäller nu. Nu visas alltid de aktuella uppgifterna. Beklagar " +
+        "om något mejl gått till fel adress.",
+      "Det som hette närstående i listan heter nu kontaktpersoner – när du mejlar eller " +
+        "kopierar adresserna tar vi med både närstående och nödkontakter.",
+    ],
+    title: "Vi har rättat kontaktuppgifterna",
   },
 ]
 

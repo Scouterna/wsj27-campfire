@@ -1,5 +1,8 @@
-/* The messages widget: a plate in the theme's bright color, the way the sign-in hero
-   wears it, with the headline, the text, and the one close control all on it. */
+/* The messages widget: one plate per message in the theme's bright color, the way the
+   sign-in hero wears it, with the label, the title, the text, and the one control that
+   closes that message. The kind decides the weight, which is the label's presence and
+   the title's case and size – never a second typeface, because every plate is the same
+   voice. */
 
 @layer component {
   .messages {
@@ -13,8 +16,8 @@
     padding: var(--spacing-section);
   }
 
-  /* The headline leading and the close control at the trailing edge, top-aligned so a
-     headline that wraps grows downward and the control stays in the corner. */
+  /* The title leading and the close control at the trailing edge, top-aligned so a
+     title that wraps grows downward and the control stays in the corner. */
   .messages-heading {
     align-items: flex-start;
     display: flex;
@@ -23,8 +26,44 @@
     margin: 0 0 var(--spacing-group);
   }
 
-  /* The headline carries the contingent's voice, so it wears the display face – the
-     same face as the page's title above it, a step smaller. */
+  /* A message that reports rather than proclaims: the theme's wash instead of its bright
+     fill, and the page's ink instead of white. A different surface rather than a smaller
+     title on the same one – size within one surface is what a subheading is, so a quiet
+     plate under the welcome read as a part of it rather than as a message of its own. */
+  .messages-quiet {
+    background: var(--color-theme-wash);
+    color: var(--color-ink);
+  }
+
+  /* The label over the title it belongs to. */
+  .messages-lead {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-inline);
+  }
+
+  /* What kind of message this is, and when it was written – small, and quieter than the
+     white the rest of the plate is set in, so it places the message without competing
+     with its title. */
+  .messages-label {
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.04em;
+    margin: 0;
+    opacity: 0.85;
+    text-transform: uppercase;
+  }
+
+  /* On the wash the label carries the theme's own ink at full strength: the thinned
+     white that places it on a bright fill would be a grey nothing here. */
+  .messages-quiet .messages-label {
+    color: var(--color-theme-ink);
+    opacity: 1;
+  }
+
+  /* Every title carries the contingent's voice, so all of them wear the display face –
+     the same face as the page's title above them. A welcome proclaims: uppercase, and a
+     step smaller than that page title. */
   .messages-headline {
     font-family: var(--typography-display-font_family);
     font-size: var(--font-size-title);
@@ -34,6 +73,14 @@
     margin: 0;
     text-transform: uppercase;
     text-wrap: balance;
+  }
+
+  /* Anything that is not a welcome: the same voice, said rather than proclaimed. The
+     capitals are most of the loudness – a correction set in them reads as though
+     everything before it had been wrong. */
+  .messages-headline-quiet {
+    font-size: var(--font-size-display-mini);
+    text-transform: none;
   }
 
   /* A small white pill in the corner, its word in the theme's ink. The pseudo-element
@@ -52,6 +99,13 @@
     padding: 8px var(--spacing-group);
     position: relative;
     transition: background 120ms ease;
+  }
+
+  /* On the wash a white pill has almost nothing to stand against – the affordance goes
+     even though its word still reads. A hairline of the theme's ink keeps it a thing you
+     can see is pressable, drawn inset so it costs no layout. */
+  .messages-quiet .messages-close {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-theme-ink) 25%, transparent);
   }
 
   .messages-close::after {
@@ -85,17 +139,9 @@
     text-wrap: pretty;
   }
 
-  /* A later message on the same plate: its own title in the body face, over a hairline
-     thinned from whatever the text color is. */
-  .messages-later {
-    border-top: 1px solid color-mix(in srgb, currentcolor 30%, transparent);
-    margin-top: var(--spacing-container);
-    padding-top: var(--spacing-container);
-  }
-
-  .messages-title {
-    font-size: var(--font-size-value);
-    font-weight: var(--font-weight-strong);
-    margin: 0 0 var(--spacing-inline);
+  /* Paragraph to paragraph, which is the only place the text sets its own spacing: the
+     plate's padding still places the first one and the blocks around it. */
+  .messages-text + .messages-text {
+    margin-top: var(--spacing-group);
   }
 }

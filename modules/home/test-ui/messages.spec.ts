@@ -27,6 +27,21 @@ function welcomeFor(role: Message["audience"][number]): Message {
   return found
 }
 
+/**
+ * A message's opening words, which is enough to tell one message from another on screen.
+ * @param message The message to look for.
+ * @returns Its first paragraph.
+ */
+function opening(message: Message): string {
+  const [first] = message.paragraphs
+  if (first === undefined) {
+    // getByText("") matches the whole page, so a message with nothing to say would
+    // pass every assertion below against any screen at all.
+    throw new Error(`the message ${message.id} has no paragraphs`)
+  }
+  return first
+}
+
 const leaderWelcome = welcomeFor("leader")
 const managementWelcome = welcomeFor("cmt")
 // One headline for both, so one locator finds either.
@@ -74,12 +89,43 @@ function welcomeHeading(page: Page): Locator {
 }
 
 /**
- * The one close control, by the name it carries while the welcome shows alone.
+ * One message's plate, found by the title it is labelled with.
  * @param page The page showing the start screen.
- * @returns The close control.
+ * @param message The message whose plate to find.
+ * @returns The plate, as the region its heading names.
  */
-function closeControl(page: Page): Locator {
-  return page.getByRole("button", { name: "Stäng meddelandet" })
+function plate(page: Page, message: Message): Locator {
+  return page.getByRole("region", { name: message.title })
+}
+
+/**
+ * The control that closes one message, which is the only thing it closes.
+ * @param page The page showing the start screen.
+ * @param message The message to close.
+ * @returns That plate's close control.
+ */
+function closeControl(page: Page, message: Message): Locator {
+  return plate(page, message).getByRole("button", { name: /^Stäng/u })
+}
+
+/**
+ * Every close control on the screen – one per message the reader has not closed.
+ * @param page The page showing the start screen.
+ * @returns The controls.
+ */
+function closeControls(page: Page): Locator {
+  return page.getByRole("button", { name: /^Stäng/u })
+}
+
+/**
+ * The titles of the messages written for a role, in list order – what the plates put
+ * into the page outline, so the walk does not hard-code a message that will be joined
+ * by others.
+ * @param role The role kind to read for.
+ * @returns The titles, oldest first.
+ */
+function titlesFor(role: Message["audience"][number]): string[] {
+  return messages.filter((message) => message.audience.includes(role)).map((one) => one.title)
 }
 
 test("shows the welcome to a leader, over the journey and their unit", async ({ page }) => {
@@ -88,17 +134,18 @@ test("shows the welcome to a leader, over the journey and their unit", async ({ 
 
   // Their own welcome – what a leader can do with their unit – and not the management's.
   await expect(welcomeHeading(page)).toBeVisible()
-  await expect(page.getByText(leaderWelcome.text)).toBeVisible()
-  await expect(page.getByText(managementWelcome.text)).toHaveCount(0)
-  await expect(closeControl(page)).toHaveText("Stäng")
+  await expect(page.getByText(opening(leaderWelcome))).toBeVisible()
+  await expect(page.getByText(opening(managementWelcome))).toHaveCount(0)
+  await expect(closeControl(page, leaderWelcome)).toHaveText("Stäng")
 
-  // In the flow with the other widgets, and first among them: over the journey's
-  // countdown and the unit – the sections' headings, in document order. Only the first
-  // three, because how many cards the unit widget draws is the participants module's
-  // business.
+  // In the flow with the other widgets, and first among them: a plate per unread
+  // message, then the journey's countdown and the unit – the sections' headings, in
+  // document order. Only up to the unit, because how many cards the unit widget draws
+  // is the participants module's business.
   await expect(page.getByRole("heading", { level: 2, name: "Min avdelning" })).toBeVisible()
+  const expected = [...titlesFor("leader"), "Resan", "Min avdelning"]
   const sections = await page.locator("main .content h2").allTextContents()
-  expect(sections.slice(0, 3)).toEqual([welcomeTitle, "Resan", "Min avdelning"])
+  expect(sections.slice(0, expected.length)).toEqual(expected)
 })
 
 test("shows the management a welcome of their own", async ({ page }) => {
@@ -107,24 +154,38 @@ test("shows the management a welcome of their own", async ({ page }) => {
 
   // What the management can do with everyone – and nothing of a single unit's.
   await expect(welcomeHeading(page)).toBeVisible()
-  await expect(page.getByText(managementWelcome.text)).toBeVisible()
-  await expect(page.getByText(leaderWelcome.text)).toHaveCount(0)
+  await expect(page.getByText(opening(managementWelcome))).toBeVisible()
+  await expect(page.getByText(opening(leaderWelcome))).toHaveCount(0)
 })
 
-test("closes every message at once and leaves no trace", async ({ page }) => {
+test("closes one message without closing the others", async ({ page }) => {
   await page.goto("/")
   await signInAs(page, "Anna Almgren")
-  await expect(welcomeHeading(page)).toBeVisible()
+  const titles = titlesFor("cmt")
 
-  // One control, however much it closes.
-  await expect(page.getByRole("button", { name: /^Stäng/ })).toHaveCount(1)
-  await closeControl(page).click()
+  // A plate each, and a control each.
+  await expect(closeControls(page)).toHaveCount(titles.length)
+  await closeControl(page, managementWelcome).click()
 
-  // Nothing of it is left: no heading, no text, no control – and for the management,
-  // whose start screen holds the journey and nothing else, no second section at all.
+  // Nothing of that one is left – no heading, no text, no control – and the rest stand.
   await expect(welcomeHeading(page)).toHaveCount(0)
-  await expect(page.getByText(managementWelcome.text)).toHaveCount(0)
-  await expect(page.getByRole("button", { name: /^Stäng/ })).toHaveCount(0)
+  await expect(page.getByText(opening(managementWelcome))).toHaveCount(0)
+  await expect(closeControls(page)).toHaveCount(titles.length - 1)
+})
+
+test("leaves no trace once every message is closed", async ({ page }) => {
+  await page.goto("/")
+  await signInAs(page, "Anna Almgren")
+
+  // Closing the first plate moves the next one up, so the control to press is always
+  // the first one left.
+  for (let left = titlesFor("cmt").length; left > 0; left -= 1) {
+    await closeControls(page).first().click()
+  }
+
+  // For the management, whose start screen holds the journey and nothing else, no
+  // second section at all.
+  await expect(closeControls(page)).toHaveCount(0)
   await expect(page.locator("main .content h2")).toHaveText(["Resan"])
 })
 
@@ -132,7 +193,7 @@ test("closes from the keyboard", async ({ page }) => {
   await page.goto("/")
   await signInAs(page, "Anna Almgren")
 
-  await closeControl(page).focus()
+  await closeControl(page, managementWelcome).focus()
   await page.keyboard.press("Enter")
 
   await expect(welcomeHeading(page)).toHaveCount(0)
@@ -143,7 +204,7 @@ test("stays closed through a reload and a new sign-in, and closes nobody else's"
 }) => {
   await page.goto("/")
   await signInAs(page, "Lars Lindberg")
-  await closeControl(page).click()
+  await closeControl(page, leaderWelcome).click()
   await expect(welcomeHeading(page)).toHaveCount(0)
 
   await page.reload()
@@ -161,7 +222,7 @@ test("stays closed through a reload and a new sign-in, and closes nobody else's"
   // closed the leaders' welcome, which is a different message.
   await signOut(page, "Lars Lindberg")
   await signInAs(page, "Anna Almgren")
-  await expect(page.getByText(managementWelcome.text)).toBeVisible()
+  await expect(page.getByText(opening(managementWelcome))).toBeVisible()
 })
 
 test("keeps what the device had already closed when it closes more", async ({ page }) => {
@@ -175,7 +236,7 @@ test("keeps what the device had already closed when it closes more", async ({ pa
   await page.goto("/")
   await signInAs(page, "Lars Lindberg")
 
-  await closeControl(page).click()
+  await closeControl(page, leaderWelcome).click()
   await expect(welcomeHeading(page)).toHaveCount(0)
 
   // Added to, never replaced: a close that wrote only what it closed would forget
@@ -251,7 +312,7 @@ test("still closes when storage refuses the write, and shows the welcome next vi
   await page.goto("/")
   await signInAs(page, "Anna Almgren")
 
-  await closeControl(page).click()
+  await closeControl(page, managementWelcome).click()
   await expect(welcomeHeading(page)).toHaveCount(0)
 
   // Closed for the visit, not only for the screen: leaving the start screen unmounts
