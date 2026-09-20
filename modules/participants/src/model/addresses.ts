@@ -1,10 +1,10 @@
-import type { Participant } from "./Participant"
+import { contactSlots, type Participant } from "./Participant"
 
 /**
- * Whose addresses are gathered from a list: the people's own, or those of the närstående
- * they named.
+ * Whose addresses are gathered from a list: the people's own, or those of everybody they
+ * named around them – their närstående and their nödkontakter alike.
  */
-export type AddressSetKind = "people" | "relatives"
+export type AddressSetKind = "contacts" | "people"
 
 /**
  * The longest mail link worth offering. Browsers and operating systems cap the address
@@ -22,6 +22,9 @@ const singleAddress = /^[^\s,;<>@]+@[^\s,;<>@]+$/u
  * The addresses to write to a list of people at – in the list's order, with whoever has
  * no usable address skipped, and each address once however many people share it. Two
  * spellings that differ only in case are one address, kept as it was first spelled.
+ *
+ * A person is both of their own addresses, primary and alternative, because the
+ * registration promises the second one the same jamboree information as the first.
  * @param people The people, as the list shows them.
  * @param kind Whose addresses to gather.
  * @returns The addresses, ready to hand to a mail client.
@@ -32,7 +35,11 @@ export function addressSet(
 ): readonly string[] {
   const addresses = new Map<string, string>()
   for (const person of people) {
-    const given = kind === "people" ? [person.email] : (person.relativeEmails ?? [])
+    const given =
+      kind === "people"
+        ? [person.email, person.alternateEmail]
+        : // eslint-disable-next-line security/detect-object-injection -- a slot is one of the model's own four literals
+          contactSlots.map((slot) => person.contactEmails?.[slot])
     for (const value of given) {
       const address = value?.trim() ?? ""
       const key = address.toLowerCase()

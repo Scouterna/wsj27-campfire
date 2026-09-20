@@ -23,6 +23,14 @@ describe("gathering the addresses of a list", () => {
     expect(addressSet(people, "people")).toEqual(["b@example.se", "a@example.se"])
   })
 
+  it("writes to both of a person's own addresses", () => {
+    // Scoutnet holds a parent's address for a young member, and the alternative is the
+    // one that is theirs – so the second is not a nicety, it is half the people.
+    const people = [person({ email: "parent@example.se", alternateEmail: "alva@example.se" })]
+
+    expect(addressSet(people, "people")).toEqual(["parent@example.se", "alva@example.se"])
+  })
+
   it("skips whoever has no address", () => {
     const people = [person(), person({ email: "a@example.se" }), person({ email: "  " })]
 
@@ -58,34 +66,45 @@ describe("gathering the addresses of a list", () => {
     expect(addressSet(people, "people")).toEqual(["Alva@Example.se"])
   })
 
-  it("gathers the närstående's addresses, each person's first then second", () => {
+  it("gathers each person's contacts in the order the form asks for them", () => {
     const people = [
-      person({ relativeEmails: ["maria@example.se", "bjorn@example.se"] }),
+      person({
+        contactEmails: {
+          emergencyContact1: "ylva@example.se",
+          nextOfKin1: "maria@example.se",
+          nextOfKin2: "bjorn@example.se",
+        },
+      }),
       person(),
-      person({ relativeEmails: ["eva@example.se"] }),
+      person({ contactEmails: { nextOfKin1: "eva@example.se" } }),
     ]
 
-    expect(addressSet(people, "relatives")).toEqual([
+    expect(addressSet(people, "contacts")).toEqual([
       "maria@example.se",
       "bjorn@example.se",
+      "ylva@example.se",
       "eva@example.se",
     ])
   })
 
   it("names a parent of two siblings once", () => {
     const people = [
-      person({ relativeEmails: ["maria@example.se"] }),
-      person({ relativeEmails: ["maria@example.se", "bjorn@example.se"] }),
+      person({ contactEmails: { nextOfKin1: "maria@example.se" } }),
+      person({
+        contactEmails: { nextOfKin1: "maria@example.se", nextOfKin2: "bjorn@example.se" },
+      }),
     ]
 
-    expect(addressSet(people, "relatives")).toEqual(["maria@example.se", "bjorn@example.se"])
+    expect(addressSet(people, "contacts")).toEqual(["maria@example.se", "bjorn@example.se"])
   })
 
   it("keeps the two kinds apart", () => {
-    const people = [person({ email: "alva@example.se", relativeEmails: ["maria@example.se"] })]
+    const people = [
+      person({ email: "alva@example.se", contactEmails: { nextOfKin1: "maria@example.se" } }),
+    ]
 
     expect(addressSet(people, "people")).toEqual(["alva@example.se"])
-    expect(addressSet(people, "relatives")).toEqual(["maria@example.se"])
+    expect(addressSet(people, "contacts")).toEqual(["maria@example.se"])
   })
 
   it("answers an empty list with no addresses", () => {

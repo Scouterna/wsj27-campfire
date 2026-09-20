@@ -62,6 +62,26 @@ describe("the decoded list of participants", () => {
     expect(decoded(1_300_098).member_group).toBe("")
   })
 
+  it("carries the two people whose Scoutnet fields and registration copies disagree", () => {
+    const alfred = decoded(1_300_500)
+    const elsa = decoded(1_300_505)
+
+    // Alfred was twelve when he applied, and Scoutnet held his mother's address and number
+    // as his own. It holds his since, and the registration kept the pair it copied.
+    expect(alfred.email).toBe("alfred.berg@example.se")
+    expect(alfred.mobile).toBe("070-492 35 19")
+    expect(alfred.contact_info["Information redan i Scoutnet"]).toMatchObject({
+      email: "maria.berg@example.se",
+      mobilePhone: "070-460 79 52",
+    })
+
+    // Elsa has no address in Scoutnet at all, so the copy is the only one there is.
+    expect(elsa.email).toBeNull()
+    expect(elsa.contact_info["Information redan i Scoutnet"]).toMatchObject({
+      email: "kristina.noren@example.se",
+    })
+  })
+
   it("normalizes the travel package per member type, and gives the management none", () => {
     expect(decoded(1_300_098).participation_type).toBe("Egen resa")
     expect(decoded(1_300_140).participation_type).toBe("Direktresa")

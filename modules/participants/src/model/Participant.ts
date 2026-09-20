@@ -2,6 +2,29 @@ import { type ParticipantRole } from "./ParticipantRole"
 import type { CmtFunktion } from "./Participation"
 
 /**
+ * The slots the registration names people in, in the order it asks for them: two
+ * närstående on every form, two nödkontakter on the leaders' own. The names are the
+ * question keys' prefixes, so one list drives the reading and the columns alike.
+ */
+export const contactSlots = [
+  "nextOfKin1",
+  "nextOfKin2",
+  "emergencyContact1",
+  "emergencyContact2",
+] as const
+
+/**
+ * One of the four slots a person names somebody in.
+ */
+export type ContactSlot = (typeof contactSlots)[number]
+
+/**
+ * The address given for each slot – a slot nobody was named in, or one whose person
+ * gave no address, is simply absent.
+ */
+export type ContactEmails = Partial<Readonly<Record<ContactSlot, string>>>
+
+/**
  * A person as the list of participants shows them – what a row needs, and the addresses
  * the list mails and copies. Every other way to reach them, and everything they answered
  * when they signed up, belongs to `ParticipantDetail` and is fetched only when somebody
@@ -46,10 +69,16 @@ export interface Participant {
    */
   readonly email?: string
   /**
-   * The addresses of the närstående they named, in the order the form asks for them.
+   * A second address of their own, where they gave one. The registration promises it the
+   * same jamboree information as the primary, so both are written to – and for a young
+   * member whose Scoutnet record holds a parent's address, this is the one that is theirs.
+   */
+  readonly alternateEmail?: string
+  /**
+   * The addresses of the people they named around them, by the slot each was named in.
    * Absent when none gave one, and when the viewer may not read them.
    */
-  readonly relativeEmails?: readonly string[]
+  readonly contactEmails?: ContactEmails
   /**
    * The function a management member serves in, read out of the record's minted roles.
    * Absent for everyone else, and for a management member the roster has not detailed.

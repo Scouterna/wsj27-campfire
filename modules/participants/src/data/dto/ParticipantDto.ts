@@ -1,8 +1,8 @@
 import type { Participant } from "../../model/Participant"
 import type { ParticipantRole } from "../../model/ParticipantRole"
 import type { CmtFunktion } from "../../model/Participation"
-import { flattenAnswers } from "./answers"
-import { toPrimaryEmail, toRelatives } from "./contact"
+import { answer, flattenAnswers } from "./answers"
+import { toContactEmails, toCurrent } from "./contact"
 
 /**
  * One participant as the participants service sends them – the basic block that
@@ -98,6 +98,28 @@ function toCmtDetail(roles: unknown): Pick<Participant, "funktion" | "isFunktion
 }
 
 /**
+ * The addresses the list mails and copies: a person's own two, and those of everybody the
+ * registration names around them. Read from the contact answers the service sends with a
+ * listing row, exactly as the detail reads them, so a row and the person opened from it
+ * never disagree.
+ * @param dto The row the participants service sent.
+ * @returns The addresses, each present only where there is one.
+ */
+function toAddresses(
+  dto: ParticipantDto,
+): Pick<Participant, "alternateEmail" | "contactEmails" | "email"> {
+  const answers = flattenAnswers(dto.contact_info, undefined)
+  const email = toCurrent(dto.email, answers, "email")
+  const alternateEmail = answer(answers, "alternateEmail")
+  const contactEmails = toContactEmails(answers)
+  return {
+    ...(email !== undefined && { email }),
+    ...(alternateEmail !== undefined && { alternateEmail }),
+    ...(Object.keys(contactEmails).length > 0 && { contactEmails }),
+  }
+}
+
+/**
  * The member number as this module carries it: a string, because it is an identifier –
  * routes, caches, and links hold it, and nothing does arithmetic on it. The service is not
  * consistent about the wire type, so both spellings are accepted.
@@ -178,15 +200,6 @@ export function toParticipant(dto: ParticipantDto): Participant | undefined {
 
   const cmtDetail = toCmtDetail(dto.roles)
 
-  // The addresses the list mails and copies, read exactly as the detail reads them so
-  // the two never disagree. The alternative email and the emergency contacts are left
-  // where they are: nothing acts on them from a list.
-  const answers = flattenAnswers(dto.contact_info, undefined)
-  const email = toPrimaryEmail(dto.email, answers)
-  const relativeEmails = toRelatives(answers)
-    .map((person) => person.email)
-    .filter((address): address is string => address !== undefined)
-
   return {
     memberNo,
     ...name,
@@ -196,8 +209,7 @@ export function toParticipant(dto: ParticipantDto): Participant | undefined {
     ...(unitNumber !== undefined && { unitNumber }),
     ...(birthDate !== undefined && { birthDate }),
     ...(memberGroup !== undefined && { memberGroup }),
-    ...(email !== undefined && { email }),
-    ...(relativeEmails.length > 0 && { relativeEmails }),
+    ...toAddresses(dto),
     ...cmtDetail,
   }
 }

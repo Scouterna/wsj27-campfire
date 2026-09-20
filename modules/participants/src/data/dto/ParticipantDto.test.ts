@@ -38,27 +38,42 @@ describe("reading one listing row", () => {
     })
   })
 
-  it("prefers the address given at registration to Scoutnet's own", () => {
+  it("prefers Scoutnet's own address to the registration's copy of it", () => {
     const contact = { "Information redan i Scoutnet": { email: "lars@example.org" } }
 
-    expect(toParticipant(row({ contact_info: contact }))?.email).toBe("lars@example.org")
+    expect(toParticipant(row({ contact_info: contact }))?.email).toBe("lars.lindberg@example.se")
   })
 
-  it("falls back to Scoutnet's address when the registration's is only spaces", () => {
-    const contact = { "Information redan i Scoutnet": { email: "  " } }
+  it("falls back to the registration's copy when Scoutnet holds no address", () => {
+    const contact = { "Information redan i Scoutnet": { email: "lars@example.org" } }
 
-    expect(toParticipant(row({ contact_info: contact }))?.email).toBe("lars.lindberg@example.se")
+    expect(toParticipant(row({ contact_info: contact, email: " " }))?.email).toBe(
+      "lars@example.org",
+    )
+  })
+
+  it("reads the second address the registration asked for, which Scoutnet has no field for", () => {
+    const contact = {
+      "Information redan i Scoutnet": { alternateEmail: "lars.privat@example.org" },
+    }
+
+    expect(toParticipant(row({ contact_info: contact }))?.alternateEmail).toBe(
+      "lars.privat@example.org",
+    )
+    expect(toParticipant(row())?.alternateEmail).toBeUndefined()
   })
 
   it("reads a missing or empty address as no address at all", () => {
     // The wire says null for a member without one, and the mock sends exactly that.
     const noEmail = JSON.parse('{"email": null}') as Record<string, unknown>
+    const blankCopy = { "Information redan i Scoutnet": { email: "  " } }
 
     expect(toParticipant(row(noEmail))?.email).toBeUndefined()
     expect(toParticipant(row({ email: " " }))?.email).toBeUndefined()
+    expect(toParticipant(row({ email: " ", contact_info: blankCopy }))?.email).toBeUndefined()
   })
 
-  it("reads the närstående's addresses, in the order the form asks for them", () => {
+  it("reads every address named around them, in the order the form asks for them", () => {
     const contact = {
       "Kontaktuppgifter närstående 1": {
         nextOfKin1Name: "Maria Ström",
@@ -68,42 +83,36 @@ describe("reading one listing row", () => {
         nextOfKin2Name: "Björn Ström",
         nextOfKin2Email: "bjorn@example.se",
       },
+      "Annan nödkontakt": {
+        emergencyContact1Name: "Ylva Sandberg",
+        emergencyContact1Email: "ylva@example.se",
+        emergencyContact2Name: "Frans Sundqvist",
+        emergencyContact2Email: "frans@example.se",
+      },
     }
 
-    expect(toParticipant(row({ contact_info: contact }))?.relativeEmails).toEqual([
-      "maria@example.se",
-      "bjorn@example.se",
-    ])
+    expect(toParticipant(row({ contact_info: contact }))?.contactEmails).toEqual({
+      emergencyContact1: "ylva@example.se",
+      emergencyContact2: "frans@example.se",
+      nextOfKin1: "maria@example.se",
+      nextOfKin2: "bjorn@example.se",
+    })
   })
 
-  it("skips a närstående without an address, and one without a name – as the detail does", () => {
+  it("skips a contact without an address, and one without a name – as the detail does", () => {
     const contact = {
       "Kontaktuppgifter närstående 1": { nextOfKin1Name: "Maria Ström" },
       "Kontaktuppgifter närstående 2": { nextOfKin2Email: "bjorn@example.se" },
     }
 
-    expect(toParticipant(row({ contact_info: contact }))?.relativeEmails).toBeUndefined()
+    expect(toParticipant(row({ contact_info: contact }))?.contactEmails).toBeUndefined()
   })
 
   it("reads a row the service sent without contact answers", () => {
     const person = toParticipant(row({ contact_info: undefined }))
 
-    expect(person?.relativeEmails).toBeUndefined()
+    expect(person?.contactEmails).toBeUndefined()
     expect(person?.email).toBe("lars.lindberg@example.se")
-  })
-
-  it("carries neither the alternative address nor the emergency contacts'", () => {
-    const contact = {
-      "Annan nödkontakt": {
-        emergencyContact1Name: "Ylva Sandberg",
-        emergencyContact1Email: "ylva@example.se",
-      },
-      "Information redan i Scoutnet": { alternateEmail: "lars.alt@example.se" },
-    }
-
-    const written = JSON.stringify(toParticipant(row({ contact_info: contact })))
-
-    expect(written).not.toMatch(/ylva|lars\.alt/u)
   })
 
   it("reads an empty member group as no scoutkår at all", () => {

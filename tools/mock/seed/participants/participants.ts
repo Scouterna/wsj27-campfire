@@ -8,9 +8,15 @@ import type { Participant } from "../../src/types.ts"
  * allergen graded 1 beside them and a food allergy graded 1 across the board, medication
  * with medical equipment, mobility aids, a diagnosis, a mental health condition, a phobia,
  * incomplete vaccinations, special diets, the youngest and oldest deltagare, a leader's record full of
- * holes, and a personal grant beside a function's own. Every answer is keyed by the form
- * template's question key and carries the label Scoutnet would export – "Ja", "Nej", the diet
- * option texts, "1"–"5" severities, and a list where the question takes several options.
+ * holes, and a personal grant beside a function's own. The two contact cases sit in unit 2
+ * instead, where they read as the ordinary thing they are: Alfred Berg, whose registration
+ * froze his mother's address and number as his own, and Elsa Norén, whose address Scoutnet no
+ * longer holds at all, so the registration's copy is all that is left. Beata Sjögren carries
+ * the third: Scoutnet holds her father's address as her own, and the address that is hers is
+ * the alternative one, which is why a list writes to both. Every answer is keyed by
+ * the form template's question key and carries the label Scoutnet would export – "Ja", "Nej",
+ * the diet option texts, "1"–"5" severities, and a list where the question takes several
+ * options.
  *
  * Three things to know about the data:
  *
@@ -121,6 +127,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Rundresa",
+      email: "ester.dahl@example.se",
       alternateEmail: "ester.dahl@example.org",
       nextOfKin1Name: "Daniel Dahl",
       nextOfKin1Phone: "070-596 43 36",
@@ -253,6 +260,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Rundresa",
+      email: "leo.ström@example.se",
       mobilePhone: "070-740 37 39",
       nextOfKin1Name: "Maria Ström",
       nextOfKin1Phone: "070-267 73 61",
@@ -385,6 +393,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Egen resa",
+      email: "freja.sandberg@example.se",
       mobilePhone: "070-238 15 66",
       nextOfKin1Name: "Anette Wallin",
       nextOfKin1Phone: "070-373 18 30",
@@ -431,6 +440,7 @@ export const participants: readonly Participant[] = [
     formId: "avdelningsledare_kontingentledning",
     answers: {
       travel: "Direktresa",
+      email: "anders.andersson@example.se",
       mobilePhone: "070-752 52 92",
       nextOfKin1Name: "Karin Nilsson",
       nextOfKin1Phone: "070-479 52 88",
@@ -477,6 +487,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Direktresa",
+      email: "molly.sundqvist@example.se",
       mobilePhone: "070-848 76 45",
       alternateEmail: "molly.sundqvist@example.org",
       nextOfKin1Name: "Maria Sundqvist",
@@ -518,6 +529,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Rundresa",
+      email: "alva.lundgren@example.se",
       mobilePhone: "070-201 77 67",
       nextOfKin1Name: "Maria Lundgren",
       nextOfKin1Phone: "070-839 36 45",
@@ -594,6 +606,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Rundresa",
+      email: "nils.söderberg@example.se",
       mobilePhone: "070-386 81 89",
       alternateEmail: "nils.söderberg@example.org",
       nextOfKin1Name: "Anette Wallin",
@@ -639,6 +652,7 @@ export const participants: readonly Participant[] = [
     phone: "070-317 82 45",
     formId: "avdelningsledare_kontingentledning",
     answers: {
+      email: "karin.kron@example.se",
       mobilePhone: "070-317 82 45",
       nextOfKin1Name: "Mats Kron",
       nextOfKin1Phone: "070-664 12 90",
@@ -682,6 +696,7 @@ export const participants: readonly Participant[] = [
     phone: "070-523 63 59",
     formId: "avdelningsledare_kontingentledning",
     answers: {
+      email: "anna.almgren@example.se",
       mobilePhone: "070-523 63 59",
       nextOfKin1Name: "Maria Axelsson",
       nextOfKin1Phone: "070-859 93 48",
@@ -816,6 +831,7 @@ export const participants: readonly Participant[] = [
     phone: "070-415 10 41",
     formId: "avdelningsledare_kontingentledning",
     answers: {
+      email: "helena.hägg@example.se",
       mobilePhone: "070-415 10 41",
       nextOfKin1Name: "Anette Wallin",
       nextOfKin1Phone: "070-265 38 17",
@@ -862,6 +878,7 @@ export const participants: readonly Participant[] = [
     phone: "070-274 91 08",
     formId: "avdelningsledare_kontingentledning",
     answers: {
+      email: "henrik.holm@example.se",
       mobilePhone: "070-274 91 08",
       nextOfKin1Name: "Sofia Holm",
       nextOfKin1Phone: "070-806 41 23",
@@ -904,6 +921,7 @@ export const participants: readonly Participant[] = [
     phone: "070-937 20 30",
     formId: "avdelningsledare_kontingentledning",
     answers: {
+      email: "sixten.segel@example.se",
       mobilePhone: "070-937 20 30",
       alternateEmail: "sixten.segel@example.org",
       nextOfKin1Name: "Karin Nilsson",
@@ -1028,10 +1046,12 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Rundresa",
-      mobilePhone: "070-492 35 19",
+      email: "maria.berg@example.se",
+      mobilePhone: "070-460 79 52",
       nextOfKin1Name: "Maria Berg",
       nextOfKin1Phone: "070-460 79 52",
       nextOfKin1Relation: "Vårdnadshavare",
+      nextOfKin1Email: "maria.berg@example.se",
     },
   },
   {
@@ -1044,12 +1064,18 @@ export const participants: readonly Participant[] = [
     birthDate: "2012-07-06",
     sex: "Kvinna",
     memberGroup: "Stubbhults scoutkår",
-    email: "beata.sjogren@example.se",
+    email: "erik.sjogren@example.se",
     phone: "070-453 40 72",
     formId: "deltagare_ist",
     answers: {
       travel: "Direktresa",
+      email: "erik.sjogren@example.se",
+      alternateEmail: "beata.sjogren@example.se",
       mobilePhone: "070-453 40 72",
+      nextOfKin1Name: "Erik Sjögren",
+      nextOfKin1Phone: "070-618 24 07",
+      nextOfKin1Relation: "Vårdnadshavare",
+      nextOfKin1Email: "erik.sjogren@example.se",
     },
   },
   {
@@ -1067,6 +1093,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Egen resa",
+      email: "cornelia.holm@example.se",
       mobilePhone: "070-635 63 16",
       nextOfKin1Name: "Mats Holm",
       nextOfKin1Phone: "070-650 54 11",
@@ -1103,6 +1130,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Direktresa",
+      email: "ebba.torn@example.se",
       mobilePhone: "070-736 28 22",
       nextOfKin1Name: "Peter Torn",
       nextOfKin1Phone: "070-509 14 97",
@@ -1123,6 +1151,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Egen resa",
+      email: "kristina.noren@example.se",
       mobilePhone: "070-355 43 79",
     },
   },
@@ -1141,6 +1170,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Rundresa",
+      email: "filip.akesson@example.se",
       mobilePhone: "070-662 29 54",
       nextOfKin1Name: "Karin Åkesson",
       nextOfKin1Phone: "070-788 63 18",
@@ -1162,6 +1192,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Direktresa",
+      email: "greta.palm@example.se",
       mobilePhone: "070-212 56 30",
     },
   },
@@ -1180,6 +1211,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Egen resa",
+      email: "gustav.palmgren@example.se",
       mobilePhone: "070-728 17 76",
       nextOfKin1Name: "Johan Palmgren",
       nextOfKin1Phone: "070-374 36 72",
@@ -1201,6 +1233,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Rundresa",
+      email: "hedda.wik@example.se",
       mobilePhone: "070-258 60 53",
     },
   },
@@ -1238,6 +1271,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Egen resa",
+      email: "isak.sandell@example.se",
       mobilePhone: "070-799 12 46",
     },
   },
@@ -1256,6 +1290,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Rundresa",
+      email: "julia.berggren@example.se",
       mobilePhone: "070-323 10 85",
       nextOfKin1Name: "Maria Berggren",
       nextOfKin1Phone: "070-581 34 47",
@@ -1276,6 +1311,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Direktresa",
+      email: "kalle.nyberg@example.se",
       mobilePhone: "070-620 68 10",
     },
   },
@@ -1294,6 +1330,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Egen resa",
+      email: "love.sund@example.se",
       mobilePhone: "070-214 89 34",
       nextOfKin1Name: "Johan Sund",
       nextOfKin1Phone: "070-590 34 52",
@@ -1315,6 +1352,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Rundresa",
+      email: "lova.eklund@example.se",
       mobilePhone: "070-387 18 20",
     },
   },
@@ -1369,6 +1407,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Rundresa",
+      email: "nora.skoog@example.se",
       mobilePhone: "070-511 95 36",
       nextOfKin1Name: "Karin Skoog",
       nextOfKin1Phone: "070-353 52 82",
@@ -1390,6 +1429,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Direktresa",
+      email: "oskar.blom@example.se",
       mobilePhone: "070-822 88 87",
     },
   },
@@ -1408,6 +1448,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Egen resa",
+      email: "petra.hedlund@example.se",
       mobilePhone: "070-513 15 26",
       nextOfKin1Name: "Maria Hedlund",
       nextOfKin1Phone: "070-610 21 57",
@@ -1429,6 +1470,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Rundresa",
+      email: "quentin.silfver@example.se",
       mobilePhone: "070-220 33 66",
     },
   },
@@ -1446,6 +1488,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Direktresa",
+      email: "rasmus.ohman@example.se",
       mobilePhone: "070-427 45 79",
       nextOfKin1Name: "Johan Öhman",
       nextOfKin1Phone: "070-296 81 86",
@@ -1467,6 +1510,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Egen resa",
+      email: "signe.alund@example.se",
       mobilePhone: "070-850 74 36",
     },
   },
@@ -1504,6 +1548,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Direktresa",
+      email: "ulrik.mansson@example.se",
       mobilePhone: "070-267 41 86",
     },
   },
@@ -1522,6 +1567,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Egen resa",
+      email: "vera.bodin@example.se",
       mobilePhone: "070-847 26 16",
       nextOfKin1Name: "Karin Bodin",
       nextOfKin1Phone: "070-701 79 21",
@@ -1560,6 +1606,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Direktresa",
+      email: "xenia.frank@example.se",
       mobilePhone: "070-753 58 53",
       nextOfKin1Name: "Karin Frank",
       nextOfKin1Phone: "070-264 73 54",
@@ -1581,6 +1628,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Egen resa",
+      email: "yusuf.ali@example.se",
       mobilePhone: "070-699 34 88",
     },
   },
@@ -1599,6 +1647,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Rundresa",
+      email: "zackarias.hard@example.se",
       mobilePhone: "070-557 23 49",
       nextOfKin1Name: "Mats Hård",
       nextOfKin1Phone: "070-502 92 31",
@@ -1635,6 +1684,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Egen resa",
+      email: "orjan.kask@example.se",
       mobilePhone: "070-384 24 77",
       nextOfKin1Name: "Peter Kask",
       nextOfKin1Phone: "070-746 15 17",
@@ -1656,6 +1706,7 @@ export const participants: readonly Participant[] = [
     formId: "avdelningsledare_kontingentledning",
     answers: {
       travel: "Rundresa",
+      email: "birgitta.ros@example.se",
       mobilePhone: "070-313 29 41",
     },
   },
@@ -1674,6 +1725,7 @@ export const participants: readonly Participant[] = [
     formId: "avdelningsledare_kontingentledning",
     answers: {
       travel: "Direktresa",
+      email: "goran.malmberg@example.se",
       mobilePhone: "070-480 78 15",
     },
   },
@@ -1692,6 +1744,7 @@ export const participants: readonly Participant[] = [
     formId: "avdelningsledare_kontingentledning",
     answers: {
       travel: "Egen resa",
+      email: "marta.vall@example.se",
       mobilePhone: "070-326 20 41",
     },
   },
