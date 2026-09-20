@@ -1,8 +1,66 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { ReactElement } from "react"
 
-import { messages } from "../../../model/messages"
+import type { Message } from "../../../model/messages"
 import { MessagesWidget } from "./MessagesWidget"
 import { forgetClosedMessages } from "./use-closed-messages"
+
+/**
+ * The widget draws a plate per message and leaves the space between them to the screen
+ * it stands in, which is a column with a gap. Without one here the plates would touch,
+ * which is the canvas lying about the layout rather than the layout being wrong.
+ * @param Story The story being rendered.
+ * @returns The story, inside the column.
+ */
+function ColumnDecorator(Story: () => ReactElement): ReactElement {
+  return (
+    <div className="story-column">
+      <Story />
+    </div>
+  )
+}
+
+// One message of each kind, written for the catalog rather than taken from the list the
+// application ships. The stories are about how a kind is drawn, so they stay true as the
+// contingent's own messages come and go.
+const reader = [{ kind: "leader", unitNumber: 1 }] as const
+const everyone: Message["audience"] = ["cmt", "leader"]
+
+const welcome: Message = {
+  audience: everyone,
+  id: "story-welcome",
+  kind: "welcome",
+  paragraphs: [
+    "Campfire är kontingentens egen app. Här ser du din avdelning – vilka som är med, hur " +
+      "du når dem, och vilka allergier du behöver ha koll på.",
+  ],
+  title: "Det här är Campfire!",
+}
+
+const important: Message = {
+  audience: everyone,
+  date: "2026-09-20",
+  id: "story-important",
+  kind: "important",
+  paragraphs: [
+    "Kontaktuppgifterna kunde i vissa fall visa det som fanns i Scoutnet vid anmälan i " +
+      "stället för det som gäller nu. Nu visas alltid de aktuella uppgifterna.",
+    "Beklagar om något mejl gått till fel adress.",
+  ],
+  title: "Vi har rättat kontaktuppgifterna",
+}
+
+const news: Message = {
+  audience: everyone,
+  date: "2026-09-22",
+  id: "story-news",
+  kind: "news",
+  paragraphs: [
+    "Det finns en ny version av appen i App Store och på Google Play – uppdatera, så " +
+      "hänger du med.",
+  ],
+  title: "Dags att uppdatera appen",
+}
 
 const meta: Meta<typeof MessagesWidget> = {
   title: "Modules/Home/Widgets/MessagesWidget",
@@ -10,6 +68,8 @@ const meta: Meta<typeof MessagesWidget> = {
   // Closing is remembered on the device, and the canvas is a device: without this a
   // story closed once would render nothing on every visit after it.
   beforeEach: forgetClosedMessages,
+  decorators: [ColumnDecorator],
+  args: { roles: reader },
 }
 
 export default meta
@@ -17,39 +77,31 @@ export default meta
 type Story = StoryObj<typeof MessagesWidget>
 
 /**
- * A leader's welcome: what they can do with their own unit.
+ * The app introducing itself: the theme's bright fill, and the only title that proclaims.
  */
-export const Leader: Story = {
-  args: {
-    messages,
-    roles: [{ kind: "leader", unitNumber: 1 }],
-  },
+export const Welcome: Story = {
+  args: { messages: [welcome] },
 }
 
 /**
- * The management's welcome: what they can do with everyone.
+ * Something the reader has to notice – said rather than shouted, on the quiet surface,
+ * over a label and the day it was written.
  */
-export const Management: Story = {
-  args: {
-    messages,
-    roles: [{ kind: "cmt" }],
-  },
+export const Important: Story = {
+  args: { messages: [important] },
 }
 
 /**
- * Two unread at once: one plate, one close, the later message under its own title.
+ * Something new to know, which is the kind there will be most of.
  */
-export const Several: Story = {
-  args: {
-    messages: [
-      ...messages,
-      {
-        audience: ["cmt", "leader"],
-        id: "story-later",
-        text: "Det finns en ny version av appen i App Store och på Google Play – uppdatera, så hänger du med.",
-        title: "Dags att uppdatera appen",
-      },
-    ],
-    roles: [{ kind: "leader", unitNumber: 1 }],
-  },
+export const News: Story = {
+  args: { messages: [news] },
+}
+
+/**
+ * The three together, which is the arrangement the weights have to hold up in: a plate
+ * each, closed one at a time, and no plate reading as a part of the one above it.
+ */
+export const Together: Story = {
+  args: { messages: [welcome, important, news] },
 }

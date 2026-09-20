@@ -41,19 +41,17 @@ export function forgetClosedMessages(): void {
 
 /**
  * The messages this device has closed, and the way to close more.
- * @returns The closed ids, and `close`, which adds to them for this visit and – where
- * storage takes the write – for every visit after it.
+ * @returns The closed ids, and `close`, which adds one to them for this visit and –
+ * where storage takes the write – for every visit after it.
  */
 export function useClosedMessages(): {
-  readonly close: (ids: readonly string[]) => void
+  readonly close: (id: string) => void
   readonly closed: ReadonlySet<string>
 } {
   const [closed, setClosed] = useState<ReadonlySet<string>>(readClosedMessages)
 
-  const close = (ids: readonly string[]): void => {
-    for (const id of ids) {
-      closedThisVisit.add(id)
-    }
+  const close = (id: string): void => {
+    closedThisVisit.add(id)
     // Read again rather than trusting what this mount read: another tab on the same
     // device may have closed something since, and writing an older set back would
     // open it again. A union, never a replacement – an id the list no longer holds
