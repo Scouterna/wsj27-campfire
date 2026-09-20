@@ -234,6 +234,17 @@ test("gives a management function the whole section, in the management's name", 
   await expect(pill).toContainText("CMT · Program")
 })
 
+test("offers the management the addresses but not the sheet", async ({ page }) => {
+  await page.goto("/participants")
+  await signInAs(page, "Anna Almgren")
+  // The menu is published from the rows the list holds, so it exists only once they do.
+  await expect(page.getByRole("status")).toHaveText("59 personer i kontingenten")
+
+  await page.getByRole("button", { name: "Fler åtgärder" }).click()
+  await expect(page.getByRole("menuitem")).toHaveCount(4)
+  await expect(page.getByRole("menuitem", { name: "Exportera till Excel" })).toHaveCount(0)
+})
+
 test("mails and copies the addresses of the list as it is narrowed", async ({ context, page }) => {
   // The clipboard is the browser's to grant, and a walk has nobody to ask.
   await context.grantPermissions(["clipboard-read", "clipboard-write"])
@@ -242,7 +253,8 @@ test("mails and copies the addresses of the list as it is narrowed", async ({ co
   await signInAs(page, "Lars Lindberg")
   await expect(page.getByRole("status")).toHaveText("8 personer i avdelningen")
 
-  // Four entries, acting on the unit's eight people – every address a hidden copy.
+  // Five entries for a leader, acting on the unit's eight people – every address a
+  // hidden copy, and the sheet of them all at the end.
   const trigger = page.getByRole("button", { name: "Fler åtgärder" })
   await trigger.click()
   await expect(page.getByRole("menuitem")).toHaveText([
@@ -250,6 +262,7 @@ test("mails and copies the addresses of the list as it is narrowed", async ({ co
     "Kopiera e-postadresserna",
     "Mejla deras kontaktpersoner",
     "Kopiera kontaktpersonernas e-postadresser",
+    "Exportera till Excel",
   ])
   const everyone = await page
     .getByRole("menuitem", { name: "Mejla personerna i listan" })
