@@ -30,20 +30,21 @@ interface EntryFace {
 }
 
 /**
- * What the four entries are called, and the glyphs the people's two wear. The
- * närstående's entries go without, indented under them: the same two acts again, for
- * the people around the ones above.
+ * What the four entries are called, and the glyphs the people's two wear. The contacts'
+ * entries go without, indented under them: the same two acts again, for the people around
+ * the ones above. "Kontaktpersoner" rather than "närstående", because the set is both the
+ * närstående somebody named and their nödkontakter.
  */
 const entries: Readonly<
   Record<AddressSetKind, { readonly copy: EntryFace; readonly mail: EntryFace }>
 > = {
+  contacts: {
+    copy: { label: "Kopiera kontaktpersonernas e-postadresser" },
+    mail: { label: "Mejla deras kontaktpersoner" },
+  },
   people: {
     copy: { icon: <CopyIcon size={20} />, label: "Kopiera e-postadresserna" },
     mail: { icon: <MailIcon size={20} />, label: "Mejla personerna i listan" },
-  },
-  relatives: {
-    copy: { label: "Kopiera närståendes e-postadresser" },
-    mail: { label: "Mejla deras närstående" },
   },
 }
 
@@ -111,7 +112,7 @@ export function useAddressMenu(
     () =>
       found.length === 0
         ? undefined
-        : [...entriesFor(found, "people"), "divider", ...entriesFor(found, "relatives")],
+        : [...entriesFor(found, "people"), "divider", ...entriesFor(found, "contacts")],
     [found],
   )
 }

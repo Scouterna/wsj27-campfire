@@ -111,11 +111,11 @@ describe("reading one person in full", () => {
     expect(person?.birthDate).toBe("1995-07-16")
   })
 
-  it("reads the contact answers, with the form's own email and phone winning", () => {
+  it("reads the contact answers, with Scoutnet's own email and phone winning", () => {
     const contact = toParticipantDetail(record())?.contact
 
-    expect(contact?.email).toBe("lars@example.se")
-    expect(contact?.phone).toBe("070-000 00 00")
+    expect(contact?.email).toBe("lars.lindberg@example.se")
+    expect(contact?.phone).toBe("070-719 56 23")
     expect(contact?.alternateEmail).toBe("lars.privat@example.se")
     expect(contact?.relatives).toEqual([
       { name: "Johannes Norberg", relation: "Förälder", phone: "070-384 64 98" },
@@ -130,11 +130,13 @@ describe("reading one person in full", () => {
     ])
   })
 
-  it("falls back to the service's own email and phone when the form has none", () => {
-    const contact = toParticipantDetail(record({ contact_info: {} }))?.contact
+  it("falls back to the registration's copies when Scoutnet holds neither", () => {
+    // The wire says null for a member without one, and the mock sends exactly that.
+    const missing = JSON.parse('{"email": null, "mobile": null}') as Record<string, unknown>
+    const contact = toParticipantDetail(record(missing))?.contact
 
-    expect(contact?.email).toBe("lars.lindberg@example.se")
-    expect(contact?.phone).toBe("070-719 56 23")
+    expect(contact?.email).toBe("lars@example.se")
+    expect(contact?.phone).toBe("070-000 00 00")
   })
 
   it("reads a missing mobile as empty, not as a crash", () => {

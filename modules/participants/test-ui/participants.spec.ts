@@ -248,19 +248,24 @@ test("mails and copies the addresses of the list as it is narrowed", async ({ co
   await expect(page.getByRole("menuitem")).toHaveText([
     "Mejla personerna i listan",
     "Kopiera e-postadresserna",
-    "Mejla deras närstående",
-    "Kopiera närståendes e-postadresser",
+    "Mejla deras kontaktpersoner",
+    "Kopiera kontaktpersonernas e-postadresser",
   ])
   const everyone = await page
     .getByRole("menuitem", { name: "Mejla personerna i listan" })
     .getAttribute("href")
   expect(everyone).toMatch(/^mailto:\?bcc=/u)
-  expect(everyone?.split(",")).toHaveLength(8)
+  // Nine addresses from eight people: Ester gave an alternative one, and the registration
+  // promises it the same jamboree information as her primary, so both are written to.
+  expect(everyone?.split(",")).toHaveLength(9)
   expect(everyone).toContain("leo.str%C3%B6m@example.se")
+  expect(everyone).toContain("ester.dahl@example.org")
 
-  // The närstående who gave an address, and nobody's emergency contacts.
+  // Everybody the unit's people named around them. The deltagare and the IST gave
+  // närstående, and their form asks for no nödkontakt; a leader's own answers a fellow
+  // leader may not read at all, so the unit's two leaders name nobody here.
   const relatives = await page
-    .getByRole("menuitem", { name: "Mejla deras närstående" })
+    .getByRole("menuitem", { name: "Mejla deras kontaktpersoner" })
     .getAttribute("href")
   expect(relatives).toBe(
     hiddenCopies([
@@ -271,8 +276,8 @@ test("mails and copies the addresses of the list as it is narrowed", async ({ co
   )
   await page.keyboard.press("Escape")
 
-  // Narrowing the list is choosing who to write to: the two leaders, whose own
-  // närstående a fellow leader may not read – so those entries stay, and say why.
+  // Narrowing the list is choosing who to write to: the two leaders, whose own contact
+  // answers a fellow leader may not read – so those entries stay, and say why.
   await page.getByRole("button", { name: "Ledare", pressed: false }).click()
   await expect(page.getByRole("status")).toHaveText("2 av 8 personer")
   await trigger.click()
@@ -280,13 +285,13 @@ test("mails and copies the addresses of the list as it is narrowed", async ({ co
     "href",
     hiddenCopies(["hanna.hellstr%C3%B6m@example.se", "lars.lindberg@example.se"]),
   )
-  const noRelatives = page.getByRole("menuitem", { name: /^Mejla deras närstående/u })
-  await expect(noRelatives).toHaveAttribute("aria-disabled", "true")
-  await expect(noRelatives).toContainText("Inga e-postadresser i listan.")
+  const noContacts = page.getByRole("menuitem", { name: /^Mejla deras kontaktpersoner/u })
+  await expect(noContacts).toHaveAttribute("aria-disabled", "true")
+  await expect(noContacts).toContainText("Inga e-postadresser i listan.")
   // Chosen anyway, it does nothing – the menu stays as it was. By keyboard, because the
   // entry stays reachable that way, and the browser driver declines to click what is
   // announced as disabled.
-  await noRelatives.focus()
+  await noContacts.focus()
   await page.keyboard.press("Enter")
   await expect(page.getByRole("menu")).toBeVisible()
 

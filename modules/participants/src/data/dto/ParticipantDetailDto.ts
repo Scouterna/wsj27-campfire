@@ -1,5 +1,3 @@
-import { stringOrFallback } from "@scouterna/wsj27-campfire-utils"
-
 import type { ContactDetails, EmergencyContact } from "../../model/ContactDetails"
 import type { Experience } from "../../model/Experience"
 import type { Note } from "../../model/Note"
@@ -7,7 +5,7 @@ import type { ParticipantDetail } from "../../model/ParticipantDetail"
 import type { Travel } from "../../model/Participation"
 import type { Readiness } from "../../model/Readiness"
 import { answer, flattenAnswers, type Answers } from "./answers"
-import { toContactPerson, toPrimaryEmail, toRelatives } from "./contact"
+import { toContactPerson, toCurrent, toRelatives } from "./contact"
 import { toHealthProfile } from "./HealthProfileDto"
 import { toParticipant, type ParticipantDto } from "./ParticipantDto"
 import { isRecord } from "./validation"
@@ -162,9 +160,10 @@ function toExperience(answers: Answers): Experience | undefined {
 }
 
 /**
- * Contact details from the form's snapshot, backed by the live Scoutnet values in the
- * basic block: the form's email and mobile answers are what the applicant typed at
- * registration, and where they left them out the service's own values stand in.
+ * Contact details as they stand now: Scoutnet's own email and mobile, with the
+ * registration's copy of either standing in where the registry has none. The
+ * alternative address and the people around them are the registration's alone – nothing
+ * in the basic block says who a person's närstående are, so the answers are all there is.
  * @param dto The record the participants service answered with.
  * @param answers The flattened answers.
  * @returns How to reach them and the people around them.
@@ -172,8 +171,8 @@ function toExperience(answers: Answers): Experience | undefined {
 function toContactDetails(dto: ParticipantDetailDto, answers: Answers): ContactDetails {
   const alternateEmail = answer(answers, "alternateEmail")
   return {
-    email: toPrimaryEmail(dto.email, answers) ?? "",
-    phone: answer(answers, "mobilePhone") ?? stringOrFallback(dto.mobile),
+    email: toCurrent(dto.email, answers, "email") ?? "",
+    phone: toCurrent(dto.mobile, answers, "mobilePhone") ?? "",
     ...(alternateEmail !== undefined && { alternateEmail }),
     relatives: toRelatives(answers),
     emergencyContacts: [

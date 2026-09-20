@@ -104,9 +104,9 @@ export const Icons: Story = {
             onPerform: () => Promise.resolve({ words: "59 adresser kopierade" }),
           },
           "divider",
-          { label: "Mejla deras närstående", unavailable: "Inga e-postadresser i listan." },
+          { label: "Mejla deras kontaktpersoner", unavailable: "Inga e-postadresser i listan." },
           {
-            label: "Kopiera närståendes e-postadresser",
+            label: "Kopiera kontaktpersonernas e-postadresser",
             unavailable: "Inga e-postadresser i listan.",
           },
         ]}
@@ -131,7 +131,7 @@ export const Receipt: Story = {
             onPerform: () => Promise.resolve({ words: "8 adresser kopierade" }),
           },
           {
-            label: "Kopiera närståendes e-postadresser",
+            label: "Kopiera kontaktpersonernas e-postadresser",
             onPerform: () => Promise.resolve({ isFailure: true, words: "Kunde inte kopieras" }),
           },
         ]}
