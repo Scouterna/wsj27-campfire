@@ -23,7 +23,7 @@ Vite's configuration is shared at `config/vite/vite.config.ts` and run with `--c
 
 ### Installable
 
-`vite-plugin-pwa` generates the manifest and the service worker, registered with `autoUpdate` so a deploy reaches an installed application on the next load without asking. The precache covers everything the built application is made of: `js`, `css`, `html`, `svg`, `png`, `ico`, and `woff2`. Navigations under `/api/` are kept off the fallback, because sign-in and sign-out are full-page navigations to the auth service and a precached shell served in their place would break them.
+`vite-plugin-pwa` generates the manifest and the service worker, registered with `autoUpdate` so a deploy reaches an installed application on the next load without asking. The precache covers everything the built application is made of: `js`, `css`, `html`, `svg`, `png`, `ico`, and `woff2`. Navigations under `/api/`, `/_services/`, and `/services/` are kept off the fallback, because those paths belong to what the ingress serves beside the application – sign-in and sign-out are full-page navigations to the auth service, and the CMS lives under `/_services/cms` – and a precached shell served in their place would break them.
 
 The manifest is Swedish, named Campfire, `display: standalone`, with `id`, `start_url`, and `scope` all at `/`. Its theme color is `#215262` – the darker tonal blue the app icon's brush mark carries – and its background is `#f4f2ec`, the paper the whole application is drawn on, so the launch surface matches the first screen. Both shells' launch screens hold `#2a778a` instead, the same blue `--color-theme-blue` names.
 
