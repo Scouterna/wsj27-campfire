@@ -54,7 +54,7 @@ Every workspace package exports raw TypeScript source, so nothing under `librari
 
 Most of the work is done by AI agents – an analyst, an architect, a developer, and a reviewer – each with one job and a human deciding at every handoff. The [Process chapter](docs/guidebook/process/index.md) is the shape of it. [`AGENTS.md`](AGENTS.md) is the operational detail and every agent's entry point, and it routes to the files beside the code: [`apps/web/AGENTS.md`](apps/web/AGENTS.md), [`apps/apple/AGENTS.md`](apps/apple/AGENTS.md), [`apps/android/AGENTS.md`](apps/android/AGENTS.md), [`modules/AGENTS.md`](modules/AGENTS.md), [`libraries/AGENTS.md`](libraries/AGENTS.md), [`tools/mock/AGENTS.md`](tools/mock/AGENTS.md), [`docs/AGENTS.md`](docs/AGENTS.md), and [`docs/architecture/AGENTS.md`](docs/architecture/AGENTS.md). Each `CLAUDE.md` is a symlink to the `AGENTS.md` beside it.
 
-Work is tracked as GitHub issues. Commits are Conventional Commits without a scope, on a rebased history, and the version is CalVer – `2026.8.0` today.
+Work is tracked as GitHub issues. Commits are Conventional Commits without a scope, on a rebased history, and the version is CalVer – `2026.8.1` today.
 
 ## License
 
