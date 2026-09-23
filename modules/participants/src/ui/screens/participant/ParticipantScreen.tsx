@@ -79,7 +79,8 @@ export function ParticipantScreen(props: ParticipantScreenProps): ReactElement {
     // One wording for every failure. A member number nobody holds and one outside the
     // viewer's scope are deliberately not told apart – the service answers both the same
     // way on purpose, and saying which it was would leak who exists. There is nothing to
-    // retry either: a second ask gets the same answer.
+    // retry either: a second ask gets the same 403 or 404. An expired session never lands
+    // here – the query client asks who is signed in, and the gate shows sign-in instead.
     return (
       <>
         <PageTitle title={pendingTitle} />

@@ -1,8 +1,9 @@
+import { withSession } from "@scouterna/wsj27-campfire-authentication"
 import {
   experimental_createQueryPersister as createQueryPersister,
   type AsyncStorage,
 } from "@tanstack/query-persist-client-core"
-import { QueryClient } from "@tanstack/react-query"
+import { QueryClient, type QueryPersister } from "@tanstack/react-query"
 import { clear, createStore, del, get, set } from "idb-keyval"
 
 /**
@@ -17,11 +18,12 @@ import { clear, createStore, del, get, set } from "idb-keyval"
  *
  * Every service read goes through this client – the gate hands it to `currentUser`, the
  * screens' hooks read it from the provider the gate mounts – so one cache holds every
- * answer, and one IndexedDB store persists it query by query. The store's buster is the
- * cached shapes' version: bump it whenever a persisted payload's shape changes, because
- * a stale shape read as a fresh one is worse than a cold cache. And the cache belongs to
- * one member number at a time – `adoptCacheOwner` wipes it when it changes hands, so
- * nothing one person saw can be served to the next on a shared device.
+ * answer, and one IndexedDB store persists it query by query, with every read that
+ * reaches the network run under the session. The store's buster is the cached shapes'
+ * version: bump it whenever a persisted payload's shape changes, because a stale shape
+ * read as a fresh one is worse than a cold cache. And the cache belongs to one member
+ * number at a time – `adoptCacheOwner` wipes it when it changes hands, so nothing one
+ * person saw can be served to the next on a shared device.
  */
 
 /**
@@ -29,6 +31,14 @@ import { clear, createStore, del, get, set } from "idb-keyval"
  * megabytes in, and blocks the main thread on every write.
  */
 const store = createStore("campfire", "queries")
+
+/**
+ * Whether the cache has been forgotten on this page. The persister saves a read on a
+ * later tick than the read resolved on, so a read that finished just before a session
+ * ended could otherwise write its answer back after `forgetCache` cleared the store.
+ * Never unset: forgetting ends a session or signs out, and both end in a page load.
+ */
+const forgotten = { value: false }
 
 const storage: AsyncStorage = {
   // The library's contract is `null` for a miss, not `undefined` – one of the few places
@@ -39,6 +49,9 @@ const storage: AsyncStorage = {
     await del(key, store)
   },
   setItem: async (key, value) => {
+    if (forgotten.value) {
+      return
+    }
     await set(key, value, store)
   },
 }
@@ -61,6 +74,24 @@ const persister = createQueryPersister({
 })
 
 /**
+ * The persister with every network read run under the session: a refusal asks the auth
+ * service again, and the read runs once more only when the same person is still signed
+ * in. A restore from IndexedDB never calls the query function and so never asks – only a
+ * read that reached the network can be refused. What a refusal means is the
+ * authentication module's to decide; this only puts the read where it can.
+ *
+ * The client's single retry is the bound: a same-person rerun refused again rethrows,
+ * the client runs the whole query function once more, and that is two asks per fetch at
+ * most.
+ * @param queryFunction The query's own function, run under the session when it runs.
+ * @param context The query function's context, handed through.
+ * @param query The query being fetched, handed through.
+ * @returns What the persister resolves – the restored answer, or the read's.
+ */
+const persisterWithSession: QueryPersister = (queryFunction, context, query) =>
+  persister.persisterFn((c) => withSession(() => Promise.resolve(queryFunction(c))), context, query)
+
+/**
  * The application's one query client – see this file's opening note for the defaults and
  * why they are not the library's.
  */
@@ -69,7 +100,7 @@ export const queryClient = new QueryClient({
     queries: {
       gcTime: 30 * 24 * 60 * 60 * 1000,
       networkMode: "offlineFirst",
-      persister: persister.persisterFn,
+      persister: persisterWithSession,
       refetchOnMount: false,
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
@@ -115,6 +146,11 @@ export async function adoptCacheOwner(memberNo: string): Promise<void> {
  * @returns Nothing, once both the client and the store are empty.
  */
 export async function forgetCache(): Promise<void> {
+  // Before anything is cleared, so no save can land between the clear and the flag.
+  forgotten.value = true
   queryClient.clear()
+  // The owner goes first, so a clear that fails partway still leaves no owner – and the
+  // next sign-in's adoption wipes whatever survived.
+  await del(ownerKey, store)
   await clear(store)
 }
