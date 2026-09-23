@@ -86,10 +86,11 @@ Two costs come with that. A correction made in the list of participants can take
 
 ## When it fails
 
-| Failure                          | What happens                                                                      |
-| -------------------------------- | --------------------------------------------------------------------------------- |
-| A row does not convert           | That row is dropped, and the rest of the list is shown                            |
-| The request never reached anyone | The cached list of participants is shown if there is one, and a failure if not    |
-| The service refuses the listing  | The screen says the list of participants could not be read, not that it is empty  |
-| One listing among many fails     | Retried once alone; still failing, the whole list reads as unreadable, with retry |
-| The person is outside the scope  | The same answer as a person who does not exist – nothing to show                  |
+| Failure                          | What happens                                                                                                                 |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| A row does not convert           | That row is dropped, and the rest of the list is shown                                                                       |
+| The request never reached anyone | The cached list of participants is shown if there is one, and a failure if not                                               |
+| The service refuses the listing  | The screen says the list of participants could not be read, not that it is empty                                             |
+| One listing among many fails     | Retried once alone; still failing, the whole list reads as unreadable, with retry                                            |
+| The person is outside the scope  | The same answer as a person who does not exist – nothing to show                                                             |
+| The session has ended            | Never the screen's to word: a 401 asks again at the query client, and the gate shows sign-in in place ([Sign in](./sign-in)) |

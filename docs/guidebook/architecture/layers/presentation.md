@@ -41,7 +41,9 @@ Above every screen sits the gate, and its order is the point:
 2. Hand the cache its owner before any screen mounts, so a cache belonging to somebody else is gone before a single query reads it ([Data layer](./data)).
 3. Show the sign-in screen, or the chrome.
 
-After the gate the application branches once, on the tier, into the shell chrome or the browser chrome, and never asks again ([Applications](../applications)).
+After the gate the application branches once, on the tier, into the shell chrome or the browser chrome ([Applications](../applications)).
+
+The gate keeps listening after boot ([ADR 033](/decisions/033-recover-an-ended-session-at-the-query-client-and-the-gate)). The authentication module holds the session as a store – one ask at a time, and the last answer – and tells the gate when the answer changes. A read refused with 401 and an expiry cookie the service's keep-alive did not renew both ask again through it ([Data layer](./data)). When the service says nobody is signed in any more, the gate unmounts the application, forgets the cache, and mounts the sign-in screen in place – at the address the person was at, so signing in returns them there, and with nothing of the signed-in application on screen meanwhile. When another person is signed in, the gate reloads the page, and the order above adopts the new owner. When it is the same person, nothing changes: the refused read is simply made again. When the service cannot be reached, nothing changes either – a lost signal is not a lost session.
 
 ## Components, and what they look like
 

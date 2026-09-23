@@ -22,6 +22,8 @@ Registration, not import, is how a module reaches the application, and that is w
 
 It holds no token and never will. The session is httpOnly cookies the browser carries, so the module asks who is signed in and is told, or is not ([ADR 019](/decisions/019-authenticate-on-the-app-origin-through-scoutid)). [Sign in](./example-flows/sign-in) walks the whole round trip.
 
+It also holds the session after boot: one ask at a time – a read refused with 401 and the expiry watch both join it – the last answer, and who wants to know when it changes. Three doorways carry that out of the module: `withSession`, which the application's query client runs every read under; `subscribeToSession`, which the gate listens through; and `watchExpiry`, which the gate starts beside the service's keep-alive ([ADR 033](/decisions/033-recover-an-ended-session-at-the-query-client-and-the-gate)).
+
 It exports `SignInScreen`, the screen the session gate shows when nobody is signed in, and a route table holding the profile page at `/profile` – the page the chrome's profile control opens. The page shows the signed-in person as the `User` knows them – the mark, the name, and the role line under it, with the unit held back until the units reveal exactly as the chrome holds it – and carries the one way out. It fetches nothing.
 
 Signing out is two packages' work: the application forgets its query cache, and this module starts the round trip. A routed screen takes no props, so the module also exports `SignOutProvider`, which the gate mounts with the whole of it, and the page presses whatever the provider holds.
