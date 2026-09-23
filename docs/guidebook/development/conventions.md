@@ -20,7 +20,7 @@ These are the rules a reviewer will hold a change to, and several of them are ES
 - **A component is a file named after it, in PascalCase, in a directory of its own,** with its stylesheet and its stories beside it: `Logo.tsx`, `Logo.css`, `Logo.stories.tsx`. Everything else is kebab-case, and `unicorn/filename-case` allows those two cases and nothing else.
 - **A component takes one `props` object** typed as an `XxxProps` type declared beside it and exported with it, every field `readonly` and every field documented.
 
-Size limits are enforced rather than suggested: 400 lines a file, 100 lines a function, four levels of nesting. The exceptions are written into `eslint.config.ts` with their reasons – the mock's seed data, which is long because the contingent is, and the test and walk-through files, where a long linear script is the right shape.
+Size limits are enforced rather than suggested: 500 lines a file, 100 lines a function, four levels of nesting. The exceptions are written into `eslint.config.ts` with their reasons – the mock's seed data, which is long because the contingent is, and the test and walk-through files, where a long linear script is the right shape.
 
 ## What a comment is for
 

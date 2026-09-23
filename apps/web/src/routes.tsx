@@ -5,6 +5,8 @@ import {
   SignInScreen,
   signOut,
   SignOutProvider,
+  subscribeToSession,
+  watchExpiry,
 } from "@scouterna/wsj27-campfire-authentication"
 import { HomeScreen } from "@scouterna/wsj27-campfire-home"
 import { host } from "@scouterna/wsj27-campfire-host"
@@ -236,33 +238,63 @@ type SignedInProps = {
 }
 
 /**
+ * Where the gate stands: asking at boot, signed in, signed out, or ending a session that
+ * the service refused – the one stretch where the cache is being forgotten and nothing of
+ * the application may be on screen.
+ */
+type Gate =
+  | { readonly kind: "asking" }
+  | { readonly kind: "ending" }
+  | { readonly kind: "signed-in"; readonly user: User }
+  | { readonly kind: "signed-out" }
+
+/**
  * The gate. Every screen sits behind it, so a signed-out visitor sees sign-in whichever
  * address they opened – there is no useful screen without a session. It asks once per
  * page load who is signed in and renders nothing at all until the answer – no spinner,
- * and no flash of the sign-in screen past a signed-in person.
+ * and no flash of the sign-in screen past a signed-in person. While somebody is signed
+ * in it keeps listening: a session the service ends takes the application down, forgets
+ * the cache, and lands on sign-in at the same address, and a session that changes hands
+ * reloads the page so the boot hands the cache to the new owner.
  * @param props The routed screens the gate stands in front of.
  * @returns Nothing until the session is known, then the sign-in screen or the
  * application.
  */
 function AppChrome(props: AppChromeProps): ReactElement {
-  const [user, setUser] = useState<User>()
-  const [asked, setAsked] = useState(false)
+  const [gate, setGate] = useState<Gate>({ kind: "asking" })
 
   useEffect(() => {
     async function ask(): Promise<void> {
-      setUser(await currentUser(queryClient))
-      setAsked(true)
+      const user = await currentUser(queryClient)
+      setGate(user === undefined ? { kind: "signed-out" } : { kind: "signed-in", user })
     }
     void ask()
   }, [])
 
+  useEffect(() => {
+    if (gate.kind !== "signed-in") {
+      return
+    }
+    return subscribeToSession((change) => {
+      if (change.kind === "changed") {
+        location.reload()
+        return
+      }
+      // Invoked without an await, an async function runs synchronously up to its first
+      // await – so `forgetCache`'s `queryClient.clear()` cancels the refused queries
+      // before their promises settle, rather than trusting the client's retry delay to
+      // outlast it.
+      void endSession(setGate)
+    })
+  }, [gate.kind])
+
   // An empty fragment rather than nothing: the router's InnerWrap must return an
   // element, and rendering none is exactly the gate's contract while it waits.
-  if (!asked) {
+  if (gate.kind === "asking" || gate.kind === "ending") {
     return <></>
   }
 
-  if (user === undefined) {
+  if (gate.kind === "signed-out") {
     return (
       <ThemeProvider theme={storedTheme() ?? "blue"}>
         <SignInScreen />
@@ -270,7 +302,7 @@ function AppChrome(props: AppChromeProps): ReactElement {
     )
   }
 
-  return <SignedInChrome user={user}>{props.children}</SignedInChrome>
+  return <SignedInChrome user={gate.user}>{props.children}</SignedInChrome>
 }
 
 /**
@@ -338,10 +370,12 @@ function SignedInChrome(props: SignedInProps): ReactElement {
     void adopt()
   }, [memberNo])
 
-  // The auth service's own loop, once per page – an active session refreshes rather
-  // than expiring mid-use.
+  // The auth service's own loop, once per page, keeps the session alive ahead of expiry
+  // so an active one refreshes rather than expiring mid-use; the watcher notices when
+  // that failed and asks the service again.
   useEffect(() => {
     keepSessionAlive()
+    return watchExpiry()
   }, [])
 
   if (!adopted || identities === undefined) {
@@ -585,6 +619,22 @@ async function signOutAndForget(): Promise<void> {
     await forgetCache()
   } finally {
     signOut(location.origin)
+  }
+}
+
+/**
+ * Take down a session the service ended: nothing of the application on screen while the
+ * cache is forgotten, then the sign-in screen – whichever way the wipe ended, as signing
+ * out leaves whichever way it ended.
+ * @param setGate The gate's own setter.
+ * @returns Nothing, once the gate stands at sign-in.
+ */
+async function endSession(setGate: (gate: Gate) => void): Promise<void> {
+  setGate({ kind: "ending" })
+  try {
+    await forgetCache()
+  } finally {
+    setGate({ kind: "signed-out" })
   }
 }
 

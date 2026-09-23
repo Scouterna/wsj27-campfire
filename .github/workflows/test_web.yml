@@ -49,6 +49,9 @@ jobs:
       # tooling that builds and runs it, or from this workflow – so all of those
       # count as a reason to run, and everything else as a reason not to.
       #
+      # The authentication module counts for every leg, not only its own: every
+      # walk signs in through it, and its session runs under every read.
+      #
       # The tooling is named config directory by config directory rather than as
       # `config/`, which would make a SwiftLint or commitlint edit start four
       # browsers to prove four screens still render.
@@ -70,7 +73,7 @@ jobs:
                      --jq '.[].filename')"
 
           if printf '%s\n' "$files" \
-             | grep -qE '^(modules/${{ matrix.module }}/|apps/web/|libraries/|tools/mock/|config/playwright/|config/vite/|config/environments/local/|scripts/start/|tsconfig\.json$|package\.json$|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|\.tool-versions$|\.github/workflows/test_web\.yml$)'; then
+             | grep -qE '^(modules/${{ matrix.module }}/|modules/authentication/|apps/web/|libraries/|tools/mock/|config/playwright/|config/vite/|config/environments/local/|scripts/start/|tsconfig\.json$|package\.json$|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|\.tool-versions$|\.github/workflows/test_web\.yml$)'; then
             echo "module=true" >> "$GITHUB_OUTPUT"
           else
             echo "module=false" >> "$GITHUB_OUTPUT"

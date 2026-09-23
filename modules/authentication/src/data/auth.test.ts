@@ -1,7 +1,7 @@
 import { QueryClient } from "@tanstack/react-query"
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { currentUser, decodeUser, keepSessionAlive, signInUrl, signOut } from "./auth"
+import { currentUser, keepSessionAlive, signInUrl, signOut } from "./auth"
 
 /**
  * A payload shaped exactly as the auth service answers, with the fields a test cares
@@ -72,107 +72,22 @@ function navigationAnswers(): readonly string[] {
   return visited
 }
 
-afterEach(() => {
-  vi.unstubAllGlobals()
+/**
+ * Stands in for a page carrying the given cookie header, so a test decides what the page
+ * can see of a session.
+ * @param cookie The `document.cookie` string.
+ */
+function browserWith(cookie: string): void {
+  vi.stubGlobal("document", { cookie })
+}
+
+// A page with no cookies at all, unless a test says otherwise.
+beforeEach(() => {
+  browserWith("")
 })
 
-describe("reading the user the auth service reports", () => {
-  it("decodes a payload it recognizes into the facts the application keeps", () => {
-    const user = decodeUser(userPayload({}))
-
-    expect(user).toEqual({
-      firstName: "Lars",
-      // How the person reads is derived at the decode too, so nothing downstream works
-      // it out again.
-      mark: { isLeader: true, unitNumber: 1 },
-      memberNo: "1001",
-      name: "Lars Larsson",
-      roleLine: "Ledare",
-      roleLineWithUnit: "Ledare · Avdelning 1",
-      roles: [{ kind: "leader", unitNumber: 1 }],
-      // A leader's unit comes straight from the roles, at the decode.
-      unit: { number: 1 },
-    })
-  })
-
-  it("degrades the optional fields rather than refusing the session", () => {
-    const user = decodeUser({ user: { name: "Lars Larsson", roles: [] } })
-
-    expect(user).toEqual({
-      firstName: "Lars",
-      memberNo: "",
-      name: "Lars Larsson",
-      roleLine: "Deltagare",
-      roleLineWithUnit: "Deltagare",
-      roles: [],
-    })
-  })
-
-  it("names a management function on the role line, the head of contingent first", () => {
-    const program = decodeUser(userPayload({ roles: ["wsj27:cmt", "wsj27:cmt:program"] }))
-    const plain = decodeUser(userPayload({ roles: ["wsj27:cmt"] }))
-
-    expect(program?.roleLine).toBe("CMT · Program")
-    expect(program?.roleLineWithUnit).toBe("CMT · Program")
-    // The management wears its own mark, which is no unit's.
-    expect(program?.mark).toEqual({ isLeader: false })
-    expect(plain?.roleLine).toBe("CMT")
-  })
-
-  it("reads as a leader when the roles carry a management function too", () => {
-    const user = decodeUser(userPayload({ roles: ["wsj27:al:1", "wsj27:cmt:program"] }))
-
-    expect(user?.roleLineWithUnit).toBe("Ledare · Avdelning 1")
-    expect(user?.mark).toEqual({ isLeader: true, unitNumber: 1 })
-  })
-
-  it("derives the greeting name from the full name when no given name arrives", () => {
-    const user = decodeUser(userPayload({ givenName: undefined, name: "  Anna   Andersson " }))
-
-    expect(user?.firstName).toBe("Anna")
-  })
-
-  it("greets nobody rather than crashing when the name is empty", () => {
-    const user = decodeUser({ user: { name: "", roles: [] } })
-
-    expect(user?.firstName).toBe("")
-  })
-
-  it("translates the spellings it knows and drops everything else", () => {
-    const user = decodeUser(userPayload({ roles: ["wsj27:al:1", 42, "junk"] }))
-
-    expect(user?.roles).toEqual([{ kind: "leader", unitNumber: 1 }])
-  })
-
-  it("keeps the unit from a leader role even when a management role sits beside it", () => {
-    // The unit is what the application shapes itself around, so it survives whatever
-    // else the person also is.
-    const user = decodeUser(userPayload({ roles: ["wsj27:al:1", "wsj27:cmt:program"] }))
-
-    expect(user?.unit).toEqual({ number: 1 })
-    expect(user?.roles).toEqual([
-      { kind: "leader", unitNumber: 1 },
-      { kind: "cmt" },
-      { kind: "program" },
-    ])
-  })
-
-  it("reads a payload with no user as nobody", () => {
-    expect(decodeUser({})).toBeUndefined()
-  })
-
-  it("reads a user that is not an object as nobody", () => {
-    expect(decodeUser({ user: "Lars Larsson" })).toBeUndefined()
-  })
-
-  it("reads a user with no name as nobody", () => {
-    expect(decodeUser({ user: { roles: [] } })).toBeUndefined()
-  })
-
-  it("reads a user with no roles as nobody", () => {
-    // An empty list is a session; a missing list is a payload this module does not know.
-    expect(decodeUser({ user: { name: "Lars Larsson" } })).toBeUndefined()
-  })
+afterEach(() => {
+  vi.unstubAllGlobals()
 })
 
 /**
@@ -231,13 +146,14 @@ describe("asking who is signed in", () => {
     expect(asked.filter((url) => url === "/api/auth/refresh")).toHaveLength(1)
   })
 
-  it("answers nobody when nothing answers at all", async () => {
+  it("answers nobody when nothing answers at all, without asking for a refresh", async () => {
+    // A dead network said nothing about the session, so there is no token to re-mint.
     const asked = networkAnswers({})
 
     const user = await currentUser(testClient())
 
     expect(user).toBeUndefined()
-    expect(asked.filter((url) => url === "/api/auth/refresh")).toHaveLength(1)
+    expect(asked).toEqual(["/api/auth/user"])
   })
 
   it("answers nobody when the answer is not JSON – a dev server with no service behind it", async () => {
@@ -416,6 +332,37 @@ describe("keeping the session alive", () => {
     keepSessionAlive()
 
     expect(scripts).toEqual([{ src: "/api/auth/static/refresh.js" }])
+  })
+})
+
+describe("asking only where a session can exist", () => {
+  it("asks when the refresh window is open, however long ago the token lapsed", async () => {
+    browserWith(`theme=dark; wsj27-auth_refresh-expires-at=${String(Date.now() + 86_400_000)}`)
+    const asked = networkAnswers({
+      "/api/auth/refresh": [Response.json({})],
+      "/api/auth/user": [new Response("{}", { status: 401 }), Response.json(userPayload({}))],
+    })
+
+    await expect(currentUser(testClient())).resolves.toMatchObject({ name: "Lars Larsson" })
+    expect(asked.slice(0, 3)).toEqual(["/api/auth/user", "/api/auth/refresh", "/api/auth/user"])
+  })
+
+  it("asks when a token was minted in the last five minutes", async () => {
+    browserWith(`wsj27-auth_expires-at=${String(Date.now() + 60_000)}`)
+    networkAnswers({ "/api/auth/user": [Response.json(userPayload({ memberNo: "3003" }))] })
+
+    await expect(currentUser(testClient())).resolves.toMatchObject({ memberNo: "3003" })
+  })
+
+  it("still asks when neither cookie is readable, since the refresh window may be open", async () => {
+    browserWith("theme=dark")
+    const asked = networkAnswers({
+      "/api/auth/refresh": [new Response("{}", { status: 401 })],
+      "/api/auth/user": [new Response("{}", { status: 401 })],
+    })
+
+    await expect(currentUser(testClient())).resolves.toBeUndefined()
+    expect(asked).toEqual(["/api/auth/user", "/api/auth/refresh"])
   })
 })
 

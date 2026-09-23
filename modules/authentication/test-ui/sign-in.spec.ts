@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test"
+import { expect, test, type BrowserContext, type Page } from "@playwright/test"
 
 // What these walks prove is the whole of sign-in in a real browser: the gate in front of
 // every address, the round trip out to ScoutID and back to where it started, the theme
@@ -7,9 +7,18 @@ import { expect, test, type Page } from "@playwright/test"
 // the start screen – the profile control naming them – and that control leads to the
 // profile page, which shows who they are and holds the one way out.
 //
-// The walks share one mock, but every session in it – the auth service's and the ScoutID
-// stand-in's alike – lives in cookies each test's own browser context keeps, so the
-// walks cannot sign each other in or out and run in parallel like every other spec.
+// Four more walks prove the session ending mid-use rather than at boot: a session the
+// service ends under a live page returns the gate to sign-in in place, at the same
+// address, with the cache forgotten; a stale access token costs nobody a sign-in, because
+// the one refresh the session runs underneath the read recovers it; an expiry is noticed
+// on its own, with nobody touching the page; and an ask that cannot reach the service,
+// while offline, ends nothing.
+//
+// The walks share one mock, and every session in it lives in cookies each test's own
+// browser context keeps, so signing in or out in one walk never touches another's. The
+// walks that end a session do it the same way – by clearing their own context's cookies
+// – rather than through `/__mock__/reset`, which forgets every context's ScoutID session
+// at once and would end a walk running beside them in another module's project.
 
 // The reveal is timed, and until its moment a leader's unit – its color included – is
 // behind the curtain. These walks are about the sign-in round trip and the theming
@@ -28,6 +37,21 @@ test.beforeEach(async ({ page }) => {
 async function signInAs(page: Page, persona: string): Promise<void> {
   await page.getByRole("button", { name: "Logga in med ScoutID" }).click()
   await page.getByRole("link", { name: persona }).click()
+}
+
+/**
+ * Clears cookies from one walk's own browser context, each name asserted present first
+ * – so a drifted name could not let a walk pass without proving anything.
+ * @param context The walk's browser context.
+ * @param names The cookies to clear.
+ */
+async function clearCookies(context: BrowserContext, names: readonly string[]): Promise<void> {
+  const cookies = await context.cookies()
+  const present = cookies.map((cookie) => cookie.name)
+  for (const name of names) {
+    expect(present).toContain(name)
+    await context.clearCookies({ name })
+  }
 }
 
 /**
@@ -210,4 +234,133 @@ test("shows somebody with no role their name, and no mark they do not wear", asy
   await expect(card.locator(".unit-avatar")).toHaveCount(0)
   await expect(card.getByText("Deltagare")).toBeVisible()
   await expect(page.getByRole("button", { name: "Logga ut" })).toBeVisible()
+})
+
+test("returns to sign-in in place when the session ends under a live page, and forgets the cache", async ({
+  context,
+  page,
+}) => {
+  await page.goto("/")
+  await signInAs(page, "Lars Lindberg")
+  await expect(page.getByRole("link", { name: "Profil för Lars Lindberg" })).toBeVisible()
+
+  // Opened in-app, so the list of participants is read and cached before the session ends.
+  await page.locator(".sidemenu").getByRole("link", { name: "Min avdelning" }).click()
+  await expect(page.getByRole("status")).toHaveText("8 personer i avdelningen")
+
+  // Ends the session in this context alone: the access token goes, standing in for its
+  // expiry, the refresh token goes, so the one refresh is refused, and the stand-in's own
+  // session goes, so signing in again means picking somebody.
+  await clearCookies(context, [
+    "mock-scoutid_session",
+    "wsj27-auth_access-token",
+    "wsj27-auth_refresh-token",
+  ])
+
+  // In-app to a person nothing has cached, so the read reaches the network and is
+  // refused – the one path this walk exists to prove.
+  await page.getByRole("link", { name: /^Ester Dahl/ }).click()
+
+  await expectSignInScreen(page)
+  await expect(page).toHaveURL(/\/participants\/1300035$/)
+  await expect(page.getByText("Personen kunde inte visas.")).toHaveCount(0)
+
+  // The stand-in's own session ended too, so it asks who is signing in rather than
+  // waving Lars back through.
+  await signInAs(page, "Lars Lindberg")
+
+  // Back at the address the session ended at, not the front door.
+  await expect(page).toHaveURL(/\/participants\/1300035$/)
+  await expect(page).toHaveTitle("Ester Dahl – Campfire")
+
+  // The one-day staleTime would otherwise serve the list from before the session
+  // ended without ever touching the network, so a network read here is the only
+  // reason the list could be asked for again – proof the cache was forgotten along
+  // with the session, not merely that the screen still works.
+  const listRead = page.waitForRequest((request) =>
+    request.url().includes("/participants/troopinfo/1"),
+  )
+  await page.locator(".sidemenu").getByRole("link", { name: "Min avdelning" }).click()
+  await listRead
+  await expect(page.getByRole("status")).toHaveText("8 personer i avdelningen")
+})
+
+test("carries a read on without a sign-in when only the access token is stale", async ({
+  context,
+  page,
+}) => {
+  await page.goto("/")
+  await signInAs(page, "Lars Lindberg")
+  await page.locator(".sidemenu").getByRole("link", { name: "Min avdelning" }).click()
+  await expect(page.getByRole("status")).toHaveText("8 personer i avdelningen")
+
+  // Only the access token goes; the refresh cookie stays, which is the one refresh the
+  // session runs underneath a refused read, recovering it without a sign-in.
+  await clearCookies(context, ["wsj27-auth_access-token"])
+
+  const refreshed = page.waitForRequest((request) => request.url().includes("/api/auth/refresh"))
+  await page.getByRole("link", { name: /^Ester Dahl/ }).click()
+
+  await expect(page).toHaveTitle("Ester Dahl – Campfire")
+  await refreshed
+  await expect(page.getByText("Personen kunde inte visas.")).toHaveCount(0)
+  await expect(page.getByRole("button", { name: "Logga in med ScoutID" })).toHaveCount(0)
+})
+
+test("notices on its own that the session expired, with nobody touching the page", async ({
+  context,
+  page,
+}) => {
+  // Installed before the first navigation, so every timer the application sets from
+  // boot on – the expiry watcher's own included – is a fake one the clock controls.
+  await page.clock.install()
+
+  await page.goto("/")
+  await signInAs(page, "Lars Lindberg")
+  await expect(page.getByRole("link", { name: "Profil för Lars Lindberg" })).toBeVisible()
+
+  // The clock never expires a real cookie, so the two the browser would drop at expiry
+  // are cleared by hand, and the refresh token with them, so the refresh the watcher
+  // eventually triggers is refused – but nothing asks for one until the watcher notices.
+  await clearCookies(context, [
+    "wsj27-auth_access-token",
+    "wsj27-auth_expires-at",
+    "wsj27-auth_refresh-token",
+  ])
+
+  // Five minutes past the expiry, plus the watcher's twenty-second grace, with margin
+  // – and nobody touches the page in between.
+  await page.clock.fastForward("05:30")
+
+  await expectSignInScreen(page)
+  await expect(page).toHaveURL(/\/$/)
+})
+
+test("keeps what it shows when the expiry passes with no signal", async ({ context, page }) => {
+  await page.clock.install()
+
+  await page.goto("/")
+  await signInAs(page, "Lars Lindberg")
+  await page.locator(".sidemenu").getByRole("link", { name: "Min avdelning" }).click()
+  await expect(page.getByRole("status")).toHaveText("8 personer i avdelningen")
+
+  // At camp a token lapses every five minutes while the keep-alive, and the watcher's
+  // own ask, cannot reach the service either.
+  await context.setOffline(true)
+
+  await clearCookies(context, ["wsj27-auth_access-token", "wsj27-auth_expires-at"])
+
+  // Awaited before the assertions, so they judge the screen after the watcher's ask
+  // failed rather than before it was made – when they would pass without proving anything.
+  const asked = page.waitForEvent("requestfailed", (request) =>
+    request.url().includes("/api/auth/user"),
+  )
+  await page.clock.fastForward("05:30")
+  await asked
+
+  // An ask that cannot reach the service ends nothing – `unreachable` records no
+  // change and notifies nobody, so the screen a reader left open keeps showing it.
+  await expect(page.getByRole("status")).toHaveText("8 personer i avdelningen")
+  await expect(page.getByRole("link", { name: "Profil för Lars Lindberg" })).toBeVisible()
+  await expect(page.getByRole("button", { name: "Logga in med ScoutID" })).toHaveCount(0)
 })

@@ -15,11 +15,13 @@ type ParticipantsQueryKey = readonly ["participants", "list"]
 
 /**
  * What one round of listings answered: everyone the listings that came back hold, and the
- * keys of the ones that did not.
+ * keys of the ones worth asking again.
  */
 interface Round {
   /**
-   * The keys whose listing did not answer, in the order they were asked for.
+   * The keys whose listing did not answer, in the order they were asked for – every
+   * failure but a refusal, which asking again before the session is settled would only
+   * repeat.
    */
   readonly failed: readonly string[]
   /**
@@ -27,8 +29,9 @@ interface Round {
    */
   readonly people: readonly Participant[]
   /**
-   * Why the first failure failed, kept so a later round can rethrow it rather than
-   * inventing a message of its own.
+   * Why the round failed, kept so it can be rethrown rather than a message invented in
+   * its place: the 401 whenever any listing was refused, since that is the one the query
+   * client acts on, and otherwise the first failure.
    */
   readonly reason?: unknown
 }
@@ -75,6 +78,16 @@ export function fetchParticipantsQuery(
 }
 
 /**
+ * Whether a listing failed because the service refused the session – a 401, which the
+ * query client answers by asking who is signed in, not by asking the listing again.
+ * @param error Why the listing failed.
+ * @returns True for an `HttpError` with status 401.
+ */
+function isRefusal(error: unknown): error is HttpError {
+  return error instanceof HttpError && error.status === 401
+}
+
+/**
  * One troop's people, or one member type's. An empty listing answers 404 – the service's
  * shape for "nothing here" – which for a composed list means no rows, not a failure.
  * @param key The listing to read – a unit number, `al`, `ist`, or `cmt`.
@@ -100,13 +113,15 @@ async function listing(key: string): Promise<readonly Participant[]> {
  * Every listing at once, with the failures kept apart from the rows rather than taking the
  * whole round down – which is what lets only the failed ones be asked again.
  * @param keys The listings to read.
- * @returns The people that came back, and the keys that did not answer.
+ * @returns The people that came back, the keys worth asking again, and why the round
+ * failed.
  */
 async function round(keys: readonly string[]): Promise<Round> {
   const settled = await Promise.allSettled(keys.map(async (key) => listing(key)))
   const failed: string[] = []
   const people: Participant[] = []
-  let reason: unknown
+  let firstFailure: unknown
+  let refusal: HttpError | undefined
 
   for (const [index, key] of keys.entries()) {
     // Promise.allSettled answers in the order it was asked, so the outcomes line up with
@@ -115,12 +130,18 @@ async function round(keys: readonly string[]): Promise<Round> {
     const outcome = settled[index]
     if (outcome?.status === "fulfilled") {
       people.push(...outcome.value)
+      continue
+    }
+    const why: unknown = outcome?.reason
+    if (isRefusal(why)) {
+      refusal ??= why
     } else {
       failed.push(key)
-      reason ??= outcome?.reason
+      firstFailure ??= why
     }
   }
 
+  const reason = refusal ?? firstFailure
   return { failed, people, ...(reason !== undefined && { reason }) }
 }
 
@@ -129,11 +150,14 @@ async function round(keys: readonly string[]): Promise<Round> {
  * management, merged and deduplicated by member number – a leader appears in their unit's
  * listing as well as in the leaders' one, and is one person either way.
  *
- * A unit, IST, or management listing that fails for anything but a 404 is asked once
- * more, on its own. If it still fails – or the leaders' listing, which names the units
- * and is asked only once, fails at all – so does the whole query: a partial contingent
- * looks exactly like a complete one to whoever is reading it, and "this unit is
- * missing" is not a thing a screen can say about a list it cannot tell is short.
+ * A unit, IST, or management listing that fails for anything but a 404 or a 401 is asked
+ * once more, on its own. If it still fails – or the leaders' listing, which names the
+ * units and is asked only once, fails at all – so does the whole query: a partial
+ * contingent looks exactly like a complete one to whoever is reading it, and "this unit is
+ * missing" is not a thing a screen can say about a list it cannot tell is short. A
+ * listing refused with 401 is not asked again here, and the refusal is what the query
+ * throws, in either round and ahead of any other failure – whether to ask again is the
+ * query client's call, once it knows who is signed in.
  * @returns Everyone in the contingent, each of them once.
  */
 async function wholeContingent(): Promise<readonly Participant[]> {
@@ -147,18 +171,20 @@ async function wholeContingent(): Promise<readonly Participant[]> {
   ].map(String)
 
   const first = await round([...units, "ist", "cmt"])
-  const people = [...first.people]
-  if (first.failed.length > 0) {
-    const second = await round(first.failed)
-    if (second.failed.length > 0) {
-      // Rethrown rather than wrapped: the original names the address that refused, which
-      // is what reading the failure in a console needs.
-      throw second.reason instanceof Error
-        ? second.reason
-        : new Error("The list of participants could not be assembled", { cause: second.reason })
-    }
-    people.push(...second.people)
+  const second = first.failed.length > 0 ? await round(first.failed) : undefined
+
+  const refusal = [first.reason, second?.reason].find((reason) => isRefusal(reason))
+  if (refusal !== undefined) {
+    throw refusal
   }
+  if (second !== undefined && second.failed.length > 0) {
+    // Rethrown rather than wrapped: the original names the address that refused, which
+    // is what reading the failure in a console needs.
+    throw second.reason instanceof Error
+      ? second.reason
+      : new Error("The list of participants could not be assembled", { cause: second.reason })
+  }
+  const people = [...first.people, ...(second?.people ?? [])]
 
   const byMemberNo = new Map<string, Participant>()
   for (const person of [...leaders, ...people]) {

@@ -1,3 +1,4 @@
+import { HttpError } from "@scouterna/wsj27-campfire-utils"
 import { QueryClient } from "@tanstack/react-query"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
@@ -192,6 +193,56 @@ describe("assembling the whole contingent", () => {
       /answered 500/u,
     )
     expect(asked.filter((url) => url === troopinfo("2"))).toHaveLength(2)
+  })
+
+  it("asks a listing that answered 503 once more, as it would any failure but a 401", async () => {
+    const answers = contingentAnswers()
+    answers[troopinfo("2")] = [new Response("{}", { status: 503 }), Response.json(unitTwo)]
+    const asked = networkAnswers(answers)
+
+    const list = await testClient().query(fetchParticipantsQuery(management))
+
+    expect(list.people).toHaveLength(6)
+    expect(asked.filter((url) => url === troopinfo("2"))).toHaveLength(2)
+  })
+
+  it("never asks a listing refused with 401 again, and fails with the refusal", async () => {
+    // Whether to ask again is the query client's call, once it knows who is signed in.
+    const answers = contingentAnswers()
+    answers[troopinfo("2")] = [new Response("{}", { status: 401 }), Response.json(unitTwo)]
+    const asked = networkAnswers(answers)
+
+    const refused = testClient().query(fetchParticipantsQuery(management))
+
+    await expect(refused).rejects.toBeInstanceOf(HttpError)
+    await expect(refused).rejects.toMatchObject({ message: /answered 401/u, status: 401 })
+    expect(asked.filter((url) => url === troopinfo("2"))).toHaveLength(1)
+  })
+
+  it("fails with the refusal ahead of a failure that came first, and still asks that one again", async () => {
+    const answers = contingentAnswers()
+    answers[troopinfo("1")] = []
+    answers[troopinfo("2")] = [new Response("{}", { status: 401 })]
+    const asked = networkAnswers(answers)
+
+    await expect(testClient().query(fetchParticipantsQuery(management))).rejects.toThrow(
+      /answered 401/u,
+    )
+    expect(asked.filter((url) => url === troopinfo("1"))).toHaveLength(2)
+    expect(asked.filter((url) => url === troopinfo("2"))).toHaveLength(1)
+  })
+
+  it("fails with the refusal when a listing asked again is refused the second time", async () => {
+    const answers = contingentAnswers()
+    answers[troopinfo("2")] = [
+      new Response("{}", { status: 500 }),
+      new Response("{}", { status: 401 }),
+    ]
+    networkAnswers(answers)
+
+    await expect(testClient().query(fetchParticipantsQuery(management))).rejects.toThrow(
+      /answered 401/u,
+    )
   })
 
   it("fails the whole query when the leaders' listing itself refuses", async () => {

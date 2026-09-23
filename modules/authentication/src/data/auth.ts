@@ -1,10 +1,11 @@
-import { fetch, leaderUnit, stringOrFallback, type User } from "@scouterna/wsj27-campfire-utils"
+import type { User } from "@scouterna/wsj27-campfire-utils"
 import type { QueryClient } from "@tanstack/react-query"
 
 import type { Registration } from "../model/Registration"
-import { markFor, roleLineFor, roleLineWithUnitFor } from "../model/User"
-import { toRoles } from "./dto/RoleDto"
+import { markFor, roleLineWithUnitFor } from "../model/User"
+import { hasRefreshWindow, readExpiry } from "./expiry"
 import { fetchRegistrationQuery } from "./fetch-registration"
+import { askAgain } from "./session"
 
 /**
  * The client half of wsj27-auth-api's browser contract.
@@ -48,32 +49,54 @@ export function signOut(returnTo: string): void {
 
 /**
  * Who is signed in, or undefined when nobody is – a missing session is an answer here,
- * not an error. A network failure also reads as signed out: the screen behind this
- * decides to show sign-in either way, and signing in is what proves the connection
- * works.
+ * not an error. An auth service that could not be reached also reads as signed out:
+ * at boot the screen behind this shows sign-in either way, and signing in is what
+ * proves the connection works.
  *
- * The access token is short-lived on purpose, so a refused first answer is not the end:
- * a returning session usually holds a live refresh cookie, and one `/api/auth/refresh`
- * round trip re-mints the token. Only when that also refuses is nobody signed in – one
- * retry, never a loop.
+ * The ask is the session's own, so a boot that meets a read already asking joins it
+ * rather than asking twice, and the answer becomes the session every later read is
+ * checked against.
+ *
+ * The auth service's readable cookies decide whether to ask at all – see `canBeSignedIn`.
  * @param client The application's one query client, so the participants-service read
  * behind the unit and the travel choice shares the cache every other read uses.
  * @returns The signed-in user, or undefined when nobody is.
  */
 export async function currentUser(client: QueryClient): Promise<User | undefined> {
-  const first = await ask()
-  if (first !== undefined) {
-    return withRegistration(client, first)
-  }
-
-  try {
-    await fetch("/api/auth/refresh")
-  } catch {
+  if (!canBeSignedIn()) {
     return undefined
   }
+  const answer = await askAgain()
+  return answer.kind === "somebody" ? withRegistration(client, answer.user) : undefined
+}
 
-  const second = await ask()
-  return second === undefined ? undefined : withRegistration(client, second)
+/**
+ * Whether a session could exist on this browser, judged from the two cookies the auth
+ * service lets a script read – so nothing here depends on storage the browser may wipe
+ * while the session lives on. Asking where no session exists costs two refused requests,
+ * each an error in the console of a visitor who has done nothing wrong.
+ * @returns True when the page should ask the auth service who is signed in.
+ */
+// eslint-disable-next-line sonarjs/no-invariant-returns -- deliberate, until the auth service ships the cookie
+function canBeSignedIn(): boolean {
+  const cookie = document.cookie
+  // The refresh window is open, so a session exists however long ago the token lapsed.
+  if (hasRefreshWindow(cookie)) {
+    return true
+  }
+  // A token minted in the last five minutes – the landing straight after sign-in, too.
+  if (readExpiry(cookie) !== undefined) {
+    return true
+  }
+  // eslint-disable-next-line sonarjs/todo-tag -- deliberate, until the auth service ships the cookie
+  // TODO: Answer false here once the auth service sets `wsj27-auth_refresh-expires-at`
+  // without httpOnly. Until then the page cannot see that cookie, so its absence does
+  // not mean nobody: a leader whose token lapsed while the refresh window is open looks
+  // exactly like a visitor who never signed in, and only asking tells them apart – at
+  // the cost of two 401s in the console for the visitor. When the service ships it,
+  // make the mock in `tools/mock/src/auth/cookies.ts` set it readable too, and bring
+  // back the walk proving a first visit asks nothing and leaves the console clean.
+  return true
 }
 
 /**
@@ -120,21 +143,6 @@ async function withRegistration(client: QueryClient, user: User): Promise<User> 
 }
 
 /**
- * One question to `/api/auth/user`, with every failure reading as "nobody" – a network
- * error, a refusal, and a body that is not even JSON alike. The last one is real: with
- * no auth service behind this origin, a bare dev server answers the application's own
- * HTML.
- * @returns The signed-in user, or undefined when the answer was anything else.
- */
-async function ask(): Promise<User | undefined> {
-  try {
-    return decodeUser(await fetch("/api/auth/user"))
-  } catch {
-    return undefined
-  }
-}
-
-/**
  * Starts the service's own keep-alive loop, once. The script watches the public expiry
  * cookie and refreshes the session while the application is open, so an active user is
  * never bounced back to sign-in mid-task.
@@ -147,65 +155,4 @@ export function keepSessionAlive(): void {
   const script = document.createElement("script")
   script.src = "/api/auth/static/refresh.js"
   document.body.append(script)
-}
-
-/**
- * Whether an untyped value is an array, narrowed to unknown members. `Array.isArray`
- * alone narrows to `any[]`, which would let every read past it lie about what it found.
- * @param value The untyped value to check.
- * @returns True when the value is an array.
- */
-function isArray(value: unknown): value is readonly unknown[] {
-  return Array.isArray(value)
-}
-
-/**
- * Defensive by design: the payload crosses a service boundary, so a shape this module
- * does not recognize reads as signed out rather than as a crash in the gate. A name and
- * a role list are the two things a session is useless without; everything else degrades
- * to an empty string.
- * @param payload The body `/api/auth/user` answered with.
- * @returns The user, or undefined when the payload is not one.
- */
-export function decodeUser(payload: unknown): User | undefined {
-  if (typeof payload !== "object" || payload === null || !("user" in payload)) {
-    return undefined
-  }
-  const { user } = payload
-  if (typeof user !== "object" || user === null) {
-    return undefined
-  }
-  // The cast is honest: past this line every field is read defensively, so a shape the
-  // service never promised still decodes to undefined rather than lying about a type.
-  const record = user as Record<string, unknown>
-  const name = record["name"]
-  const spellings = record["roles"]
-  if (typeof name !== "string" || !isArray(spellings)) {
-    return undefined
-  }
-  const givenName = stringOrFallback(record["givenName"])
-  // Translated here and nowhere else: a spelling the vocabulary does not know grants
-  // nothing, and a non-string entry is dropped the same way.
-  const roles = spellings.flatMap((spelling) =>
-    typeof spelling === "string" ? toRoles(spelling) : [],
-  )
-  const leaderUnitNumber = leaderUnit(roles)
-  const unit = leaderUnitNumber === undefined ? undefined : { number: leaderUnitNumber }
-  const mark = markFor(roles, unit)
-
-  return {
-    // The greeting name, derived once here: the given name the provider sent, or the
-    // full name's first word when it sent none – an empty name greets nobody rather
-    // than crashing.
-    firstName: givenName === "" ? (name.trim().split(/\s+/u, 1)[0] ?? "") : givenName,
-    memberNo: stringOrFallback(record["memberNo"]),
-    name,
-    roleLine: roleLineFor(roles),
-    roleLineWithUnit: roleLineWithUnitFor(roles, unit),
-    roles,
-    // Spread rather than assigned: an absent unit is a missing key, not a key holding
-    // undefined, which is the distinction `exactOptionalPropertyTypes` holds the code to.
-    ...(mark !== undefined && { mark }),
-    ...(unit !== undefined && { unit }),
-  }
 }
