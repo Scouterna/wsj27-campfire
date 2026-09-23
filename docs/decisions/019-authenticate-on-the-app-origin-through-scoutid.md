@@ -4,6 +4,10 @@
 <p><Badge type="tip" text="Accepted" /> <Badge type="info" text="2026-09-15" /></p>
 :::
 
+::: warning A later record moved part of this
+[ADR 033](033-recover-an-ended-session-at-the-query-client-and-the-gate.md) amends two things below: the sign-in screen also appears in place when a session ends mid-use, and what is in flight then is cancelled by clearing the cache rather than never existing; and after boot, only a refusal reads as signed out – a service that cannot be reached ends nothing. Everything else here stands.
+:::
+
 ## Context
 
 Everyone Campfire is for is already a member of Scouterna, and Scouterna already knows who they are. ScoutID – a Keycloak – is where that identity lives and where a leader signs in to everything else the movement runs. A second account, with a second password and a second reset queue, would be work for them and support for us, arriving during the three weeks when nobody has time for it.

@@ -66,6 +66,8 @@ Two details are easy to get wrong and expensive to debug. The identity webview c
 
 The auth service ships its own keep-alive script. The application loads it once per page, and it watches a public expiry cookie and refreshes the session while the app is open, so an active person is never bounced back to sign-in mid-task.
 
+The application watches the same cookie, for the one thing the script cannot tell it: a refresh the service refused, after which the script stops. Shortly after the expiry the cookie names – or at once when the page becomes visible again – a cookie that was not renewed, or is gone, makes the authentication module ask the same question as at boot ([ADR 033](/decisions/033-recover-an-ended-session-at-the-query-client-and-the-gate)). The script keeps the session alive ahead of expiry; the watcher notices when that failed.
+
 A restore from the back-forward cache is treated as a reason to start over: it hands back a fully rendered application with whatever session it had when it was frozen, and re-asking is cheaper than reasoning about that.
 
 ## When it fails
@@ -81,5 +83,20 @@ Every failure reads as "nobody is signed in", and the screen behind that is the 
 | ScoutID refused the sign-in        | The round trip returns without minting cookies | The sign-in screen, ready to try again          |
 
 Reading a network failure as "signed out" is a deliberate simplification: the screen behind it decides the same thing either way, and signing in is what proves the connection works.
+
+## When the session ends mid-use
+
+A session can end under an open screen – the refresh window closes, or the service ends it – and the first sign is a read refused with 401, or the expiry cookie left unrenewed. Either asks again, through the authentication module's one ask, and the answer decides ([ADR 033](/decisions/033-recover-an-ended-session-at-the-query-client-and-the-gate)):
+
+| Answer                                       | What happens                                                                                                                                                         |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The same person – the access token was stale | The refused read is made again; the screen showed its loading state, never a failure                                                                                 |
+| The service cannot be reached                | Nothing changes: the refused read fails as a network failure does, the cache stays, and the watch tries again shortly                                                |
+| Nobody                                       | The application unmounts, the cache is forgotten as sign-out forgets it, and the sign-in screen is shown in place – at the same address, so signing in returns there |
+| Another person                               | The page reloads, and the gate adopts the new owner as it does at boot                                                                                               |
+
+A read that fails on the network, or is answered 403 or 404, asks nothing: those are the module's answers to word ([Data layer](../layers/data)). Unlike the gate at boot, an ask mid-use reads only a refusal as signed out – at boot the sign-in screen forgets nothing, mid-use ending the session would forget the cache.
+
+## Signing out
 
 Signing out starts on the profile page, the one place that offers it: the application forgets its query cache, and then the same mechanism runs in reverse – a full-page navigation to `/api/auth/logout`, which drops the session and signs out of ScoutID too, and in a shell it walks through the same modal flow.

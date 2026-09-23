@@ -38,7 +38,7 @@ The application branches exactly once, on which tier it is running in, and never
 
 Branching once is deliberate. Nothing below that point asks whether it is in a shell, so a screen cannot grow a native-only path by accident. The branch is a constant computed before the first render, so chrome belonging to the other tier is never briefly visible.
 
-Above the branch sits the session gate, and its order matters: ask the auth service who is signed in, hand the cache its new owner before any screen mounts, then show either the sign-in screen or the chrome. [Presentation layer](./layers/presentation) describes the gate, and [Data layer](./layers/data) the cache that hangs on it.
+Above the branch sits the session gate, and its order matters: ask the auth service who is signed in, hand the cache its new owner before any screen mounts, then show either the sign-in screen or the chrome. It keeps listening after boot: a session that ends mid-use returns the person to the sign-in screen in place, and a changed owner reloads the page ([ADR 033](/decisions/033-recover-an-ended-session-at-the-query-client-and-the-gate)). [Presentation layer](./layers/presentation) describes the gate, and [Data layer](./layers/data) the cache that hangs on it.
 
 `libraries/host` answers which tier the application is in. It reads the `CampfireShell` token off the User-Agent once, at module evaluation, and freezes the answer – a fact that is fixed before the document is requested, so there is no message to wait for and no frame in which the wrong chrome is on screen.
 

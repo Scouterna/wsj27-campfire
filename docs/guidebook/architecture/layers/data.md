@@ -41,6 +41,10 @@ Every URL is origin-relative – `/api/project/participants/troopinfo/3`, never 
 
 The fetch itself lives in `libraries/utils`, wrapped so that three outcomes are distinguishable: the request never reached anything, the service answered with a refusal, and the answer was not JSON at all. A refusal carries its status, and the status is load-bearing – the detail fetch asks for the full information level, and a caller who may see the person but not their health answers is refused rather than quietly given less, so the client retries the same person at the basic level. Telling a refusal from a missing person is the difference between a second request and a wrong screen.
 
+## A refusal asks again
+
+A 401 is not the module's to word. The one query client wraps every query function ([ADR 033](/decisions/033-recover-an-ended-session-at-the-query-client-and-the-gate)): a read the service refuses with 401 hands itself to the authentication module, which asks who is signed in – `/api/auth/user`, one refresh, `/api/auth/user` again – and every read refused while that ask is in flight joins it rather than starting another. The same person still signed in runs the read once more, and the query stays pending throughout, so the screen shows its loading state and never a failure. Only the service saying no – a refused refresh – ends the session at the gate ([Presentation layer](./presentation)), and nothing is read again until the person signs in. An ask that cannot reach the service ends nothing: the refused read fails as any network failure does, and the cache stays, because on the island a lost signal is the ordinary case and a lapsed access token comes every five minutes. A module declares nothing for this – a read is under the seam the moment it is a query – and a restore from the store never asks, because it never reached the network. A 403 and a 404 stay the module's: they are answers about the data, and the factory folds or words them as it always has.
+
 ## Who is asking
 
 The participants service serves the list of participants one troop at a time and gates every answer by the caller's roles. There is no "everyone I may see" endpoint, so the client composes the list of participants from exactly the listings the service would allow, and to do that it has to know who is reading.
@@ -69,3 +73,5 @@ The cost is stated in the decision and worth repeating: stale is the normal case
 Personal data sits on the device for up to thirty days, health answers included, so the cache is owned by the person it was fetched for ([ADR 017](/decisions/017-route-and-load-data-with-tanstack-router-and-query)). The session gate adopts the signed-in member number before any screen mounts; a different owner than the stored one wipes both the in-memory client and the store first.
 
 A leader's cached unit must not survive to the next person who signs in on the same phone. The same person signing back in keeps everything, which is the offline-first promise – only a change of person costs a refetch.
+
+A session that ends mid-use forgets the cache the way sign-out does – the client and the store both – before the sign-in screen is shown, and a session that turns out to be somebody else's reloads the page, so the gate adopts the new owner the same way it does at boot ([ADR 033](/decisions/033-recover-an-ended-session-at-the-query-client-and-the-gate)).
