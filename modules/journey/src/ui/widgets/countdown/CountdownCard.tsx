@@ -1,4 +1,5 @@
 import { Card, Chip } from "@scouterna/wsj27-campfire-ui"
+import type { Travel } from "@scouterna/wsj27-campfire-utils"
 import type { ReactElement } from "react"
 
 import {
@@ -167,6 +168,25 @@ function Status(props: StatusProps): ReactElement {
   )
 }
 
+/**
+ * The road to the camp, as the legend names it.
+ */
+interface Road {
+  readonly dates: string
+  readonly route: string
+}
+
+/**
+ * The roads the contingent travels together. Traveling on one's own has none – the
+ * journey is the camp.
+ */
+const roads: Readonly<Partial<Record<Travel, Road>>> = {
+  // Three days of the bar is too narrow for the rundresa's form of the wording, so this
+  // road names only where it goes, and the camp leg beside it carries the year.
+  direktresa: { dates: "26–28 juli", route: "Till Olsztyn" },
+  rundresa: { dates: "Resa · 21–28 juli 2027", route: "Sverige → Lettland → Litauen" },
+}
+
 interface LegendProps {
   /**
    * The moment the legend is drawn for.
@@ -177,21 +197,22 @@ interface LegendProps {
    */
   readonly phase: JourneyPhase
   /**
-   * Whether the road through the Baltics is drawn at all.
+   * How the person travels, which decides the road drawn before the camp, if any.
    */
-  readonly preTrip: boolean
+  readonly travel: Travel | undefined
 }
 
 /**
  * The legs under the bar, each as wide as the days it spans. The camp is the journey's
- * destination and always wears the leading tone; the road through the Baltics is only
- * drawn for those who travel it, and leads beside the camp while it is what the count
- * runs to or through – muted once it is behind the contingent.
- * @param props The moment, the phase it falls in, and whether the pre-trip is theirs.
+ * destination and always wears the leading tone; the road there is only drawn for those
+ * who travel it with the contingent, and leads beside the camp while it is what the
+ * count runs to or through – muted once it is behind the contingent.
+ * @param props The moment, the phase it falls in, and how the person travels.
  * @returns The legend.
  */
 function Legend(props: LegendProps): ReactElement {
   const isHome = props.phase === "home"
+  const road = props.travel === undefined ? undefined : roads[props.travel]
   const campDetail =
     props.phase === "camping"
       ? `Dag ${String(dayOfCamp(props.now))} av ${String(campDays)}`
@@ -199,18 +220,16 @@ function Legend(props: LegendProps): ReactElement {
 
   return (
     <div className="countdown-legend">
-      {props.preTrip ? (
+      {road === undefined ? null : (
         <span
-          className={
-            props.phase === "ahead" || props.phase === "traveling"
-              ? "is-travel-leg is-primary"
-              : "is-travel-leg is-muted"
-          }
+          className={`is-travel-leg is-${String(props.travel)} ${
+            props.phase === "ahead" || props.phase === "traveling" ? "is-primary" : "is-muted"
+          }`}
         >
-          <strong>Sverige → Lettland → Litauen</strong>
-          <small>Resa · 21–28 juli 2027</small>
+          <strong>{road.route}</strong>
+          <small>{road.dates}</small>
         </span>
-      ) : null}
+      )}
       <span className="is-camp-leg is-primary">
         <strong>World Scout Jamboree · Gdańsk</strong>
         <small>{campDetail}</small>
@@ -231,17 +250,18 @@ export interface CountdownCardProps {
    */
   readonly now: Date
   /**
-   * Whether the person joins the pre-trip through Latvia and Lithuania. With it the
-   * countdown runs to the buses on 21 July and the bar walks the road; without it the
-   * journey is the camp, and everything counts to the day the contingent reaches it.
-   */
-  readonly preTrip: boolean
-  /**
    * Whether the countdown runs to the second rather than the minute. Off by default;
    * the widget turns it on in the wide layout for everybody who has not asked for
    * reduced motion, and hands in a moment that moves as often.
    */
   readonly seconds?: boolean
+  /**
+   * How the person travels. The rundresa and the direktresa each count down to their
+   * own departure, and the bar walks their road; traveling on one's own, or a travel
+   * choice nobody knows, makes the journey the camp, and everything counts to the day
+   * the contingent reaches it.
+   */
+  readonly travel?: Travel | undefined
 }
 
 /**
@@ -253,12 +273,11 @@ export interface CountdownCardProps {
  * occupy, and while the dates are still ahead the card says they are not yet the
  * person's own.
  *
- * @param props The moment, whether the pre-trip is this person's, and how fine the
- * countdown runs.
+ * @param props The moment, how the person travels, and how fine the countdown runs.
  * @returns The card.
  */
 export function CountdownCard(props: CountdownCardProps): ReactElement {
-  const trip = itinerary(props.preTrip)
+  const trip = itinerary(props.travel)
   const phase = phaseAt(props.now, trip)
   const journeyDay = dayOfJourney(props.now, trip)
 
@@ -276,7 +295,7 @@ export function CountdownCard(props: CountdownCardProps): ReactElement {
           </span>
         ))}
       </div>
-      <Legend now={props.now} phase={phase} preTrip={props.preTrip} />
+      <Legend now={props.now} phase={phase} travel={props.travel} />
       {phase === "home" ? null : (
         // The dates above are the contingent's plan, not yet anyone's own booking; once
         // everyone is home they are history, and the caveat stands down.

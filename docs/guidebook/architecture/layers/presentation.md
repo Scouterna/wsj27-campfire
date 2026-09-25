@@ -31,7 +31,7 @@ A widget is how one module's work appears on another module's screen without eit
 
 That is the home screen, and everything about it is home's own: what goes where, who sees it, and from when – both widgets wait behind the units reveal, and the unit widget is a leader's alone. The screen never learns which module drew what, and an id nobody registered renders nothing, which is what a story or a build assembled without that module should do.
 
-A widget takes no props. What it needs it reads where it is used – its own queries, or the ambient session `utils` holds, the way the countdown reads the signed-in person with `useUser` to know whether the pre-trip is theirs. Nothing is threaded through the screen that places it.
+A widget takes no props. What it needs it reads where it is used – its own queries, or the ambient session `utils` holds, the way the countdown reads the signed-in person with `useUser` to know how they travel. Nothing is threaded through the screen that places it.
 
 ## The session gate and the two chromes
 

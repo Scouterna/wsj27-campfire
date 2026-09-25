@@ -6,7 +6,7 @@ That makes leaders the largest audience Campfire has – a little over two hundr
 
 ## At camp and before it
 
-The camp runs 30 July – 8 August 2027 on Wyspa Sobieszewska outside Gdansk, and Scouterna frames the Swedish period as 29 July – 9 August to include arrival and departure. A leader travels with their unit on one of two options: the rundresa, a tour through Latvia and Lithuania leaving Sweden 21–22 July, or the direktresa straight to Gdansk, leaving 26–27 July. Everyone comes home 9–10 August.
+The camp runs 30 July – 8 August 2027 on Wyspa Sobieszewska outside Gdansk, and Scouterna frames the Swedish period as 29 July – 9 August to include arrival and departure. A leader travels with their unit on one of two options: the rundresa, a tour through Latvia and Lithuania leaving Sweden 21–22 July, or the direktresa, leaving 26–27 July to join the rest of the contingent in Olsztyn and travel on to the camp together. Everyone comes home 9–10 August.
 
 On site the unit lives in one of the jamboree's 16 subcamps, each holding around 2,250 people and 56 units. The program is ZHP's and WOSM's to run, not Sweden's, so a leader spends the day accounting for 36 teenagers who are scattered across activities somebody else scheduled. Their questions are small and constant: who is where, who is unwell, who has the number for the CMT-jour, and is the unit whole.
 

@@ -12,7 +12,7 @@ Authentication and participants carry the full shape – a data layer, a domain 
 
 Two checks keep that true. A relative path into another module would otherwise resolve and work, so ESLint refuses it – `import-x/no-relative-packages` in `eslint.config.ts` rejects any relative import that crosses into another package. A package name cannot resolve at all, because a module is private and is nobody's declared dependency, so `pnpm check:types` fails on it.
 
-When the rule feels restrictive, the answer is a library, never the application. The home screen decides for itself who sees which widget, and the countdown works out for itself whether the pre-trip is the signed-in person's – because the reveal is `ui`'s, and the roles and the signed-in `User` are ambient in `utils`. A hook a module needs and cannot reach is a hook in the wrong package: move it to the library, rather than moving the module's logic up into `apps/web`. Home never learns that journey or participants exist.
+When the rule feels restrictive, the answer is a library, never the application. The home screen decides for itself who sees which widget, and the countdown works out for itself how the signed-in person travels – because the reveal is `ui`'s, and the roles and the signed-in `User` are ambient in `utils`. A hook a module needs and cannot reach is a hook in the wrong package: move it to the library, rather than moving the module's logic up into `apps/web`. Home never learns that journey or participants exist.
 
 ## The shape of a module
 

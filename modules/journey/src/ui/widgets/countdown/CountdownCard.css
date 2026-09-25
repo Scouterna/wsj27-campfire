@@ -111,9 +111,14 @@
     margin-top: 2px;
   }
 
-  /* Each leg is as wide as the days it spans: eight on the road, twelve at the camp. */
-  .countdown-legend .is-travel-leg {
+  /* Each leg is as wide as the days it spans: eight on the rundresa's road, three on
+     the direktresa's, twelve at the camp. */
+  .countdown-legend .is-rundresa {
     flex: 8;
+  }
+
+  .countdown-legend .is-direktresa {
+    flex: 3;
   }
 
   .countdown-legend .is-camp-leg {

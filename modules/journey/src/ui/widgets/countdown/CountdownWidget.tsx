@@ -28,15 +28,15 @@ declare module "@scouterna/wsj27-campfire-ui" {
  * it does not have to, and it catches up the moment the card is back. The dates are the
  * module's own, so it needs no network and never loads.
  *
- * Whose dates it counts to it reads from the signed-in person: only the rundresa has
- * the pre-trip through Latvia and Lithuania, and its journey starts at the buses on
- * 21 July. For everybody else the journey is the camp – an unknown travel choice
- * included, so nobody is put on a bus they did not book.
+ * Whose dates it counts to it reads from the signed-in person: the rundresa and the
+ * direktresa each start the journey at their own departure, one through Latvia and
+ * Lithuania and the other to Olsztyn. For everybody else the journey is the camp – an
+ * unknown travel choice included, so nobody is put on a bus they did not book.
  *
  * @returns The card, on the clock.
  */
 export function CountdownWidget(): ReactElement {
-  const hasPreTrip = useUser()?.travel === "rundresa"
+  const travel = useUser()?.travel
   const isWide = useIsMediaMatched("(min-width: 768px)")
   const isStill = useIsMediaMatched("(prefers-reduced-motion: reduce)")
   const hasSeconds = isWide && !isStill
@@ -47,7 +47,7 @@ export function CountdownWidget(): ReactElement {
   return (
     // The card takes no ref, so the element the clock watches is the widget's own.
     <div ref={card}>
-      <CountdownCard now={now} preTrip={hasPreTrip} seconds={hasSeconds} />
+      <CountdownCard now={now} seconds={hasSeconds} travel={travel} />
     </div>
   )
 }
