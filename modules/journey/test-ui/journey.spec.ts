@@ -1,9 +1,11 @@
 import { expect, test, type Page } from "@playwright/test"
+import type { Travel } from "@scouterna/wsj27-campfire-utils"
 
 // The reveal file itself rather than the ui package: the package surface pulls
 // component stylesheets along, which the test runner cannot swallow.
 // eslint-disable-next-line import-x/no-relative-packages -- see above
 import { unitsReveal } from "../../../libraries/ui/src/foundations/reveal/reveals"
+
 import { itinerary, phaseAt, type JourneyPhase } from "../src/model/Journey"
 
 // The journey module's walks: the countdown widget on the start screen, behind the
@@ -32,20 +34,20 @@ async function signInAs(page: Page, persona: string): Promise<void> {
 }
 
 /**
- * What the status line leads with today, for a journey with or without the pre-trip –
- * the same decision the card makes, so the walk holds in September 2026 and in August
- * 2027 alike.
- * @param hasPreTrip Whose journey.
+ * What the status line leads with today, for one way of traveling – the same decision
+ * the card makes, so the walk holds in September 2026 and in August 2027 alike.
+ * @param travel Whose journey.
  * @returns The leading words to expect.
  */
-function statusToday(hasPreTrip: boolean): string {
+function statusToday(travel: Travel): string {
+  const trip = itinerary(travel)
   const labels: Readonly<Record<JourneyPhase, string>> = {
-    ahead: hasPreTrip ? "Avresa om" : "Lägret om",
+    ahead: trip.travelDays > 0 ? "Avresa om" : "Lägret om",
     camping: "Lägret · dag",
     home: "Jamboreen är över",
     traveling: "Resan · dag",
   }
-  return labels[phaseAt(new Date(), itinerary(hasPreTrip))]
+  return labels[phaseAt(new Date(), trip)]
 }
 
 /**
@@ -54,7 +56,7 @@ function statusToday(hasPreTrip: boolean): string {
  * @returns True from the homecoming day on.
  */
 function isOverToday(): boolean {
-  return phaseAt(new Date(), itinerary(true)) === "home"
+  return phaseAt(new Date(), itinerary("rundresa")) === "home"
 }
 
 test("reaches the application at the root address", async ({ page }) => {
@@ -64,7 +66,7 @@ test("reaches the application at the root address", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(/Äventyret\s*börjar här/)
 })
 
-test("counts a rundresa leader to the buses, with the pre-trip as its own leg", async ({
+test("counts a rundresa leader to the buses, with the Baltic road as its own leg", async ({
   page,
 }) => {
   // Desktop width: the legend's three columns, the homecoming among them.
@@ -75,7 +77,7 @@ test("counts a rundresa leader to the buses, with the pre-trip as its own leg", 
 
   // The card, under its own heading, counting whatever today calls for.
   await expect(page.getByRole("heading", { level: 2, name: "Resan" })).toBeVisible()
-  await expect(page.getByText(statusToday(true))).toBeVisible()
+  await expect(page.getByText(statusToday("rundresa"))).toBeVisible()
 
   // The road through the Baltics is this person's own leg.
   await expect(page.getByText("Sverige → Lettland → Litauen")).toBeVisible()
@@ -99,17 +101,20 @@ test("counts a rundresa leader to the buses, with the pre-trip as its own leg", 
   }
 })
 
-test("counts a direktresa leader to the camp, with no pre-trip anywhere", async ({ page }) => {
+test("counts a direktresa leader to its own departure, with the road to Olsztyn", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.goto("/")
   await signInAs(page, "Anders Andersson")
   await expect(page.getByRole("heading", { level: 1, name: "Välkommen" })).toBeVisible()
 
   await expect(page.getByRole("heading", { level: 2, name: "Resan" })).toBeVisible()
-  await expect(page.getByText(statusToday(false))).toBeVisible()
+  await expect(page.getByText(statusToday("direktresa"))).toBeVisible()
 
-  // No bus was booked, so no departure and no road – the journey is the camp.
-  await expect(page.getByText("Avresa om")).toHaveCount(0)
+  // The direktresa's own road, and none of the rundresa's.
+  await expect(page.getByText("Till Olsztyn")).toBeVisible()
+  await expect(page.getByText("26–28 juli", { exact: true })).toBeVisible()
   await expect(page.getByText("Sverige → Lettland → Litauen")).toHaveCount(0)
   await expect(page.getByText("World Scout Jamboree · Gdańsk")).toBeVisible()
 })
@@ -119,7 +124,7 @@ test("counts to the second, and only to the minute on a phone or under reduced m
 }) => {
   // Seconds belong to the countdown alone – once the journey has begun the line counts
   // days, and there is nothing finer to hold still.
-  test.skip(phaseAt(new Date(), itinerary(true)) !== "ahead", "the countdown is over")
+  test.skip(phaseAt(new Date(), itinerary("rundresa")) !== "ahead", "the countdown is over")
 
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.goto("/")
@@ -145,7 +150,7 @@ test("stops the clock while the card is out of view, and catches up on return", 
 }) => {
   // Only the countdown moves by the second – once the journey has begun there is no
   // clock fine enough to catch standing still.
-  test.skip(phaseAt(new Date(), itinerary(true)) !== "ahead", "the countdown is over")
+  test.skip(phaseAt(new Date(), itinerary("rundresa")) !== "ahead", "the countdown is over")
 
   // The page's timers are the walk's to wind, so "nothing was scheduled" is something
   // to observe rather than to wait out.

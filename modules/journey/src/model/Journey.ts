@@ -1,11 +1,14 @@
+import type { Travel } from "@scouterna/wsj27-campfire-utils"
+
 /**
  * The contingent's journey to Gdańsk, as dates.
  *
  * The whole trip is fixed and public, so it is written down here rather than fetched:
- * the pre-trip's buses leave Sweden on 21 July 2027, the contingent is at the jamboree
- * 29 July to 9 August, and everyone is home on 10 August. Nothing about the countdown
- * needs a server. They are the contingent's plan rather than anyone's own booking, and
- * the widget says so – a change here is a one-line edit, never a migration.
+ * the rundresa's buses leave Sweden on 21 July 2027 for Latvia and Lithuania, the
+ * direktresa leaves on 26 July to join the contingent in Olsztyn, the contingent is at
+ * the jamboree 29 July to 9 August, and everyone is home on 10 August. Nothing about the
+ * countdown needs a server. They are the contingent's plan rather than anyone's own
+ * booking, and the widget says so – a change here is a one-line edit, never a migration.
  *
  * Every date is midnight local time on the day named. Comparisons are made against day
  * boundaries, so "days left" means whole days rather than a fraction that rounds oddly
@@ -13,9 +16,14 @@
  */
 
 /**
- * The day the pre-trip's buses leave for Latvia and Lithuania.
+ * The day the rundresa's buses leave for Latvia and Lithuania.
  */
-export const preTripDeparture = new Date(2027, 6, 21)
+export const rundresaDeparture = new Date(2027, 6, 21)
+
+/**
+ * The day the direktresa leaves for Olsztyn, where it joins the rest of the contingent.
+ */
+export const direktresaDeparture = new Date(2027, 6, 26)
 
 /**
  * The day the contingent reaches the camp on Wyspa Sobieszewska.
@@ -38,13 +46,13 @@ export const homecoming = new Date(2027, 7, 10)
 export const campDays = daysBetween(campStart, campEnd) + 1
 
 /**
- * One person's journey: where it starts, and how long it is. Two shapes exist today –
- * with the pre-trip, and without – and both end on the homecoming day.
+ * One person's journey: where it starts, and how long it is. Every journey ends on the
+ * homecoming day; where it starts depends on how the person travels.
  */
 export interface Itinerary {
   /**
-   * The day the journey begins: the buses, for the pre-trip; the day the contingent
-   * reaches camp otherwise.
+   * The day the journey begins: the day the contingent's travel leaves Sweden for those
+   * who travel with it, and the day the contingent reaches camp otherwise.
    */
   readonly departure: Date
   /**
@@ -52,23 +60,41 @@ export interface Itinerary {
    */
   readonly journeyDays: number
   /**
-   * How many days are spent on the road before the camp. Zero without the pre-trip.
+   * How many days are spent on the road before the camp. Zero for a journey that starts
+   * at the camp.
    */
   readonly travelDays: number
 }
 
 /**
- * The itinerary for somebody who does, or does not, join the pre-trip. Direct travel
- * and traveling on one's own both count as "not" – for them the journey is the camp.
- * @param hasPreTrip Whether the person joins the pre-trip.
+ * The itinerary for a travel choice. The rundresa and the direktresa each leave Sweden
+ * on their own day; traveling on one's own, and a travel choice nobody knows, both have
+ * the journey start at the camp, so nobody is put on a bus they did not book.
+ * @param travel How the person travels, or undefined when the list of participants
+ * gave no answer.
  * @returns The itinerary the countdown runs on.
  */
-export function itinerary(hasPreTrip: boolean): Itinerary {
-  const departure = hasPreTrip ? preTripDeparture : campStart
+export function itinerary(travel: Travel | undefined): Itinerary {
+  const departure = departureFor(travel)
   return {
     departure,
     journeyDays: daysBetween(departure, homecoming) + 1,
     travelDays: daysBetween(departure, campStart),
+  }
+}
+
+function departureFor(travel: Travel | undefined): Date {
+  switch (travel) {
+    case "direktresa": {
+      return direktresaDeparture
+    }
+    case "rundresa": {
+      return rundresaDeparture
+    }
+    case "egenResa":
+    case undefined: {
+      return campStart
+    }
   }
 }
 
@@ -79,11 +105,11 @@ export function itinerary(hasPreTrip: boolean): Itinerary {
 export type JourneyPhase = "ahead" | "traveling" | "camping" | "home"
 
 /**
- * Which phase a given moment falls in. Without the pre-trip nobody is ever
- * `traveling`: the journey opens on the contingent's first day at camp.
+ * Which phase a given moment falls in. A journey without a road is never `traveling`:
+ * it opens on the contingent's first day at camp.
  * @param now The moment to place. Passed in rather than read from the clock, so a
  * screen renders the same way in a test as it does in August 2027.
- * @param trip Whose journey – with or without the pre-trip.
+ * @param trip Whose journey.
  * @returns The phase the moment falls in.
  */
 export function phaseAt(now: Date, trip: Itinerary): JourneyPhase {
