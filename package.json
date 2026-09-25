@@ -1,6 +1,6 @@
 {
   "name": "@scouterna/wsj27-campfire",
-  "version": "2026.8.1",
+  "version": "0.0.0",
   "private": true,
   "description": "Digital home for the leaders and contingent management team of Scouterna's Swedish contingent to WSJ27 in Poland.",
   "homepage": "https://scouterna.github.io/wsj27-campfire",
@@ -50,7 +50,8 @@
     "test:android:ui": "serial=$(sh scripts/android/emulator.sh) && ANDROID_SERIAL=\"$serial\" apps/android/gradlew -p apps/android connectedLocalDebugAndroidTest",
     "test:apple": "sh scripts/apple/test.sh CampfireTests",
     "test:apple:ui": "sh scripts/apple/test.sh CampfireUITests",
-    "test:web:ui": "playwright test --config config/playwright/playwright.config.ts"
+    "test:web:ui": "playwright test --config config/playwright/playwright.config.ts",
+    "version:next": "node scripts/release/next-version.ts"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.1",

@@ -4,9 +4,9 @@ import type { UserConfig } from "@commitlint/types"
 // These mirror the Commit messages section of AGENTS.md; that file is the prose
 // and this is the check, so a change to one wants the same change to the other.
 //
-// Conventional Commits' own preset is the base, narrowed in three ways: this
-// project uses no scope, it keeps subjects short enough to read in a log, and it
-// has no warnings.
+// Conventional Commits' own preset is the base, narrowed in four ways: this
+// project uses no scope, it keeps subjects short enough to read in a log, it has
+// no warnings, and it checks a revert like any other commit.
 //
 // The preset carries rules this file does not restate, and they are enforced
 // just the same – body-max-line-length at 100 is the one AGENTS.md names, along
@@ -14,6 +14,14 @@ import type { UserConfig } from "@commitlint/types"
 // below are listed here; the preset is the rest of the check.
 const config: UserConfig = {
   extends: ["@commitlint/config-conventional"],
+
+  // commitlint lets git's own `Revert "…"` subject through unchecked, and the release
+  // rule in scripts/release/ reads only `revert:` – so a revert written that way would
+  // earn no version, and the change it undoes would stay released. Its defaults are off,
+  // and the one worth keeping is restated: the fixups a rebase squashes away.
+  defaultIgnores: false,
+  ignores: [(message: string): boolean => /^(?:amend|fixup|squash)! /.test(message)],
+
   rules: {
     // The eleven types, and no others.
     "type-enum": [

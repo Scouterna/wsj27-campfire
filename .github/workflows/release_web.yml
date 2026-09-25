@@ -1,18 +1,27 @@
 name: Release web
 
 # Packages the web application as a container image and publishes it to the GitHub
-# Container Registry, so a deployment has something to pull. Nothing here deploys –
-# the dev cluster takes the image by hand (ADR 027), and this workflow assumes no host.
+# Container Registry, so a deployment has something to pull.
 #
-# The version in package.json is the source of truth, the same way metadata.version is
-# for a skill: the tag is web-v<version>, so bumping the version cuts a release and an
-# unchanged version is skipped. CalVer, per the Versioning section of AGENTS.md.
+# The version is worked out from the commits since the last web-v<version> tag, by
+# scripts/release/next-version.ts (ADR 034): a feat or a breaking change since then
+# earns a feature release, a fix or a revert a patch, and anything else earns nothing.
+# CalVer, per the Versioning section of AGENTS.md. A merge that earns a version
+# publishes :<version>, creates the tag web-v<version>, and then moves :dev to that
+# image, so dev follows every version and only ever a version that finished releasing
+# (ADR 035).
 #
-# Every merge also publishes :main and :sha-<short>, whether or not the version moved.
+# Every merge also publishes :main and :sha-<short>, whether or not it earned a version.
 # Those are for rollback and for pointing a staging deployment at a specific commit;
-# the version tags are what a real deployment pins.
+# the version tags are what a real deployment pins. :prod moves only through
+# promote_web.yml.
 #
-# Also runnable by hand, to retry a release that failed.
+# Nothing here deploys. Moving a tag restarts nothing, and how the cluster notices a
+# moved tag is settled with the people who run it.
+#
+# Also runnable by hand, to retry a release that failed. A retry runs every step again:
+# the failed run created no tag, so it works out the same version and overwrites
+# whatever :<version> the failed run left behind.
 
 on:
   push:
@@ -48,14 +57,26 @@ jobs:
     # platform whatever the target, so nothing here runs under emulation either way.
     runs-on: ubuntu-24.04
     timeout-minutes: 20
-    # Scoped to the job that needs it: packages to publish the image, contents to
-    # create the version tag.
+    # Scoped to the job that needs it: packages to publish the image and move :dev,
+    # contents to create the version tag.
     permissions:
       contents: write
       packages: write
     steps:
+      # The whole history and every tag: the version is worked out from the commits
+      # since the last web-v<version> tag, and a shallow clone answers as though
+      # nothing was ever released.
       - name: Check out the repository
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # Node alone runs next-version.ts – it reads nothing but git and this workflow,
+      # so there is nothing to install.
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .tool-versions
 
       - name: Work out the version and the tags
         id: version
@@ -65,7 +86,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          version="$(node -p "require('./package.json').version")"
+          # The next version, or nothing when these commits earn none.
+          version="$(node scripts/release/next-version.ts web)"
 
           # A registry path is lowercase; a GitHub owner is not necessarily.
           image="ghcr.io/$(printf '%s' "$REPOSITORY" | tr '[:upper:]' '[:lower:]')"
@@ -75,23 +97,17 @@ jobs:
           tags="${image}:main
           ${image}:sha-$(printf '%s' "$SHA" | cut -c1-7)"
 
-          # The version's tag is its identity, and what says whether it has shipped.
-          # To re-release a version, delete its tag.
-          git_tag="web-v${version}"
-          if git ls-remote --exit-code origin "refs/tags/${git_tag}" >/dev/null 2>&1; then
-            echo "Version $version is already released as $git_tag – publishing main and sha tags only."
-            release=false
-          else
+          if [ -n "$version" ]; then
+            echo "These commits earn version $version."
             tags="${tags}
-          ${image}:${version}
-          ${image}:latest"
-            release=true
+          ${image}:${version}"
+          else
+            echo "These commits earn no version – publishing main and sha tags only."
           fi
 
           {
-            echo "release=${release}"
+            echo "image=${image}"
             echo "version=${version}"
-            echo "git_tag=${git_tag}"
             echo "tags<<EOF"
             printf '%s\n' "$tags" | sed 's/^[[:space:]]*//'
             echo "EOF"
@@ -109,8 +125,10 @@ jobs:
 
       # The install layer is the expensive one, and the Dockerfile is laid out so a
       # source change reuses it. The cache carries that across runs, where a runner
-      # starts with nothing.
+      # starts with nothing. An empty version is passed as empty, and the build reads
+      # it as 0.0.0.
       - name: Build and publish the image
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -118,20 +136,80 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ${{ steps.version.outputs.tags }}
+          build-args: |
+            CAMPFIRE_VERSION=${{ steps.version.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # Last, so the tag exists only once the image it names is actually published.
+      # After the image, so the tag exists only once the image it names is actually
+      # published.
       - name: Tag the released version
-        if: steps.version.outputs.release == 'true'
+        id: tag
+        if: steps.version.outputs.version != ''
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           SHA: ${{ github.sha }}
-          GIT_TAG: ${{ steps.version.outputs.git_tag }}
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
           set -euo pipefail
           gh api --method POST "repos/${REPO}/git/refs" \
-            -f "ref=refs/tags/${GIT_TAG}" \
+            -f "ref=refs/tags/web-v${VERSION}" \
             -f "sha=${SHA}"
-          echo "Released ${GIT_TAG}."
+          echo "Released web-v${VERSION}."
+
+      # Last, after the tag exists, so :dev only ever points at a digest that also
+      # carries a released :<version>. It copies the manifest by digest – nothing is
+      # built, pulled, or pushed but the tag.
+      - name: Move dev to the released version
+        id: dev
+        if: steps.version.outputs.version != ''
+        env:
+          IMAGE: ${{ steps.version.outputs.image }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          set -euo pipefail
+          docker buildx imagetools create --tag "${IMAGE}:dev" "${IMAGE}@${DIGEST}"
+          echo "Moved ${IMAGE}:dev to ${DIGEST}."
+
+      # Always, so a failed run says how far it got. A :dev move that failed after the
+      # tag was created is not fixed by a retry – the tag exists, so a retry earns no
+      # version and :dev stays behind until the next one – so the summary gives the
+      # command that moves it by hand.
+      - name: Summarize the release
+        if: always()
+        env:
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          DEV_OUTCOME: ${{ steps.dev.outcome }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+          IMAGE: ${{ steps.version.outputs.image }}
+          TAG_OUTCOME: ${{ steps.tag.outcome }}
+          VERSION: ${{ steps.version.outputs.version }}
+          VERSION_OUTCOME: ${{ steps.version.outcome }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## Release web"
+            echo
+            if [ "$VERSION_OUTCOME" != "success" ]; then
+              echo "- **Version:** not worked out (${VERSION_OUTCOME:-skipped})"
+            elif [ -n "$VERSION" ]; then
+              echo "- **Version:** \`${VERSION}\`"
+            else
+              echo "- **Version:** no version earned"
+            fi
+            echo "- **Image:** \`${IMAGE:-not worked out}\`"
+            echo "- **Digest:** \`${DIGEST:-not published}\` (${BUILD_OUTCOME:-skipped})"
+            if [ -n "$VERSION" ]; then
+              echo "- **Tag \`web-v${VERSION}\`:** ${TAG_OUTCOME:-skipped}"
+              echo "- **\`:dev\`:** ${DEV_OUTCOME:-skipped}"
+            fi
+            if [ "$TAG_OUTCOME" = "success" ] && [ "$DEV_OUTCOME" != "success" ]; then
+              echo
+              echo "\`web-v${VERSION}\` exists but \`:dev\` did not move, and a retry will not move it. Move it by hand:"
+              echo
+              echo "\`\`\`sh"
+              echo "docker buildx imagetools create --tag ${IMAGE}:dev ${IMAGE}@${DIGEST}"
+              echo "\`\`\`"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

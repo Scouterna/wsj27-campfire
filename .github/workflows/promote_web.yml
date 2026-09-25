@@ -1,0 +1,236 @@
+name: Promote web
+
+# Moves the web image's :prod tag to a version that has already been released, and
+# does nothing else (ADR 035). Nothing is built, pulled, or pushed but the tag: the
+# manifest behind :<version> is copied to :prod as is, so prod runs the digest dev ran.
+#
+# Nothing here deploys either. A manual step on the cluster side takes what :prod
+# points at, which is how ADR 035 answers ADR 027's open deploy trigger, so this
+# workflow holds no credentials for the cluster.
+#
+# A version is refused when it is not CalVer-shaped, has no web-v<version> tag, or has
+# no :<version> image, and a refusal fails the run and leaves :prod where it was.
+# Rolling back is this same workflow, run with an earlier version.
+#
+# The job runs in the prod environment, so every run – promoted or refused – is a
+# deployment with its creator, its status, and a link to its run, and the repository's
+# Deployments page is the history. The run summary names who, the version, the
+# outcome, the new and the previous digest, and the command that rolls back.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: The web version to promote, e.g. 2026.9.0
+        required: true
+        type: string
+
+run-name: Promote web ${{ inputs.version }} to prod
+
+# Promotions queue rather than race, and one in flight is never canceled – a canceled
+# promotion can leave :prod moved without its summary.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: prod
+    # Scoped to the job that needs it: contents to read the version tags, packages to
+    # move the image tag.
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      # The input reaches every script through env and is checked here first, so
+      # nothing after this step sees a value that is not three dot-separated numbers
+      # without leading zeros – the shape the release rule gives every version.
+      - name: Check the version's shape
+        id: shape
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+            echo "refusal=the version is not shaped YEAR.FEATURE.PATCH" >> "$GITHUB_OUTPUT"
+            echo "::error::The version is not shaped YEAR.FEATURE.PATCH, e.g. 2026.9.0."
+            exit 1
+          fi
+
+      # The tag is what says a version was released, so a version without one was
+      # never offered to dev.
+      - name: Check the version was released
+        id: tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          if ! error="$(gh api "repos/${REPO}/git/ref/tags/web-v${VERSION}" 2>&1 >/dev/null)"; then
+            if printf '%s' "$error" | grep -q 'HTTP 404'; then
+              echo "refusal=there is no web-v${VERSION} tag" >> "$GITHUB_OUTPUT"
+              echo "::error::There is no web-v${VERSION} tag, so ${VERSION} was never released."
+            else
+              echo "::error::Could not read the web-v${VERSION} tag: ${error}"
+            fi
+            exit 1
+          fi
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Sign in to the registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Find the version's image
+        id: image
+        env:
+          REPOSITORY: ${{ github.repository }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+
+          # A registry path is lowercase; a GitHub owner is not necessarily.
+          image="ghcr.io/$(printf '%s' "$REPOSITORY" | tr '[:upper:]' '[:lower:]')"
+          echo "image=${image}" >> "$GITHUB_OUTPUT"
+
+          # The digest of the top-level manifest – the index, attestations and all –
+          # which is what :prod will point at. Only a missing image is a refusal; any
+          # other failure – the registry not answering – fails the run without one.
+          if ! manifest="$(docker buildx imagetools inspect "${image}:${VERSION}" --format '{{json .Manifest}}' 2>&1)"; then
+            if printf '%s' "$manifest" | grep -qi 'not found'; then
+              echo "refusal=there is no ${image}:${VERSION} image" >> "$GITHUB_OUTPUT"
+              echo "::error::There is no ${image}:${VERSION} image to promote."
+            else
+              echo "::error::Could not read ${image}:${VERSION}: ${manifest}"
+            fi
+            exit 1
+          fi
+          digest="$(printf '%s' "$manifest" | jq -r '.digest')"
+          # jq prints "null" for a missing field, which would reach the copy as a digest.
+          if [[ "$digest" != sha256:* ]]; then
+            echo "::error::Could not read a digest for ${image}:${VERSION} – got \"${digest}\"."
+            exit 1
+          fi
+          echo "digest=${digest}" >> "$GITHUB_OUTPUT"
+
+      # Read before the move, so the summary can say what this promotion replaced and
+      # how to go back to it. The version is found by matching digests against the
+      # newest twenty releases; older than that, the digest alone is recorded.
+      - name: Read what prod runs now
+        id: previous
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IMAGE: ${{ steps.image.outputs.image }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          # Only a :prod that does not exist means this is the first promotion. Any other
+          # failure – the registry not answering – stops the run before prod moves, rather
+          # than recording a previous version that was merely not read.
+          if ! manifest="$(docker buildx imagetools inspect "${IMAGE}:prod" --format '{{json .Manifest}}' 2>&1)"; then
+            if printf '%s' "$manifest" | grep -qi 'not found'; then
+              echo "Nothing is tagged :prod yet."
+              echo "digest=none" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "::error::Could not read what ${IMAGE}:prod points at: ${manifest}"
+            exit 1
+          fi
+          digest="$(printf '%s' "$manifest" | jq -r '.digest')"
+          if [[ "$digest" != sha256:* ]]; then
+            echo "::error::Could not read a digest for ${IMAGE}:prod – got \"${digest}\"."
+            exit 1
+          fi
+          echo "digest=${digest}" >> "$GITHUB_OUTPUT"
+
+          versions="$(gh api "repos/${REPO}/git/matching-refs/tags/web-v" --jq '.[].ref' \
+            | sed 's#^refs/tags/web-v##' \
+            | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' \
+            | sort -t. -k1,1nr -k2,2nr -k3,3nr \
+            | head -n 20 || true)"
+
+          for version in $versions; do
+            candidate="$(docker buildx imagetools inspect "${IMAGE}:${version}" --format '{{json .Manifest}}' 2>/dev/null | jq -r '.digest' || true)"
+            if [ "$candidate" = "$digest" ]; then
+              echo "version=${version}" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+          echo "No version among the newest twenty releases matches ${digest}."
+
+      # With a single source, imagetools create copies the manifest as is rather than
+      # building a new index, so :prod gets the exact digest :<version> has.
+      - name: Move prod to the version
+        id: promote
+        env:
+          DIGEST: ${{ steps.image.outputs.digest }}
+          IMAGE: ${{ steps.image.outputs.image }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          docker buildx imagetools create --tag "${IMAGE}:prod" "${IMAGE}@${DIGEST}"
+          echo "Promoted ${VERSION} (${DIGEST}) to prod."
+
+      # Runs on a refusal too, so every deployment in the prod environment says what
+      # happened without opening its log.
+      - name: Summarize the promotion
+        if: always()
+        env:
+          # Who started this run – on a re-run, the person who re-ran it, where
+          # github.actor would name whoever started the first attempt.
+          ACTOR: ${{ github.triggering_actor }}
+          NEW_DIGEST: ${{ steps.image.outputs.digest }}
+          OUTCOME: ${{ steps.promote.outcome }}
+          PREVIOUS_DIGEST: ${{ steps.previous.outputs.digest }}
+          PREVIOUS_VERSION: ${{ steps.previous.outputs.version }}
+          REFUSAL: ${{ steps.shape.outputs.refusal || steps.tag.outputs.refusal || steps.image.outputs.refusal }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+
+          if [ "$OUTCOME" = "success" ]; then
+            outcome="Promoted – prod now runs ${VERSION}."
+          elif [ -n "$REFUSAL" ]; then
+            outcome="Refused – ${REFUSAL}. Prod is unchanged."
+          else
+            outcome="Failed before prod moved – see the run's log."
+          fi
+
+          if [ "$OUTCOME" != "success" ]; then
+            previous="${PREVIOUS_VERSION:-${PREVIOUS_DIGEST:-not read}}"
+            rollback="Prod did not move."
+          elif [ -n "$PREVIOUS_VERSION" ]; then
+            previous="${PREVIOUS_VERSION} (\`${PREVIOUS_DIGEST}\`)"
+            rollback="\`gh workflow run promote_web.yml -f version=${PREVIOUS_VERSION}\`"
+          elif [ -n "$PREVIOUS_DIGEST" ] && [ "$PREVIOUS_DIGEST" != "none" ]; then
+            previous="\`${PREVIOUS_DIGEST}\`, matching none of the newest twenty releases"
+            rollback="Pick the version to go back to by hand, then run \`gh workflow run promote_web.yml -f version=<version>\`."
+          elif [ "$PREVIOUS_DIGEST" = "none" ]; then
+            previous="nothing – this is the first promotion"
+            rollback="There is nothing earlier to roll back to."
+          else
+            previous="not read"
+            rollback="Pick the version to go back to by hand, then run \`gh workflow run promote_web.yml -f version=<version>\`."
+          fi
+
+          {
+            echo "## Promote web ${VERSION} to prod"
+            echo
+            echo "| | |"
+            echo "| --- | --- |"
+            echo "| Promoted by | ${ACTOR} |"
+            echo "| Version | ${VERSION} |"
+            echo "| Outcome | ${outcome} |"
+            echo "| New digest | \`${NEW_DIGEST:-none}\` |"
+            echo "| Previous | ${previous} |"
+            echo "| Roll back | ${rollback} |"
+          } >> "$GITHUB_STEP_SUMMARY"

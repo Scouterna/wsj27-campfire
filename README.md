@@ -44,7 +44,7 @@ Before work leaves the machine it passes `pnpm test` and [the checks](docs/guide
 - `modules/` – feature modules, each a domain capability: `authentication`, `home`, `journey`, `participants`
 - `tools/` – development tooling that ships to nobody, starting with the mock back-end
 - `config/` – shared tooling configuration, one directory per tool, plus the three environments
-- `scripts/` – the scripts behind the `pnpm` scripts: the start scripts under `start/`, the shells' own under `android/` and `apple/`, and the Structurizr runner under `structurizr/`
+- `scripts/` – the scripts behind the `pnpm` scripts: the start scripts under `start/`, the shells' own under `android/` and `apple/`, the Structurizr runner under `structurizr/`, and the version rule under `release/`
 - `docs/` – the decision log, the software guidebook, and the C4 architecture model
 - `.agents/` – the agent definitions, the skills, and the per-branch spec scratch
 
@@ -54,7 +54,7 @@ Every workspace package exports raw TypeScript source, so nothing under `librari
 
 Most of the work is done by AI agents – an analyst, an architect, a developer, and a reviewer – each with one job and a human deciding at every handoff. The [Process chapter](docs/guidebook/process/index.md) is the shape of it. [`AGENTS.md`](AGENTS.md) is the operational detail and every agent's entry point, and it routes to the files beside the code: [`apps/web/AGENTS.md`](apps/web/AGENTS.md), [`apps/apple/AGENTS.md`](apps/apple/AGENTS.md), [`apps/android/AGENTS.md`](apps/android/AGENTS.md), [`modules/AGENTS.md`](modules/AGENTS.md), [`libraries/AGENTS.md`](libraries/AGENTS.md), [`tools/mock/AGENTS.md`](tools/mock/AGENTS.md), [`docs/AGENTS.md`](docs/AGENTS.md), and [`docs/architecture/AGENTS.md`](docs/architecture/AGENTS.md). Each `CLAUDE.md` is a symlink to the `AGENTS.md` beside it.
 
-Work is tracked as GitHub issues. Commits are Conventional Commits without a scope, on a rebased history, and the version is CalVer – `2026.8.1` today.
+Work is tracked as GitHub issues. Commits are Conventional Commits without a scope, on a rebased history, and the web image, the Android shell, and the Apple shell each carry a CalVer version of their own, worked out from the commits that touch them.
 
 ## License
 

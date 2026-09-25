@@ -1,6 +1,37 @@
 import react from "@vitejs/plugin-react"
-import { defineConfig } from "vite"
+import { defineConfig, type Plugin } from "vite"
 import { VitePWA } from "vite-plugin-pwa"
+
+// The version this build is, handed in by whoever runs it rather than read from the tree:
+// the release workflow passes the version it is releasing. A build given none –
+// locally, `pnpm build:image`, a push that earns no release – is 0.0.0, which no release
+// ever carries. Checked here, at load, so a malformed value fails the dev server and the
+// build alike before either does any work. Leading zeros are refused, as the release rule
+// in scripts/release/ refuses them, so both agree on what a version is.
+const given = process.env["CAMPFIRE_VERSION"]
+// An empty value counts as none, since a CI variable that was never set arrives as "".
+const version = given === undefined || given === "" ? "0.0.0" : given
+if (!/^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/.test(version)) {
+  throw new Error(
+    `CAMPFIRE_VERSION must be three dot-separated numbers without leading zeros, such as 2026.9.0 – got "${version}".`,
+  )
+}
+
+/**
+ * Writes the build's version into the page head as a `campfire-version` meta tag.
+ * @returns The plugin that adds the tag to `index.html`.
+ */
+function campfireVersion(): Plugin {
+  return {
+    name: "campfire-version",
+    // A meta tag rather than a global: nothing in the application reads the version, so
+    // it stays out of the bundle, and a person in the browser's console or a Playwright
+    // walk can still read which version a running build is.
+    transformIndexHtml: () => [
+      { tag: "meta", attrs: { name: "campfire-version", content: version }, injectTo: "head" },
+    ],
+  }
+}
 
 // Vite's configuration, kept in config/ with every other tool's rather than in the app
 // that uses it (ADR 006). Vite resolves `root` from the working directory rather than
@@ -14,6 +45,7 @@ export default defineConfig({
 
   plugins: [
     react(),
+    campfireVersion(),
 
     // The PWA: a manifest so Campfire installs from the browser, and a generated
     // service worker that precaches the built shell. The cache is what makes a

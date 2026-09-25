@@ -1,8 +1,9 @@
-// Settings every configuration shares. Split from the per-environment files so that a
-// version bump touches one line rather than one line per environment.
-// Three segments, matching the CalVer shape the root package.json and the Android
-// versionName carry, so the same release reads the same everywhere.
-CAMPFIRE_VERSION_NUMBER = 2026.8.1
+// Settings every configuration shares. This shell has its own version, released under
+// its own tag (apple-v<version>), so nothing in the tree bumps it – a release
+// passes CAMPFIRE_VERSION_NUMBER=… CAMPFIRE_BUILD_NUMBER=… as trailing xcodebuild
+// settings, the way scripts/apple/build.sh passes CAMPFIRE_WEB_ORIGIN. Without them –
+// Xcode, pnpm build:*, pnpm start:* – the shell builds as 0.0.0 build 1.
+CAMPFIRE_VERSION_NUMBER = 0.0.0
 CAMPFIRE_BUILD_NUMBER = 1
 
 // One identity across all three environments. The three cannot sit on a phone side by

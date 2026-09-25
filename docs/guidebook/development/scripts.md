@@ -17,51 +17,52 @@ The names follow one grammar: `<verb>:<target>` and, where a target has variants
 
 ## Every script
 
-| Script                      | What it does                                                        |
-| --------------------------- | ------------------------------------------------------------------- |
-| `pnpm build:android:dev`    | Assembles the Android shell against campfire.wsj27.scouterna.net    |
-| `pnpm build:android:prod`   | Assembles the Android shell against campfire.wsj27.se               |
-| `pnpm build:apple:dev`      | Builds the Apple shell against campfire.wsj27.scouterna.net         |
-| `pnpm build:apple:prod`     | Builds the Apple shell against campfire.wsj27.se                    |
-| `pnpm build:arch`           | Exports the architecture diagrams as SVGs                           |
-| `pnpm build:guidebook`      | Builds the guidebook into `.build/docs`                             |
-| `pnpm build:image`          | Packages the built web application as a linux/amd64 Caddy image     |
-| `pnpm build:storybook`      | Builds Storybook into `.build/storybook`                            |
-| `pnpm build:web`            | Builds the web application into `apps/web/.build`                   |
-| `pnpm check:android:format` | ktlint, in check mode                                               |
-| `pnpm check:android:lint`   | Detekt and Android Lint                                             |
-| `pnpm check:apple:format`   | SwiftFormat, in lint mode                                           |
-| `pnpm check:apple:lint`     | SwiftLint, with `--strict`                                          |
-| `pnpm check:arch`           | Validates and inspects the architecture model                       |
-| `pnpm check:format`         | Prettier, in check mode                                             |
-| `pnpm check:lint`           | ESLint, with `--max-warnings 0`                                     |
-| `pnpm check:markdown`       | markdownlint                                                        |
-| `pnpm check:types`          | `tsc --noEmit`                                                      |
-| `pnpm clean`                | Removes every `.build`, and Gradle's working directories            |
-| `pnpm format`               | Prettier, writing fixes                                             |
-| `pnpm format:android`       | ktlint, writing fixes                                               |
-| `pnpm format:apple`         | SwiftFormat, writing fixes                                          |
-| `pnpm format:svg`           | svgo, rewriting the web and guidebook icons in place                |
-| `pnpm generate:apple`       | XcodeGen, regenerating `Campfire.xcodeproj` from `project.yml`      |
-| `pnpm ide:android`          | Opens `apps/android` in Android Studio                              |
-| `pnpm ide:apple`            | Opens `Campfire.xcodeproj` in Xcode                                 |
-| `pnpm prepare`              | Points git at `.githooks` – runs as part of `pnpm install`          |
-| `pnpm start:android`        | Boots an emulator and launches the Android shell against :8000      |
-| `pnpm start:apple`          | Boots a Simulator and launches the Apple shell against :8000        |
-| `pnpm start:arch`           | Structurizr, to arrange the diagrams, on port 3003                  |
-| `pnpm start:dev`            | The dev environment: the real back-end in containers, on :8000      |
-| `pnpm start:guidebook`      | The guidebook's dev server, on port 3001                            |
-| `pnpm start:local`          | The local environment: the mock back-end, on :8000                  |
-| `pnpm start:mock`           | The mock back-end alone, on port 8003                               |
-| `pnpm start:prod`           | The prod environment: the built image, on :8000                     |
-| `pnpm start:storybook`      | Storybook – every component, widget, and screen – on port 3002      |
-| `pnpm start:web`            | The web application's dev server alone, on port 3000                |
-| `pnpm test`                 | The TypeScript tests, across every package that has them            |
-| `pnpm test:android`         | The Android JVM unit tests, plus the instrumented compile           |
-| `pnpm test:android:ui`      | The Android instrumented tests, on an emulator                      |
-| `pnpm test:apple`           | The Apple unit tests, on a Simulator                                |
-| `pnpm test:apple:ui`        | The Apple UI tests, on a Simulator                                  |
-| `pnpm test:web:ui`          | The Playwright walks – starts a dev server, or reuses a running one |
+| Script                      | What it does                                                           |
+| --------------------------- | ---------------------------------------------------------------------- |
+| `pnpm build:android:dev`    | Assembles the Android shell against campfire.wsj27.scouterna.net       |
+| `pnpm build:android:prod`   | Assembles the Android shell against campfire.wsj27.se                  |
+| `pnpm build:apple:dev`      | Builds the Apple shell against campfire.wsj27.scouterna.net            |
+| `pnpm build:apple:prod`     | Builds the Apple shell against campfire.wsj27.se                       |
+| `pnpm build:arch`           | Exports the architecture diagrams as SVGs                              |
+| `pnpm build:guidebook`      | Builds the guidebook into `.build/docs`                                |
+| `pnpm build:image`          | Packages the built web application as a linux/amd64 Caddy image        |
+| `pnpm build:storybook`      | Builds Storybook into `.build/storybook`                               |
+| `pnpm build:web`            | Builds the web application into `apps/web/.build`                      |
+| `pnpm check:android:format` | ktlint, in check mode                                                  |
+| `pnpm check:android:lint`   | Detekt and Android Lint                                                |
+| `pnpm check:apple:format`   | SwiftFormat, in lint mode                                              |
+| `pnpm check:apple:lint`     | SwiftLint, with `--strict`                                             |
+| `pnpm check:arch`           | Validates and inspects the architecture model                          |
+| `pnpm check:format`         | Prettier, in check mode                                                |
+| `pnpm check:lint`           | ESLint, with `--max-warnings 0`                                        |
+| `pnpm check:markdown`       | markdownlint                                                           |
+| `pnpm check:types`          | `tsc --noEmit`                                                         |
+| `pnpm clean`                | Removes every `.build`, and Gradle's working directories               |
+| `pnpm format`               | Prettier, writing fixes                                                |
+| `pnpm format:android`       | ktlint, writing fixes                                                  |
+| `pnpm format:apple`         | SwiftFormat, writing fixes                                             |
+| `pnpm format:svg`           | svgo, rewriting the web and guidebook icons in place                   |
+| `pnpm generate:apple`       | XcodeGen, regenerating `Campfire.xcodeproj` from `project.yml`         |
+| `pnpm ide:android`          | Opens `apps/android` in Android Studio                                 |
+| `pnpm ide:apple`            | Opens `Campfire.xcodeproj` in Xcode                                    |
+| `pnpm prepare`              | Points git at `.githooks` – runs as part of `pnpm install`             |
+| `pnpm start:android`        | Boots an emulator and launches the Android shell against :8000         |
+| `pnpm start:apple`          | Boots a Simulator and launches the Apple shell against :8000           |
+| `pnpm start:arch`           | Structurizr, to arrange the diagrams, on port 3003                     |
+| `pnpm start:dev`            | The dev environment: the real back-end in containers, on :8000         |
+| `pnpm start:guidebook`      | The guidebook's dev server, on port 3001                               |
+| `pnpm start:local`          | The local environment: the mock back-end, on :8000                     |
+| `pnpm start:mock`           | The mock back-end alone, on port 8003                                  |
+| `pnpm start:prod`           | The prod environment: the built image, on :8000                        |
+| `pnpm start:storybook`      | Storybook – every component, widget, and screen – on port 3002         |
+| `pnpm start:web`            | The web application's dev server alone, on port 3000                   |
+| `pnpm test`                 | The TypeScript tests, across every package that has them               |
+| `pnpm test:android`         | The Android JVM unit tests, plus the instrumented compile              |
+| `pnpm test:android:ui`      | The Android instrumented tests, on an emulator                         |
+| `pnpm test:apple`           | The Apple unit tests, on a Simulator                                   |
+| `pnpm test:apple:ui`        | The Apple UI tests, on a Simulator                                     |
+| `pnpm test:web:ui`          | The Playwright walks – starts a dev server, or reuses a running one    |
+| `pnpm version:next`         | The next version an artifact would earn – `android`, `apple`, or `web` |
 
 The same table is in `AGENTS.md`, because the agents work off it. The two are kept in step by hand, and `package.json` settles any disagreement.
 
@@ -88,7 +89,7 @@ Two servers can therefore run at once without either stealing the other's addres
 
 ## What is behind them
 
-The shell scripts live in `scripts/`, with the shells' own under `scripts/android/` and `scripts/apple/`, and the Structurizr runner under `scripts/structurizr/`. That last one is Node rather than shell, so it runs on any machine and a missing Docker fails with a message that names it.
+The shell scripts live in `scripts/`, with the shells' own under `scripts/android/` and `scripts/apple/`, the Structurizr runner under `scripts/structurizr/`, and the version rule behind `pnpm version:next` under `scripts/release/`. The last two are Node rather than shell, so they run on any machine – and a missing Docker fails the Structurizr runner with a message that names it.
 
 `scripts/start/helpers.sh` is sourced by the rest and never run on its own. It holds the parts that make a script trustworthy: freeing a port and naming its previous holder, waiting until a server actually answers rather than until a process exists, supervising a set of processes so any one dying stops them all, and exiting cleanly on Ctrl+C. Three kinds of waiting are separate on purpose – any answer at all, a 2xx, and any status the back-end itself produced rather than a proxy's 502 – because a stack reported as up before it is up costs more than the wait.
 

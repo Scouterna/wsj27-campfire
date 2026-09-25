@@ -1,7 +1,11 @@
 # 007. Version with CalVer on a rebased history
 
 ::: info Status
-<p><Badge type="tip" text="Accepted" /> <Badge type="info" text="2026-09-15" /></p>
+<p><Badge type="warning" text="Superseded by ADR 034" /> <Badge type="info" text="2026-09-15" /></p>
+:::
+
+::: warning A later record replaced part of this
+[ADR 034](034-version-each-artifact-from-its-own-commits.md) supersedes the one version moved by hand: each artifact now has a version of its own, worked out from the commits that touch it, and the tree holds a placeholder. The commit convention and the rebased history stand and are restated there.
 :::
 
 ## Context

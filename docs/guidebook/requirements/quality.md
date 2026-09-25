@@ -19,7 +19,7 @@ Campfire is a tool people reach for while doing something else – walking betwe
 
 The others matter; this one decides the architecture. For three weeks in the summer of 2027, roughly 2,600 people are on an island outside Gdansk and the only people who can fix Campfire are among them. A flow that breaks at the wrong moment has to be repairable in a deploy that takes minutes, not in a build that waits for a store review measured in days.
 
-That is why every screen lives in the web application and the shells stay thin ([ADR 010](/decisions/010-deliver-the-front-end-as-one-web-application-in-native-shells)), why the web ships as one container image published on a version bump ([ADR 026](/decisions/026-publish-the-web-application-as-a-container-image)), and why what crosses into a shell is a versioned contract rather than code the shells depend on ([ADR 018](/decisions/018-bridge-the-web-application-and-the-shells-with-versioned-messages)). Each of those choices costs something. Together they buy the ability to fix things while the camp is still running.
+That is why every screen lives in the web application and the shells stay thin ([ADR 010](/decisions/010-deliver-the-front-end-as-one-web-application-in-native-shells)), why the web ships as one container image, versioned and published by the merge that changes it ([ADR 026](/decisions/026-publish-the-web-application-as-a-container-image), [ADR 034](/decisions/034-version-each-artifact-from-its-own-commits)), and why what crosses into a shell is a versioned contract rather than code the shells depend on ([ADR 018](/decisions/018-bridge-the-web-application-and-the-shells-with-versioned-messages)). Each of those choices costs something. Together they buy the ability to fix things while the camp is still running.
 
 Availability sits immediately behind it, and pulls in the same direction: a fix that has shipped is worth nothing to a phone with no signal, so the application is useful before the network answers ([ADR 017](/decisions/017-route-and-load-data-with-tanstack-router-and-query)).
 
@@ -27,7 +27,7 @@ Availability sits immediately behind it, and pulls in the same direction: a fix 
 
 Three of them are held by the shape of the repository rather than by any one feature.
 
-- **Deployability.** The web image builds and publishes on a version bump ([Release](../maintenance/release)), and every screen is in the web application.
+- **Deployability.** Every merge with a web `feat` or `fix` builds and publishes a versioned image, and promoting one to prod is one command ([Release](../maintenance/release)); every screen is in the web application.
 - **Accessibility, in its mechanics.** Every font size is written against the 17-point base, so a reader who has turned Dynamic Type up gets a bigger application rather than a clipped one ([Design](../design/)). The rest of AA is the standard each screen is held to, not a result on record.
 - **Maintainability.** The module boundary is enforced by the package layout rather than by review ([Modules](../architecture/modules)), and the formatters, linters, and type checks run at zero tolerance ([The checks](../development/checks)).
 
