@@ -282,11 +282,11 @@ export default tseslint.config(
     },
   },
   {
-    // tools/* run their TypeScript natively on Node, which resolves a relative import
-    // only with its explicit `.ts` extension. Everything else is bundled, where
-    // extensionless is correct, so this holds for tools alone – and holds at lint time
-    // rather than as a "module not found" the first time the mock is started.
-    files: ["tools/**/*.ts"],
+    // tools/* and scripts/* run their TypeScript natively on Node, which resolves a
+    // relative import only with its explicit `.ts` extension. Everything else is bundled,
+    // where extensionless is correct, so this holds for those two alone – and holds at
+    // lint time rather than as a "module not found" the first time a script is run.
+    files: ["scripts/**/*.ts", "tools/**/*.ts"],
     rules: {
       "import-x/extensions": ["error", "always", { ignorePackages: true, checkTypeImports: true }],
     },

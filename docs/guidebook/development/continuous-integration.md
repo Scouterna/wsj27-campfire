@@ -2,14 +2,14 @@
 
 Every check that guards Campfire runs on a developer's own machine first, through [the git hooks](./checks). Continuous integration runs the same checks again on the server, on every pull request, so nothing reaches `main` without passing them. It is where the best-effort local checks become a hard gate, and [ADR 009](/decisions/009-check-and-release-with-small-github-actions-workflows) is where its shape was decided.
 
-The workflows live in `.github/workflows/`, on GitHub Actions – the same place the code, the issues, the pull requests, the releases, and the guidebook's hosting already are. There are eleven of them, each single-purpose, and each named for what it does: a `check_*` workflow validates without building, a `build_*` workflow compiles one output to prove it compiles, a `test_*` workflow runs a suite, and a `release_*` workflow ships one output and is the only kind that writes anywhere.
+The workflows live in `.github/workflows/`, on GitHub Actions – the same place the code, the issues, the pull requests, the releases, and the guidebook's hosting already are. There are twelve of them, each single-purpose, and each named for what it does: a `check_*` workflow validates without building, a `build_*` workflow compiles one output to prove it compiles, a `test_*` workflow runs a suite, a `release_*` workflow ships one output, and a `promote_*` workflow moves a pointer to something already shipped. The last two are the only kinds that write anywhere.
 
 ## Four rules give them their shape
 
 - **A check filters inside the job, never with `on: paths:`.** This is the important one. A workflow skipped by a path filter reports no status at all, and a required status check waits on that status forever; a job skipped by an `if:` reports as passing. So every check triggers on every pull request, asks in its first step whether the change touches anything it cares about, and skips the rest of the job when it does not.
 - **Every check reports separately.** `check.yml` runs one step per check script, each executing even after a sibling failed, so one run reports every problem rather than the first.
 - **Least privilege, declared explicitly.** A read-only workflow says `contents: read` – plus `pull-requests: read` where it asks the API which files changed – rather than inheriting the repository default, and a release scopes its write permission to the job that needs it: `packages: write` to publish an image, `pages: write` and `id-token: write` only on the deploy job.
-- **Pull request runs cancel on supersede; releases queue and never cancel.** A canceled check wastes nothing. A canceled release can leave a tag without the artifact it names.
+- **Pull request runs cancel on supersede; releases and promotions queue and never cancel.** A canceled check wastes nothing. A canceled release can leave a tag without the artifact it names, and a canceled promotion a moved tag without its record.
 
 The flow below is what a check workflow does on every pull request: it asks the API which files changed, and either runs or reports as passing without doing the work.
 
@@ -45,7 +45,8 @@ The change detection is its own step rather than an inline condition, so a faile
 | `check_android.yml`      | Pull requests touching `apps/android/`, Detekt's config, or `.editorconfig`           | ktlint, Detekt and Android Lint, the JVM tests, and the instrumented compile                  |
 | `check_architecture.yml` | Pull requests touching `docs/architecture/` or `scripts/structurizr/`                 | `pnpm check:arch`                                                                             |
 | `check_skills.yml`       | Pull requests touching `.agents/skills/`                                              | Validates each skill's frontmatter, its links, and that a changed skill bumped its version    |
-| `release_web.yml`        | Push to `main` touching the web application; also by hand                             | Builds the image and publishes it to `ghcr.io`                                                |
+| `release_web.yml`        | Push to `main` touching the web application; also by hand                             | Works out the version, builds the image with it, publishes, tags, and moves `:dev`            |
+| `promote_web.yml`        | By hand, naming a version                                                             | Moves `:prod` to that version's image, as a deployment in the `prod` environment              |
 | `release_skills.yml`     | Push to `main` touching `.agents/skills/`; also by hand                               | One GitHub Release per skill whose version has not been released                              |
 | `release_guidebook.yml`  | Push to `main` touching `docs/` or the agent definitions; also by hand                | Builds the site and deploys it to GitHub Pages                                                |
 
@@ -61,17 +62,19 @@ Four of them deserve a note on what they actually prove.
 
 ## What a release means here
 
-The version in `package.json` is the trigger. `release_web.yml` always publishes `:main` and `:sha-<short>` on every merge – for rollback, and for pointing a deployment at one exact commit – and additionally publishes `:<version>` and `:latest` when the git tag `web-v<version>` does not yet exist. It creates that tag last, so the tag exists only once the image it names is actually published. Bumping the version is therefore what cuts a release, and re-releasing means deleting the tag. The skills work the same way, keyed on `metadata.version` instead.
+The commits are the trigger. `release_web.yml` checks out the full history, runs the version rule in `scripts/release/` over the commits since the last `web-v*` tag that touch its own trigger paths, and gets a version or nothing ([ADR 034](/decisions/034-version-each-artifact-from-its-own-commits)). It always publishes `:main` and `:sha-<short>` – for rollback, and for pointing a deployment at one exact commit. With a version, the image is built with it as a build argument and also published as `:<version>`; the git tag `web-v<version>` is created last, so it exists only once the image it names is published; and `:dev` is moved to that image after the tag. A merge with a `feat` or a `fix` on the web's paths is therefore a release, and nothing has to be remembered. The skills are the exception: they are keyed on `metadata.version`, because a skill's version tracks the freshness of its content rather than the commits ([ADR 025](/decisions/025-publish-agent-skills-as-versioned-releases)).
+
+`promote_web.yml` is the one workflow with an input and the one that runs in a GitHub environment. It takes a version, checks the tag and the image exist, and copies the image's manifest to `:prod` without building anything, so the digest that reaches prod is the digest dev ran. Running in the `prod` environment is what makes every run a deployment record ([ADR 035](/decisions/035-promote-the-web-by-moving-environment-tags)). It needs `packages: write` and nothing about the cluster.
 
 The image is built for `linux/amd64` and only for amd64 – the cluster's platform ([ADR 026](/decisions/026-publish-the-web-application-as-a-container-image)) – on a plain `ubuntu-24.04` runner. The Dockerfile's build stage runs on the builder's own platform whatever the target, so the pnpm install and the Vite build never run under emulation, there or on a developer's Apple-silicon machine.
 
 `release_guidebook.yml` publishes this guidebook to GitHub Pages on every merge that touches `docs/` or an agent definition ([ADR 029](/decisions/029-render-the-guidebook-with-vitepress)). It is two jobs – build, then deploy – so the deploy job is the only thing holding `pages: write`, and its concurrency group is `pages` with canceling switched off, because a canceled deploy can leave the site half-published.
 
-Nothing deploys the application. Publishing to `ghcr.io` is where that pipeline ends: the direction for where the image runs is recorded ([ADR 027](/decisions/027-run-the-back-end-on-kubernetes-in-azure)), the dev cluster is handed the image by hand, and this workflow assumes no host.
+Neither workflow touches the cluster. Moving `:dev` or `:prod` is where the pipeline ends: prod is deployed by a step on the cluster that takes what `:prod` points at, and how dev follows `:dev` is settled with the people who run it ([ADR 027](/decisions/027-run-the-back-end-on-kubernetes-in-azure), [Release](../maintenance/release)).
 
 ## What is missing
 
 - **There is no Apple continuous integration at all.** Not an oversight: a macOS runner bills at several times the rate of a Linux one, and the shell is thin enough that the `pre-push` hook is the trade worth making. It means a Swift change is only ever checked on the machine that made it.
 - **Nothing checks that the diagrams match the model.** `check_architecture.yml` runs `pnpm check:arch`, which validates and inspects the workspace; nothing compares the committed SVGs against it. Re-export after a model change and read the diff.
-- **Nothing checks that the version moved.** A `feat` merged without a version bump publishes `:main` and its sha and cuts no release, silently. The rule is written down in the [conventions](./conventions) and enforced by nobody.
+- **Nothing checks that dev ran a version before it is promoted.** A promotion of a version dev never had is legal, and visible on the Deployments page, but not refused.
 - **Releases trust the pull request gate** rather than re-validating on `main`. That holds while one person merges one change at a time onto an up-to-date branch, and stops holding the day two changes pass alone and break together.

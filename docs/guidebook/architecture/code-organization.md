@@ -17,7 +17,7 @@ Where all of it sits on disk, and what each directory outside these four is for,
 
 ## The packages
 
-`apps/*`, `libraries/*`, `modules/*`, and `tools/*` are the four pnpm workspace roots. Every package is private, is `"type": "module"`, is named `@scouterna/wsj27-campfire-<name>`, and carries the repository's version.
+`apps/*`, `libraries/*`, `modules/*`, and `tools/*` are the four pnpm workspace roots. Every package is private, is `"type": "module"`, is named `@scouterna/wsj27-campfire-<name>`, and carries the placeholder version `0.0.0`, because a version lives in a release tag rather than in the tree ([ADR 034](/decisions/034-version-each-artifact-from-its-own-commits)).
 
 | Package                  | Name                                       | Depends on                                                   |
 | ------------------------ | ------------------------------------------ | ------------------------------------------------------------ |

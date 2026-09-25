@@ -38,6 +38,11 @@ RUN pnpm install --frozen-lockfile
 # Then the sources. .dockerignore keeps the native apps and the build output out of
 # the context; a new workspace package needs its manifest added above.
 COPY . .
+
+# The version the build writes into the page. Declared after the install, so a new
+# version does not invalidate the dependency cache. `pnpm build:image` passes none and
+# gets 0.0.0; the release workflow passes the version it is releasing as a build argument.
+ARG CAMPFIRE_VERSION=0.0.0
 RUN pnpm build:web
 
 FROM caddy:2-alpine

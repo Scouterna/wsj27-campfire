@@ -4,6 +4,10 @@
 <p><Badge type="tip" text="Accepted" /> <Badge type="info" text="2026-09-15" /></p>
 :::
 
+::: warning A later record moved part of this
+[ADR 034](034-version-each-artifact-from-its-own-commits.md) takes the version out of the tree: `Shared.xcconfig` holds `0.0.0`, and a release passes the version and the build number as build settings. The consequence below about three files moved by hand no longer holds; everything else here stands.
+:::
+
 ## Context
 
 The Apple shell ([ADR 010](010-deliver-the-front-end-as-one-web-application-in-native-shells.md)) needs an Xcode project, and an Xcode project is a `project.pbxproj`: a graph of objects addressed by generated UUIDs, rewritten by the IDE whenever a file is added, a group is renamed, or a setting is toggled. Its diff is unreadable, so a change to the build is invisible in review, and a conflict in it is effectively unresolvable – two branches that each added a file produce colliding UUID blocks, and the fix is to take one side and redo the other by hand.

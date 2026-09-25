@@ -20,7 +20,7 @@ One monorepo holds all of it, so a change that crosses a boundary is one commit,
 
 ## The four workspace roots
 
-`pnpm-workspace.yaml` lists four globs – `apps/*`, `libraries/*`, `modules/*`, and `tools/*` – and every directory under them that carries a `package.json` is a workspace package. Packages are named `@scouterna/wsj27-campfire-<name>` and versioned together at the repository's own version. They depend on each other with `workspace:*`, never a published range.
+`pnpm-workspace.yaml` lists four globs – `apps/*`, `libraries/*`, `modules/*`, and `tools/*` – and every directory under them that carries a `package.json` is a workspace package. Packages are named `@scouterna/wsj27-campfire-<name>`, and every one of them says `0.0.0` – the version lives in a release tag, not in the tree ([Release](../maintenance/release)). They depend on each other with `workspace:*`, never a published range.
 
 Two directories under `apps/` are not packages. `apps/android` is a Gradle build and `apps/apple` an Xcode project; neither has a `package.json`, and both are driven entirely by named root scripts, so the native directories stay purely native.
 

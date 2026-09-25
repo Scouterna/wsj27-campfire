@@ -4,6 +4,10 @@
 <p><Badge type="tip" text="Accepted" /> <Badge type="info" text="2026-09-15" /></p>
 :::
 
+::: warning A later record moved part of this
+[ADR 034](034-version-each-artifact-from-its-own-commits.md) replaces the version in `package.json` as the release trigger with a version worked out from the commits, and [ADR 035](035-promote-the-web-by-moving-environment-tags.md) drops `:latest` and moves `:dev` and `:prod` instead. The registry, the image's shape, the platform, `:main` and `:sha-<short>`, and publish-then-tag all stand.
+:::
+
 ## Context
 
 The web application is the whole front-end ([ADR 010](010-deliver-the-front-end-as-one-web-application-in-native-shells.md)), and the shells already name the origins they will load it from, so something has to serve it. Where is not decided, and that is not a reason to wait: choosing a host later should be a matter of pointing it at an artifact, not of building the pipeline that produces one. The artifact has to exist first, and it has to be neutral about where it lands.

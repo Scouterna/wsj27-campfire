@@ -117,6 +117,7 @@ The guidebook describes the first version as built, so it runs ahead of the tree
 | `pnpm test:apple`           | The Apple unit tests, on a Simulator                                |
 | `pnpm test:apple:ui`        | The Apple UI tests, on a Simulator                                  |
 | `pnpm test:web:ui`          | The Playwright walks – starts a dev server, or reuses a running one |
+| `pnpm version:next`         | Prints an artifact's next version – `android`, `apple`, or `web`    |
 
 Campfire has three environments – **local**, **dev**, and **prod** – and they differ in one thing: what sits behind the back-end paths. All three serve the same origin, `http://localhost:8000`, so the web application and the shells never know which is running. `pnpm start:local` puts the mock there, `pnpm start:dev` the real back-end in containers, and `pnpm start:prod` the same back-end with the built image serving the web. `start:android` and `start:apple` always point at that origin, so the environment is a property of the stack rather than of the build – the shells' dev and prod flavors exist for `build:android:dev` and the rest, which bake a remote origin into a shipped artifact.
 
@@ -148,7 +149,7 @@ The same checks run in GitHub Actions from `.github/workflows/` ([Continuous int
 - `modules/` – feature modules, each a domain capability: `authentication`, `home`, `journey`, `participants`
 - `tools/` – development tooling that ships to nobody: `mock`, the back-end stand-in behind `pnpm start:mock`
 - `config/` – shared tooling configuration, one directory per tool, plus `environments/local|dev|prod` for the three ways Campfire runs
-- `scripts/` – every script the `pnpm` scripts run: the start scripts under `start/`, the shells' own under `android/` and `apple/`, and the Structurizr runner under `structurizr/`
+- `scripts/` – every script the `pnpm` scripts run: the start scripts under `start/`, the shells' own under `android/` and `apple/`, the Structurizr runner under `structurizr/`, and the version rule under `release/`
 - `docs/` – the decision log, the software guidebook, and the C4 architecture model
 - `.agents/` – the agent definitions, the skills, and the per-branch spec scratch
 - `.githooks/` – the git hooks `pnpm install` wires up
@@ -176,7 +177,7 @@ Packages are named `@scouterna/wsj27-campfire-<name>`, and `apps/*`, `libraries/
 
 ## Architecture and decisions
 
-Campfire is built on decisions made explicitly and written down, so the reasoning stays understandable over time. Significant decisions are recorded as ADRs under [`docs/decisions/`](docs/decisions/index.md) – [ADR 001](docs/decisions/001-record-architecture-decisions.md) through [ADR 032](docs/decisions/032-hold-the-signed-in-person-in-utils.md) so far, so the next record is 033; the system is described in the [guidebook](docs/guidebook/index.md); the C4 model lives in [`docs/architecture/`](docs/architecture/AGENTS.md).
+Campfire is built on decisions made explicitly and written down, so the reasoning stays understandable over time. Significant decisions are recorded as ADRs under [`docs/decisions/`](docs/decisions/index.md) – [ADR 001](docs/decisions/001-record-architecture-decisions.md) through [ADR 035](docs/decisions/035-promote-the-web-by-moving-environment-tags.md) so far, so the next record is 036; the system is described in the [guidebook](docs/guidebook/index.md); the C4 model lives in [`docs/architecture/`](docs/architecture/AGENTS.md).
 
 - Read the decisions and the guidebook before a change that touches architecture.
 - Record a significant decision as a new ADR – context, choice, consequences, alternatives. Copy `docs/decisions/template.md`, take the next number, add a row to the index. Never renumber.
@@ -283,6 +284,7 @@ gh label list
 
 - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
 - Do not use a scope. `feat(auth): …` is valid Conventional Commits and is rejected here.
+- A revert is `revert: …`. Git's own `Revert "…"` subject is rejected here, because the version rule would read it as earning nothing.
 - Subject: imperative, lowercase first word, no trailing period. Aim for 50 characters; 72 is the ceiling.
 - Body: most commits have one. Explain why, not how, and never every detail the diff already shows. At most three `-` bullets, each a brief sentence or two, wrapped at about 72 characters with continuation lines indented two spaces, and a blank line between bullets. 100 characters is the enforced ceiling on a line. Reasoning that belongs beside the code goes in a comment instead, where it stays true.
 - Breaking change: `!` after the type – `feat!: …`.
@@ -305,10 +307,14 @@ docs: record the back-end direction as an ADR
 
 ## Versioning
 
-The version in `package.json` is `2026.8.1`. The project uses [Calendar Versioning (CalVer)](https://calver.org/) with the shape `YEAR.FEATURE.PATCH`:
+Campfire ships three artifacts, and each has a version of its own: the web image, the Android shell, and the Apple shell ([ADR 034](docs/decisions/034-version-each-artifact-from-its-own-commits.md)). Each is [Calendar Versioning (CalVer)](https://calver.org/) in the shape `YEAR.FEATURE.PATCH`, and each lives in a git tag – `web-v<version>`, `android-v<version>`, `apple-v<version>`. The tree carries `0.0.0` everywhere – every `package.json`, `Shared.xcconfig`, and the Android default – and a build given no version reports `0.0.0`, build `1`.
 
-- `2026` – the year of the feature release. The first feature release in a new year adopts that year; a patch release stays on the year of the feature it patches and never advances it.
-- `1` – the feature release, bumped for a `feat`.
-- `0` – the patch, bumped for a `fix`.
+A commit counts toward an artifact when it touches that artifact's paths – the web's are the trigger paths in `release_web.yml`, Android's `apps/android/`, Apple's `apps/apple/` – and toward each one it touches. Its type decides how far:
 
-Commit types drive the bump: `feat` moves the feature segment, `fix` moves the patch segment, and the other types (`chore`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`) do not change the version.
+- **The feature segment**, resetting the patch – any `feat`, or any type marked `!`.
+- **The patch segment** – otherwise, any `fix` or `revert`.
+- **Nothing** – otherwise. `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, and `chore` do not change the version.
+
+Several commits earn one version, the largest bump among them. The first feature release in a new year adopts that year as `<year>.1.0`; a patch stays on the year of the feature it patches.
+
+The web's version is worked out and released on the merge that earns it, which also moves `:dev`; `:prod` moves only when someone starts `promote_web.yml` ([ADR 035](docs/decisions/035-promote-the-web-by-moving-environment-tags.md)). The shells have no release workflow yet – it waits on signing and store upload from continuous integration. `pnpm version:next <android|apple|web>` prints what an artifact's next version would be. [Release](docs/guidebook/maintenance/release.md) has the whole of it.

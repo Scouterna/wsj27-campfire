@@ -14,8 +14,15 @@ android {
     applicationId = "se.scouterna.campfire"
     minSdk = 30
     targetSdk = 36
-    versionCode = 1
-    versionName = "2026.8.1"
+    // A release passes -Pcampfire.version=… -Pcampfire.build=…; without them – Android
+    // Studio, pnpm build:*, pnpm start:* – the shell builds as 0.0.0 build 1. The build
+    // never reads git.
+    versionCode =
+      providers
+        .gradleProperty("campfire.build")
+        .map { it.toIntOrNull() ?: error("campfire.build must be a whole number, got \"$it\"") }
+        .getOrElse(1)
+    versionName = providers.gradleProperty("campfire.version").getOrElse("0.0.0")
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }

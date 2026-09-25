@@ -73,18 +73,38 @@ export default defineConfig({
           include: ["src/**/*.test.ts"],
         },
       },
+      {
+        test: {
+          name: "release",
+          root: "scripts/release",
+          environment: "node",
+          include: ["*.test.ts"],
+        },
+      },
     ],
 
     coverage: {
       provider: "v8",
       reporter: ["text-summary"],
+      // Vitest writes its scratch here while it runs even though the only report is text,
+      // so it goes where every other generated file goes: ignored, and cleared by
+      // `pnpm clean`, rather than a `coverage/` at the root that git can pick up mid-run.
+      reportsDirectory: ".build/coverage",
       // The logic the screens stand on. Components and screens are proved by Storybook
       // and the Playwright walk-through in each module's `test-ui`, so `libraries/ui`
       // and the modules' components stay outside the denominator on purpose.
-      include: ["libraries/host/src/**", "libraries/utils/src/**", "tools/mock/src/**"],
+      include: [
+        "libraries/host/src/**",
+        "libraries/utils/src/**",
+        "scripts/release/**",
+        "tools/mock/src/**",
+      ],
       exclude: [
         // It starts a server and has no behavior of its own to assert.
         "tools/mock/src/main.ts",
+        // Its test runs it as a subprocess inside a throwaway repository, where coverage
+        // cannot see it; the rule it drives is covered directly.
+        "scripts/release/next-version.ts",
         // A component, proved by the Playwright walks rather than a unit test – like
         // every component outside the denominator.
         "libraries/utils/src/roles/RolesProvider.tsx",
