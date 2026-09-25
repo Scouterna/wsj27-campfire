@@ -13,9 +13,10 @@ name: Promote web
 # Rolling back is this same workflow, run with an earlier version.
 #
 # The job runs in the prod environment, so every run – promoted or refused – is a
-# deployment with its creator, its status, and a link to its run, and the repository's
-# Deployments page is the history. The run summary names who, the version, the
-# outcome, the new and the previous digest, and the command that rolls back.
+# deployment with its creator, its status, a link to its run, and a link to the site,
+# and the repository's Deployments page is the history. The run summary names who, the
+# version, the outcome, the new and the previous digest, and the command that rolls
+# back.
 
 on:
   workflow_dispatch:
@@ -37,7 +38,9 @@ jobs:
   promote:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
-    environment: prod
+    environment:
+      name: prod
+      url: https://campfire.wsj27.se
     # Scoped to the job that needs it: contents to read the version tags, packages to
     # move the image tag.
     permissions:

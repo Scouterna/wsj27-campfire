@@ -49,7 +49,7 @@ Four workflows write somewhere ([ADR 009](/decisions/009-check-and-release-with-
 
 Two tags on the image say what each environment runs, and nothing else moves ([ADR 035](/decisions/035-promote-the-web-by-moving-environment-tags)).
 
-**Dev follows releases.** `:dev` moves to every new web version as it is released, so what the management team tests at `campfire.wsj27.scouterna.net` is what could be promoted. It never points at a digest that does not also carry a released `:<version>`.
+**Dev follows releases.** `:dev` moves to every new web version as it is released, so what the management team tests at `campfire.wsj27.scouterna.net` is what could be promoted. It never points at a digest that does not also carry a released `:<version>`. The move is its own job, run in the GitHub environment `dev`, so each one is a deployment linking to the site; a merge that earns no version moves nothing and records nothing. When the move fails after the tag exists, re-running that failed job repeats it, but a new run of the workflow does not – it earns no version – so the run's summary also gives the command that moves `:dev` by hand.
 
 **Prod is promoted.** `promote_web.yml` is started from the Actions tab or the command line, naming a version:
 
@@ -59,7 +59,7 @@ gh workflow run promote_web.yml -f version=2026.9.0
 
 It refuses a version that is not CalVer-shaped, has no `web-v<version>` tag, or has no `:<version>` image, and a refusal leaves `:prod` where it was. Accepted, it copies the manifest behind `:<version>` to `:prod` – nothing is built, pulled, or pushed but the tag, so the digest is the one dev ran. Rolling back is a promotion of an earlier version; there is no other way to move `:prod`. Promotions queue and never cancel, like releases.
 
-Every promotion runs in the GitHub environment `prod`, so each one – accepted or refused – is a deployment on the repository's Deployments page: who started it, which version, and how it ended. The run's summary adds the new digest, the digest `:prod` pointed at before, and the command that rolls back.
+Every promotion runs in the GitHub environment `prod`, so each one – accepted or refused – is a deployment on the repository's Deployments page, linking to `campfire.wsj27.se`: who started it, which version, and how it ended. The run's summary adds the new digest, the digest `:prod` pointed at before, and the command that rolls back.
 
 **The cluster side is a step by hand.** Moving a tag restarts nothing. Prod, at `campfire.wsj27.se`, is deployed by a step on the cluster that takes what `:prod` points at, and how dev follows `:dev` is settled with the people who run it ([ADR 027](/decisions/027-run-the-back-end-on-kubernetes-in-azure)). A promotion holds no credentials for the cluster.
 
