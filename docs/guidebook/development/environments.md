@@ -33,7 +33,7 @@ Local is the everyday environment. It needs nothing beyond the machine and start
 
 ## Dev
 
-Dev exists for the one thing the mock cannot do: the real sign-in flow. The auth service and the project API are built from their repositories' `main` on every start, beside a container running the same Vite dev server over the repository, so hot reload still works through the front door. The first start is slow while that container installs the workspace.
+Dev exists for the one thing the mock cannot do: the real sign-in flow. The auth service is built from its repository's `main` and the project API from its `dev` branch – the one the deployed dev site runs – on every start, beside a container running the same Vite dev server over the repository, so hot reload still works through the front door. The first start is slow while that container installs the workspace.
 
 Credentials never enter the repository. The Keycloak client and the Scoutnet keys go in a gitignored `.env` beside the compose file, which you write and nothing overwrites, and the first run on a machine without one prints what to write. The values are the ones the deployed services run with. The contingent management team's roster, which the project API reads to tell the management's functions apart, is a gitignored `cmt-roles.csv` beside it for the same reason – it names real people. Without it the service runs on, and the management's roles carry no function.
 
@@ -45,7 +45,7 @@ On a cold start, a session made before the auth service has loaded the roles fro
 
 Prod is dev with the web served by the image `pnpm build:image` produced, so the production build, the image's own Caddy, and its single-page fallback all run before a deploy ([ADR 026](/decisions/026-publish-the-web-application-as-a-container-image)). `start:prod` never builds the image, because a stale image would run and mislead – a missing one is an error telling you to build it. It refuses `--user-id`, because prod is there to prove the real flow.
 
-The image is `linux/amd64`, the cluster's platform, so an Apple-silicon machine runs it under emulation. Prod runs the same back-end containers as dev, so it proves the image rather than the deployment.
+The image is `linux/amd64`, the cluster's platform, so an Apple-silicon machine runs it under emulation. Prod runs the same back-end containers as dev, except that the project API is built from its `main`, as the deployed prod site's is – so it proves the image rather than the deployment.
 
 ## Running a shell against it
 
