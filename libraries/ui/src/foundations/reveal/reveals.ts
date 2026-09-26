@@ -19,7 +19,7 @@ export interface Reveal {
    */
   readonly hint: string
   /**
-   * The name consumers gate by – "units", and whatever is revealed after it.
+   * The name consumers gate by, such as "units".
    */
   readonly id: string
   /**
@@ -29,8 +29,8 @@ export interface Reveal {
 }
 
 /**
- * The units reveal: 19 September 2026 at 19.30, Swedish time – the evening the
- * application opens and the leaders meet their avdelningar.
+ * The units reveal, the evening the application opens and the leaders meet their
+ * avdelningar.
  */
 export const unitsReveal: Reveal = {
   at: new Date("2026-09-19T19:30:00+02:00"),
@@ -40,8 +40,8 @@ export const unitsReveal: Reveal = {
 }
 
 /**
- * Every reveal the product currently has. The application hangs exactly this list,
- * and the next reveal is another entry here, not another mechanism.
+ * Every reveal in the product. The application hangs exactly this list, so a new reveal
+ * is another entry here rather than another mechanism.
  */
 export const reveals: readonly Reveal[] = [unitsReveal]
 
@@ -57,8 +57,7 @@ const bypassKey = "campfire-reveal"
  * Whether one reveal is bypassed on this browser. Guarded, because storage can be
  * absent (a test's Node environment), refuse to answer (a locked-down webview), or
  * hold something that is not the JSON array it should – each reads as no bypass
- * rather than a crash. Internal to the reveal machinery: consumers ask the provider,
- * which folds the bypass in.
+ * rather than a crash. A consumer asks the provider, which folds the bypass in.
  * @param id The reveal's id.
  * @returns True when the development bypass lists it.
  */
@@ -72,5 +71,30 @@ export function isRevealBypassed(id: string): boolean {
     return Array.isArray(parsed) && parsed.includes(id)
   } catch {
     return false
+  }
+}
+
+// setTimeout's delay is a signed 32-bit count of milliseconds, so a longer wait overflows
+// and fires at once. A far-off moment sleeps a day at a time instead.
+const day = 24 * 60 * 60 * 1000
+
+/**
+ * Calls back once when a reveal's moment has passed – a beat past it, so a clock read on
+ * waking is unambiguously beyond. A moment already passed calls back after that beat.
+ * @param reveal The reveal to wake for.
+ * @param onOpen Called when the moment has passed, and never after cancelling.
+ * @returns Cancels the wake, whichever of its timers is pending.
+ */
+export function wakeAt(reveal: Reveal, onOpen: () => void): () => void {
+  let timer: ReturnType<typeof setTimeout>
+
+  const arm = (): void => {
+    const wait = Math.max(0, reveal.at.getTime() - Date.now()) + 50
+    timer = wait > day ? setTimeout(arm, day) : setTimeout(onOpen, wait)
+  }
+  arm()
+
+  return () => {
+    clearTimeout(timer)
   }
 }
