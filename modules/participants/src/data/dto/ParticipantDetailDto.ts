@@ -58,7 +58,7 @@ export function toParticipantDetail(dto: ParticipantDetailDto): ParticipantDetai
   return {
     ...base,
     ...(travel !== undefined && { travel }),
-    contact: toContactDetails(dto, answers),
+    contact: toContactDetails(dto, answers, base.phone),
     // The health block exists exactly when the service sent `forms_data`, so a viewer
     // without health access, or a basic fetch, gets a person without one, and the screens
     // render nothing rather than a caveat.
@@ -158,13 +158,19 @@ function toExperience(answers: Answers): Experience | undefined {
  * because nothing in the basic block says who a person's närstående are.
  * @param dto The record the participants service answered with.
  * @param answers The flattened answers.
+ * @param phone The current number the basic converter already read, taken rather than
+ *   read again so the page and the export can never disagree about it.
  * @returns How to reach them and the people around them.
  */
-function toContactDetails(dto: ParticipantDetailDto, answers: Answers): ContactDetails {
+function toContactDetails(
+  dto: ParticipantDetailDto,
+  answers: Answers,
+  phone: string | undefined,
+): ContactDetails {
   const alternateEmail = answer(answers, "alternateEmail")
   return {
     email: toCurrent(dto.email, answers, "email") ?? "",
-    phone: toCurrent(dto.mobile, answers, "mobilePhone") ?? "",
+    phone: phone ?? "",
     ...(alternateEmail !== undefined && { alternateEmail }),
     relatives: toRelatives(answers),
     emergencyContacts: [

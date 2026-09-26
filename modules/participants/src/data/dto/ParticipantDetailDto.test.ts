@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import { toParticipantDetail } from "./ParticipantDetailDto"
+import { toParticipant } from "./ParticipantDto"
 
 /**
  * One person in full, as the participants service sends them: the basic block, the contact
@@ -137,6 +138,16 @@ describe("reading one person in full", () => {
 
     expect(contact?.email).toBe("lars@example.se")
     expect(contact?.phone).toBe("070-000 00 00")
+  })
+
+  it("reads the same number the listing row carries for the export", () => {
+    // The sheet and the person's page read one number, whichever source it came from.
+    // eslint-disable-next-line unicorn/no-null -- a missing mobile number is null on the wire
+    for (const payload of [record(), record({ mobile: null })]) {
+      const detail = toParticipantDetail(payload)
+
+      expect(detail?.contact.phone).toBe(toParticipant(payload)?.phone)
+    }
   })
 
   it("reads a missing mobile as empty, not as a crash", () => {

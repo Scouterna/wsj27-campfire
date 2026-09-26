@@ -67,7 +67,7 @@ tools/mock/
 **A seed is data, not a special case.** Each persona is a file under `seed/personas/`, there for a case rather than for numbers, and listed for the picker in `seed/personas/index.ts` with a description of the case it covers. Add a persona by adding a file and listing it, and by giving them a row in the list of participants if they are in the contingent – never by branching in a route.
 
 - `seed/units.ts` seeds two units, because a leader's boundary needs a unit on each side. Their real names and glyphs come from the web application's own unit identities, not from the mock.
-- `seed/participants/participants.ts` is the list before the service decodes it, every answer keyed by its question. The ledare and kontingentledning rows carry the personas' identities, so a signed-in persona holds the roles their row mints. The holes – a missing mobile number, a missing scout group – are deliberate.
+- `seed/participants/participants.ts` is the list before the service decodes it, every answer keyed by its question. The ledare and kontingentledning rows carry the personas' identities, so a signed-in persona holds the roles their row mints. The holes – a missing mobile number, a missing scout group, a missing home town, a home town abroad – are deliberate.
 - `seed/participants/cmt-roles.csv` is the CMT roster in the columns the service's own tooling writes, so the service's slug rules run on it.
 - `src/project/participants-list.ts` walks the form template rather than the answers, so an answer the template does not carry never reaches the wire.
 - `max-lines` is off for `seed/**`, because a row carries a whole registration form.

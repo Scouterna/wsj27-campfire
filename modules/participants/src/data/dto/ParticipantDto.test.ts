@@ -33,6 +33,7 @@ describe("reading one listing row", () => {
       firstName: "Lars",
       lastName: "Lindberg",
       memberGroup: "Mockåsens scoutkår",
+      phone: "070-719 56 23",
       role: "ledare",
       unitNumber: 1,
     })
@@ -99,19 +100,46 @@ describe("reading one listing row", () => {
     })
   })
 
+  it("reads every number named around them, beside the addresses", () => {
+    const contact = {
+      "Kontaktuppgifter närstående 1": {
+        nextOfKin1Name: "Maria Ström",
+        nextOfKin1Phone: "070-123 45 67",
+      },
+      "Annan nödkontakt": {
+        emergencyContact1Name: "Ylva Sandberg",
+        emergencyContact1Email: "ylva@example.se",
+        emergencyContact1Phone: "+46701112233",
+      },
+    }
+    const person = toParticipant(row({ contact_info: contact }))
+
+    expect(person?.contactPhones).toEqual({
+      emergencyContact1: "+46701112233",
+      nextOfKin1: "070-123 45 67",
+    })
+    expect(person?.contactEmails).toEqual({ emergencyContact1: "ylva@example.se" })
+  })
+
   it("skips a contact without an address, and one without a name – as the detail does", () => {
     const contact = {
       "Kontaktuppgifter närstående 1": { nextOfKin1Name: "Maria Ström" },
-      "Kontaktuppgifter närstående 2": { nextOfKin2Email: "bjorn@example.se" },
+      "Kontaktuppgifter närstående 2": {
+        nextOfKin2Email: "bjorn@example.se",
+        nextOfKin2Phone: "070-765 43 21",
+      },
     }
+    const person = toParticipant(row({ contact_info: contact }))
 
-    expect(toParticipant(row({ contact_info: contact }))?.contactEmails).toBeUndefined()
+    expect(person?.contactEmails).toBeUndefined()
+    expect(person?.contactPhones).toBeUndefined()
   })
 
   it("reads a row the service sent without contact answers", () => {
     const person = toParticipant(row({ contact_info: undefined }))
 
     expect(person?.contactEmails).toBeUndefined()
+    expect(person?.contactPhones).toBeUndefined()
     expect(person?.email).toBe("lars.lindberg@example.se")
   })
 
@@ -167,8 +195,42 @@ describe("reading one listing row", () => {
     expect(toParticipant(row({ member_type: "Funktionär" }))).toBeUndefined()
   })
 
-  it("carries no phone – how to reach somebody is the person's own record", () => {
-    expect(toParticipant(row())).not.toHaveProperty("phone")
+  it("reads the home town, trimmed, in the case it was typed", () => {
+    expect(toParticipant(row({ city: "  GÖTEBORG " }))?.homeTown).toBe("GÖTEBORG")
+    expect(toParticipant(row({ city: "Bryssel (Belgien)" }))?.homeTown).toBe("Bryssel (Belgien)")
+  })
+
+  it("reads a blank, null, or missing home town as none", () => {
+    // A row without the key at all is the same absence as one with null in it, so the
+    // field being there or not changes nothing about how a row is read.
+    expect(toParticipant(row({ city: " " }))).not.toHaveProperty("homeTown")
+    // eslint-disable-next-line unicorn/no-null -- a missing town is null on the wire
+    expect(toParticipant(row({ city: null }))).not.toHaveProperty("homeTown")
+    expect(toParticipant(row({ city: 42 }))).not.toHaveProperty("homeTown")
+    expect(toParticipant(row())).not.toHaveProperty("homeTown")
+  })
+
+  it("carries the current phone number, unformatted, for the export", () => {
+    expect(toParticipant(row({ mobile: "+46708277486" }))?.phone).toBe("+46708277486")
+  })
+
+  it("falls back to the registration's copy of the number when Scoutnet holds none", () => {
+    const contact = { "Information redan i Scoutnet": { mobilePhone: "070-111 22 33" } }
+
+    // eslint-disable-next-line unicorn/no-null -- a missing mobile number is null on the wire
+    expect(toParticipant(row({ contact_info: contact, mobile: null }))?.phone).toBe("070-111 22 33")
+  })
+
+  it("carries no phone number where neither Scoutnet nor the registration holds one", () => {
+    const blank = { "Information redan i Scoutnet": { mobilePhone: " " } }
+
+    // eslint-disable-next-line unicorn/no-null -- as above
+    expect(toParticipant(row({ contact_info: blank, mobile: null }))).not.toHaveProperty("phone")
+    // A fellow leader's contact answers are withheld, and so is their number.
+    expect(
+      // eslint-disable-next-line unicorn/no-null -- as above
+      toParticipant(row({ contact_info: undefined, mobile: null })),
+    ).not.toHaveProperty("phone")
   })
 })
 

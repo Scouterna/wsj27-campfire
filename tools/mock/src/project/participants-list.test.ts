@@ -34,6 +34,7 @@ describe("the decoded list of participants", () => {
       "born",
       "sex",
       "member_group",
+      "city",
       "email",
       "mobile",
       "member_type",
@@ -49,6 +50,7 @@ describe("the decoded list of participants", () => {
       born: "1995-07-16",
       sex: "Man",
       member_group: "Mockåsens scoutkår",
+      city: "Göteborg",
       mobile: "070-719 56 23",
       member_type: "Avdelningsledare",
       participation_type: "Rundresa",
@@ -60,6 +62,16 @@ describe("the decoded list of participants", () => {
   it("carries the holes Scoutnet has – no mobile number, no scout group", () => {
     expect(decoded(1_100_402).mobile).toBeNull()
     expect(decoded(1_300_098).member_group).toBe("")
+  })
+
+  it("carries the holes the export of home towns has, and a town abroad", () => {
+    // A kår but no town – somebody the one-off export of towns did not hold.
+    expect(decoded(1_300_512).member_group).toBe("Stubbhults scoutkår")
+    expect(decoded(1_300_512).city).toBeNull()
+    // Neither a kår nor a town.
+    expect(decoded(1_300_098).member_group).toBe("")
+    expect(decoded(1_300_098).city).toBeNull()
+    expect(decoded(1_300_525).city).toBe("Bryssel (Belgien)")
   })
 
   it("carries the two people whose Scoutnet fields and registration copies disagree", () => {
