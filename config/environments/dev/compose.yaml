@@ -56,15 +56,17 @@ services:
       PROJECT_API_URL: http://ingress:8001
       SERVICE_CLIENT_ROLES: '{"wsj27-auth": ["wsj27:bulkread"]}'
 
-  # The real project API, built from its repository's main like the auth service
-  # above. It verifies a token by fetching the JWKS at the auth service's
-  # public URL, http://localhost:8000/api/auth/certs – an address that reaches the front
-  # door only from inside the ingress's own network namespace, which is why this
-  # container shares it instead of getting its own. The ingress reaches it as
-  # localhost:8001, and the auth service as ingress:8001.
+  # The real project API, built fresh like the auth service above, but from its
+  # repository's dev branch – the one the deployed dev site runs, so this environment
+  # reads what the dev site reads before it reaches main. It verifies a token by
+  # fetching the JWKS at the auth service's public URL,
+  # http://localhost:8000/api/auth/certs – an address that reaches the front door only
+  # from inside the ingress's own network namespace, which is why this container shares
+  # it instead of getting its own. The ingress reaches it as localhost:8001, and the auth
+  # service as ingress:8001.
   project:
     build:
-      context: https://github.com/Scouterna/wsj27-project-api.git#main
+      context: https://github.com/Scouterna/wsj27-project-api.git#dev
     network_mode: service:ingress
     environment:
       # 8001, because the ingress already holds 8000 in the shared namespace.
