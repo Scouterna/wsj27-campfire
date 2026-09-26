@@ -2,9 +2,10 @@ import { expect, test, type Page } from "@playwright/test"
 
 // The participants section, walked as the people who use it: a leader reading their
 // own unit, the contingent management searching and narrowing the whole contingent,
-// opening a person and coming back to the list as it was, browsing by unit, the
-// information levels the service grants, and – for a person outside the contingent –
-// no section at all, with its address answering exactly as one that matches nothing.
+// opening a person and coming back to the list as it was, a list kept when a fresh read
+// fails, browsing by unit, the information levels the service grants, and – for a
+// person outside the contingent – no section at all, with its address answering exactly
+// as one that matches nothing.
 
 // The reveal is timed, and until its moment the whole participants surface is behind
 // the curtain. These walks are about what the surface does once it is open, so each
@@ -45,14 +46,14 @@ test("shows a leader their own unit, with the unit's own filter", async ({ page 
   await expect(page.getByRole("heading", { level: 1, name: "Min avdelning" })).toBeVisible()
   await expect(page).toHaveTitle("Min avdelning – Campfire")
 
-  // The unit's eight people, and nobody from anywhere else.
+  // The unit's own people, and nobody from anywhere else.
   await expect(page.getByRole("status")).toHaveText("8 personer i avdelningen")
   await expect(page.getByRole("listitem")).toHaveCount(8)
   await expect(page.getByRole("listitem").filter({ hasText: "Avdelning 2" })).toHaveCount(0)
 
-  // A unit is searched and narrowed too – in its own vocabulary: a unit holds
-  // deltagare and ledare, so IST and CMT are not offered. The way in by unit stays
-  // the management's.
+  // A unit is searched and narrowed too, in its own vocabulary – a unit holds deltagare
+  // and ledare, so IST and CMT are not offered. The way in by unit stays the
+  // management's.
   await expect(page.getByRole("searchbox", { name: "Sök deltagare" })).toBeVisible()
   const filter = page.getByRole("group", { name: "Filtrera efter roll" })
   await expect(filter.getByRole("button")).toHaveCount(3)
@@ -85,7 +86,7 @@ test("lets the management search the contingent and narrow it by roll", async ({
   await expect(page.getByRole("status")).toHaveText("2 av 59 personer")
   await expect(page).toHaveURL(/q=str%C3%B6m/)
 
-  // A roll on top of the search: both apply, and the search survives the chip.
+  // A roll on top of the search narrows further, and the search survives the chip.
   await page.getByRole("button", { name: "Ledare", pressed: false }).click()
   await expect(page.getByRole("status")).toHaveText("1 av 59 personer")
   await expect(page.getByRole("button", { name: "Ledare", pressed: true })).toBeVisible()
@@ -142,6 +143,30 @@ test("browses the contingent by unit, down to a person", async ({ page }) => {
   await expect(page).toHaveTitle("Anders Andersson – Campfire")
 })
 
+test("asks again on every visit, and keeps the list it has when the ask fails", async ({
+  page,
+}) => {
+  await page.goto("/")
+  await signInAs(page, "Lars Lindberg")
+
+  const menu = page.locator(".sidemenu")
+  await menu.getByRole("link", { name: "Min avdelning" }).click()
+  await expect(page.getByRole("status")).toHaveText("8 personer i avdelningen")
+  await menu.getByRole("link", { name: "Hem" }).click()
+
+  // The next visit asks the service again even though the list is cached, and the
+  // ask fails – the list it already had stays, rather than an error in its place.
+  await page.route("**/participants/troopinfo/1*", (route) => route.abort())
+  const again = page.waitForRequest((request) =>
+    request.url().includes("/participants/troopinfo/1"),
+  )
+  await menu.getByRole("link", { name: "Min avdelning" }).click()
+  await again
+
+  await expect(page.getByRole("status")).toHaveText("8 personer i avdelningen")
+  await expect(page.getByRole("listitem")).toHaveCount(8)
+})
+
 test("shows the health answers to the health function, at the full level", async ({ page }) => {
   await page.goto("/")
   await signInAs(page, "Helena Hägg")
@@ -179,9 +204,9 @@ test("renders a fellow leader's record with the dropped details absent", async (
   await page.goto("/")
   await signInAs(page, "Lars Lindberg")
 
-  // The service drops a leader's contact answers for a fellow leader: no emergency
-  // contacts, and the unsent mobile gets its designed absent state – worded exactly as
-  // any other absence, with no reason given.
+  // The service drops a leader's contact answers for a fellow leader, so there are no
+  // emergency contacts, and the unsent mobile gets its designed absent state – worded
+  // exactly as any other absence, with no reason given.
   await page.goto("/participants/1100402")
   await expect(page).toHaveTitle("Hanna Hellström – Campfire")
   await expect(page.getByText("Nödkontakt", { exact: false })).toHaveCount(0)
@@ -253,8 +278,8 @@ test("mails and copies the addresses of the list as it is narrowed", async ({ co
   await signInAs(page, "Lars Lindberg")
   await expect(page.getByRole("status")).toHaveText("8 personer i avdelningen")
 
-  // Five entries for a leader, acting on the unit's eight people – every address a
-  // hidden copy, and the sheet of them all at the end.
+  // Every entry a leader gets, acting on the unit's people – every address a hidden
+  // copy, and the sheet of them all at the end.
   const trigger = page.getByRole("button", { name: "Fler åtgärder" })
   await trigger.click()
   await expect(page.getByRole("menuitem")).toHaveText([
@@ -268,15 +293,16 @@ test("mails and copies the addresses of the list as it is narrowed", async ({ co
     .getByRole("menuitem", { name: "Mejla personerna i listan" })
     .getAttribute("href")
   expect(everyone).toMatch(/^mailto:\?bcc=/u)
-  // Nine addresses from eight people: Ester gave an alternative one, and the registration
-  // promises it the same jamboree information as her primary, so both are written to.
+  // One address more than there are people, because Ester gave an alternative one, and
+  // the registration promises it the same jamboree information as her primary, so both
+  // are written to.
   expect(everyone?.split(",")).toHaveLength(9)
   expect(everyone).toContain("leo.str%C3%B6m@example.se")
   expect(everyone).toContain("ester.dahl@example.org")
 
   // Everybody the unit's people named around them. The deltagare and the IST gave
   // närstående, and their form asks for no nödkontakt; a leader's own answers a fellow
-  // leader may not read at all, so the unit's two leaders name nobody here.
+  // leader may not read at all, so the unit's leaders name nobody here.
   const relatives = await page
     .getByRole("menuitem", { name: "Mejla deras kontaktpersoner" })
     .getAttribute("href")
@@ -289,8 +315,8 @@ test("mails and copies the addresses of the list as it is narrowed", async ({ co
   )
   await page.keyboard.press("Escape")
 
-  // Narrowing the list is choosing who to write to: the two leaders, whose own contact
-  // answers a fellow leader may not read – so those entries stay, and say why.
+  // Narrowing the list chooses who to write to. A fellow leader may not read the
+  // leaders' own contact answers, so those entries stay, and say why.
   await page.getByRole("button", { name: "Ledare", pressed: false }).click()
   await expect(page.getByRole("status")).toHaveText("2 av 8 personer")
   await trigger.click()
@@ -318,7 +344,7 @@ test("mails and copies the addresses of the list as it is narrowed", async ({ co
   await expect(page.getByRole("menu")).toHaveCount(0)
   await expect(trigger).toBeFocused()
 
-  // Nobody shown is nobody to write to: the menu goes with the list.
+  // Nobody shown is nobody to write to, so the menu goes with the list.
   await page.getByRole("searchbox", { name: "Sök deltagare" }).fill("zzz")
   await expect(page.getByRole("status")).toHaveText("Inga träffar.")
   await expect(trigger).toHaveCount(0)

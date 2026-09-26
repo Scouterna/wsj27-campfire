@@ -1,18 +1,7 @@
 import { expect, test, type BrowserContext, type Page } from "@playwright/test"
 
-// What these walks prove is the whole of sign-in in a real browser: the gate in front of
-// every address, the round trip out to ScoutID and back to where it started, the theme
-// the signed-in person wears, the silent refresh behind a stale access token, and a
-// sign-out that ends both sessions. What proves somebody is in is the chrome around
-// the start screen – the profile control naming them – and that control leads to the
-// profile page, which shows who they are and holds the one way out.
-//
-// Four more walks prove the session ending mid-use rather than at boot: a session the
-// service ends under a live page returns the gate to sign-in in place, at the same
-// address, with the cache forgotten; a stale access token costs nobody a sign-in, because
-// the one refresh the session runs underneath the read recovers it; an expiry is noticed
-// on its own, with nobody touching the page; and an ask that cannot reach the service,
-// while offline, ends nothing.
+// What proves somebody is signed in is the chrome around the start screen – the profile
+// control naming them.
 //
 // The walks share one mock, and every session in it lives in cookies each test's own
 // browser context keeps, so signing in or out in one walk never touches another's. The
@@ -115,10 +104,10 @@ test("goes straight back in on a reload, and again once the access token is gone
   await page.reload()
   await expect(page.getByRole("link", { name: "Profil för Lars Lindberg" })).toBeVisible()
 
-  // Only the short-lived access token goes; the refresh cookie stays, which is the one
-  // retry in the gate recovering the session without the visitor noticing. The name is
-  // asserted first: were it to drift from the service's, clearing would quietly remove
-  // nothing and this walk would pass without proving the recovery it exists for.
+  // Only the short-lived access token goes, and the refresh cookie stays, so the one
+  // refresh the session's ask runs recovers it without the visitor noticing. The name
+  // is asserted first, because were it to drift from the service's, clearing would
+  // quietly remove nothing and this walk would pass without proving the recovery.
   const cookies = await context.cookies()
   expect(cookies.map((cookie) => cookie.name)).toContain("wsj27-auth_access-token")
   await context.clearCookies({ name: "wsj27-auth_access-token" })
@@ -133,8 +122,8 @@ test("signs out to the sign-in screen, and lets the next person in with nothing 
   await signInAs(page, "Lars Lindberg")
   await expect(page.getByRole("link", { name: "Profil för Lars Lindberg" })).toBeVisible()
 
-  // The profile control leads to the profile page and ends nothing on the way – the
-  // page arrives signed in, cross-faded in as a start of its own: a detail of no
+  // The profile control leads to the profile page and ends nothing on the way. The page
+  // arrives signed in, cross-faded in as a start of its own, and is a detail of no
   // screen, so nothing above its title leads back to one.
   await page.getByRole("link", { name: "Profil för Lars Lindberg" }).click()
   await expect(page).toHaveURL(/\/profile$/)
@@ -248,7 +237,7 @@ test("returns to sign-in in place when the session ends under a live page, and f
   await page.locator(".sidemenu").getByRole("link", { name: "Min avdelning" }).click()
   await expect(page.getByRole("status")).toHaveText("8 personer i avdelningen")
 
-  // Ends the session in this context alone: the access token goes, standing in for its
+  // Ends the session in this context alone. The access token goes, standing in for its
   // expiry, the refresh token goes, so the one refresh is refused, and the stand-in's own
   // session goes, so signing in again means picking somebody.
   await clearCookies(context, [
@@ -273,15 +262,17 @@ test("returns to sign-in in place when the session ends under a live page, and f
   await expect(page).toHaveURL(/\/participants\/1300035$/)
   await expect(page).toHaveTitle("Ester Dahl – Campfire")
 
-  // The one-day staleTime would otherwise serve the list from before the session
-  // ended without ever touching the network, so a network read here is the only
-  // reason the list could be asked for again – proof the cache was forgotten along
-  // with the session, not merely that the screen still works.
-  const listRead = page.waitForRequest((request) =>
-    request.url().includes("/participants/troopinfo/1"),
-  )
+  // A cached list is drawn at once while the fresh read is still out, so holding that
+  // read shows which it is. The screen waiting for its first answer proves the cache
+  // was forgotten along with the session, not merely that the screen still works.
+  const held = Promise.withResolvers<undefined>()
+  await page.route("**/participants/troopinfo/1*", async (route) => {
+    await held.promise
+    await route.continue()
+  })
   await page.locator(".sidemenu").getByRole("link", { name: "Min avdelning" }).click()
-  await listRead
+  await expect(page.getByRole("status")).toHaveText("Hämtar deltagarna …")
+  held.resolve(undefined)
   await expect(page.getByRole("status")).toHaveText("8 personer i avdelningen")
 })
 
@@ -294,8 +285,8 @@ test("carries a read on without a sign-in when only the access token is stale", 
   await page.locator(".sidemenu").getByRole("link", { name: "Min avdelning" }).click()
   await expect(page.getByRole("status")).toHaveText("8 personer i avdelningen")
 
-  // Only the access token goes; the refresh cookie stays, which is the one refresh the
-  // session runs underneath a refused read, recovering it without a sign-in.
+  // Only the access token goes, and the refresh cookie stays, so the one refresh the
+  // session runs underneath a refused read recovers it without a sign-in.
   await clearCookies(context, ["wsj27-auth_access-token"])
 
   const refreshed = page.waitForRequest((request) => request.url().includes("/api/auth/refresh"))

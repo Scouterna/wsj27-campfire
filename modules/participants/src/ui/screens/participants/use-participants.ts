@@ -7,12 +7,13 @@ import { inReadingOrder, type Participant } from "../../../model/Participant"
 import type { ListScope } from "../../../model/ParticipantsList"
 
 /**
- * What a screen listing people needs: the people, what they are a list of, and the two
+ * What a screen listing people needs: the people, what they are a list of, and the
  * states that are not a list at all.
  */
 export interface ParticipantsView {
   /**
-   * Why the list could not be assembled, or null while it can be.
+   * Why the list could not be assembled, or null while it can be – including when a fresh
+   * read failed but an earlier answer is still here to show.
    */
   readonly error: Error | null
   /**
@@ -63,7 +64,7 @@ export function useParticipants(): ParticipantsView {
   const viewer = useViewer()
   const { data, error, isPending, refetch } = useQuery(fetchParticipantsQuery(viewer))
 
-  // Sorting 2,600 people collates 2,600 names, so it happens when the answer changes
+  // Sorting collates every name in the list, so it happens when the answer changes
   // rather than on every keystroke that re-renders the screen above it.
   const people = useMemo(() => inReadingOrder(data?.people ?? []), [data])
 
@@ -71,5 +72,14 @@ export function useParticipants(): ParticipantsView {
     void refetch()
   }, [refetch])
 
-  return { error, isPending, people, refetch: again, scope: data?.scope ?? scopeOf(viewer) }
+  // A read that failed with an earlier answer in hand keeps showing that answer, because an
+  // older list is worth more to a leader in a field than an error.
+  return {
+    // eslint-disable-next-line unicorn/no-null -- the view keeps TanStack Query's `Error | null`
+    error: data === undefined ? error : null,
+    isPending,
+    people,
+    refetch: again,
+    scope: data?.scope ?? scopeOf(viewer),
+  }
 }
