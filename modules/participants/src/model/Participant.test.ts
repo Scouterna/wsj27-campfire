@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest"
 
-import { ageOf, belonging, fullName, inReadingOrder, type Participant } from "./Participant"
+import {
+  ageOf,
+  belonging,
+  fullName,
+  inReadingOrder,
+  whereFrom,
+  type Participant,
+} from "./Participant"
 
 /**
  * A person as a listing row converts to, overridable per case.
@@ -113,5 +120,22 @@ describe("how old a person is", () => {
 
   it("answers nothing for a birth date in the future", () => {
     expect(ageOf(person({ birthDate: "2030-01-01" }), new Date(2027, 0, 1))).toBeUndefined()
+  })
+})
+
+describe("where a participant comes from", () => {
+  it("joins the scoutkår and the home town, in that order", () => {
+    const person1 = person({ homeTown: "Göteborg", memberGroup: "Mockåsens scoutkår" })
+
+    expect(whereFrom(person1)).toBe("Mockåsens scoutkår · Göteborg")
+  })
+
+  it("says whichever of the two there is", () => {
+    expect(whereFrom(person({ memberGroup: "Mockåsens scoutkår" }))).toBe("Mockåsens scoutkår")
+    expect(whereFrom(person({ homeTown: "Bryssel (Belgien)" }))).toBe("Bryssel (Belgien)")
+  })
+
+  it("says nothing when there is neither", () => {
+    expect(whereFrom(person())).toBeUndefined()
   })
 })

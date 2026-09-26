@@ -19,16 +19,15 @@ export const contactSlots = [
 export type ContactSlot = (typeof contactSlots)[number]
 
 /**
- * The address given for each slot – a slot nobody was named in, or one whose person
- * gave no address, is absent.
+ * One way of reaching the people a person named, for each slot – an address, or a phone
+ * number. A slot nobody was named in, or one whose person gave none, is absent.
  */
-export type ContactEmails = Partial<Readonly<Record<ContactSlot, string>>>
+export type ContactValues = Partial<Readonly<Record<ContactSlot, string>>>
 
 /**
  * A person as the list of participants shows them – what a row needs, and the addresses
- * the list mails and copies. Every other way to reach them, and everything they answered
- * when they signed up, belongs to `ParticipantDetail` and is fetched only when somebody
- * is opened.
+ * and numbers the list mails, copies, and exports. Everything else they answered when they
+ * signed up belongs to `ParticipantDetail` and is fetched only when somebody is opened.
  */
 export interface Participant {
   /**
@@ -64,6 +63,11 @@ export interface Participant {
    */
   readonly memberGroup?: string
   /**
+   * The postort they live at, as the participants service sends it – trimmed, in the
+   * case it was typed, with the country after it when abroad. Absent when it has none.
+   */
+  readonly homeTown?: string
+  /**
    * The address to write to them at – the one the detail shows as theirs. Absent when
    * neither the registration nor Scoutnet holds one.
    */
@@ -78,7 +82,17 @@ export interface Participant {
    * The addresses of the people they named around them, by the slot each was named in.
    * Absent when none gave one, and when the viewer may not read them.
    */
-  readonly contactEmails?: ContactEmails
+  readonly contactEmails?: ContactValues
+  /**
+   * The phone numbers of the people they named around them, unformatted, by the slot each
+   * was named in. Absent as the addresses are. Read by the export alone.
+   */
+  readonly contactPhones?: ContactValues
+  /**
+   * The current mobile number, unformatted – Scoutnet's, else the registration's copy.
+   * Read by the export alone; the person's page reads its own record's.
+   */
+  readonly phone?: string
   /**
    * The function a management member serves in, read out of the record's minted roles.
    * Absent for everyone else, and for a management member the roster has not detailed.
@@ -144,6 +158,17 @@ export function ageOf(person: Participant, today: Date): number | undefined {
     age -= 1
   }
   return age >= 0 ? age : undefined
+}
+
+/**
+ * Where a person comes from – their scoutkår and home town, in that order, joined by
+ * " · ". Undefined when neither is known.
+ * @param person The person to place.
+ * @returns The line, or undefined when there is nothing to say.
+ */
+export function whereFrom(person: Participant): string | undefined {
+  const parts = [person.memberGroup, person.homeTown].filter((part) => part !== undefined)
+  return parts.length === 0 ? undefined : parts.join(" · ")
 }
 
 // Constructed once, because a collator is expensive to build and free to reuse, and a

@@ -59,7 +59,7 @@ const storage: AsyncStorage = {
 const persister = createQueryPersister({
   // The cached shapes' version. Bump it whenever a persisted payload's shape changes,
   // because a stale shape read as a fresh one is worse than a cold cache.
-  buster: "5",
+  buster: "6",
   // Thirty days, not the library's twenty-four hours, and the same span as `gcTime` –
   // the default would drop the whole cache on the jamboree's second day, which is
   // exactly when the network is worst and the cache matters most.

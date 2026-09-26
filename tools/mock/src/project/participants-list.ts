@@ -8,6 +8,7 @@ import { rolesForParticipant, type CmtDetails } from "./roles.ts"
  */
 export interface ParticipantRecord {
   readonly born: string
+  readonly city: string | null
   /**
    * The contact tab's sections, with the form and tab levels dropped – available at basic.
    */
@@ -93,6 +94,8 @@ export function decodeParticipantsList(
       born: participant.birthDate,
       sex: participant.sex,
       member_group: participant.memberGroup ?? "",
+      // eslint-disable-next-line unicorn/no-null -- a member the export holds no town for is null on the wire
+      city: participant.city ?? null,
       // eslint-disable-next-line unicorn/no-null -- Scoutnet's missing email is null on the wire
       email: participant.email ?? null,
       // eslint-disable-next-line unicorn/no-null -- a missing mobile number is null on the wire

@@ -123,6 +123,12 @@ export interface Participant {
   readonly answers: Readonly<Record<string, Answer>>
   readonly birthDate: string
   /**
+   * The postort they live at, as the service's one-off export of member number to postort
+   * holds it – with the country after it for somebody living abroad. Absent is null on the
+   * wire.
+   */
+  readonly city?: string
+  /**
    * Their primary email in Scoutnet. Absent is null on the wire.
    */
   readonly email?: string

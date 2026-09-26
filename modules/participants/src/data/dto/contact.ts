@@ -1,5 +1,5 @@
 import type { ContactPerson } from "../../model/ContactDetails"
-import { contactSlots, type ContactEmails, type ContactSlot } from "../../model/Participant"
+import { contactSlots, type ContactSlot, type ContactValues } from "../../model/Participant"
 import { answer, type Answers } from "./answers"
 
 // The listing and the detail read contacts through these, so a row in the list and the
@@ -29,20 +29,22 @@ export function toContactPerson(answers: Answers, prefix: string): ContactPerson
 }
 
 /**
- * The addresses of everybody the registration names around a person – the närstående
- * and the nödkontakter – kept under the slot each was named in, so a list can write
- * to all of them at once and a sheet can give each its own column.
+ * One way of reaching everybody the registration names around a person – the närstående
+ * and the nödkontakter – kept under the slot each was named in, so a list can write to
+ * all of them at once and a sheet can give each its own column.
  *
- * Whether somebody wanted their contacts written to is a question the registration asks
- * and the participants service does not publish, so every named address is gathered. A
- * form that asks for no nödkontakt has no answers under those keys.
+ * Whether somebody wanted their contacts reached is a question the registration asks and
+ * the participants service does not publish, so every named contact is gathered. A form
+ * that asks for no nödkontakt has no answers under those keys.
  * @param answers The flattened answers.
- * @returns The addresses by slot – empty when nobody gave one.
+ * @param field Which way of reaching them to gather.
+ * @returns The values by slot – empty when nobody gave one.
  */
-export function toContactEmails(answers: Answers): ContactEmails {
+export function toContactValues(answers: Answers, field: "email" | "phone"): ContactValues {
   return Object.fromEntries(
     contactSlots
-      .map((slot) => [slot, toContactPerson(answers, slot)?.email] as const)
+      // eslint-disable-next-line security/detect-object-injection -- the field is one of two literals
+      .map((slot) => [slot, toContactPerson(answers, slot)?.[field]] as const)
       .filter((entry): entry is readonly [ContactSlot, string] => entry[1] !== undefined),
   )
 }

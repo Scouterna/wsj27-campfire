@@ -2,7 +2,7 @@ import type { Participant } from "../../model/Participant"
 import type { ParticipantRole } from "../../model/ParticipantRole"
 import type { CmtFunktion } from "../../model/Participation"
 import { answer, flattenAnswers } from "./answers"
-import { toContactEmails, toCurrent } from "./contact"
+import { toContactValues, toCurrent } from "./contact"
 
 /**
  * One participant as the participants service sends them – the basic block a listing row
@@ -19,6 +19,7 @@ export interface ParticipantDto {
   readonly born?: unknown
   readonly sex?: unknown
   readonly member_group?: unknown
+  readonly city?: unknown
   readonly email?: unknown
   readonly mobile?: unknown
   readonly member_type?: unknown
@@ -96,23 +97,27 @@ function toCmtDetail(roles: unknown): Pick<Participant, "funktion" | "isFunktion
 }
 
 /**
- * The addresses the list mails and copies – a person's own, and those of everybody the
- * registration names around them – read from the contact answers the service sends with a
- * listing row.
+ * How to reach a person from the list – their own addresses and phone number, and the
+ * addresses and numbers of everybody the registration names around them – read from the
+ * basic block and the contact answers the service sends with a listing row.
  * @param dto The row the participants service sent.
- * @returns The addresses, each present only where there is one.
+ * @returns The addresses and the numbers, each present only where there is one.
  */
-function toAddresses(
+function toContactInfo(
   dto: ParticipantDto,
-): Pick<Participant, "alternateEmail" | "contactEmails" | "email"> {
+): Pick<Participant, "alternateEmail" | "contactEmails" | "contactPhones" | "email" | "phone"> {
   const answers = flattenAnswers(dto.contact_info, undefined)
   const email = toCurrent(dto.email, answers, "email")
+  const phone = toCurrent(dto.mobile, answers, "mobilePhone")
   const alternateEmail = answer(answers, "alternateEmail")
-  const contactEmails = toContactEmails(answers)
+  const contactEmails = toContactValues(answers, "email")
+  const contactPhones = toContactValues(answers, "phone")
   return {
     ...(email !== undefined && { email }),
+    ...(phone !== undefined && { phone }),
     ...(alternateEmail !== undefined && { alternateEmail }),
     ...(Object.keys(contactEmails).length > 0 && { contactEmails }),
+    ...(Object.keys(contactPhones).length > 0 && { contactPhones }),
   }
 }
 
@@ -152,6 +157,15 @@ function toName(value: unknown): { firstName: string; lastName: string } | undef
 }
 
 /**
+ * A free-text field as the domain carries it: trimmed, and absent when blank.
+ * @param value The untyped value the text arrived in.
+ * @returns The text, or undefined when there is none.
+ */
+function toText(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() !== "" ? value.trim() : undefined
+}
+
+/**
  * One listing row as the domain knows it, or undefined when the payload is not one.
  * Undefined rather than a throw because a list drops the row it cannot read and shows the
  * rest – one broken record must not empty the list somebody is standing in a field trying
@@ -188,12 +202,11 @@ export function toParticipant(dto: ParticipantDto): Participant | undefined {
   const birthDate =
     typeof dto.born === "string" && /^\d{4}-\d{2}-\d{2}$/u.test(dto.born) ? dto.born : undefined
 
-  // The scoutkår at home. The service sends the empty string for nobody's, which is
-  // absence rather than a kår with no name.
-  const memberGroup =
-    typeof dto.member_group === "string" && dto.member_group.trim() !== ""
-      ? dto.member_group.trim()
-      : undefined
+  // The scoutkår and the home town. The service sends the empty string for nobody's kår,
+  // and null or no key at all for nobody's town, all of which are absence rather than a
+  // kår or a town with no name.
+  const memberGroup = toText(dto.member_group)
+  const homeTown = toText(dto.city)
 
   const cmtDetail = toCmtDetail(dto.roles)
 
@@ -207,7 +220,8 @@ export function toParticipant(dto: ParticipantDto): Participant | undefined {
     ...(unitNumber !== undefined && { unitNumber }),
     ...(birthDate !== undefined && { birthDate }),
     ...(memberGroup !== undefined && { memberGroup }),
-    ...toAddresses(dto),
+    ...(homeTown !== undefined && { homeTown }),
+    ...toContactInfo(dto),
     ...cmtDetail,
   }
 }
