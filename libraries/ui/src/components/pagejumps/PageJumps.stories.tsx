@@ -14,8 +14,8 @@ type Story = StoryObj<typeof PageJumps>
 
 /**
  * The chrome's side of the declaration: whatever the page declared is read back and
- * drawn as pressable stops, the current one marked – the way the outline and the
- * phone's jump control consume it in the application.
+ * drawn as pressable stops, the current one marked – the way the outline consumes it
+ * in the application.
  * @returns The readout of the declared stops.
  */
 function Readout(): ReactElement {

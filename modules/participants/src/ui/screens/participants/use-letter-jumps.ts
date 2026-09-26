@@ -17,10 +17,10 @@ const holdMs = 600
 
 /**
  * How many stops the outline column has room for on a given screen: roughly what fits
- * under the chrome at one entry's height, never more than ten – past that the column
- * stops reading as an outline and starts reading as a list of its own.
+ * under the chrome at one entry's height, capped because past a point the column stops
+ * reading as an outline and starts reading as a list of its own.
  * @param viewportHeight The window's inner height, in pixels.
- * @returns The largest number of stops worth offering, at least three.
+ * @returns The largest number of stops worth offering.
  */
 export function stopBudget(viewportHeight: number): number {
   const aboveAndBelow = 260
@@ -56,11 +56,16 @@ function positionOf(name: string): number {
 }
 
 /**
- * One offered stop: its label – a range of the alphabet – and the first row it points
- * at.
+ * One offered stop in the outline.
  */
 export interface LetterStop {
+  /**
+   * The first row the stop points at.
+   */
   readonly firstIndex: number
+  /**
+   * The range of the alphabet the stop covers – "A–D", or a single letter.
+   */
   readonly label: string
 }
 
@@ -188,7 +193,8 @@ export interface LetterJumps {
  * @returns The stops and their wiring.
  */
 export function useLetterJumps(people: readonly Participant[]): LetterJumps {
-  // Read once per mount: a mid-session resize is rare, and the next visit recomputes.
+  // Read once per mount, because a mid-session resize is rare and the next visit
+  // recomputes.
   // One place in the budget is the top stop's, standing outside the alphabet.
   const [budget] = useState(() => stopBudget(window.innerHeight))
   const computed = useMemo(

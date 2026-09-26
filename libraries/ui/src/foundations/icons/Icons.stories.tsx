@@ -35,8 +35,7 @@ const icons: readonly (readonly [string, (props: IconProps) => ReactElement])[] 
 ]
 
 /**
- * The whole set, at the 24-point size the grid is drawn on. The set grows with the
- * screens that draw more.
+ * The whole set, at the 24-point size the grid is drawn on.
  */
 export const All: StoryObj = {
   render: (): ReactElement => (
@@ -62,7 +61,7 @@ const samples: readonly { readonly size: number; readonly strokeWidth: number }[
 ]
 
 /**
- * The two knobs every icon carries: the size it draws itself at, and the weight of its
+ * The knobs every icon carries – the size it draws itself at, and the weight of its
  * line – thickened where an icon is the active one, thinned where it sits behind text.
  */
 export const SizeAndWeight: StoryObj = {

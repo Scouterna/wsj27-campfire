@@ -6,9 +6,8 @@
 # then an iPhone on the newest installed iOS runtime that has one. Exits non-zero when
 # no iPhone simulator is available.
 #
-# Node does the JSON, because `simctl list -j` is the only output of the three that is
-# not a formatted table – and Node is already a prerequisite for the workspace, so this
-# adds nothing to install.
+# Node reads the JSON, because simctl's other output is a formatted table, and Node is
+# already a prerequisite of the workspace.
 
 set -eu
 
@@ -26,10 +25,10 @@ device=$(
     process.stdin.on("data", (chunk) => (raw += chunk)).on("end", () => {
       const byRuntime = JSON.parse(raw).devices
 
-      // Only iPhones on an iOS runtime are candidates at all: a booted Apple Watch or
-      // Apple TV is an ordinary thing to have on a machine, and neither name resolves
-      // for `platform=iOS Simulator`. Newest runtime first, sorted numerically so
-      // iOS-27-0 beats iOS-9-0, which a string sort would not.
+      // Only iPhones on an iOS runtime are candidates, because a booted Apple Watch or
+      // Apple TV is ordinary on a machine and neither name resolves for
+      // `platform=iOS Simulator`. Newest runtime first, sorted numerically so iOS-27-0
+      // beats iOS-9-0.
       const iPhonesByRuntime = Object.entries(byRuntime)
         .filter(([id]) => id.includes("iOS"))
         .sort(([a], [b]) => {
@@ -40,8 +39,8 @@ device=$(
         })
         .map(([, devices]) => devices.filter((device) => device.name.startsWith("iPhone")))
 
-      // A booted simulator wins: the developer put it there, and booting a second
-      // one to run beside it is not what anybody meant.
+      // A booted simulator wins, because the developer put it there, and booting a
+      // second one beside it is not what anybody meant.
       for (const devices of iPhonesByRuntime) {
         const booted = devices.find((device) => device.state === "Booted")
         if (booted) {

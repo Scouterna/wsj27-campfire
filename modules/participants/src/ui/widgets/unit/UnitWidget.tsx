@@ -24,16 +24,14 @@ interface PeopleCardProps {
    */
   readonly people: readonly Participant[]
   /**
-   * Whether each row carries the person's age – the scouts' rows do, the leaders'
-   * do not.
+   * Whether each row carries the person's age.
    */
   readonly withAges: boolean
 }
 
 /**
- * One titled card of people as a compact ledger – one column on a phone, two on a
- * desktop – each row a doorway into the person, the age at the trailing edge where one
- * rides along.
+ * One titled card of people as a compact ledger, each row a doorway into the person, the
+ * age at the trailing edge where one rides along.
  * @param props The title, the people, and whether their ages ride along.
  * @returns The card, or nothing when it holds nobody.
  */
@@ -81,14 +79,13 @@ declare module "@scouterna/wsj27-campfire-ui" {
 }
 
 /**
- * The leader's unit on the home screen, as three cards: the unit itself – its mark, its
- * number, and its name once one is public – then the
- * deltagare and the ledarteam, each row a doorway into the person. Reads the same list
- * the participants section holds, so opening the section afterwards costs no request.
+ * The leader's unit on the home screen: the unit itself – its mark, its number, and its
+ * name where the identities know one – then the deltagare and the ledarteam, each row a
+ * doorway into the person. Reads the same list the participants section holds, so
+ * opening the section afterwards costs no request.
  *
- * The start screen places it for a leader and for nobody else; a viewer without a
- * unit renders nothing, so a misplaced mount stays blank rather than wrong.
- *
+ * The home screen places it for a leader and for nobody else; a viewer without a unit
+ * renders nothing, so a misplaced mount stays blank rather than wrong.
  * @returns The cards, or nothing without a unit in scope.
  */
 export function UnitWidget(): ReactElement | null {

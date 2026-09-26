@@ -57,11 +57,14 @@ export interface LinkTarget {
 
 /**
  * One screen: the component that answers at an address, and what the chrome needs to
- * place it – which section lights up, and where back leads. What the screen is called
- * is the screen's own to say: it declares its name with `PageTitle`, because the page
- * is what knows its name – and, in time, the actions its bar carries.
+ * place it – which section lights up, and where back leads. What the screen is called,
+ * and the actions its bar carries, are the screen's own to declare with `PageTitle` and
+ * `PageActions`, because the page is what knows them.
  */
 export interface ScreenSpec {
+  /**
+   * The component that renders the screen.
+   */
   readonly Component: RouteComponent
   /**
    * The section the screen belongs to, by the id the menus use. The application's
@@ -75,11 +78,11 @@ export interface ScreenSpec {
    */
   readonly parent?: AppPath
   /**
-   * Parses the address's search params into the object the screen reads – the router
+   * Parses the address's search params into the object the screen reads. The router
    * runs it on every navigation and keeps only what it returns, so a screen that
    * carries state in its address names it here. A screen without one carries none.
-   * The result is deliberately wide: the declaring module re-reads it through its own
-   * parser, which is what keeps a stale or hand-typed address harmless.
+   * The result is deliberately wide, because the declaring module re-reads it through
+   * its own parser, which is what keeps a stale or hand-typed address harmless.
    */
   readonly validateSearch?: (search: Record<string, unknown>) => Record<string, unknown>
 }
@@ -115,9 +118,7 @@ export function matchScreen(
     }
 
     const isMatch = pattern.every(
-      // The index walks two arrays of equal, checked length – nothing user-typed
-      // reaches a property lookup here.
-      // eslint-disable-next-line security/detect-object-injection -- bounded array index
+      // eslint-disable-next-line security/detect-object-injection -- an index bounded by the checked length
       (segment, index) => isParameter(segment) || segment === actual[index],
     )
     if (!isMatch) {
@@ -148,8 +149,8 @@ function isParameter(segment: string): boolean {
  * One address, as a route under the application's root.
  *
  * Its return type is deliberately left to inference and then read back by `RouteFor`,
- * because `createRoute` produces a type with eighteen parameters that change between
- * router versions. Inferring it from a real call is both shorter and more durable than
+ * because `createRoute` produces a type with many parameters that change between router
+ * versions. Inferring it from a real call is both shorter and more durable than
  * spelling it out.
  * @param path The address the route answers at.
  * @param spec The screen that renders there, with the search schema it declares.
@@ -173,10 +174,10 @@ export type RouteFor<TPath extends AppPath> = ReturnType<typeof make<TPath>>
 /**
  * Turn a module's routing table into routes hung under the application's root.
  *
- * Returns a record rather than an array, and that is the whole trick: an array collapses
- * the routes into a single union type, and the router can then no longer tell which
- * address takes parameters – it demands a `params` object for every link. Keyed by path,
- * each route keeps its own type, and `Link` stays checked down to that detail.
+ * Returns a record rather than an array, because an array collapses the routes into one
+ * union type, and the router then cannot tell which address takes parameters and
+ * demands a `params` object for every link. Keyed by path, each route keeps its own
+ * type, and `Link` stays checked down to that detail.
  * @param routes The table to mount.
  * @returns The routes, keyed by path so each keeps its own type.
  */
@@ -188,10 +189,9 @@ export function mountRoutes<const TRoutes extends Routes>(
     make(path as AppPath, spec),
   ])
 
-  // Through `unknown`: at runtime this is one uniform record, while the declared type
-  // gives each key its own route. That per-key information is exactly what
-  // `Object.fromEntries` cannot carry, which is why the cast exists rather than being
-  // something a better signature would avoid.
+  // Through `unknown`, because at runtime this is one uniform record while the declared
+  // type gives each key its own route – per-key information `Object.fromEntries` cannot
+  // carry under any signature.
   return Object.fromEntries(mounted) as unknown as {
     [TPath in keyof TRoutes]: RouteFor<TPath & AppPath>
   }

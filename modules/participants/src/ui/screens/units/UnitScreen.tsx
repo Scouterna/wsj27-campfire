@@ -118,7 +118,6 @@ export function UnitScreen(props: UnitScreenProps): ReactElement {
   return (
     <>
       <PageTitle title={title} />
-      {/* Spoken only: the visible answer is each list's own heading. */}
       <p className="unit-status unit-status-spoken" role="status">
         {countOf(group.people.length, props.entryKey)}
       </p>

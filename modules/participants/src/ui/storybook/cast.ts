@@ -9,7 +9,7 @@ import type { ParticipantsList } from "../../model/ParticipantsList"
  */
 
 /**
- * The mock's twenty-three: two units of leaders, deltagare, and IST, plus the contingent
+ * The mock's contingent: units of leaders and deltagare, the IST, and the contingent
  * management. The IST carry no unit, because the participants service does not hold their
  * patrols.
  */
@@ -223,7 +223,7 @@ export function unitList(unitNumber: number): ParticipantsList {
 export const nobodyList: ParticipantsList = { people: [], scope: { kind: "nobody" } }
 
 // Enough names, with å, ä, and ö among them, that a search and a Swedish sort over the
-// generated list below are answering something real rather than eight repeated rows.
+// generated list below are answering something real rather than a few repeated rows.
 const firstNames = [
   "Åsa",
   "Elias",
@@ -270,8 +270,8 @@ const cmtCount = 30
 /**
  * One generated seat in the contingent. The management is handed out first, then the IST,
  * then the units – so a smaller count still produces a shape rather than only deltagare –
- * and the unit seats go round by round across every unit, which makes the first four
- * rounds each unit's leaders and everything after them its deltagare.
+ * and the unit seats go round by round across every unit, which makes the first rounds
+ * each unit's leaders and everything after them its deltagare.
  * @param index The seat's position in the whole contingent.
  * @returns What that seat is, and which unit it belongs to.
  */
@@ -290,21 +290,21 @@ function seatAt(index: number): Pick<Participant, "role" | "unitNumber"> {
 }
 
 /**
- * A list the size of the real contingent – about 2,600 people – for the one thing the
- * cast cannot show: how the screens behave at scale.
+ * A list the size of the real contingent, for the one thing the cast cannot show: how
+ * the screens behave at scale.
  *
  * Generated rather than written, because nobody should read it. The names repeat on
  * purpose; that they repeat unevenly is the point, so a search matches a plausible number
  * of rows rather than all of them or one.
  * @param count How many people to generate. Smaller than the IST and the management
- * together gives a list of those two alone.
+ * together gives a list of those alone.
  * @returns The whole generated contingent, as one list.
  */
 export function largePeopleList(count = 2600): ParticipantsList {
   const people: Participant[] = Array.from({ length: count }, (_, index) => ({
     memberNo: String(1_000_000 + index),
-    // Two strides that share no factor with the name lists' lengths, so the pairs keep
-    // changing rather than repeating every twelfth row.
+    // Strides that share no factor with the name lists' lengths, so every first name
+    // meets every last name rather than the pairs repeating early.
     firstName: firstNames[index % firstNames.length] ?? "Åsa",
     lastName: lastNames[(index * 7) % lastNames.length] ?? "Berg",
     ...seatAt(index),

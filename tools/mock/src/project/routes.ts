@@ -15,8 +15,8 @@ export function projectHealth(context: Context): Response {
 
 /**
  * Builds `/api/project`: wsj27-project-api as the dev environment runs it – its health check, the
- * participant routes, and the Scoutnet refresh. `/cases` is absent, as it is wherever the service
- * runs without a database.
+ * participant routes, and the Scoutnet refresh. The cases service is absent, as it is wherever
+ * wsj27-project-api runs without a database.
  * @param dependencies The auth service's key, the clock, and the list of participants.
  * @returns The routes, ready to be mounted at `/api/project`.
  */
@@ -24,8 +24,9 @@ export function projectRoutes(dependencies: ProjectDependencies): Hono {
   const router = new Hono()
   router.get("/", (context) => projectHealth(context))
   router.route("/participants", participantRoutes(dependencies))
-  // Any signed-in caller may ask the service to fetch Scoutnet again. The seeded list of participants is
-  // already everything there is, so the refetch is nothing, and it answers as the service does.
+  // Any signed-in caller may ask the service to fetch Scoutnet again. The seeded list of
+  // participants is already everything there is, so the refetch does nothing but answer as the
+  // service does.
   router.get("/scoutnet/refresh", (context) => {
     const user = requireAuthUser(context, dependencies.key, dependencies.now())
     // eslint-disable-next-line unicorn/no-null -- the route returns None, which FastAPI sends as null

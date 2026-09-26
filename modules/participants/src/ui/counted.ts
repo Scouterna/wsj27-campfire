@@ -1,11 +1,11 @@
-// Constructed once: a formatter is expensive to build and free to reuse.
+// Constructed once, because a formatter is expensive to build and free to reuse.
 const swedish = new Intl.NumberFormat("sv-SE")
 
 /**
  * A list's count as its card wears it: "59 st" – or "2 av 59 st" when a narrowing left
- * fewer than there are. Handed to `Card` as the aside beside the list's title, hidden
- * from assistive technology there: every screen that shows it already speaks the count
- * through its status line, and a card reads its aside aloud.
+ * fewer than there are. It sits beside the list's title hidden from assistive technology,
+ * because a card reads its aside aloud and every screen that shows it already speaks the
+ * count through its status line.
  * @param count How many rows the list holds.
  * @param total How many there are before any narrowing. Equal to `count`, or left out,
  * reads as the plain count.

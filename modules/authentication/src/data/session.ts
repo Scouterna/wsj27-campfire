@@ -3,10 +3,9 @@ import { fetch, HttpError, type User } from "@scouterna/wsj27-campfire-utils"
 import { decodeUser } from "./dto/UserDto"
 
 /**
- * The session as the application sees it: one ask at a time, the last answer, and who
- * wants to know when it changes. The state is the module's own, as `injected` is in
- * `auth.ts` – a page has one session, and every read under it is checked against the
- * same answer.
+ * The session as the application sees it – one ask at a time, the last answer, and who
+ * wants to know when it changes. The state is module state, because a page has one
+ * session and every read under it is checked against the same answer.
  */
 
 /**
@@ -32,8 +31,8 @@ export type SessionChange =
   { readonly kind: "changed"; readonly user: User } | { readonly kind: "ended" }
 
 /**
- * The store. `inFlight` is the ask every caller joins while it runs; `state` changes only
- * when an ask settles on an answer from the service.
+ * The session's state. `inFlight` is the ask every caller joins while it runs, and
+ * `state` changes only when an ask settles on an answer from the service.
  */
 const store: {
   inFlight: Promise<Answer> | undefined
@@ -42,9 +41,9 @@ const store: {
 } = { inFlight: undefined, listeners: new Set(), state: { kind: "unknown" } }
 
 /**
- * Asks the auth service who is signed in – one ask at a time; a caller while one is in
+ * Asks the auth service who is signed in, one ask at a time, so a caller while one is in
  * flight gets that ask's promise. Records a `nobody` or `somebody` answer, and notifies
- * subscribers when it differs from the last: nobody, or a different member number. An
+ * subscribers when a session that had somebody ends or changes member number. An
  * `unreachable` answer records nothing and notifies nobody.
  * @returns What the ask settled on.
  */
@@ -54,7 +53,7 @@ export function askAgain(): Promise<Answer> {
   }
 
   // Recording and notifying happen inside the ask, before the promise every joiner holds
-  // resolves – so the subscribers have acted on an ended session before any caller's
+  // resolves, so the subscribers have acted on an ended session before any caller's
   // await resumes and decides what to do with the answer.
   const ask = (async () => {
     const answer = await identity()
@@ -124,7 +123,7 @@ export async function withSession<T>(read: () => Promise<T>): Promise<T> {
     if (answer.kind !== "somebody" || answer.user.memberNo !== memberNo) {
       throw error
     }
-    // Once more and no further: a refusal here rethrows without asking again, and the
+    // Once more and no further. A refusal here rethrows without asking again, and the
     // query client's own single retry is the bound.
     value = await read()
   }
@@ -139,12 +138,12 @@ export async function withSession<T>(read: () => Promise<T>): Promise<T> {
 }
 
 /**
- * One identity ask: `/api/auth/user`, and on a refusal one `/api/auth/refresh` round trip
- * to re-mint the short-lived token and the question once more. Only the service saying
- * no – the refresh refused, or the second question refused – is nobody. A network
- * failure, another status, a body that is not JSON, and a payload that is not a user are
- * all unreachable: nothing was said about the session. The last two are real – with no
- * auth service behind this origin, a bare dev server answers the application's own HTML.
+ * One identity ask, and on a refusal one refresh round trip to re-mint the short-lived
+ * token and the question once more. Only the service saying no – the refresh refused,
+ * or the second question refused – is nobody. A network failure, another status, a body
+ * that is not JSON, and a payload that is not a user are all unreachable, because
+ * nothing was said about the session. A bare dev server with no auth service behind it
+ * answers with the application's own HTML, which is how the last two happen.
  * @returns What the ask found.
  */
 async function identity(): Promise<Answer> {
@@ -165,7 +164,7 @@ async function identity(): Promise<Answer> {
 }
 
 /**
- * One question to `/api/auth/user`, decoded.
+ * One identity question, decoded.
  * @returns Somebody, or unreachable when the payload is not a user.
  */
 async function askUser(): Promise<Answer> {
@@ -184,8 +183,8 @@ function isRefusal(error: unknown): boolean {
 
 /**
  * Records an answer and tells the subscribers what changed. Only a change after somebody
- * was signed in is news: the first answer, and nobody after nobody, are the gate's own
- * boot to act on.
+ * was signed in is news, because the first answer, and nobody after nobody, are the
+ * gate's own boot to act on.
  * @param answer What the ask settled on.
  */
 function settle(answer: Answer): void {

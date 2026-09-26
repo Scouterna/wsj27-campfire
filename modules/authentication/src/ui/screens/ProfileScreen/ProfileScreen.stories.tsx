@@ -15,8 +15,8 @@ const meta = {
   component: ProfileScreen,
   decorators: [ScreenDecorator],
   parameters: {
-    // A screen fills the frame, as sign-in's does – the decorator draws the page
-    // surface, so the canvas adds no padded box around it.
+    // A screen fills the frame, because the decorator draws the page surface, so the
+    // canvas adds no padded box around it.
     layout: "fullscreen",
   },
 } satisfies Meta<typeof ProfileScreen>

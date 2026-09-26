@@ -30,8 +30,8 @@ export interface IconFieldProps {
 
 /**
  * One labeled fact with a leading icon: the tile, the field's name, and the value –
- * as a link where the value is something to open, and as a quiet "Ej angiven" where
- * there is no value at all.
+ * as a link where the value is something to open, and as a quiet note where there is
+ * no value at all.
  *
  * @param props The icon, the field's name, and the value with where it leads.
  * @returns The field.
@@ -53,8 +53,7 @@ export function IconField(props: IconFieldProps): ReactElement {
 }
 
 /**
- * The line under the field's name: a link where the value opens something, the value on
- * its own where it does not, and the missing note where there is no value.
+ * The line under the field's name.
  * @param props The field's value, where it leads, and what absence says.
  * @returns The value line.
  */

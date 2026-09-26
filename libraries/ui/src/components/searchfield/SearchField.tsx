@@ -21,8 +21,8 @@ export interface SearchFieldProps {
   readonly placeholder?: string
   /**
    * What sits at the end of the field – a count of what the search left, a quiet
-   * hint. Text or a passive mark, never a control: the whole field is a label, and a
-   * button inside a label presses the input too.
+   * hint. Text or a passive mark, never a control, because the whole field is a label
+   * and a button inside a label presses the input too.
    */
   readonly trailing?: ReactNode
   /**

@@ -223,7 +223,7 @@ describe("reading one person in full", () => {
   })
 
   it("leaves the travel out where the service carries none", () => {
-    // The contingent management travels outside the three packages, and the service sends
+    // The contingent management travels outside the packages, and the service sends
     // the empty string for them – absence, not a package nobody offers.
     expect(toParticipantDetail(record({ participation_type: "" }))?.travel).toBeUndefined()
     expect(toParticipantDetail(record({ participation_type: undefined }))?.travel).toBeUndefined()

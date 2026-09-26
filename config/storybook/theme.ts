@@ -1,14 +1,10 @@
 import { create } from "storybook/theming"
 
-// The one theme both halves of Storybook read – the manager for its sidebar and
-// toolbar (manager.ts), the preview for its Docs pages (preview.tsx) – so the two
-// cannot drift. The values are the guidebook's: the contingent's official red where
-// VitePress puts its brand color, VitePress's own grays for the surfaces and the text,
-// its font stack, and the same app icon its nav bar carries, served from
-// config/vitepress/assets through the static directory main.ts declares.
-
 /**
- * Storybook's theme, the guidebook's look carried over to the catalog.
+ * Storybook's theme, the one both the manager and the Docs pages read so the two cannot
+ * drift. The values are the guidebook's – the contingent's official red where VitePress
+ * puts its brand color, VitePress's own grays and font stack, and the app icon its nav
+ * bar carries.
  */
 export const theme = create({
   base: "light",

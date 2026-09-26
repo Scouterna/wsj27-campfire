@@ -13,8 +13,8 @@
     padding: 0 var(--spacing-container);
   }
 
-  /* The accessible name, carried in the markup and kept out of the picture: clipped
-     rather than hidden, because a display of none is read by nobody either. */
+  /* The accessible name, kept out of sight by clipping rather than hiding, because a
+     display of none is read by nobody. */
   .searchfield-label {
     clip-path: inset(50%);
     height: 1px;

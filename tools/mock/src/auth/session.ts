@@ -19,9 +19,9 @@ export interface AuthDependencies {
 }
 
 /**
- * Whether login and logout may send a browser to an address: its host, port included, is on
- * the allowlist. Scheme and path are not checked, because apps come back to any path of their
- * own. The host is read the way Python's `urlsplit` reads it.
+ * Whether login and logout may send a browser to an address, which they may when its host, port
+ * included, is on the allowlist. Scheme and path are not checked, because apps come back to any
+ * path of their own. The host is read the way Python's `urlsplit` reads it.
  * @param uri The address, if one was sent.
  * @returns Whether the address is allowed.
  */
@@ -46,8 +46,8 @@ function networkLocation(uri: string): string | undefined {
 }
 
 /**
- * Turns ScoutID's tokens into the service's own session: the member number read from the
- * identity claims, the roles looked up for it, a token minted, and the cookies set.
+ * Turns ScoutID's tokens into the service's own session and sets its cookies, with the roles
+ * looked up for the member number in the identity claims.
  * @param context The response being built.
  * @param upstream What ScoutID answered a code or a refresh grant with.
  * @param dependencies The key, the clock, the role map, and ScoutID.

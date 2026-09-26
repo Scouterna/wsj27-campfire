@@ -1,7 +1,7 @@
 import type { Persona } from "../../src/types.ts"
 
 /**
- * Patrik, in the contingent management but missing from the funktion mapping.
+ * Patrik, in the contingent management but missing from the CMT roster.
  */
 export const persona: Persona = {
   email: "cmt@wsj.se",

@@ -7,5 +7,6 @@ package se.scouterna.campfire
  * source, so the shell can be pointed at another origin without a code change.
  */
 object Config {
+  /** Where the web application is served from. */
   val webOrigin: String = BuildConfig.CAMPFIRE_WEB_ORIGIN
 }

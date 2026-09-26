@@ -45,7 +45,7 @@ function Fact(props: FactProps): ReactElement {
 }
 
 /**
- * Erfarenhet: the two yes-or-no facts, each with whatever was written about it.
+ * Erfarenhet: the yes-or-no facts, each with whatever was written about it.
  * @param props What the person has done before.
  * @returns The card.
  */

@@ -9,7 +9,7 @@ import type { ParticipantDetail } from "../../../model/ParticipantDetail"
 
 /**
  * A leader who answered everything: every section has something to draw, including the
- * two the participants service does not publish today.
+ * ID-card name and the languages, which the participants service does not publish.
  */
 export const complete: ParticipantDetail = {
   memberNo: "1100101",
@@ -163,7 +163,7 @@ export const sparse: ParticipantDetail = {
 }
 
 /**
- * What the stories seed the query cache with, so opening any of the three answers from
+ * What the stories seed the query cache with, so opening any of them answers from
  * memory rather than from a network Storybook does not have.
  */
 export const details: readonly ParticipantDetail[] = [complete, sparse, withoutHealth]

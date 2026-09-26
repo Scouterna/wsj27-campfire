@@ -1,13 +1,13 @@
 #!/bin/sh
 # The local environment, in one command: Caddy as the front door on 8000, the mock
-# backend on 8003, and the Vite dev server on 3000. Browse http://localhost:8000 – sign-in is the
-# persona picker, no password, no network beyond this machine.
+# back-end on 8003, and the Vite dev server on 3000. Browse http://localhost:8000, where
+# sign-in is the persona picker – no password, and no network beyond this machine.
 #
-# Whatever already holds one of the three ports – an earlier run, a server a closed
-# terminal left behind, the dev or prod environment's containers – is stopped first and
-# named. Each server is reported only once it answers, and the whole stack is checked
-# through the front door before the prompt says it is up. Ctrl+C stops all three; so
-# does any one of them dying.
+# Whatever already holds one of the ports – an earlier run, a server a closed terminal
+# left behind, the dev or prod environment's containers – is stopped first and named.
+# Each server is reported only once it answers, and the whole stack is checked through
+# the front door before the prompt says it is up. Ctrl+C stops everything, and so does
+# any one server dying.
 set -eu
 
 # shellcheck source=scripts/start/helpers.sh
@@ -33,7 +33,8 @@ wait_for caddy http://localhost:8000/ 15
 wait_for mock http://localhost:8003/__mock__/state 30
 wait_for web http://localhost:3000/ 60
 
-# The checks that matter: the addresses the browser and the shells actually use.
+# Checked again through Caddy, because those are the addresses the browser and the
+# shells use.
 wait_for_ok "the mock through Caddy" http://localhost:8000/__mock__/state 10
 wait_for_ok "the web through Caddy" http://localhost:8000/ 10
 

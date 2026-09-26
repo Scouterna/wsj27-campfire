@@ -21,8 +21,7 @@ export function authHealth(context: Context, roles: RoleCache): Response {
 
 /**
  * Builds `/api/auth`: every route wsj27-auth-api serves, answering as it answers. The one thing
- * that is not the service's is the identity provider behind it – the ScoutID stand-in under
- * `/__mock__/scoutid`.
+ * that is not the service's is the identity provider behind it, the ScoutID stand-in.
  * @param dependencies The key, the clock, the role map, and ScoutID.
  * @returns The routes, ready to be mounted at `/api/auth`.
  */

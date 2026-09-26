@@ -1,30 +1,26 @@
 import type { Participant } from "../../src/types.ts"
 
 /**
- * The contingent's list of participants as wsj27-project-api holds it before it decodes a row – two units
- * of leaders, deltagare, and IST, plus the contingent management. Unit 1's rows are each
- * here for a case, and unit 2 is grown to a realistic 36 deltagare and 4 ledare so the
- * screens are exercised at a unit's true size. The cases: a food allergy with severities, an
- * allergen graded 1 beside them and a food allergy graded 1 across the board, medication
- * with medical equipment, mobility aids, a diagnosis, a mental health condition, a phobia,
- * incomplete vaccinations, special diets, the youngest and oldest deltagare, a leader's record full of
- * holes, and a personal grant beside a function's own. The two contact cases sit in unit 2
- * instead, where they read as the ordinary thing they are: Alfred Berg, whose registration
- * froze his mother's address and number as his own, and Elsa Norén, whose address Scoutnet no
- * longer holds at all, so the registration's copy is all that is left. Beata Sjögren carries
- * the third: Scoutnet holds her father's address as her own, and the address that is hers is
- * the alternative one, which is why a list writes to both. Every answer is keyed by
- * the form template's question key and carries the label Scoutnet would export – "Ja", "Nej",
- * the diet option texts, "1"–"5" severities, and a list where the question takes several
- * options.
- *
- * Three things to know about the data:
+ * The contingent's list of participants as wsj27-project-api holds it before it decodes a row –
+ * two units of leaders, deltagare, and IST, plus the contingent management. Unit 1's rows are
+ * each here for a case: a food allergy with severities, an allergen graded 1 beside them and a
+ * food allergy graded 1 across the board, medication with medical equipment, mobility aids, a
+ * diagnosis, a mental health condition, a phobia, incomplete vaccinations, special diets, the
+ * youngest and oldest deltagare, a leader's record full of holes, and a personal grant beside a
+ * function's own. The contact cases sit in unit 2 instead, where they read as the ordinary
+ * thing they are. Alfred Berg's registration froze his mother's address and number as his own.
+ * Scoutnet holds no address for Elsa Norén, so the registration's copy is the only one.
+ * Scoutnet holds Beata Sjögren's father's address as her own, and the address that is
+ * hers is the alternative one, which is why a list writes to both. Every answer is keyed by the
+ * form template's question key and carries the label Scoutnet would export – "Ja", "Nej", the
+ * diet option texts, "1"–"5" severities, and a list where the question takes several options.
  *
  * - The ledare and kontingentledning rows carry the sign-in personas' identities, so a
- *   signed-in persona exists in the list of participants and their roles are minted from their row.
- * - `travel` stands in for the three questions the service reads a travel package from, one
- *   per member type, which the form template does not publish. It becomes
- *   `participation_type` on the wire.
+ *   signed-in persona exists in the list of participants and their roles are minted from
+ *   their row.
+ * - `travel` stands in for the questions the service reads a travel package from, one per
+ *   member type, which the form template does not publish. It becomes `participation_type`
+ *   on the wire.
  * - A few answers belong to questions the form template does not carry – the `language*`
  *   keys, and the WSJ questions on the leaders' form, which only the deltagare and IST form
  *   publishes. The decoder walks the template, so they never reach the wire, exactly as an
@@ -1028,9 +1024,9 @@ export const participants: readonly Participant[] = [
       languageSpanish: "1",
     },
   },
-  // Unit 2 at its real size – 36 deltagare and 4 ledare – so one unit in the seed
-  // scrolls, narrows, and counts like a real one. Lighter rows than the cases above
-  // on purpose: their job is the shape, and a real list of participants has holes.
+  // Unit 2 at a real unit's size, so one unit in the seed scrolls, narrows, and counts like a
+  // real one. Its rows are lighter than the cases above, because their job is the shape and a
+  // real list of participants has holes.
   {
     id: "p-024",
     firstName: "Alfred",

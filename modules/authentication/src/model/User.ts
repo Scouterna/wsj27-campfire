@@ -3,14 +3,13 @@ import { hasAnyRole, type Role, type Unit, type UserMark } from "@scouterna/wsj2
 /**
  * The derivations the decode fills the signed-in person in with – how they read, and
  * the mark they wear. The `User` itself is `utils`' to define, because every module
- * may ask who is signed in; what the words and the marks are is decided here, once.
+ * may ask who is signed in, but its words and marks are decided here.
  */
 
 /**
- * What each management function is called, and the order a person holding more than
- * one is named by: the head of contingent leads, then the functions as the role
- * vocabulary lists them. The words are the application's – the role set carries kinds,
- * never labels.
+ * What each management function is called, in the order a person holding more than
+ * one is named by – the head of contingent first, then alphabetically by kind. The
+ * words are the application's, because the role set carries kinds, never labels.
  */
 const cmtFunctions: readonly (readonly [Role["kind"], string])[] = [
   ["headOfContingent", "HoC"],
@@ -53,8 +52,8 @@ export function roleLineWithUnitFor(roles: readonly Role[], unit: Unit | undefin
 }
 
 /**
- * The mark somebody wears: their unit's first – the unit is what the application
- * shapes itself around – then the management's.
+ * The mark somebody wears – their unit's first, because the unit is what the
+ * application shapes itself around, then the management's.
  * @param roles The person's roles.
  * @param unit The unit they are placed in, from the roles or the list of participants.
  * @returns The mark, or undefined for somebody who wears none.

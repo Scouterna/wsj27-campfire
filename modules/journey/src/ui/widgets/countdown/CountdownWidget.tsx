@@ -18,20 +18,11 @@ declare module "@scouterna/wsj27-campfire-ui" {
 }
 
 /**
- * Where the contingent is on the journey to Gdańsk – the card the home screen places,
- * whoever is signed in. The widget is the card on the clock: it reads the moment and
- * hands it to `CountdownCard`, which draws it. The clock runs to the second where the
- * wide layout has the room for it, and to the minute on a phone – and for somebody who
- * has asked for reduced motion, because a figure changing every second is motion too.
- * The clock stops while nobody can see the card – scrolled out of view, in a background
- * tab, in a shell that has been put away – so a countdown a year long costs no battery
- * it does not have to, and it catches up the moment the card is back. The dates are the
- * module's own, so it needs no network and never loads.
- *
- * Whose dates it counts to it reads from the signed-in person: the rundresa and the
- * direktresa each start the journey at their own departure, one through Latvia and
- * Lithuania and the other to Olsztyn. For everybody else the journey is the camp – an
- * unknown travel choice included, so nobody is put on a bus they did not book.
+ * The countdown card on the clock, counted to the signed-in person's own travel choice.
+ * The clock runs to the second in the wide layout, and to the minute on a phone or under
+ * reduced motion, because a figure changing every second is motion too. It stops while
+ * nobody can see the card, so a countdown a year long costs no battery it does not have
+ * to. The dates are the module's own, so it needs no network and never loads.
  *
  * @returns The card, on the clock.
  */

@@ -1,14 +1,11 @@
 #!/bin/sh
-# One dev server, started the way the local environment starts its three: the port is
+# One dev server, started the way the local environment starts its own: the port is
 # freed first and the previous holder named, the server is reported only once it answers
 # on its port, and Ctrl+C stops it – the node behind pnpm included, which a plain Ctrl+C
-# on some wrappers does not reach.
+# on some wrappers does not reach. A second start of the same server therefore replaces
+# the first rather than failing on a busy port.
 #
 #   sh scripts/start/server.sh <name> <port> <command...>
-#
-# The root's start:web, start:mock, start:storybook, and start:guidebook all run
-# through here, so a second `pnpm start:web` replaces the first rather than failing on
-# a busy port. A whole environment is scripts/start/local.sh or dev.sh instead.
 set -eu
 
 # shellcheck source=scripts/start/helpers.sh

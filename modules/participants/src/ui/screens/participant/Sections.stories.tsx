@@ -120,7 +120,7 @@ export const ReadinessCard: StoryObj = {
 }
 
 /**
- * Vaccinationer: the childhood program and the two boosters, in every state.
+ * Vaccinationer: the childhood program and the boosters, in every state.
  */
 export const Vaccinations: StoryObj = {
   render: (): ReactElement => (
@@ -132,8 +132,8 @@ export const Vaccinations: StoryObj = {
 }
 
 /**
- * Språk: each language as a pill with its proficiency. Nothing fills this section from the
- * participants service today, so the story is where it is kept honest.
+ * Språk: each language as a pill with its proficiency. The participants service fills
+ * nothing here, so the story is where the section is kept honest.
  */
 export const Languages: StoryObj = {
   render: (): ReactElement => (
@@ -144,7 +144,7 @@ export const Languages: StoryObj = {
 }
 
 /**
- * Erfarenhet: the two yes-or-no facts, each with whatever was written about it.
+ * Erfarenhet: the yes-or-no facts, each with whatever was written about it.
  */
 export const ExperienceCard: StoryObj = {
   name: "Experience",

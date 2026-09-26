@@ -17,18 +17,18 @@ export const cmtAvatarNumber = 55
 
 export interface UnitAvatarProps {
   /**
-   * The avatar's number: a unit's own, 54 for the IST, 55 for the
-   * contingent management.
+   * The avatar's number – a unit's own, or the IST's or the contingent management's
+   * slot beyond the units.
    */
   readonly unitNumber: number
   /**
-   * Marks a unit leader: a star sits in a notch cut out of the mark's corner, in the
-   * unit's own ink.
+   * Marks a unit leader with a star in a notch cut out of the mark's corner, in the
+   * surrounding theme's ink.
    */
   readonly isLeader?: boolean
   /**
-   * Where the avatar sits: a list row (44 points, the default) or a profile header
-   * (64).
+   * Where the avatar sits, which decides its size – a list row by default, or a profile
+   * header.
    */
   readonly size?: "profile" | "row"
 }
@@ -69,7 +69,7 @@ export function UnitAvatar(props: UnitAvatarProps): ReactElement {
   }
 
   // The star sits in a notch masked out of the mark's corner, so the badge reads as
-  // one cut piece rather than a sticker. Its ink is the theme's own, like the mark's.
+  // one cut piece rather than a sticker.
   return (
     <span aria-hidden="true" className={`unit-avatar-leader unit-avatar-leader-${size}`}>
       {mark}

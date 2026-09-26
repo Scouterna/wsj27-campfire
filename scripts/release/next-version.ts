@@ -1,15 +1,12 @@
 // Prints the version an artifact's next release gets, or nothing when its commits since
-// the last release earn none. The release workflow runs it to decide what to publish,
-// and a developer runs it as `pnpm version:next <android|apple|web>` to ask the same
-// question locally.
+// the last release earn none.
 //
-// The last release is the artifact's newest tag, so git is the only state: nothing is
-// read from or written to the tree. It needs the full history and the tags, and refuses
-// a shallow clone – one sees no tags, and would answer as though nothing was ever
+// The last release is the artifact's newest tag, so git is the only state. A shallow
+// clone is refused, because it sees no tags and would answer as though nothing was ever
 // released.
 //
 // The repository is the one the current directory is in, not the one this file sits in,
-// so its test can run it inside a throwaway repository.
+// so a test can run it inside a throwaway repository.
 
 import { spawnSync, type SpawnSyncReturns } from "node:child_process"
 
@@ -24,8 +21,8 @@ const artifacts: readonly Artifact[] = ["android", "apple", "web"]
  * @returns The finished process, its output as text.
  */
 function runGit(args: readonly string[]): SpawnSyncReturns<string> {
-  // Resolving `git` on PATH is the point: the developer's own installation, or the
-  // runner's, is what this asks, and there is no fixed location to pin it to.
+  // Resolving `git` on PATH is the point, because the developer's or the runner's own
+  // installation is what this asks, and there is no fixed location to pin it to.
   // eslint-disable-next-line sonarjs/no-os-command-from-path
   return spawnSync("git", args, { encoding: "utf8" })
 }
@@ -85,8 +82,8 @@ const newest = git(["tag", "--list", `${prefix}*`])
   .toSorted((a, b) => compareVersions(b.version, a.version))
   .at(0)
 
-// A commit the newest release is not behind has nothing left to release: re-running an
-// older commit must not cut a version below one that already shipped.
+// A commit that does not descend from the newest release has nothing left to release,
+// because re-running an older commit must not cut a version below one that already shipped.
 if (newest !== undefined && !isAncestor(newest.tag, "HEAD")) {
   process.exit(0)
 }

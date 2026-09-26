@@ -1,6 +1,7 @@
 # The web application, packaged for deploy: build the workspace, then serve the built
-# SPA from Caddy. Nothing else is in the image – /api/auth, /api/project, and every future back-end path
-# belong to the deployment's ingress, exactly as they do in local development.
+# SPA from Caddy. Nothing else is in the image – /api/auth, /api/project, and every
+# other back-end path belong to the deployment's ingress, exactly as they do in local
+# development.
 #
 # Build from the repository root, where the workspace lives:
 #   pnpm build:image
@@ -14,8 +15,9 @@
 
 # Pinned to the version in .tool-versions, so the image builds on the Node the
 # repository develops on. A floating 24-alpine would drift from it silently. On the
-# builder's platform rather than the target's: this stage only produces static files, and
-# running pnpm under emulation would make every amd64 build several times slower.
+# builder's platform rather than the target's, because this stage only produces static
+# files, and running pnpm under emulation would make every amd64 build several times
+# slower.
 FROM --platform=$BUILDPLATFORM node:24.19.0-alpine AS build
 WORKDIR /campfire
 RUN corepack enable
@@ -41,7 +43,8 @@ COPY . .
 
 # The version the build writes into the page. Declared after the install, so a new
 # version does not invalidate the dependency cache. `pnpm build:image` passes none and
-# gets 0.0.0; the release workflow passes the version it is releasing as a build argument.
+# gets 0.0.0; the release workflow passes the version it is releasing as a build
+# argument.
 ARG CAMPFIRE_VERSION=0.0.0
 RUN pnpm build:web
 
@@ -49,10 +52,10 @@ FROM caddy:2-alpine
 COPY config/environments/prod/image.Caddyfile /etc/caddy/Caddyfile
 COPY --from=build /campfire/apps/web/.build /srv
 
-# The image serves on 8080 so that it never needs root, and this is the other half of
-# that: caddy:2-alpine runs as uid 0 unless told otherwise. Caddy writes its storage
-# unit under XDG_DATA_HOME on start, and /data is not writable for an unprivileged
-# user – /tmp is.
+# The image serves on 8080 so it never needs root, and this is the other half of that –
+# caddy:2-alpine runs as uid 0 unless told otherwise. Caddy writes its storage
+# under XDG_DATA_HOME on start, and /data is not writable for an unprivileged user while
+# /tmp is.
 ENV XDG_CONFIG_HOME=/tmp XDG_DATA_HOME=/tmp
 USER 1000:1000
 

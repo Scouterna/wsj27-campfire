@@ -65,10 +65,10 @@
   }
 
   /* The focus ring, drawn as a rounded border on a pseudo-element rather than an
-     outline: WebKit double-paints a rounded outline at a negative offset, and the
-     default ring would cross the rail and be clipped by the column's own scroll box.
-     The transparent outline is for forced colors, which ignores the pseudo-element's
-     colors and paints the outline in the system's instead. */
+     outline, because WebKit double-paints a rounded outline at a negative offset, and
+     the default ring would cross the rail and be clipped by the column's own scroll
+     box. The transparent outline is for forced colors, which ignores the
+     pseudo-element's colors and paints the outline in the system's instead. */
   .outline-items button:focus-visible {
     outline: 2px solid transparent;
     outline-offset: -4px;

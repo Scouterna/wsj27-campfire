@@ -32,9 +32,7 @@ describe("which screen a pathname names", () => {
   })
 
   it("prefers a literal segment over a parameter, whichever comes first in the table", () => {
-    // The router resolves by specificity, so this has to as well: a chrome that named
-    // one screen while the router mounted another would be worse than either answer.
-    // Declared parameter-first on purpose – key order must not decide it.
+    // Declared parameter-first on purpose, so key order cannot decide it.
     const withLiteral = {
       "/participants/$id": spec("participants"),
       "/participants/nya": spec("participants"),
@@ -49,8 +47,6 @@ describe("mounting a table as routes", () => {
   it("keys the mounted routes by path, so each keeps its own type", () => {
     const mounted = mountRoutes(screens)
 
-    // Keyed by path, not collapsed into an array: that is what keeps each route's own
-    // literal type, and with it every checked `Link` in the product.
     expect(Object.keys(mounted)).toStrictEqual(["/", "/participants", "/participants/$id"])
     expect(mounted["/participants"]).toBeDefined()
   })

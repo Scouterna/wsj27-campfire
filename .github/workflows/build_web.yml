@@ -29,15 +29,11 @@ jobs:
     # time inside Docker – the same ceiling as release_web.yml.
     timeout-minutes: 20
     steps:
-      # Everything the bundle is made from: the app, the modules it composes,
-      # the libraries they stand on, the Vite, Storybook, and TypeScript
-      # configuration, the Dockerfile, the image's Caddyfile, and what the image
-      # leaves out, the lockfile, the Node version the runner installs, the
-      # workspace's install policy, and this workflow.
+      # Everything the bundle and the image are made from, and this workflow.
       #
-      # The image files also answer a second question – whether to build the
-      # image at all. It is the slow step, and a change to the bundle alone is
-      # already proven by the two builds before it.
+      # The image's own files also decide whether to build the image at all,
+      # because it is the slow step and a change to the bundle alone is already
+      # proven by the builds before it.
       - name: Look for web changes
         id: changed
         env:
@@ -93,7 +89,7 @@ jobs:
 
       # Every story is compiled here, so a component whose story no longer
       # builds fails the pull request rather than the next person who opens
-      # Storybook. It is a build, not a render: a story that bundles and then
+      # Storybook. It is a build, not a render, so a story that bundles and then
       # throws on screen still passes.
       - name: Build Storybook
         if: steps.changed.outputs.web == 'true'

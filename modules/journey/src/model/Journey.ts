@@ -3,12 +3,9 @@ import type { Travel } from "@scouterna/wsj27-campfire-utils"
 /**
  * The contingent's journey to Gdańsk, as dates.
  *
- * The whole trip is fixed and public, so it is written down here rather than fetched:
- * the rundresa's buses leave Sweden on 21 July 2027 for Latvia and Lithuania, the
- * direktresa leaves on 26 July to join the contingent in Olsztyn, the contingent is at
- * the jamboree 29 July to 9 August, and everyone is home on 10 August. Nothing about the
- * countdown needs a server. They are the contingent's plan rather than anyone's own
- * booking, and the widget says so – a change here is a one-line edit, never a migration.
+ * The trip is fixed and public, so it is written down here rather than fetched. The
+ * dates are the contingent's plan rather than anyone's own booking, and the widget says
+ * so.
  *
  * Every date is midnight local time on the day named. Comparisons are made against day
  * boundaries, so "days left" means whole days rather than a fraction that rounds oddly
@@ -46,12 +43,12 @@ export const homecoming = new Date(2027, 7, 10)
 export const campDays = daysBetween(campStart, campEnd) + 1
 
 /**
- * One person's journey: where it starts, and how long it is. Every journey ends on the
+ * One person's journey – where it starts, and how long it is. Every journey ends on the
  * homecoming day; where it starts depends on how the person travels.
  */
 export interface Itinerary {
   /**
-   * The day the journey begins: the day the contingent's travel leaves Sweden for those
+   * The day the journey begins – the day the contingent's travel leaves Sweden for those
    * who travel with it, and the day the contingent reaches camp otherwise.
    */
   readonly departure: Date
@@ -99,14 +96,14 @@ function departureFor(travel: Travel | undefined): Date {
 }
 
 /**
- * Where the contingent is on the journey. The phases run in this order: `ahead` counts
- * down to the departure, and the rest count through the days.
+ * Where a journey stands, in the order the phases run – `ahead` counts down to the
+ * departure, and the rest count through the days.
  */
 export type JourneyPhase = "ahead" | "traveling" | "camping" | "home"
 
 /**
- * Which phase a given moment falls in. A journey without a road is never `traveling`:
- * it opens on the contingent's first day at camp.
+ * Which phase a given moment falls in. A journey without a road is never `traveling`,
+ * because it opens on the contingent's first day at camp.
  * @param now The moment to place. Passed in rather than read from the clock, so a
  * screen renders the same way in a test as it does in August 2027.
  * @param trip Whose journey.
@@ -169,7 +166,7 @@ export function dayOfJourney(now: Date, trip: Itinerary): number {
 
 /**
  * Which day at the camp a moment falls on, counting the arrival day as day one.
- * Clamped the same way.
+ * Clamped to the camp, so a moment outside it names the nearest end.
  * @param now The moment to place.
  * @returns The day number, from one to the camp's length.
  */

@@ -8,7 +8,7 @@
     margin: 0;
   }
 
-  /* Heard, never seen: the count lives in the lists' own headings. */
+  /* Heard, never seen, because the count lives in the lists' own headings. */
   .unit-status-spoken {
     clip-path: inset(50%);
     height: 1px;

@@ -1,7 +1,7 @@
 import type { Persona } from "../../src/types.ts"
 
 /**
- * Anna, in the administration function – the one caller allowed the role map.
+ * Anna, in the administration function – the one persona allowed the role map.
  */
 export const persona: Persona = {
   email: "admin@wsj.se",

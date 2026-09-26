@@ -42,7 +42,7 @@
 
   /* Dressed like the floating action button – the ink with a white glyph – rather
      than the bright, whose white counterpart goes dark on yellow. One dress keeps the
-     glyph white in all five themes. */
+     glyph white in every theme. */
   .contact-card-action {
     align-items: center;
     background: var(--color-theme-ink);
@@ -61,8 +61,8 @@
     width: 18px;
   }
 
-  /* Darkening steps mixed over the bright rather than picked per theme, so all five
-     respond to a press the same way. */
+  /* Darkening steps mixed over the ink rather than picked per theme, so every theme
+     responds to a press the same way. */
   @media (hover: hover) {
     .contact-card-action:hover {
       background: color-mix(in srgb, var(--color-theme-ink) 85%, black);

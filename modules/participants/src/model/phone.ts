@@ -1,9 +1,8 @@
 /**
- * Phone numbers as people write them, not as registries store them. Scoutnet holds
- * numbers in whatever shape the member typed – "+46708277486", "070-8277486",
- * "070-827 74 86" – and a leader in a field reads the conventional Swedish shape
- * fastest. Formatting is display-only: what a `tel:` link dials is the link's own
- * business.
+ * Phone numbers as people read them, not as Scoutnet stores them. Scoutnet holds numbers
+ * in whatever shape the member typed – "+46708277486", "070-8277486", "070-827 74 86" –
+ * and a leader in a field reads the conventional Swedish shape fastest. Formatting is for
+ * display only, never what a `tel:` link dials.
  */
 
 // The separators people put in numbers, all of which say nothing about the number.
@@ -23,7 +22,7 @@ function compact(value: string): string {
   if (bare.startsWith("0046")) {
     return `0${bare.slice(4)}`
   }
-  // Any other 00 prefix is a foreign number: give it back untouched rather than as a
+  // Any other 00 prefix is a foreign number, so it goes back untouched rather than as a
   // stripped digit blob a later check would mistake for a Swedish one.
   if (bare.startsWith("00")) {
     return value

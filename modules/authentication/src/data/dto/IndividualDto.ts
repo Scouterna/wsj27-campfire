@@ -3,8 +3,8 @@ import type { Travel, Unit } from "@scouterna/wsj27-campfire-utils"
 import type { Registration } from "../../model/Registration"
 
 /**
- * The two answer fields the registration read uses from
- * `GET /api/project/participants/individual/<memberNo>`.
+ * The fields the registration read uses from the participants service's record of one
+ * person.
  */
 export interface IndividualDto {
   readonly participation_type?: unknown
@@ -22,10 +22,9 @@ const travelSpellings: ReadonlyMap<unknown, Travel> = new Map([
 ])
 
 /**
- * Reads the unit out of the participants service's answer. The wire carries the troop
- * as a string, and the ones that name a unit read as digits – a member type such as
- * `IST` is a troop to the list of participants and no unit to Campfire, so it converts
- * to nothing rather than to a number that would be wrong.
+ * Reads the unit out of the participants service's answer. Only a troop of digits names
+ * a unit, because a member type such as `IST` is a troop to the list of participants
+ * and no unit to Campfire.
  * @param dto The record the participants service answered with.
  * @returns The unit, or undefined when the record places them in none.
  */
@@ -36,10 +35,9 @@ export function toUnit(dto: IndividualDto): Unit | undefined {
 }
 
 /**
- * Reads the travel package out of the same answer. The service normalizes the
- * registration's three questions into one spelling, and anything outside the three –
- * the empty string the management's rows carry included – converts to nothing rather
- * than to a package nobody booked.
+ * Reads the travel package out of the same answer. Anything but the spellings the
+ * service normalizes the registration to – the empty string the management's rows carry
+ * included – converts to nothing rather than to a package nobody booked.
  * @param dto The record the participants service answered with.
  * @returns The travel package, or undefined when the record carries none.
  */

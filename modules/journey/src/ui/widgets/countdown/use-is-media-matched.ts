@@ -7,8 +7,8 @@ import { useCallback, useSyncExternalStore } from "react"
  * @returns True while the query matches.
  */
 export function useIsMediaMatched(query: string): boolean {
-  // Held stable per query: a new subscribe function makes React resubscribe, and the
-  // widget renders once a second.
+  // Held stable per query, because a new subscribe function makes React resubscribe on
+  // every render.
   const subscribe = useCallback(
     (onChange: () => void) => {
       const media = matchMedia(query)

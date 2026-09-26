@@ -7,8 +7,8 @@ import { usePageTitle } from "../components/pagetitle/PageTitle"
  * Wraps a screen's story in the page column the application puts a screen in: the page
  * heading, reading the title the screen declares through `PageTitle`, over the content
  * – without it a screen story is title-less body text, because the heading owns the
- * page's `h1`. The condensed bar is not here: it belongs to phone width, where the
- * application hides it again from 768px up, and it has stories of its own.
+ * page's `h1`. The condensed bar is left out, because it belongs to phone width and has
+ * stories of its own.
  *
  * Applied per story file rather than globally, because only whole screens render in a
  * page column.

@@ -1,5 +1,5 @@
-/* The reset: only what the browser gets wrong for this application. Anything opinionated
-   about how Campfire looks belongs in base, not here. */
+/* Only what the browser gets wrong for this application. Anything opinionated about how
+   Campfire looks belongs in base, not here. */
 
 @layer reset {
   *,

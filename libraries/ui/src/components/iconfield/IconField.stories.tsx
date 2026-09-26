@@ -73,7 +73,7 @@ export const AbsentWithOwnLabel: Story = {
 }
 
 /**
- * The three states together, as a contact card lists them.
+ * The states together, as a contact card lists them.
  */
 export const AsAList: Story = {
   render: (): ReactElement => (

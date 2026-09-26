@@ -1,22 +1,20 @@
 #!/bin/sh
 # What every start script needs in order to be trusted: a port is freed before it is
-# taken, a process is only reported as running once it answers, and everything started
-# is stopped together on Ctrl+C or the first failure. Sourced by the scripts beside it, never run.
+# taken, a process is reported as running only once it answers, and everything started
+# is stopped together on Ctrl+C or the first failure. Sourced, never run.
 #
-# macOS is the target: the shells' toolchains only exist here, and continuous
-# integration never runs a start script. lsof, ps, curl, and sed are all the system's
-# own.
+# macOS is the target, because the shells' toolchains exist only there and continuous
+# integration runs no start script, so lsof, ps, curl, and sed are the system's own.
 #
-# Every function prints for a person, on the terminal that ran the script. Nothing here
-# is quiet about killing a process – a server that vanished with no explanation is worse
-# than a port that was busy.
+# Every function prints for a person at the terminal, and none is quiet about killing a
+# process – a server that vanished with no explanation is worse than a busy port.
 
 # The repository root, so a sourcing script can run from anywhere.
 repository=$(cd "$(dirname "$0")/../.." && pwd)
 
-# The processes this script started, as "name:pgid" pairs. Each runs in a process group
-# of its own (see `start_process`), so stopping one stops everything under it – pnpm,
-# the node it spawned, and the sed prefixing its output – with one signal.
+# The processes the script started, as "name:pgid" pairs. Each runs in a process group
+# of its own, so one signal stops everything under it – pnpm, the node it spawned, and
+# the sed prefixing its output.
 processes=""
 
 die() {
@@ -38,10 +36,9 @@ describe() {
   ps -o command= -p "$1" 2>/dev/null | cut -c1-100
 }
 
-# Stop whatever listens on a port, and say what it was. A previous run of a start
-# script, a server left behind by a crashed terminal, a Storybook whose wrapper died
-# but not its node – all of these end the same way. Docker's port proxy is the one
-# exception: the containers hold the port, so they are what is stopped.
+# Stop whatever listens on a port, and say what it was – an earlier run, a server a
+# crashed terminal left behind, or a node whose wrapper died. Docker's port proxy is the
+# exception, because the containers behind it hold the port, so they are what is stopped.
 free_port() {
   name=$1
   port=$2
@@ -53,8 +50,8 @@ free_port() {
     case "$command" in
       *com.docker*)
         echo "Port $port ($name) is held by Docker – stopping the dev and prod environments' containers."
-        # A name of its own, because POSIX sh has no `local`: a bare `environment` here
-        # would overwrite the caller's, and dev.sh reads its own after this returns.
+        # A name of its own, because POSIX sh has no `local` and a caller still reads its
+        # own `environment` after this returns.
         for compose_environment in dev prod; do
           docker compose --file "$repository/config/environments/$compose_environment/compose.yaml" \
             down >/dev/null 2>&1 || true
@@ -90,10 +87,9 @@ wait_for_port_to_free() {
 }
 
 # Start a command in a process group of its own, every line of its output prefixed
-# with its name so three servers on one terminal stay readable. `set -m` is what gives
-# each background job its own group – and, as a consequence, keeps the terminal's
-# Ctrl+C from reaching the children directly: the trap below is the one place that
-# stops them, in order, with a report.
+# with its name so servers sharing a terminal stay readable. `set -m` gives each
+# background job its own group, which also keeps the terminal's Ctrl+C from reaching
+# the children directly, so the trap is the one place that stops them, with a report.
 start_process() {
   name=$1
   shift
@@ -154,11 +150,9 @@ wait_for_ok() {
   echo " ok"
 }
 
-# Like `wait_for`, but a 5xx does not count. Between the two there is a case neither
-# covers: a backend reached through a proxy, where the proxy answers 502 on its own
-# behalf until the backend starts. `wait_for` takes that 502 as an answer and reports up;
-# `wait_for_ok` never passes, because the backend's healthy reply is a 401. This waits
-# for any status the backend itself produced.
+# Like `wait_for`, but a 5xx does not count – for a back-end behind a proxy that answers
+# 502 on its own behalf until the back-end starts. `wait_for` would take that 502 as an
+# answer, and `wait_for_ok` never passes a back-end whose healthy reply is a 401.
 wait_for_backend() {
   name=$1
   url=$2
@@ -166,8 +160,8 @@ wait_for_backend() {
   printf '%s' "Waiting for $name at $url "
   waited=0
   while :; do
-    # curl writes its %{http_code} – 000 – even when it fails, so the fallback adds
-    # nothing: `|| echo 000` would make a timed-out probe report "000000".
+    # curl writes 000 as the status even when it fails, so a fallback of its own would
+    # make a timed-out probe report "000000".
     code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 2 "$url" || true)
     [ "$code" -ge 100 ] && [ "$code" -lt 500 ] && break
     waited=$((waited + 1))
@@ -214,7 +208,6 @@ stop_processes() {
 
 # Keep the script in the foreground until Ctrl+C, or until one of the processes dies
 # on its own – in which case the rest are stopped too and the exit code says so.
-# Everything running is the only state this script ever reports as running.
 supervise() {
   while :; do
     for entry in $processes; do
@@ -226,8 +219,8 @@ supervise() {
   done
 }
 
-# Arms the trap. INT and TERM exit through the EXIT handler, so stopping happens once
-# whichever way the script ends – Ctrl+C, a `die`, or the end of the script.
+# The EXIT handler. INT and TERM exit through it, so stopping happens once whichever
+# way the script ends – Ctrl+C, a `die`, or the end of the script.
 on_exit() {
   status=$?
   trap - INT TERM EXIT
@@ -236,9 +229,10 @@ on_exit() {
   exit "$status"
 }
 
-# Ctrl+C is how a dev server is meant to end, so it exits 0: the 130 convention would
-# have pnpm print an ELIFECYCLE failure banner over the "Stopped." that just said
-# everything went as asked. TERM keeps its code – that is somebody else stopping us.
+# Arms the trap. Ctrl+C is how a dev server is meant to end, so it exits 0, because the
+# conventional 130 would have pnpm print an ELIFECYCLE failure banner over the "Stopped."
+# it just printed.
+# TERM keeps its code, because that is somebody else stopping the script.
 arm_trap() {
   trap on_exit EXIT
   trap 'exit 0' INT

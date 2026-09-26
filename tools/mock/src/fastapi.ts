@@ -125,7 +125,7 @@ export function notFound(context: Context): Response {
 }
 
 /**
- * Both services' middleware, which marks every response as never to be cached – their
+ * Both services' middleware, which marks every response as never to be cached, because their
  * responses carry session state.
  * @param context The request being answered.
  * @param next The rest of the chain.
@@ -137,7 +137,7 @@ export const noCache: MiddlewareHandler = async (context, next) => {
   context.res.headers.set("Expires", "0")
 }
 
-// Every method a browser or a client sends to a route declared for another.
+// The methods a path answers with a 405 when it is declared for another.
 const methods = ["DELETE", "GET", "PATCH", "POST", "PUT"] as const
 
 /**
@@ -171,8 +171,8 @@ export interface CookieAttributes {
   readonly secure: boolean
 }
 
-// Python's http.cookies: a value made only of these characters goes out as it is; any other
-// value is quoted, and inside the quotes these and a few more pass through untouched.
+// Python's http.cookies sends a value made only of these characters as it is and quotes any
+// other, and inside the quotes these and a few more pass through untouched.
 const legalValue = /^[\w!#$%&'*+\-.:^`|~]+$/u
 const unescapedInQuotes = /^[\w !#$%&'()*+\-./:<=>?@[\]^`{|}~]$/u
 

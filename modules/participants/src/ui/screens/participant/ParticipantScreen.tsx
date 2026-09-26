@@ -32,7 +32,7 @@ const pendingTitle = "Deltagare"
 /**
  * Whether a readiness block says anything a tile or a quote could draw.
  * @param readiness The readiness to weigh.
- * @returns True where at least one of the three answers arrived.
+ * @returns True where at least one answer arrived.
  */
 function hasAnswers(readiness: Readiness): boolean {
   return (
@@ -43,7 +43,7 @@ function hasAnswers(readiness: Readiness): boolean {
 }
 
 /**
- * Whether an experience block carries either of its two facts.
+ * Whether an experience block carries any of its facts.
  * @param experience The experience to weigh.
  * @returns True where at least one fact arrived.
  */
@@ -54,12 +54,9 @@ function hasFacts(experience: Experience): boolean {
 }
 
 /**
- * One person in full: one screen for all four roles, drawing the sections whose data
- * arrived and nothing for the rest, so the per-role variation falls out of the record
- * rather than out of a branch.
- *
- * The chrome titles the screen with the person's name the moment the record arrives –
- * `PageTitle` is how the screen tells it.
+ * One person in full: one screen for every role, drawing the sections whose data arrived
+ * and nothing for the rest, so the per-role variation falls out of the record rather than
+ * out of a branch.
  * @param props Whose record to show.
  * @returns The screen.
  */
@@ -76,11 +73,10 @@ export function ParticipantScreen(props: ParticipantScreenProps): ReactElement {
   }
 
   if (error !== null || participant === undefined) {
-    // One wording for every failure. A member number nobody holds and one outside the
-    // viewer's scope are deliberately not told apart – the service answers both the same
-    // way on purpose, and saying which it was would leak who exists. There is nothing to
-    // retry either: a second ask gets the same 403 or 404. An expired session never lands
-    // here – the query client asks who is signed in, and the gate shows sign-in instead.
+    // One wording for every failure, because saying which it was would leak who exists,
+    // and no retry, because a second ask gets the same answer. An expired session never
+    // lands here, because the query client asks who is signed in and the gate shows
+    // sign-in instead.
     return (
       <>
         <PageTitle title={pendingTitle} />

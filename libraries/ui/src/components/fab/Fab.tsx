@@ -47,7 +47,7 @@ export type FabProps = {
  *
  * @param props The icon, the accessible name, and what pressing does or where it
  * leads.
- * @returns The control.
+ * @returns A button, or a router link when `link` is given.
  */
 export function Fab(props: FabProps): ReactElement {
   if (props.link !== undefined) {

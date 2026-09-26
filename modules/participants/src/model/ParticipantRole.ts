@@ -1,8 +1,8 @@
 /**
  * What someone is at the jamboree.
  *
- * A closed set: the screens switch on it exhaustively, which is what makes an unknown
- * role a compile error rather than a blank label.
+ * A closed set, because the screens switch on it exhaustively, which is what makes an
+ * unknown role a compile error rather than a blank label.
  */
 export type ParticipantRole = "deltagare" | "ist" | "ledare" | "kontingentledning"
 

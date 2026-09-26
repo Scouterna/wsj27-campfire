@@ -42,15 +42,15 @@ export type PageTitleProps = {
  * Declares the page's title: render it anywhere in a page and the chrome picks it up –
  * the bar's title and the document title alike. The page is the one thing that knows
  * its own name, so every screen declares one; the route table carries no titles at
- * all. It renders nothing itself, and the declaration is withdrawn when it unmounts.
- * The write happens in a layout effect, so a title known at first render is on the bar
- * before paint rather than one frame after.
+ * all. The declaration is withdrawn when it unmounts, and written in a layout effect,
+ * so a title known at first render is on the bar before paint rather than one frame
+ * after.
  *
  * This is the headless half of the pair. What a reader sees under the name "page title"
  * is drawn by `NavigationBar`, which is handed the title rather than reading it.
  *
  * @param props The title to declare.
- * @returns Nothing – the component renders nothing.
+ * @returns Always null, because the chrome draws the title.
  */
 export function PageTitle(props: PageTitleProps): null {
   useLayoutEffect(() => {

@@ -1,14 +1,11 @@
-/* The design system's global stylesheet, imported by the application by package subpath:
-   `@import "@scouterna/wsj27-campfire-ui/styles.css"`.
+/* The design system's global stylesheet, which the application imports as
+   `@scouterna/wsj27-campfire-ui/styles.css`. A component's own stylesheet is not listed
+   here, because the component imports it and it arrives when the component does.
 
-   Global only: the tokens, the faces, the reset, and the base. A component's own CSS is
-   not global, so it travels with the component – `Logo.tsx` imports `Logo.css` – and
-   arrives when the component does rather than being listed here.
-
-   The cascade order itself is declared in the application's `index.html`, before any
-   stylesheet loads. Everything below writes into one of those layers and never outside
-   them. Order still matters here for one reason: tokens come first because every rule
-   below reads them with no fallback value, so a wrong order breaks styling silently. */
+   The application's `index.html` declares the cascade layers before any stylesheet
+   loads, and every sheet below writes into one of them. Tokens still come first, because
+   every rule below reads them with no fallback value, so a wrong order breaks styling
+   silently. */
 
 @import "./styles/tokens.css";
 @import "./styles/fonts.css";

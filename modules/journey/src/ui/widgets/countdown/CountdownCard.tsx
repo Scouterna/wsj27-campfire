@@ -16,9 +16,9 @@ import {
 import "./CountdownCard.css"
 
 /**
- * How one day of the trip is painted in the bar: dashed before the journey has begun,
+ * How one day of the trip is painted in the bar – dashed before the journey has begun,
  * filled once behind the contingent, today standing taller, and the homecoming day on
- * the end – checked off once it is reached.
+ * the end, checked off once it is reached.
  */
 type Segment = "planned" | "travel" | "camp" | "today" | "remaining" | "home" | "home-done"
 
@@ -57,7 +57,7 @@ function paint(segment: Segment, count: number): readonly Segment[] {
 }
 
 /**
- * One figure in the count: the number, and the unit it counts.
+ * One figure in the count – the number, and the unit it counts.
  */
 interface Figure {
   readonly unit: string
@@ -65,7 +65,7 @@ interface Figure {
 }
 
 /**
- * The count beside the heading: a leading label, and the figures after it.
+ * The count beside the heading – a leading label, and the figures after it.
  */
 interface Count {
   readonly figures: readonly Figure[]
@@ -73,7 +73,7 @@ interface Count {
 }
 
 /**
- * The one count for a moment: down to the journey's first day while it is ahead, and
+ * The one count for a moment – down to the journey's first day while it is ahead, and
  * through the days once it has begun. None once everyone is home, when the line is the
  * thank-you instead.
  * @param now The moment the card is drawn for.
@@ -141,7 +141,7 @@ interface StatusProps {
 }
 
 /**
- * The line beside the heading for one moment: the count while something is ahead or
+ * The line beside the heading for one moment – the count while something is ahead or
  * under way, and the thank-you as an all-clear badge once everyone is home. Phrasing
  * content, because the card draws its aside inside a `span`.
  * @param props The moment, the phase it falls in, and the trip.
@@ -181,8 +181,8 @@ interface Road {
  * journey is the camp.
  */
 const roads: Readonly<Partial<Record<Travel, Road>>> = {
-  // Three days of the bar is too narrow for the rundresa's form of the wording, so this
-  // road names only where it goes, and the camp leg beside it carries the year.
+  // The direktresa's leg is too narrow for the rundresa's form of the wording, so it
+  // gives only its dates, and the camp leg beside it carries the year.
   direktresa: { dates: "26–28 juli", route: "Till Olsztyn" },
   rundresa: { dates: "Resa · 21–28 juli 2027", route: "Sverige → Lettland → Litauen" },
 }
@@ -242,6 +242,9 @@ function Legend(props: LegendProps): ReactElement {
   )
 }
 
+/**
+ * The moment to draw the card for, how fine its countdown runs, and whose journey.
+ */
 export interface CountdownCardProps {
   /**
    * The moment the card is drawn for. Handed in rather than read from the clock, so
@@ -250,16 +253,13 @@ export interface CountdownCardProps {
    */
   readonly now: Date
   /**
-   * Whether the countdown runs to the second rather than the minute. Off by default;
-   * the widget turns it on in the wide layout for everybody who has not asked for
-   * reduced motion, and hands in a moment that moves as often.
+   * Whether the countdown runs to the second rather than the minute, off by default.
+   * The caller hands in a moment that moves as often.
    */
   readonly seconds?: boolean
   /**
-   * How the person travels. The rundresa and the direktresa each count down to their
-   * own departure, and the bar walks their road; traveling on one's own, or a travel
-   * choice nobody knows, makes the journey the camp, and everything counts to the day
-   * the contingent reaches it.
+   * How the person travels, which decides where the journey starts and whether the bar
+   * walks a road before the camp.
    */
   readonly travel?: Travel | undefined
 }
@@ -270,8 +270,8 @@ export interface CountdownCardProps {
  * The line beside the heading counts down to the journey's first day, counts through
  * the days once it has begun, and closes with a thank-you once everyone is home. The
  * bar walks the trip day by day, the legend names each leg at the width its days
- * occupy, and while the dates are still ahead the card says they are not yet the
- * person's own.
+ * occupy, and until everyone is home the card says the dates are the contingent's plan
+ * rather than the person's own.
  *
  * @param props The moment, how the person travels, and how fine the countdown runs.
  * @returns The card.
@@ -286,10 +286,11 @@ export function CountdownCard(props: CountdownCardProps): ReactElement {
       aside={<Status now={props.now} phase={phase} seconds={props.seconds === true} trip={trip} />}
       title="Resan"
     >
-      {/* Decoration under the count: the same journey the words already tell. */}
+      {/* Hidden from assistive technology, because the words already tell the same
+        journey. */}
       <div aria-hidden="true" className="countdown-bar">
         {segmentsIn(phase, journeyDay, trip).map((segment, index) => (
-          // Position is the identity: segment n is day n of the fixed journey.
+          // Position is the identity, because segment n is day n of the fixed journey.
           <span key={index} className={`is-${segment}`}>
             {segment === "home-done" ? "✓" : null}
           </span>
@@ -297,8 +298,7 @@ export function CountdownCard(props: CountdownCardProps): ReactElement {
       </div>
       <Legend now={props.now} phase={phase} travel={props.travel} />
       {phase === "home" ? null : (
-        // The dates above are the contingent's plan, not yet anyone's own booking; once
-        // everyone is home they are history, and the caveat stands down.
+        // Once everyone is home the dates are history, and the caveat stands down.
         <p className="countdown-caveat">
           Exakta datum och tider för just <b>dig</b> och <b>din avdelning</b> visas inte här än.
         </p>

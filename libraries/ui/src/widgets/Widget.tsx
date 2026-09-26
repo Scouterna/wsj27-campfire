@@ -4,6 +4,9 @@ import type { WidgetId, Widgets } from "./widgets"
 
 const WidgetsContext = createContext<Widgets>({})
 
+/**
+ * The merged widget tables a `WidgetsProvider` offers, and the subtree that may place them.
+ */
 export interface WidgetsProviderProps {
   /**
    * The subtree whose screens may place widgets – in practice the whole signed-in
@@ -26,6 +29,9 @@ export function WidgetsProvider(props: WidgetsProviderProps): ReactElement {
   return <WidgetsContext.Provider value={props.widgets}>{props.children}</WidgetsContext.Provider>
 }
 
+/**
+ * The widget a `Widget` places.
+ */
 export interface WidgetProps {
   /**
    * The widget to place, by the id its module declared.

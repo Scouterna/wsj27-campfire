@@ -1,16 +1,16 @@
 import type { Role } from "../roles/roles"
 
 /**
- * How the signed-in person travels to the jamboree. A closed set, like the roles – the
- * registration offers exactly these three, and the contingent management travels
- * outside them. Where the list of participants gave no answer there is no `Travel` at
- * all, and nothing downstream may treat that as a booked seat.
+ * How the signed-in person travels to the jamboree, from the closed set the registration
+ * offers – the contingent management travels outside it. Where the list of participants
+ * gave no answer there is no `Travel` at all, and nothing downstream may treat that as a
+ * booked seat.
  */
 export type Travel = "direktresa" | "egenResa" | "rundresa"
 
 /**
- * A unit in the contingent, as the application knows one so far: its number. Where
- * somebody has no unit, there is no `Unit` at all – never an empty one.
+ * A unit in the contingent, known by its number. Where somebody has no unit, there is no
+ * `Unit` at all – never an empty one.
  */
 export interface Unit {
   /**
@@ -20,20 +20,18 @@ export interface Unit {
 }
 
 /**
- * The signed-in person, as the application knows them – our definition, not the
- * provider's: the decode reads whatever ScoutID spells and answers with these facts,
- * derivations included, so nothing downstream ever meets a provider field or works out
- * for itself how the person reads. There is no second definition of who is signed in.
+ * The signed-in person in the application's own terms, derivations included, so nothing
+ * downstream meets a provider field or works out for itself how the person reads. It is
+ * the one definition of who is signed in.
  */
 export interface User {
   /**
-   * What to greet them by – derived once, at the decode, from whatever name parts the
-   * provider sent.
+   * What to greet them by, derived from whatever name parts the provider sent.
    */
   readonly firstName: string
   /**
-   * The mark they wear wherever the application shows them as a badge: their unit's –
-   * a leader's with the star – or the management's. Nobody else wears one.
+   * The mark they wear wherever the application shows them as a badge – their unit's,
+   * with the star for a leader, or the management's. Nobody else wears one.
    */
   readonly mark?: UserMark
   /**
@@ -61,14 +59,14 @@ export interface User {
    */
   readonly roles: readonly Role[]
   /**
-   * How they travel to the jamboree, where the list of participants says – the fact the
-   * journey's countdown reads, and plenty of people are simply not placed on a package.
+   * How they travel to the jamboree, where the list of participants says – plenty of
+   * people are not placed on a package.
    */
   readonly travel?: Travel
   /**
    * The unit the roles or the list of participants place them in, where either does –
    * a leader's comes from their role, anyone else's from the list, and plenty of people
-   * simply have none.
+   * have none.
    */
   readonly unit?: Unit
 }

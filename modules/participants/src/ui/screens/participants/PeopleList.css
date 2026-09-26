@@ -1,7 +1,7 @@
 /* The virtual list: the container is as tall as every row would be and the few rows that
    exist are placed by the virtualizer, so the scrollbar and the scroll position read as
-   one long list. Both heights come from the virtualizer as inline values – they are
-   per-render measurements no rule could state. */
+   one long list. The container's height and each row's offset come from the virtualizer
+   as inline values, because they are per-render measurements no rule could state. */
 
 @layer component {
   .people-list {
@@ -14,8 +14,8 @@
     top: 0;
   }
 
-  /* Rows are no longer the card's direct children, so the card's own edge rules do not
-     reach them: the card gives up its vertical padding so the list fills its height, and
+  /* The rows are not the card's direct children, so the card's own edge rules do not
+     reach them. The card gives up its vertical padding so the list fills its height, and
      clips so a pressed edge row is cut to the radius. Selected by what the card holds,
      because the card takes no class of its own. */
   .card:has(> .people-list) {

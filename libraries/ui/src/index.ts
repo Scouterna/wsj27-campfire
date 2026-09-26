@@ -1,8 +1,7 @@
 /**
- * The design system's public surface. The stylesheet is a separate export condition –
- * `@scouterna/wsj27-campfire-ui/styles.css` – because what it carries is global: the
- * tokens, the faces, the reset, and the base. A component's own CSS is not global, so it
- * travels with the component and arrives when the component is imported.
+ * The design system's public surface. The global stylesheet is the separate
+ * `@scouterna/wsj27-campfire-ui/styles.css` export, and a component's own CSS arrives
+ * with the component.
  */
 
 export { expectPop, setNavDirection, wasPopExpected } from "./behavior/transitions"

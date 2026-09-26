@@ -1,6 +1,5 @@
 # SwiftFormat owns formatting for Swift, the way Prettier owns it for everything
-# else (ADR 005): formatting is never a review comment, because it is never a
-# choice.
+# else (ADR 006), so formatting is never a choice and never a review comment.
 #
 # Run it through `pnpm format:apple` or `pnpm check:apple:format`, which pass this
 # file with --config. SwiftFormat otherwise walks up from the source looking for a

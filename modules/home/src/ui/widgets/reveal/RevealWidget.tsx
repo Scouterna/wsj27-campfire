@@ -1,6 +1,9 @@
 import { Countdown, useIsRevealed, type Reveal } from "@scouterna/wsj27-campfire-ui"
 import type { ReactElement } from "react"
 
+/**
+ * The reveal a countdown stands for.
+ */
 export interface RevealWidgetProps {
   /**
    * The reveal to count down – its moment and its words both come from the catalog.
@@ -9,9 +12,8 @@ export interface RevealWidgetProps {
 }
 
 /**
- * One pending reveal on the start screen: its countdown while the curtain hangs, and
- * nothing at all once it has opened – at the moment itself the widget stands down
- * live, and whatever the reveal opened takes the room.
+ * One pending reveal's countdown on the start screen. At its moment the widget stands
+ * down live, and whatever the reveal opened takes the room.
  *
  * @param props The reveal to count down.
  * @returns The countdown, or nothing once the reveal is open.

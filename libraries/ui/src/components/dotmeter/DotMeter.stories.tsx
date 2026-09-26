@@ -13,7 +13,7 @@ export default meta
 type Story = StoryObj<typeof DotMeter>
 
 /**
- * Every reading on a five-step scale.
+ * Every reading on one scale, from the mild end to the top.
  */
 export const Levels: Story = {
   render: (): ReactElement => (
@@ -28,7 +28,7 @@ export const Levels: Story = {
 }
 
 /**
- * The three color families: danger for the top of a severity scale, caution just under
+ * The color families: danger for the top of a severity scale, caution just under
  * it, info for the mild end and for a plain reading.
  */
 export const Tones: Story = {

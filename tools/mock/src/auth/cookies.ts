@@ -179,8 +179,8 @@ export function setSessionCookies(context: Context, session: SessionCookies, now
     String(now + session.refreshExpiresIn * 1000),
     session.refreshExpiresIn,
   )
-  // Tied to the refresh lifetime: it is needed at logout, and an expired id token is still a
-  // valid hint.
+  // Tied to the refresh lifetime, because it is needed at logout and an expired id token is
+  // still a valid hint.
   setCookie(context, idTokenCookie, session.idToken, session.refreshExpiresIn)
   setCookie(
     context,

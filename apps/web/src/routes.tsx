@@ -86,7 +86,7 @@ import { adoptCacheOwner, forgetCache, queryClient } from "./query"
 import { loadUnitIdentities } from "./units"
 
 /**
- * The route tree, and the chrome around it. This is the composition root: the one place
+ * The route tree, and the chrome around it. This is the composition root – the one place
  * that knows every module, so no module has to know another.
  */
 
@@ -147,16 +147,15 @@ interface AppSection {
 
 /**
  * The sections, in menu order: home for everyone, and the participants section for a
- * leader and for any management function – for nobody else. The list grows as modules
- * land.
+ * leader and for any management function – for nobody else.
  */
 const sections: readonly AppSection[] = [
   { icon: <HomeIcon />, id: "home", isGranted: () => true, label: () => "Hem", path: "/" },
   {
     icon: <ParticipantsIcon />,
     id: "participants",
-    // The reveal gates the section for everyone: until the moment, the contingent's
-    // people are offered to nobody, and the address answers as not found. A curtain,
+    // The reveal gates the section for everyone, so until the moment the contingent's
+    // people are offered to nobody and the address answers as not found. A curtain,
     // not a lock – the service's own gates scope the data itself.
     isGranted: (roles, isRevealed) =>
       hasAnyRole(roles, "leader", "cmt") && isRevealed(unitsReveal.id),
@@ -166,9 +165,9 @@ const sections: readonly AppSection[] = [
 ]
 
 /**
- * Whether the roles grant the section a screen belongs to. The one predicate: the
- * menus filter with it, the chrome resolves title, marked section, and back with it,
- * and the guard mounts with it. Fail closed on purpose – a screen whose tab names no
+ * Whether the roles grant the section a screen belongs to – the one predicate the
+ * menus filter with, the chrome resolves title, marked section, and back with, and the
+ * guard mounts with. Fail closed on purpose – a screen whose tab names no
  * section is granted to nobody, so a typo hides a screen loudly in development rather
  * than publishing it to everyone.
  * @param tab The screen's declared section id.
@@ -253,7 +252,7 @@ type Gate =
  * address they opened – there is no useful screen without a session. It asks once per
  * page load who is signed in and renders nothing at all until the answer – no spinner,
  * and no flash of the sign-in screen past a signed-in person. While somebody is signed
- * in it keeps listening: a session the service ends takes the application down, forgets
+ * in it keeps listening, so a session the service ends takes the application down, forgets
  * the cache, and lands on sign-in at the same address, and a session that changes hands
  * reloads the page so the boot hands the cache to the new owner.
  * @param props The routed screens the gate stands in front of.
@@ -280,16 +279,15 @@ function AppChrome(props: AppChromeProps): ReactElement {
         location.reload()
         return
       }
-      // Invoked without an await, an async function runs synchronously up to its first
-      // await – so `forgetCache`'s `queryClient.clear()` cancels the refused queries
-      // before their promises settle, rather than trusting the client's retry delay to
-      // outlast it.
+      // Not awaited, yet the client is cleared synchronously before the wipe's first
+      // await, so the refused queries are canceled before their promises settle rather
+      // than trusting the client's retry delay to outlast the wipe.
       void endSession(setGate)
     })
   }, [gate.kind])
 
-  // An empty fragment rather than nothing: the router's InnerWrap must return an
-  // element, and rendering none is exactly the gate's contract while it waits.
+  // An empty fragment rather than null, because the router's inner wrap must return an
+  // element, and the gate renders nothing while it waits.
   if (gate.kind === "asking" || gate.kind === "ending") {
     return <></>
   }
@@ -306,15 +304,15 @@ function AppChrome(props: AppChromeProps): ReactElement {
 }
 
 /**
- * The theme the signed-in person wears: the known unit's color first – the unit is what
- * the application shapes itself around – then the management's red, then whatever this
- * browser wore last time, then the contingent's blue.
+ * The theme the signed-in person wears – the known unit's color first, because the unit
+ * is what the application shapes itself around, then the management's red, then
+ * whatever this browser wore last time, then the contingent's blue.
  * @param user The signed-in person.
  * @returns The theme to wear.
  */
 function themeFor(user: User): Theme {
-  // The unit's color dresses the application from the first sign-in, reveal or not –
-  // a color among five names no unit. Only the number waits for the moment.
+  // The unit's color dresses the application from the first sign-in, reveal or not,
+  // because a color alone names no unit. Only the number waits for the moment.
   if (user.unit !== undefined) {
     return unitTheme(user.unit.number)
   }
@@ -343,12 +341,9 @@ function viewerFor(user: User): Viewer {
 }
 
 /**
- * Everything a signed-in session shows: the keep-alive, the cache's owner, the resolved
- * theme, the ambient roles and user, the way out, the query client, the viewer, the
- * widget table, and the tier's chrome. All of
- * it is mounted here, at the gate, because there is exactly one session; the tier branch
- * is a constant computed before the first render, so chrome belonging to the other tier
- * is never briefly visible.
+ * Everything a signed-in session shows, mounted once at the gate because there is
+ * exactly one session. The tier branch is a constant computed before the first render,
+ * so chrome belonging to the other tier is never briefly visible.
  * @param props The signed-in user, and the routed screens.
  * @returns The themed, role-aware application, once the cache is this person's.
  */
@@ -393,8 +388,8 @@ function SignedInChrome(props: SignedInProps): ReactElement {
               <ViewerProvider viewer={viewerFor(props.user)}>
                 <UnitIdentitiesProvider identities={identities}>
                   {/* The design system's curtains, hung once over the chrome and the
-                  screens alike: each closed until its moment, opening live for
-                  everything under it. The next reveal is another catalog entry, not
+                  screens alike – each closed until its moment, opening live for
+                  everything under it. A new reveal is another catalog entry, not
                   another mechanism. */}
                   <RevealProvider reveals={reveals}>
                     <WidgetsProvider widgets={widgets}>
@@ -416,9 +411,9 @@ function SignedInChrome(props: SignedInProps): ReactElement {
 }
 
 /**
- * The shell tier's chrome, which draws nothing yet: the native bars will replace every
- * visible piece, and the bridge conversation is the shell feature's. The branch lands
- * now so the seam exists and no screen can grow a native-only path by accident.
+ * The shell tier's chrome, which draws none, because the shell draws its own. It is the
+ * seam the bridge conversation fills (ADR 018), so no screen can grow a native-only path
+ * by accident.
  * @param props The signed-in user, and the routed screens.
  * @returns The bare content column.
  */
@@ -478,8 +473,8 @@ function backControlFor(
 
   // The trail knows what the previous entry called itself. Cold – or where the trail
   // is empty – nothing has named the parent, because pages name themselves and the
-  // parent has not mounted: a parent that is a section start wears the section's own
-  // label, and anything deeper is a plain "back", the way a native bar answers the
+  // parent has not mounted, so a parent that is a section start wears the section's
+  // own label, and anything deeper is a plain "back", the way a native bar answers the
   // same ignorance.
   const sectionLabel = sections.find((section) => section.path === parent)?.label(roles)
   const label = isCold ? sectionLabel : (titleTrail.get(index - 1) ?? sectionLabel)
@@ -520,9 +515,8 @@ function BrowserChrome(props: SignedInProps): ReactElement {
   const found = matchScreen(pathname, screens)
   const isGrantedScreen = found !== undefined && isGranted(found.spec.tab, user.roles, isRevealed)
 
-  // The page names itself through PageTitle – the not-found page included, which is
-  // what keeps an ungranted address named exactly as one that matches nothing
-  // (requirement 4.3): the hidden screen never mounts, so its name never lands.
+  // The page names itself – the not-found page included – and a hidden screen never
+  // mounts, so an ungranted address is named exactly as one that matches nothing.
   const title = usePageTitle() ?? ""
 
   // The page's declared bar actions, placed per width: the menu on the heading's row
@@ -546,7 +540,7 @@ function BrowserChrome(props: SignedInProps): ReactElement {
     }))
   const currentTab = isGrantedScreen ? found.spec.tab : undefined
 
-  // Which unit somebody belongs to is part of the surprise: the mark and the unit on
+  // Which unit somebody belongs to is part of the surprise, so the mark and the unit on
   // the role line both wait for the units reveal, and the pill keeps its initials and
   // the bare line until then.
   const isUnitShown = isRevealed(unitsReveal.id)
@@ -598,9 +592,6 @@ function BrowserChrome(props: SignedInProps): ReactElement {
         </main>
       </div>
       <Outline key={pathname} title={title} />
-      {/* The page's primary action floats at phone width – the same declared action
-          the heading's row draws as its button on a desktop. Only an action that
-          brought a glyph floats; where it floats is app.css's decision. */}
       {fabFor(declared?.action)}
       <TabBar items={items} current={currentTab} onReselect={scrollToTop} />
     </div>
@@ -609,9 +600,9 @@ function BrowserChrome(props: SignedInProps): ReactElement {
 
 /**
  * Leave the session, and leave nothing of it behind. The cache is forgotten before the
- * round trip starts – signing out is the one deliberate start over a person has – and the
- * round trip leaves whichever way the wipe ended, because a browser that refuses its own
- * storage must not be able to hold somebody inside a session.
+ * round trip starts, and the round trip leaves whichever way the wipe ended, because a
+ * browser that refuses its own storage must not be able to hold somebody inside a
+ * session.
  * @returns Nothing – the sign-out navigates the document away.
  */
 async function signOutAndForget(): Promise<void> {
@@ -667,7 +658,7 @@ function NotFoundRoute(): ReactElement {
   )
 }
 
-// Deliberately not annotated: the tree's inferred type is what gives every `Link` and
+// Left unannotated, because the tree's inferred type is what gives every `Link` and
 // `useParams` in the application its checked paths and parameters. Naming it `AnyRoute`
 // would typecheck and quietly turn all of that back into `any`.
 const routeTree = rootRoute.addChildren(mountRoutes(screens))

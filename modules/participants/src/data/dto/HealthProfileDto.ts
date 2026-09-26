@@ -24,12 +24,9 @@ import {
 } from "./answers"
 
 /**
- * The health profile, read straight from the flattened form answers. The participants
- * service publishes the answers as the applicant gave them – "Ja", "Nej", the Swedish
- * option labels, "1"–"5" severities – and this file is where that vocabulary becomes the
- * domain's. It only runs when the payload carried `forms_data` at all: a caller without
- * health access never gets the block, and absence of the profile is how the screens know
- * not to caveat what they cannot show.
+ * The health profile, read from the flattened answers. This is where the applicant's
+ * vocabulary – "Ja", "Nej", the Swedish option labels, "1"–"5" severities – becomes the
+ * domain's.
  * @param answers The flattened answers.
  * @returns The profile, with every part that was not declared left out.
  */
@@ -64,8 +61,7 @@ export function toHealthProfile(answers: Answers): HealthProfile {
 }
 
 /**
- * The declared special diet. "Ingen specialkost" is not in the table, so it converts to
- * nothing.
+ * The declared special diet.
  * @param answers The flattened answers.
  * @returns The diet, or undefined when none was declared.
  */
@@ -81,8 +77,8 @@ function toDiet(answers: Answers): Diet | undefined {
 /**
  * The graded allergens. Only a numeric value carries a severity – the participant form's
  * "Övriga" is a yes/no, so a "Ja" adds no entry, and the free text is where that answer
- * shows up. A 1 is dropped rather than kept as the mildest grade: the form's scale calls
- * it "Inte allergisk / intolerant", so it is an allergen somebody ruled out.
+ * shows up. A 1 is dropped rather than kept as the mildest grade, because the form's scale
+ * calls it "Inte allergisk / intolerant", which makes it an allergen somebody ruled out.
  * @param answers The flattened answers.
  * @returns The graded allergens and the free text around them.
  */
@@ -99,11 +95,12 @@ function toFoodAllergy(answers: Answers): FoodAllergy {
 }
 
 /**
- * A booster answer in its three states: "Ja" with a year, "Nej", or never answered.
+ * A booster answer – given in a year, not given, or never answered. A "Ja" without a
+ * usable year counts as never answered.
  * @param answers The flattened answers.
  * @param gateKey The question key that asks whether the booster was given.
  * @param yearKey The question key that asks which year it was given.
- * @returns The booster, in whichever of the three states the answers put it.
+ * @returns The booster, in whichever state the answers put it.
  */
 function toBooster(answers: Answers, gateKey: string, yearKey: string): Booster {
   const gate = answer(answers, gateKey)
@@ -123,7 +120,7 @@ function toBooster(answers: Answers, gateKey: string, yearKey: string): Booster 
 /**
  * The vaccination answers, which everybody gives and which always render.
  * @param answers The flattened answers.
- * @returns The three vaccination answers.
+ * @returns Every vaccination answer.
  */
 function toVaccinations(answers: Answers): Vaccinations {
   return {
@@ -175,7 +172,7 @@ function toEquipment(answers: Answers): EquipmentNeeds | undefined {
 }
 
 /**
- * Limited mobility, which any of the three answers can raise on its own.
+ * Limited mobility, which any one of its answers can raise on its own.
  * @param answers The flattened answers.
  * @returns The mobility needs, or undefined when none were declared.
  */
@@ -195,7 +192,7 @@ function toMobility(answers: Answers): MobilityNeeds | undefined {
 }
 
 /**
- * What was declared about mental health, assembled from three independent questions.
+ * What was declared about mental health, assembled from independent questions.
  * @param answers The flattened answers.
  * @returns What was declared, or undefined when nothing was.
  */

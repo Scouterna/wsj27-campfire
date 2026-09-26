@@ -2,9 +2,8 @@ import { createContext, useContext, type ReactElement, type ReactNode } from "re
 
 /**
  * Who is reading the list of participants, as the participants service's gates see them.
- * The application's composition root distills this from the signed-in identity and mounts
- * it once; every query in this module reads it, because the real service has no "give me
- * what I may see" endpoint – the client has to ask for the right things.
+ * Every query in this module reads it, because the service has no "give me what I may
+ * see" endpoint and the client has to ask for the right things.
  */
 export interface Viewer {
   /**
@@ -45,7 +44,7 @@ export interface ViewerProviderProps {
    */
   readonly children: ReactNode
   /**
-   * Who is reading the list of participants – see `Viewer`.
+   * Who is reading, distilled from the signed-in identity.
    */
   readonly viewer: Viewer
 }

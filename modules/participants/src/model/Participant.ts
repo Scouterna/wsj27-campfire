@@ -2,8 +2,8 @@ import { type ParticipantRole } from "./ParticipantRole"
 import type { CmtFunktion } from "./Participation"
 
 /**
- * The slots the registration names people in, in the order it asks for them: two
- * närstående on every form, two nödkontakter on the leaders' own. The names are the
+ * The slots the registration names people in, in the order it asks for them – the
+ * närstående on every form, and the nödkontakter on the leaders' own. The names are the
  * question keys' prefixes, so one list drives the reading and the columns alike.
  */
 export const contactSlots = [
@@ -14,13 +14,13 @@ export const contactSlots = [
 ] as const
 
 /**
- * One of the four slots a person names somebody in.
+ * A slot a person names somebody in.
  */
 export type ContactSlot = (typeof contactSlots)[number]
 
 /**
  * The address given for each slot – a slot nobody was named in, or one whose person
- * gave no address, is simply absent.
+ * gave no address, is absent.
  */
 export type ContactEmails = Partial<Readonly<Record<ContactSlot, string>>>
 
@@ -60,7 +60,7 @@ export interface Participant {
    */
   readonly birthDate?: string
   /**
-   * The scoutkår the person belongs to at home. Absent when the registry holds none.
+   * The scoutkår the person belongs to at home. Absent when Scoutnet holds none.
    */
   readonly memberGroup?: string
   /**
@@ -91,19 +91,17 @@ export interface Participant {
   readonly isFunktionsansvarig?: true
 }
 
-/**
- * The register slots beyond the units: the IST wear 54 and the contingent management
- * 55, each with a mark and a name of their own.
- */
+// The numbers past the last unit, which the IST and the contingent management wear, each
+// with a mark and a name of their own.
 const istAvatarNumber = 54
 const cmtAvatarNumber = 55
 
 /**
- * The number whose mark a person wears: their unit's, the IST's 54, or the
- * management's 55. Undefined for the rare deltagare or ledare the service left
- * without a unit – they have no mark to wear, and a caller falls back to initials.
+ * The number whose mark a person wears – their unit's, the IST's, or the management's.
+ * Undefined for the rare deltagare or ledare the service left without a unit, who have no
+ * mark to wear, so a caller falls back to initials.
  * @param person The person whose mark to pick.
- * @returns The register number, or undefined.
+ * @returns The number, or undefined when they have no mark.
  */
 export function avatarNumberFor(person: Participant): number | undefined {
   if (person.unitNumber !== undefined) {
@@ -143,8 +141,8 @@ export function ageOf(person: Participant, today: Date): number | undefined {
   return age >= 0 ? age : undefined
 }
 
-// Constructed once: a collator is expensive to build and free to reuse, and a sort of
-// 2,600 people would otherwise build one per comparison.
+// Constructed once, because a collator is expensive to build and free to reuse, and a
+// sort of the whole contingent would otherwise build one per comparison.
 const swedish = new Intl.Collator("sv")
 
 /**
@@ -158,8 +156,8 @@ export function fullName(person: Participant): string {
 
 /**
  * Where a person sits in the contingent, for the line under their name: their unit, the
- * IST, or the contingent when they belong to neither. Units are numbered and never
- * named – their identities are the contingent's own secret until the reveal.
+ * IST, or the contingent when they belong to neither. A unit is given by its number,
+ * because its name is runtime data the screen adds beside it.
  * @param person The person to place.
  * @returns The one line that says where they belong.
  */
@@ -173,9 +171,9 @@ export function belonging(person: Participant): string {
     }
     case "deltagare":
     case "ledare": {
-      // A deltagare or a ledare the service placed in no unit is rare and is not an
-      // error to surface here: the contingent is the honest answer for anybody the
-      // units do not hold.
+      // A deltagare or a ledare the service placed in no unit is rare and not an error to
+      // surface here, because the contingent is the honest answer for anybody the units
+      // do not hold.
       return person.unitNumber === undefined
         ? "Kontingenten"
         : `Avdelning ${String(person.unitNumber)}`
@@ -184,14 +182,9 @@ export function belonging(person: Participant): string {
 }
 
 /**
- * A list in reading order: by name, as a person is looked up. The name as the list of
- * participants sends it – one string opening with the given name – because the service
- * sends no family name to sort by, and a guessed split misfiles more names than it
- * helps find.
- *
- * Sorting is the client's job because the answer depends on how the list is being read,
- * and asking the service to re-sort is a round trip for something that costs nothing
- * here. Names collate in Swedish, where å, ä, and ö sort after z.
+ * A list in reading order, by the whole name as the service sends it, given name first,
+ * because the service sends no family name to sort by and a guessed split misfiles more
+ * names than it helps find. Names collate in Swedish, where å, ä, and ö sort after z.
  * @param people The people to order. Left untouched.
  * @returns A new list, in reading order.
  */

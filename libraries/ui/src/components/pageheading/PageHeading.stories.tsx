@@ -50,8 +50,8 @@ export const WithBack: Story = {
 
 /**
  * The title row's actions, from desktop width: the page's one primary action, and the
- * overflow menu behind the rest. A phone's bar carries the menu instead, so both hide
- * below the breakpoint.
+ * overflow menu behind the rest. A phone carries them in its bar and its floating
+ * button instead, so both hide below the breakpoint.
  */
 export const WithActions: Story = {
   args: {

@@ -14,7 +14,7 @@ describe("reading a value that ought to be a string", () => {
   })
 
   it("answers with the empty string when the value was some other type", () => {
-    // The case that matters: a JSON body whose field changed type under us.
+    // A JSON body whose field changed type under us is the case that matters.
     expect(stringOrFallback(7)).toBe("")
     expect(stringOrFallback({ name: "Melker" })).toBe("")
     expect(stringOrFallback(["Melker"])).toBe("")

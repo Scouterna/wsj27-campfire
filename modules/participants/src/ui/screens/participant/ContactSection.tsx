@@ -19,7 +19,7 @@ export interface ContactSectionProps {
 }
 
 /**
- * A registration field as a component value: the empty string the service uses for "not
+ * A registration field as a component value. The empty string the service uses for "not
  * given" becomes an omitted prop, which is the components' own honest missing state.
  * @param value The field as the record carries it.
  * @returns The value, or undefined when there is nothing in it.
@@ -30,7 +30,7 @@ function given(value: string | undefined): string | undefined {
 
 /**
  * The value and link props for one channel, omitted entirely where the record holds
- * nothing – `IconField` draws its own missing state for an absent value. A number is
+ * nothing, because the field draws its own missing state for an absent value. A number is
  * shown in its display shape and dialed in its bare one.
  * @param value The address or number, where there is one.
  * @param scheme Which scheme the link opens with.
@@ -58,8 +58,7 @@ function overline(base: string, relation: string | undefined): string {
 }
 
 /**
- * The line under a contact's name, and the one action that reaches them: a call where
- * there is a number, an email otherwise, and no action where the record holds neither.
+ * The line under a contact's name, and the one action that reaches them.
  * @param person The contact to reach.
  * @returns The detail line and the action, each present only where there is one.
  */
@@ -103,7 +102,6 @@ function actionFor(
 export function ContactSection(props: ContactSectionProps): ReactElement {
   const contact = props.contact
 
-  // The first call first: the primary emergency contact ahead of the secondary.
   const emergency = contact.emergencyContacts.toSorted((left, right) => {
     if (left.rank === right.rank) {
       return 0

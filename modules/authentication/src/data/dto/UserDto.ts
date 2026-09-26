@@ -14,11 +14,11 @@ function isArray(value: unknown): value is readonly unknown[] {
 }
 
 /**
- * Defensive by design: the payload crosses a service boundary, so a shape this module
- * does not recognize reads as signed out rather than as a crash in the gate. A name and
- * a role list are the two things a session is useless without; everything else degrades
- * to an empty string.
- * @param payload The body `/api/auth/user` answered with.
+ * Decodes the auth service's identity answer into the signed-in user. The payload
+ * crosses a service boundary, so a shape this module does not recognize decodes to
+ * nothing rather than crashing the gate. A session is useless without a name and a
+ * role list, and everything else degrades to an empty string.
+ * @param payload The body the identity question answered with.
  * @returns The user, or undefined when the payload is not one.
  */
 export function decodeUser(payload: unknown): User | undefined {
@@ -29,8 +29,8 @@ export function decodeUser(payload: unknown): User | undefined {
   if (typeof user !== "object" || user === null) {
     return undefined
   }
-  // The cast is honest: past this line every field is read defensively, so a shape the
-  // service never promised still decodes to undefined rather than lying about a type.
+  // The cast is safe because every field past this line is read defensively, so a shape
+  // the service never promised decodes to undefined rather than lying about a type.
   const record = user as Record<string, unknown>
   const name = record["name"]
   const spellings = record["roles"]
@@ -38,8 +38,7 @@ export function decodeUser(payload: unknown): User | undefined {
     return undefined
   }
   const givenName = stringOrFallback(record["givenName"])
-  // Translated here and nowhere else: a spelling the vocabulary does not know grants
-  // nothing, and a non-string entry is dropped the same way.
+  // A non-string entry grants nothing, like a spelling the vocabulary does not know.
   const roles = spellings.flatMap((spelling) =>
     typeof spelling === "string" ? toRoles(spelling) : [],
   )
@@ -48,17 +47,16 @@ export function decodeUser(payload: unknown): User | undefined {
   const mark = markFor(roles, unit)
 
   return {
-    // The greeting name, derived once here: the given name the provider sent, or the
-    // full name's first word when it sent none – an empty name greets nobody rather
-    // than crashing.
+    // The given name the provider sent, or the full name's first word when it sent none,
+    // and an empty name greets nobody rather than crashing.
     firstName: givenName === "" ? (name.trim().split(/\s+/u, 1)[0] ?? "") : givenName,
     memberNo: stringOrFallback(record["memberNo"]),
     name,
     roleLine: roleLineFor(roles),
     roleLineWithUnit: roleLineWithUnitFor(roles, unit),
     roles,
-    // Spread rather than assigned: an absent unit is a missing key, not a key holding
-    // undefined, which is the distinction `exactOptionalPropertyTypes` holds the code to.
+    // Spread rather than assigned, because `exactOptionalPropertyTypes` holds an absent
+    // unit to a missing key rather than a key holding undefined.
     ...(mark !== undefined && { mark }),
     ...(unit !== undefined && { unit }),
   }

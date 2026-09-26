@@ -27,8 +27,8 @@ export default meta
 type Story = StoryObj<typeof UnitAvatar>
 
 /**
- * The five palettes with a stand-in glyph, at row size – units 1, 2, 4, 6, and 10
- * happen to cover all five colors.
+ * Every palette with a stand-in glyph, at row size – the units shown happen to cover
+ * every color.
  */
 export const WithGlyph: Story = {
   decorators: [withGlyphs],
@@ -55,8 +55,8 @@ export const NumberFallback: Story = {
 }
 
 /**
- * The two slots beyond the units: the IST's 54 and the management's 55, in the
- * surrounding theme like every mark.
+ * The slots beyond the units, the IST's and the management's, in the surrounding theme
+ * like every mark.
  */
 export const IstAndCmt: Story = {
   decorators: [withGlyphs],

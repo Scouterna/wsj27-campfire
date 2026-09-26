@@ -16,8 +16,8 @@ import { useUnitEntries } from "./use-unit-entries"
 import "./UnitsScreen.css"
 
 /**
- * The register number behind an entry's mark: a unit's own, the IST's 54, and the
- * management's 55.
+ * The number behind an entry's mark: a unit's own, or the one the IST or the management
+ * wears.
  * @param key The entry's key.
  * @returns The number whose mark the entry wears.
  */
@@ -64,8 +64,8 @@ export function UnitsScreen(): ReactElement {
     )
   }
 
-  // The subtitle: the entry's name leading where the identities know one – the IST and
-  // the management have identities of their own in the register, like any unit.
+  // The entry's name leads the subtitle where the identities know one, and the IST and the
+  // management have identities of their own, like any unit.
   const subtitleOf = (key: string, count: number): string => {
     const people = personCount(count)
     const name = identities.name(avatarNumberOf(key))

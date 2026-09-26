@@ -4,11 +4,9 @@ import type { ReactElement } from "react"
 import { UnitScreen } from "./UnitScreen"
 
 /**
- * The route that answers at `/participants/units/$unit`: it reads the entry's key out of
- * the address and hands it to the screen.
- *
- * The split is what lets the screen be rendered outside the application – in the catalog,
- * where there is no route to read a parameter from.
+ * The screen with the router attached. It reads the entry's key out of the address and
+ * hands it to the screen as an ordinary prop, so a story can render the screen with no
+ * router underneath it.
  * @returns The screen, for the entry the address names.
  */
 export function UnitRoute(): ReactElement {

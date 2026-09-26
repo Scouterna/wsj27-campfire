@@ -4,9 +4,8 @@ name: Test web
 # driving the real web application against a real development server.
 #
 # Split from check.yml because it is the slow half. A leg installs a browser and
-# starts a server, and a pull request that touches one module has no business
-# paying that four times – so each leg first asks whether this pull request could
-# possibly change what it proves, and says so out loud when the answer is no.
+# starts a server, so each leg first asks whether the pull request could change
+# what it proves, and says so out loud when the answer is no.
 #
 # Filtered inside the job rather than by `on: paths:`. A workflow skipped by a
 # path filter reports no status, and a required check waits on that status
@@ -35,7 +34,7 @@ jobs:
       # tells you less than the one that reports them all.
       fail-fast: false
       matrix:
-        # The same four, in the same order, as the `modules` array in
+        # The same modules, in the same order, as the `modules` array in
         # config/playwright/playwright.config.ts. A module added to one and not
         # the other either runs nowhere or fails with "no project named X".
         module:
@@ -49,12 +48,12 @@ jobs:
       # tooling that builds and runs it, or from this workflow – so all of those
       # count as a reason to run, and everything else as a reason not to.
       #
-      # The authentication module counts for every leg, not only its own: every
-      # walk signs in through it, and its session runs under every read.
+      # The authentication module counts for every leg, because every walk signs
+      # in through it and its session runs under every read.
       #
       # The tooling is named config directory by config directory rather than as
-      # `config/`, which would make a SwiftLint or commitlint edit start four
-      # browsers to prove four screens still render.
+      # `config/`, which would make a SwiftLint or commitlint edit start every
+      # leg's browser to prove the screens still render.
       #
       # Asked before the checkout, so a leg with nothing to do pays for neither.
       - name: Look for changes this module's walk-through could see

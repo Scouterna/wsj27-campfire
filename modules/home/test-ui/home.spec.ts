@@ -1,20 +1,18 @@
 import { expect, test, type Page } from "@playwright/test"
 
-// The reveal file itself rather than the ui package: the package surface pulls
+// The reveal file itself rather than the ui package, because the package surface pulls
 // component stylesheets along, which the test runner cannot swallow.
 // eslint-disable-next-line import-x/no-relative-packages -- see above
 import { unitsReveal } from "../../../libraries/ui/src/foundations/reveal/reveals"
 import { closedMessagesKey, messages } from "../src/model/messages"
 
-// Home is the one section everyone has, so its walk carries the chrome-wide claims:
-// the shared layout at every width, the document title, the menus and the marked
-// section, the reselect behavior, the outline column, the not-found page, and the
-// profile control naming who is signed in. The participants section's role gating is the
-// participants module's walk.
+// Home is the one section everyone has, so its walk carries the claims about the chrome
+// around every screen. The participants section's role gating is the participants
+// module's walk.
 
 // The reveal is timed, and until its moment the whole participants surface is behind
 // the curtain. These walks are about what the surface does once it is open, so each
-// page opens with the development bypass set – exactly as a developer works.
+// page opens with the development bypass set.
 //
 // And every message starts closed. An unread message is a section of its own on the
 // start screen, and these walks are about the chrome around a bare one – the outline's
@@ -40,13 +38,11 @@ async function signInAs(page: Page, persona: string): Promise<void> {
 }
 
 /**
- * Give the page sections and enough height to scroll, as a screen with real content will.
- *
- * Every screen in this build is a one-line placeholder, so there is nothing to scroll and
- * no heading to list – which would leave the outline's whole job and the reselect scroll
- * asserted by tests that cannot fail. The outline reads the document as rendered rather
- * than a table a module declared, so headings put here exercise exactly the code a real
- * page will, without a placeholder screen having to invent content it does not have yet.
+ * Gives the page sections and enough height to scroll, so the outline and the reselect
+ * scroll are asserted against headings the walk controls rather than whatever the start
+ * screen happens to show. The outline reads the document as rendered rather than a
+ * table a module declared, so headings put here exercise exactly the code a real page
+ * does.
  * @param page The page showing a signed-in screen.
  * @param headings What to call the sections.
  */
@@ -299,8 +295,8 @@ test("keeps everything behind the curtain until the reveal", async ({ page }) =>
   await signInAs(page, "Lars Lindberg")
 
   // The start screen holds the reveal's countdown and nothing else – the journey's
-  // card included waits behind the curtain – and the menus offer only home: the
-  // participants section does not exist yet, for anybody.
+  // card included waits behind the curtain – and the menus offer only home, because
+  // before the reveal the participants section does not exist for anybody.
   await expect(page.getByText("Lördag 19 september 19.30")).toBeVisible()
   await expect(page.getByText("dagar")).toBeVisible()
   await expect(page.getByRole("heading", { level: 2, name: "Resan" })).toHaveCount(0)

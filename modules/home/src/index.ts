@@ -1,8 +1,7 @@
 /**
- * The home module's public surface: the screen the application mounts, and nothing
- * else. The reveals themselves are the design system's foundation; home only wears
- * the words around their countdowns, and that stays inside – as do the contingent's
- * messages, which the screen places itself and nothing outside needs to know about.
+ * The home module's public surface, which is the start screen the application mounts.
+ * The reveal countdown and the contingent's messages are the screen's own, so nothing
+ * outside needs them.
  */
 
 export { HomeScreen } from "./ui/screens/home/HomeScreen"

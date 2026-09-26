@@ -86,8 +86,8 @@ export function DietSection(props: DietSectionProps): ReactElement {
             <Chip tone="positive">{dietName(health.diet.sort)}</Chip>
           )}
           {health.foodAllergy === undefined && <Chip>Inga matallergier</Chip>}
-          {/* Declared, but with nothing graded and nothing written: the fact itself
-              still has to show, or a leader reads the silence as no allergy at all. */}
+          {/* An allergy declared with nothing graded and nothing written still shows, or a
+              leader reads the silence as no allergy at all. */}
           {health.foodAllergy?.severities.length === 0 &&
             health.foodAllergy.details === undefined && (
               <Chip tone="warning">Matallergi angiven utan detaljer</Chip>

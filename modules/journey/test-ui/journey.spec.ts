@@ -1,17 +1,17 @@
 import { expect, test, type Page } from "@playwright/test"
 import type { Travel } from "@scouterna/wsj27-campfire-utils"
 
-// The reveal file itself rather than the ui package: the package surface pulls
+// The reveal file itself rather than the ui package, because the package surface pulls
 // component stylesheets along, which the test runner cannot swallow.
 // eslint-disable-next-line import-x/no-relative-packages -- see above
 import { unitsReveal } from "../../../libraries/ui/src/foundations/reveal/reveals"
 
 import { itinerary, phaseAt, type JourneyPhase } from "../src/model/Journey"
 
-// The journey module's walks: the countdown widget on the start screen, behind the
-// units reveal, counting to the signed-in person's own dates. The walks run on the
-// real clock, so what the count beside the heading says is read from the same model the
-// card reads – the walk asserts the wording for whichever phase today falls in.
+// The countdown widget on the start screen, behind the units reveal, counting to the
+// signed-in person's own dates. The walks run on the real clock, so each reads the
+// wording it expects from the same model the card reads, for whichever phase today
+// falls in.
 
 // The reveal is timed, and until its moment every widget waits behind the curtain.
 // These walks are about the widget once it is open, so each page opens with the
@@ -24,7 +24,7 @@ test.beforeEach(async ({ page }) => {
 })
 
 /**
- * The sign-in screen's one action, and the picker's way back into the application.
+ * Signs in from the sign-in screen by picking a persona in the stand-in's picker.
  * @param page The page standing on the sign-in screen.
  * @param persona The persona to pick, by the name the stand-in lists them under.
  */
@@ -69,7 +69,7 @@ test("reaches the application at the root address", async ({ page }) => {
 test("counts a rundresa leader to the buses, with the Baltic road as its own leg", async ({
   page,
 }) => {
-  // Desktop width: the legend's three columns, the homecoming among them.
+  // Desktop width, where the legend's columns include the homecoming.
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.goto("/")
   await signInAs(page, "Lars Lindberg")
@@ -84,8 +84,8 @@ test("counts a rundresa leader to the buses, with the Baltic road as its own leg
   await expect(page.getByText("World Scout Jamboree · Gdańsk")).toBeVisible()
   await expect(page.getByText("10/8")).toBeVisible()
 
-  // On a phone the legs stack rather than drop: the day the buses leave matters as much
-  // as the camp's, and only the homecoming stands down.
+  // On a phone the legs stack rather than drop, because the day the buses leave matters
+  // as much as the camp's. Only the homecoming stands down.
   await page.setViewportSize({ width: 390, height: 844 })
   await expect(page.getByText("Resa · 21–28 juli 2027")).toBeVisible()
   await expect(page.getByText("World Scout Jamboree · Gdańsk")).toBeVisible()
@@ -139,7 +139,7 @@ test("counts to the second, and only to the minute on a phone or under reduced m
   await page.setViewportSize({ width: 1280, height: 900 })
   await expect(page.getByText("sek", { exact: true })).toBeVisible()
 
-  // The setting is followed live: a figure changing every second is motion too.
+  // The setting is followed live, because a figure changing every second is motion too.
   await page.emulateMedia({ reducedMotion: "reduce" })
   await expect(page.getByText("sek", { exact: true })).toHaveCount(0)
   await expect(page.getByText("min", { exact: true })).toBeVisible()

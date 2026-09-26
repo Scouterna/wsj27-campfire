@@ -25,7 +25,7 @@ export interface SegmentedControlProps {
 /**
  * A segmented control: one tonal track holding every choice, the one in force raised
  * on its own pill – which slides to the segment the reader picks, so the change reads
- * as one control moving rather than five buttons swapping state.
+ * as one control moving rather than buttons swapping state.
  *
  * @param props The segments, the one in force, and what picking one does.
  * @returns The control.
@@ -34,10 +34,10 @@ export function SegmentedControl(props: SegmentedControlProps): ReactElement {
   const track = useRef<HTMLDivElement>(null)
   const { current, entries } = props
 
-  // The pill's geometry, written as custom properties before paint: on the first
-  // render it appears in place, and on every later change the stylesheet's transition
-  // slides it there. The track is observed too, so a resize – a rotation, a text-size
-  // change – realigns the pill instead of leaving it where the old width put it.
+  // The pill's geometry, written as custom properties before paint, so it appears in
+  // place on the first render and the stylesheet's transition slides it on every later
+  // change. The track is observed too, so a resize – a rotation, a text-size change –
+  // realigns the pill instead of leaving it where the old width put it.
   useLayoutEffect(() => {
     const list = track.current
     if (!list) {
@@ -64,12 +64,11 @@ export function SegmentedControl(props: SegmentedControlProps): ReactElement {
       <span className="segmented-pill" aria-hidden="true" />
       {entries.map((entry, index) => (
         <button
-          // The position, not the text: the caller picks by index, as the outline does.
+          // Keyed by position, because the caller picks by index.
           key={index}
           type="button"
           aria-pressed={index === current}
-          // The stylesheet draws an invisible bold copy from this, so a segment is as
-          // wide as its emphasized self from the start and nothing shifts on a pick.
+          // Read by the stylesheet's invisible bold copy of the label.
           data-label={entry}
           onClick={() => {
             props.onPick(index)

@@ -38,9 +38,7 @@ function requestedTheme(): Theme | undefined {
 }
 
 /**
- * Remembers a theme for the next visit. Storage can refuse – a private window, a browser
- * configured to – and a refusal is not worth failing over: the only cost is signing in
- * blue next time.
+ * Remembers a theme for the next visit.
  *
  * @param theme The theme to remember.
  */
@@ -48,7 +46,9 @@ function rememberTheme(theme: Theme): void {
   try {
     localStorage.setItem(storageKey, theme)
   } catch {
-    // A browser that refuses storage just signs in blue next time.
+    // A private window or a browser configured to refuse storage throws here, and a
+    // refusal is not worth failing over, because the only cost is signing in blue next
+    // time.
   }
 }
 
@@ -76,6 +76,9 @@ export function applyInitialTheme(): void {
   }
 }
 
+/**
+ * The theme a `ThemeScope` wears, and the subtree that wears it.
+ */
 export type ThemeScopeProps = {
   /**
    * The subtree the theme applies to.
@@ -107,15 +110,17 @@ export function ThemeScope(props: ThemeScopeProps): ReactElement {
   )
 }
 
+/**
+ * The theme a `ThemeProvider` applies, and the subtree that wears it.
+ */
 export type ThemeProviderProps = {
   /**
    * The themed subtree – in practice the whole application.
    */
   readonly children: ReactNode
   /**
-   * The theme the whole document wears. The application resolves it – from the unit,
-   * the management function, or the stored preference – and this provider only wears
-   * it: onto the root element, into storage, and into context.
+   * The theme the whole document wears, resolved by the application from the unit, the
+   * management function, or the stored preference.
    */
   readonly theme: Theme
 }
@@ -126,7 +131,7 @@ export type ThemeProviderProps = {
  * two places – onto a layout-neutral wrapper, so a provider anywhere themes exactly its
  * own subtree, Storybook included; and onto the document root, so body-level styling and
  * the pre-render boot path agree with it. The browser chrome follows too, through the
- * `theme-color` meta the shells and the PWA read.
+ * `theme-color` meta.
  *
  * @param props The theme to wear, and the subtree that wears it.
  * @returns The themed subtree.
@@ -137,8 +142,8 @@ export function ThemeProvider(props: ThemeProviderProps): ReactElement {
   useEffect(() => {
     document.documentElement.dataset["theme"] = theme
 
-    // Read back rather than duplicated: the stylesheet owns the values, and the meta
-    // follows whatever ink the attribute above just selected.
+    // Read back rather than duplicated, because the stylesheet owns the values and the
+    // meta follows whatever ink the attribute above just selected.
     const ink = getComputedStyle(document.documentElement)
       .getPropertyValue("--color-theme-ink")
       .trim()

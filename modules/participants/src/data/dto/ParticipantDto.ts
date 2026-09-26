@@ -5,15 +5,13 @@ import { answer, flattenAnswers } from "./answers"
 import { toContactEmails, toCurrent } from "./contact"
 
 /**
- * One participant as the participants service sends them – the basic block that
- * `GET /api/project/participants/troopinfo/{troop}` lists and every detail answer starts
- * from.
+ * One participant as the participants service sends them – the basic block a listing row
+ * carries and every detail answer starts from.
  *
- * Every field on every DTO in this folder is `unknown` on purpose. The service is a
- * separate one that will change shape during an eighteen-month build, so a DTO says which
- * keys to expect and the function below decides whether what arrived in them is usable.
- * Declaring a field `string` here would be a promise this module cannot keep, and would
- * turn a bad payload into a crash somewhere far from the boundary.
+ * Every DTO field is `unknown`, because the service is built separately and changes shape,
+ * so a DTO says which keys to expect and its converter decides whether what arrived is
+ * usable. A field declared `string` would be a promise this module cannot keep, and would
+ * turn a bad payload into a crash far from the boundary.
  */
 export interface ParticipantDto {
   readonly member_no?: unknown
@@ -67,7 +65,7 @@ const faRolls = new Set(["fa", "fa-cet"])
 /**
  * What the minted roles say about a management member: the funktion they serve in, and
  * whether they are its funktionsansvarig. Both absent for everyone outside the
- * contingent management, and for a member the roster has not detailed yet.
+ * contingent management, and for a member whose roles name no funktion.
  * @param roles The record's `roles` field, as the service sent it.
  * @returns The funktion and the FA mark, each present only where the roles say so.
  */
@@ -98,10 +96,9 @@ function toCmtDetail(roles: unknown): Pick<Participant, "funktion" | "isFunktion
 }
 
 /**
- * The addresses the list mails and copies: a person's own two, and those of everybody the
- * registration names around them. Read from the contact answers the service sends with a
- * listing row, exactly as the detail reads them, so a row and the person opened from it
- * never disagree.
+ * The addresses the list mails and copies – a person's own, and those of everybody the
+ * registration names around them – read from the contact answers the service sends with a
+ * listing row.
  * @param dto The row the participants service sent.
  * @returns The addresses, each present only where there is one.
  */
@@ -204,8 +201,9 @@ export function toParticipant(dto: ParticipantDto): Participant | undefined {
     memberNo,
     ...name,
     role,
-    // Spread rather than assigned: an absent unit is a missing key, not a key holding
-    // undefined, which is the distinction `exactOptionalPropertyTypes` holds the code to.
+    // Spread rather than assigned, because an absent unit is a missing key, not a key
+    // holding undefined, which is the distinction `exactOptionalPropertyTypes` holds the
+    // code to.
     ...(unitNumber !== undefined && { unitNumber }),
     ...(birthDate !== undefined && { birthDate }),
     ...(memberGroup !== undefined && { memberGroup }),

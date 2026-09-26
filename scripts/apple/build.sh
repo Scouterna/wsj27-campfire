@@ -16,21 +16,19 @@ cd "$here/../../apps/apple"
 
 environment=$(sh "$here/environment.sh" "${1:-local}")
 
-# Local.xcconfig holds localhost, which is right for the Simulator and is the one host
-# name the sign-in cookies work on. A real phone cannot reach it, so CAMPFIRE_DEVICE=1
-# overrides the origin with this machine's LAN address – read now rather than
-# committed, because DHCP moves it – and builds for the phone rather than the
-# Simulator, since a Simulator build is the one thing that address is no use to. Opt-in
-# rather than automatic: on a LAN address the app loads but sign-in cannot complete,
-# since ScoutID only sends the flow back to localhost, so the trade is made knowingly.
+# The Local origin is localhost, the one host name the sign-in cookies work on, which a
+# real phone cannot reach. CAMPFIRE_DEVICE=1 builds for a phone instead, with this
+# machine's LAN address as the origin – read now rather than committed, because DHCP
+# moves it. It is opt-in, because on a LAN address the app loads but sign-in cannot
+# complete, since ScoutID sends the flow back only to localhost.
 destination='generic/platform=iOS Simulator'
 origin=""
 if [ "$environment" = "Local" ] && [ -n "${CAMPFIRE_DEVICE:-}" ]; then
   address=$(ipconfig getifaddr en0 2>/dev/null || true)
   if [ -n "$address" ]; then
-    # Port 8000, not 3000: 8000 is the one origin every environment serves, and Caddy
-    # answers there on every interface. 3000 is the bare Vite dev server, which carries
-    # none of the backend paths.
+    # Port 8000, because it is the one origin every environment serves and Caddy answers
+    # there on every interface, while the bare Vite server carries none of the back-end
+    # paths.
     destination='generic/platform=iOS'
     origin="CAMPFIRE_WEB_ORIGIN=http://${address}:8000"
     echo "Web origin: http://${address}:8000 – sign-in will not complete on a device."

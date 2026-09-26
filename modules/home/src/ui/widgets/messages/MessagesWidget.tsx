@@ -6,6 +6,9 @@ import { useClosedMessages } from "./use-closed-messages"
 
 import "./MessagesWidget.css"
 
+/**
+ * The messages to choose from, and the roles of the reader they are chosen for.
+ */
 export interface MessagesWidgetProps {
   /**
    * The message list to show the unread part of, oldest first.
@@ -17,12 +20,12 @@ export interface MessagesWidgetProps {
   readonly roles: readonly Role[]
 }
 
-// Constructed once: a formatter is expensive to build and free to reuse.
+// Constructed once, because a formatter is expensive to build and free to reuse.
 const swedishDate = new Intl.DateTimeFormat("sv-SE", { dateStyle: "long" })
 
-// The word over a message's title, which is how a fourth kind arrives later without a
-// fourth type treatment – it adds a word rather than a design. A welcome has none: it
-// introduces Campfire rather than reporting anything, and wears the big title instead.
+// The word over a message's title, so a new kind adds a word rather than a type
+// treatment. A welcome has none, because it introduces Campfire rather than reporting
+// anything, and wears the big title instead.
 const labelByKind: Partial<Readonly<Record<MessageKind, string>>> = {
   important: "Viktigt",
   news: "Nyhet",
@@ -40,16 +43,11 @@ function written(date: string): string {
 }
 
 /**
- * The contingent's messages on the start screen – each one its own plate, with its label
- * and date, its title, its paragraphs, and the one control that closes it.
- *
- * A plate per message, because the kinds do not belong under one heading or behind one
- * close control. The welcome proclaims, and wears the sign-in hero's bright fill because
- * it is the contingent speaking rather than a block of data; an important one has to be
- * noticed without being celebrated, and news is quiet, so both report from the theme's
- * quieter wash. A different surface rather than a smaller title on the same one: size
- * within one surface is what a subheading is. Every title is an `h2`, which is what lists
- * the plates in the page outline. Nothing at all once everything is closed.
+ * The contingent's unread messages on the start screen, a plate each, because the kinds
+ * do not belong under one heading or behind one close control. The welcome wears the
+ * theme's bright fill, as the sign-in hero does, because it is the contingent speaking
+ * rather than a block of data. Every title is an `h2`, which lists the plates in the
+ * page outline.
  *
  * @param props The message list, and the reader's roles.
  * @returns The plates, or nothing when no message is unread.
@@ -67,8 +65,6 @@ export function MessagesWidget(props: MessagesWidgetProps): ReactElement | null 
       {unread.map((message) => {
         const headingId = `${prefix}-${message.id}`
         const label = labelByKind[message.kind]
-        // The welcome proclaims and every other kind reports, which is a different
-        // surface rather than a smaller title on the same one.
         const isWelcome = message.kind === "welcome"
         return (
           <section

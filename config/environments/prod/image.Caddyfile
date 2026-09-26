@@ -1,9 +1,9 @@
-# The server inside the deployable image, beside the Dockerfile that copies it in. The
-# only one of the four that leaves this machine, and the only one that is not a front
-# door: there is nothing behind it. It serves the built files, and any path that is not a
-# real file falls back to index.html, so a deep link into a screen loads the app that
-# then routes to it. 8080 rather than 80, so the container never needs root. /api/auth and
-# /api/project belong to whatever ingress sits in front of it.
+# The server inside the deployable image, beside the Dockerfile that copies it in. It is
+# the only config here that leaves this machine, and the only one that is not a front
+# door, because there is nothing behind it. It serves the built files, and any path
+# that is not a real file falls back to index.html, so a deep link into a screen loads
+# the app that then routes to it. 8080 rather than 80, so the container never needs
+# root. /api/auth and /api/project belong to whatever ingress sits in front of it.
 #
 # One Caddy config per way Campfire is served, one folder per environment:
 #   local/Caddyfile       `pnpm start:local`, the mock back-end
@@ -14,15 +14,15 @@
 	root * /srv
 	try_files {path} /index.html
 
-	# Stated rather than left to heuristics: with no Cache-Control, a browser may serve
-	# a file from cache for a tenth of its age without asking, which is how a deploy
-	# stays invisible for days. The split is safe because Vite hashes everything under
-	# /assets/ into its name – a changed file is a new address, so those can be immutable
-	# for a year – while the root files (index.html, sw.js, registerSW.js, the manifest,
-	# the icons) keep their names across deploys and must revalidate on every use.
-	# no-cache still allows caching: the browser asks with the ETag and gets a 304, so
-	# an unchanged file costs one round trip, and offline the service worker's precache
-	# answers instead.
+	# Stated rather than left to heuristics, because with no Cache-Control a browser may
+	# serve a file from cache for a tenth of its age without asking, which is how a
+	# deploy stays invisible for days. The split is safe because Vite hashes everything
+	# under /assets/ into its name – a changed file is a new address, so those can be
+	# immutable for a year – while the root files (index.html, sw.js, registerSW.js, the
+	# manifest, the icons) keep their names across deploys and must revalidate on every
+	# use. no-cache still allows caching, because the browser asks with the ETag and
+	# gets a 304, so an unchanged file costs one round trip, and offline the service
+	# worker's precache answers instead.
 	@hashed path /assets/*
 	header @hashed Cache-Control "public, max-age=31536000, immutable"
 	@unhashed not path /assets/*

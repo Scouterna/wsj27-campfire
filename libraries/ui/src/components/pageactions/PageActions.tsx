@@ -30,9 +30,9 @@ type PageActionBehavior =
     }
 
 /**
- * The actions the current page declared, and who is listening. Module state for the
- * same reason as the page title's: the declaring page and the reading chrome sit on
- * opposite sides of the router's outlet.
+ * The actions the current page declared, and who is listening. Module state, because
+ * the declaring page and the reading chrome sit on opposite sides of the router's
+ * outlet.
  */
 const state: { declared: PageActionsProps | undefined } = { declared: undefined }
 const listeners = new Set<() => void>()
@@ -57,9 +57,8 @@ function setPageActions(next: PageActionsProps | undefined): void {
 
 export type PageActionsProps = {
   /**
-   * The page's one primary action, drawn as the button beside the title on a desktop.
-   * It presses or it leads – give it `onPress` or `link`, exactly as `Button` takes
-   * them.
+   * The page's one primary action, drawn as the button beside the title on a desktop
+   * and as the floating button on a phone.
    */
   readonly action?:
     | ({
@@ -82,12 +81,12 @@ export type PageActionsProps = {
 }
 
 /**
- * Declares the page's bar actions from anywhere in a page, the way `PageTitle`
- * declares its name: the chrome picks them up and places them per width. Renders
- * nothing; withdrawn on unmount. A page without one gets a bar with no actions.
+ * Declares the page's bar actions from anywhere in a page, for the chrome to place per
+ * width. The declaration is withdrawn on unmount, and a page without one gets a bar
+ * with no actions.
  *
  * @param props The primary action and the overflow entries to declare.
- * @returns Nothing – the component renders nothing.
+ * @returns Always null, because the chrome draws the actions.
  */
 export function PageActions(props: PageActionsProps): null {
   const { action, menu } = props

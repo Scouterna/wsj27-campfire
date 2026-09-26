@@ -44,7 +44,7 @@ export type ButtonProps = {
  * a button; with `link` it is the same pill as a real link to the address it names.
  *
  * @param props The label, and what pressing it does or where it leads.
- * @returns The control.
+ * @returns A button, or a router link when `link` is given.
  */
 export function Button(props: ButtonProps): ReactElement {
   if (props.link !== undefined) {

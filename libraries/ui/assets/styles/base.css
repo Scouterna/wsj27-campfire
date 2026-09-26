@@ -1,15 +1,15 @@
-/* Base: what an unstyled element looks like in Campfire. Element selectors only – the
+/* What an unstyled element looks like in Campfire. Element selectors only, because the
    moment a rule needs a class it is a component. */
 
 @layer base {
-  /* Dynamic Type base: every size in the --font-size-* scale is calc(<points>rem / 17),
-     against iOS's default 17px text size.
+  /* The root is iOS's default 17-point text size, or the reader's Dynamic Type size where
+     the system font applies, and the rem-based type scale follows it.
      See https://joakimkemeny.com/writing/2024-09-05-dynamic-size/. */
   html {
     font-size: calc(100% * 17 / 16);
 
-    /* The second condition is load-bearing – desktop Safari also matches the first
-       alone, but renders the system font too small. */
+    /* The second condition is load-bearing, because desktop Safari matches the first
+       alone but renders the system font too small. */
     @supports (font: -apple-system-body) and (-webkit-touch-callout: default) {
       font: -apple-system-body;
     }

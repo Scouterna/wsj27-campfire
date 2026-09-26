@@ -1,4 +1,4 @@
-/* The list row pattern: tile, text column, trailing chevron. */
+/* The list row: a tile, a text column, and a trailing chevron. */
 
 @layer component {
   .row {
@@ -10,9 +10,8 @@
     padding: var(--spacing-group) 0;
   }
 
-  /* Inside a card the row bleeds to the card's edges: its inset is padding of its own
-     rather than the card's, so a press fills the whole row and the divider runs the
-     full width. */
+  /* Inside a card the row bleeds to the card's edges and takes the inset as padding of
+     its own, so a press fills the whole row and the divider runs the full width. */
   .card .row {
     margin: 0 calc(-1 * var(--card-padding, var(--spacing-section)));
     padding: var(--spacing-group) var(--spacing-container);

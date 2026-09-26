@@ -31,9 +31,8 @@ export interface ChipProps {
 }
 
 /**
- * One chip. With `onClick` it is a filter in a `.chips` row – a toggle, so it reports
- * whether it is the filter in force rather than pretending to be a location; without
- * it, it is a static badge in its tone's tint.
+ * One chip: with `onClick` a filter in a `.chips` row, reporting as a toggle rather than
+ * as a location, and without it a static badge in its tone's tint.
  *
  * @param props The label, the tone, and – for a filter – what choosing it does and
  * whether it is in force.

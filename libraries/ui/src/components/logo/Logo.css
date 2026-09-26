@@ -1,5 +1,3 @@
-/* The Logo component's styling. */
-
 @layer component {
   /* A default width for the surfaces that give the mark no size of their own; a hero
      that wants it larger says so in its own stylesheet. */

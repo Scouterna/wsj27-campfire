@@ -1,9 +1,8 @@
 /**
- * A refusal from a service: the request arrived and the answer was a no. Carries the
- * status so a caller can tell "you may not see this much" (403) from "there is no such
- * thing" (404) and act on the difference – retrying at a lower access level is the
- * concrete case. A network failure is deliberately not one of these; it stays a plain
- * `Error`, because no server produced it.
+ * A refusal from a service – the request arrived and the answer was no. It carries the
+ * status, so a caller can tell "you may not see this much" (403) from "there is no such
+ * thing" (404) and retry at a lower access level on the first. A network failure stays a
+ * plain `Error`, because no server produced it.
  */
 export class HttpError extends Error {
   /**
@@ -12,11 +11,10 @@ export class HttpError extends Error {
   readonly status: number
 
   /**
-   * @param url The address that answered, named in the message for the reason every
-   * other message here names it: it is the one label that cannot drift.
+   * @param url The address that answered, which the message names.
    * @param status The status code the service answered with.
-   * @param statusText The reason phrase, which HTTP/2 does not carry – hence the trim,
-   * so an empty one does not leave the message ending in a space.
+   * @param statusText The reason phrase, empty over HTTP/2, so the message is trimmed
+   * rather than left ending in a space.
    */
   constructor(url: string, status: number, statusText: string) {
     super(`${url} answered ${String(status)} ${statusText}`.trimEnd())
@@ -26,22 +24,18 @@ export class HttpError extends Error {
 }
 
 /**
- * Ask a service for JSON: the request, the status check, and the parse.
+ * Asks a service for JSON – the request, the status check, and the parse.
  *
- * The type parameter is the caller's description of what the endpoint sends, and it
- * carries through to the returned value – so a call site names the payload shape once
- * and everything downstream is typed from it.
+ * The type parameter is cast onto the parsed body, not checked, so the caller still
+ * validates what arrived.
  *
- * Named `fetch` on purpose, so a call reads like the platform call it replaces. Two
- * consequences worth knowing: importing this shadows the global `fetch` for the whole
- * file, and the implementation below has to say `globalThis.fetch` or it would call
- * itself.
+ * Named `fetch` so a call reads like the platform call it replaces, which means
+ * importing it shadows the global `fetch` for the whole file.
  *
- * Every failure becomes an error naming the address that produced it, with the original
- * kept as `cause`. The address rather than a friendly label, because it is the one thing
- * that is always accurate – a hand-written name has to be maintained and drifts. These
- * messages are read in a console and a log; a screen carries its own Swedish for the
- * person.
+ * A refusal is an `HttpError`. A request that reached nothing and an answer that was not
+ * JSON are plain `Error`s. Every one names the address rather than a hand-written label,
+ * because the address cannot drift, and keeps the original as `cause`. The messages are
+ * for a console or a log; a screen words its own for the person.
  *
  * @param url Where to ask. Origin-relative, so the same call works against the mock, the
  * local back-end, and the deployed one.
@@ -50,12 +44,12 @@ export class HttpError extends Error {
 export async function fetch<T>(url: string): Promise<T> {
   let response: Response
   try {
+    // The global, because this function's own name shadows it.
     response = await globalThis.fetch(url)
   } catch (error) {
-    // No network, a refused connection, a DNS failure – the request never reached a
-    // server, which is a different thing from a server saying no. A caller in a field
-    // with no signal has to be able to tell them apart: one means "try again later",
-    // the other means "this is the answer".
+    // No network, a refused connection, or a DNS failure never reached a server, and a
+    // caller in a field with no signal must tell that apart from a refusal – one means
+    // try again later, the other is the answer.
     throw new Error(`Could not reach ${url}`, { cause: error })
   }
 
@@ -66,9 +60,8 @@ export async function fetch<T>(url: string): Promise<T> {
   try {
     return (await response.json()) as T
   } catch (error) {
-    // Not hypothetical: a dev server with no API behind it answers a request for
-    // `/api/…` with the application's own `index.html`, and an error page in production
-    // does the same.
+    // A dev server with no API behind it answers a request for `/api/…` with the
+    // application's own `index.html`, and an error page in production does the same.
     throw new Error(`${url} answered with something that is not JSON`, { cause: error })
   }
 }

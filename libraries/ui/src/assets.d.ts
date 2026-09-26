@@ -1,5 +1,5 @@
-// A component may import its own stylesheet, and the library's artwork out of assets/ –
-// Vite's behavior, told to TypeScript.
+// Vite lets a component import its own stylesheet and the library's artwork out of
+// assets/, and these declarations tell TypeScript so.
 declare module "*.css" {}
 
 declare module "*.svg" {

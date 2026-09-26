@@ -28,7 +28,7 @@ describe("the stand-in's static assets", () => {
     const served = await response.arrayBuffer()
 
     // The face is a copy kept in step with the design system's by hand, so the magic
-    // number is worth asserting: a truncated or replaced copy fails here rather than as
+    // number is worth asserting. A truncated or replaced copy fails here rather than as
     // a picker that silently loses its type.
     expect(new TextDecoder().decode(served.slice(0, 4))).toBe("wOF2")
   })

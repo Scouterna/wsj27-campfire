@@ -64,8 +64,8 @@ function setUp(now: () => number = Date.now): {
   return { app, browser: new Browser(app, now) }
 }
 
-// A round trip stopped just before the callback: the flow's cookies, and the address ScoutID
-// sent the browser back to.
+// A round trip stopped just before the callback, with the flow's cookies and the address
+// ScoutID sent the browser back to.
 async function pendingCallback(browser: Browser): Promise<{ cookie: string; url: string }> {
   const picker = await browser.navigate(loginUrl())
   const choice = new URL(picker.url).searchParams
@@ -149,8 +149,8 @@ describe("starting a sign-in", () => {
     expect(response.status).toBe(200)
     expect(new URL(url).pathname).toBe("/__mock__/scoutid/auth")
     const page = await response.text()
-    // A row shows the name and what the roles it will mint say the persona is; the
-    // email travels only in the link.
+    // A row shows the name and what the persona's roles say they are, and the email travels
+    // only in the link.
     expect(page).toContain("Lars Lindberg")
     expect(page).toContain("Ledare · Avdelning 1")
     expect(page).toContain("CMT · Administration")
@@ -266,7 +266,7 @@ describe("the round trip", () => {
     expect(again.status).toBe(502)
     expect(await again.text()).toBe("Authentication failed")
 
-    // A fresh browser: this one holds ScoutID's session now, which would skip the picker.
+    // A fresh browser, because this one holds ScoutID's session, which would skip the picker.
     const next = await pendingCallback(new Browser(app))
     const wrongVerifier = next.cookie.replace(
       /oidc-code-verifier=[^;]+/u,

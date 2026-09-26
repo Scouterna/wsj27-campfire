@@ -1,8 +1,8 @@
 import { useEffect, useState, type RefObject } from "react"
 
 /**
- * Whether an element can actually be seen: inside the viewport, in a document that is
- * itself showing – not a background tab, and not a shell that has been put away.
+ * Whether an element can actually be seen – inside the viewport, in a document that is
+ * itself showing rather than a background tab or a shell that has been put away.
  * @param element The element to watch.
  * @returns True while the element is on screen. True before the first measurement, so
  * what is drawn first is never held back.

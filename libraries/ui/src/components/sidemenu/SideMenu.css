@@ -2,8 +2,8 @@
 
 @layer component {
   .sidemenu {
-    /* Opaque, so the page sliding to the rear during a push genuinely disappears under
-       the menu instead of showing through it. */
+    /* Opaque, so the page sliding to the rear during a push disappears under the menu
+       instead of showing through it. */
     background: var(--color-paper);
     border-right: 1px solid var(--color-divider);
     display: flex;
@@ -54,7 +54,7 @@
     stroke-width: 2.3;
   }
 
-  /* The what's-coming line: quiet, under a divider, plainly not a section. */
+  /* The what's-coming line sits quiet under a divider, plainly not a section. */
   .sidemenu-teaser {
     border-top: 1px solid var(--color-divider);
     color: var(--color-ink-tertiary);

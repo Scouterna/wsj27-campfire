@@ -38,7 +38,7 @@ export interface ProfilePillProps {
    */
   readonly link: LinkTarget
   /**
-   * Compact renders the avatar initials alone – the bar's corner at phone width.
+   * Whether the avatar is drawn alone, for the bar's corner at phone width.
    */
   readonly compact?: boolean
 }

@@ -3,10 +3,8 @@ name: Release web
 # Packages the web application as a container image and publishes it to the GitHub
 # Container Registry, so a deployment has something to pull.
 #
-# The version is worked out from the commits since the last web-v<version> tag, by
-# scripts/release/next-version.ts (ADR 034): a feat or a breaking change since then
-# earns a feature release, a fix or a revert a patch, and anything else earns nothing.
-# CalVer, per the Versioning section of AGENTS.md. A merge that earns a version
+# The version is worked out from the commits since the last web-v<version> tag, by the
+# rule in the Versioning section of AGENTS.md (ADR 034). A merge that earns a version
 # publishes :<version>, creates the tag web-v<version>, and then moves :dev to that
 # image, so dev follows every version and only ever a version that finished releasing
 # (ADR 035).
@@ -22,9 +20,9 @@ name: Release web
 # Nothing here deploys. Moving a tag restarts nothing, and how the cluster notices a
 # moved tag is settled with the people who run it.
 #
-# Also runnable by hand, to retry a release that failed. A retry runs every step again:
-# the failed run created no tag, so it works out the same version and overwrites
-# whatever :<version> the failed run left behind.
+# Also runnable by hand, to retry a release that failed. A retry runs every step again,
+# and because the failed run created no tag, it works out the same version and
+# overwrites whatever :<version> the failed run left behind.
 
 on:
   push:
@@ -46,9 +44,9 @@ on:
       - ".github/workflows/release_web.yml"
   workflow_dispatch:
 
-# Releases queue rather than race: two merges in quick succession would otherwise
-# create the same tag twice. Never cancel one in flight – a canceled release can
-# leave a tag without its image, or an image without its tag.
+# Releases queue rather than race, because two merges in quick succession would
+# otherwise create the same tag twice. One in flight is never canceled, because a
+# canceled release can leave a tag without its image, or an image without its tag.
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
@@ -60,7 +58,7 @@ jobs:
     # platform whatever the target, so nothing here runs under emulation either way.
     runs-on: ubuntu-24.04
     timeout-minutes: 20
-    # Scoped to the job that needs it: packages to publish the image, contents to create
+    # Scoped to the job that needs it – packages to publish the image, contents to create
     # the version tag.
     permissions:
       contents: write
@@ -71,8 +69,7 @@ jobs:
       image: ${{ steps.version.outputs.image }}
       version: ${{ steps.version.outputs.version }}
     steps:
-      # The whole history and every tag: the version is worked out from the commits
-      # since the last web-v<version> tag, and a shallow clone answers as though
+      # The whole history and every tag, because a shallow clone answers as though
       # nothing was ever released.
       - name: Check out the repository
         uses: actions/checkout@v7
@@ -100,7 +97,7 @@ jobs:
           # A registry path is lowercase; a GitHub owner is not necessarily.
           image="ghcr.io/$(printf '%s' "$REPOSITORY" | tr '[:upper:]' '[:lower:]')"
 
-          # Always published, version or not: a moving pointer at main, and an
+          # Always published, version or not – a moving pointer at main, and an
           # immutable one at this exact commit.
           tags="${image}:main
           ${image}:sha-$(printf '%s' "$SHA" | cut -c1-7)"
@@ -195,9 +192,8 @@ jobs:
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
-  # After release, and only when it earned a version: release succeeding means the tag
-  # exists, so :dev only ever points at a digest that also carries a released :<version>.
-  # A merge that earns nothing skips this job and records no deployment.
+  # Only after a release that earned a version, which means the tag exists, so :dev only
+  # ever points at a digest that also carries a released :<version>.
   dev:
     needs: release
     if: needs.release.outputs.version != ''
@@ -206,7 +202,7 @@ jobs:
     environment:
       name: dev
       url: https://campfire.wsj27.scouterna.net
-    # Scoped to the job that needs it: packages to move the image tag.
+    # Scoped to the job that needs it, which moves the image tag.
     permissions:
       packages: write
     steps:

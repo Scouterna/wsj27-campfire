@@ -32,8 +32,6 @@ export function scoutIdRoutes(scoutId: ScoutId, roles: RoleCache): Hono {
     const query = context.req.query()
     const outcome = scoutId.authorize(query, readCookie(context, scoutIdSessionCookie))
     if (outcome.kind === "picker") {
-      // The picker reads each persona from the same map the auth service fills their
-      // token from, so what a row promises is what the session carries.
       return context.html(pickerPage(groups, query, (memberNo) => roles.rolesFor(memberNo)))
     }
     if (outcome.kind === "refused") {

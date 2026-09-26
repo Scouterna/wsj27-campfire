@@ -21,15 +21,12 @@ const roleLabels = new Map<string, string>([
 ])
 
 /**
- * What a persona is, read from the very roles the auth service will mint into their
- * token – so the picker promises exactly what the session then carries, rather than a
- * description written beside it. A Roll names the audience where the roster has one
- * (Support's do), and the Funktion names it otherwise; a personal Accesstyp follows
- * with a plus, because a grant is something held on top of a function rather than a
- * function of its own.
- *
- * The real ScoutID would say none of this – it is a developer's aid on the one page of
- * the stand-in that is nobody's copy.
+ * What a persona is, read from the very roles their token will carry, so a row promises exactly
+ * what the session holds rather than a description written beside it. A Roll
+ * names the audience where the roster has one (Support's do), and the Funktion names it
+ * otherwise. A personal Accesstyp follows with a plus, because a grant is held on top of a
+ * function rather than being one. The real ScoutID says none of this, since the line is a
+ * developer's aid.
  * @param roles The member's minted roles, as the role map holds them.
  * @returns The line under the persona's name.
  */
@@ -50,8 +47,7 @@ function roleLine(roles: readonly string[]): string {
  */
 function belongingOf(role: string): string | undefined {
   const segments = role.split(":")
-  // The namespace first, and segment by segment, as the client's own converter reads a
-  // role – so the row promises exactly what the session will carry.
+  // The namespace first, and segment by segment, as the client's own converter reads a role.
   if (segments[0] !== "wsj27") {
     return undefined
   }
@@ -109,8 +105,8 @@ function section(
   const links = group.personas.map((persona) =>
     personaLink(persona, request, rolesFor(persona.memberNo)),
   )
-  // The heading above the sheet, as the design system's Card draws it.
-  // See personaLink.
+  // The heading above the sheet, as the design system's Card draws it. Formatted by hand, for
+  // the reason the rows are.
   // prettier-ignore
   return html`<section>
     <h2>${group.label}</h2>
@@ -133,11 +129,11 @@ const themeScript = `
 `
 
 // The page's stylesheet, out of the page function so the function stays readable – and
-// inside the lint budget. Every value mirrors a design token by hand: the mock depends
-// on nothing in the workspace, so it copies the system rather than importing it.
+// inside the lint budget. Every value mirrors a design token by hand, because the mock
+// depends on nothing in the workspace and copies the system rather than importing it.
 const styles = `
           /* The arrival from the sign-in screen and the departure back into the
-             application cross-fade: the whole round trip is same-origin, so both
+             application cross-fade. The whole round trip is same-origin, so both
              documents opting in is all a cross-document view transition needs. */
           @view-transition {
             navigation: auto;
@@ -159,7 +155,7 @@ const styles = `
             font-display: block;
           }
 
-          /* The five unit inks, and the one in force – the same pair the application
+          /* The unit inks, and the one in force – the same pair the application
              swaps on [data-theme]. */
           :root {
             --ink: #215262;
@@ -279,10 +275,8 @@ const styles = `
 
 /**
  * The ScoutID stand-in's sign-in page, where the real one asks for a password. One link per
- * persona, grouped by unit, then the contingent management, then an outsider – and every tap a
- * completed sign-in. Dressed in the design system's own language by hand – the display face, the
- * unit theme in force, and the card and row patterns – because the mock imports nothing from the
- * workspace and mirrors the tokens rather than reading them.
+ * persona, and every tap a completed sign-in. It wears the design system's display face, unit
+ * theme, and card and row patterns, copied by hand.
  * @param groups The personas, in the sections the picker shows them in.
  * @param request The authorization request the page answers, carried on to the chosen link.
  * @param rolesFor One member's minted roles, which each row reads itself by.
@@ -294,7 +288,7 @@ export function pickerPage(
   rolesFor: (memberNo: string) => readonly string[],
 ): Page {
   const sections = groups.map((group) => section(group, request, rolesFor))
-  // See personaLink.
+  // Formatted by hand, for the reason the rows are.
   // prettier-ignore
   return html`<!doctype html>
     <html lang="sv">

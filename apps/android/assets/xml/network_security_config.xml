@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!--
-  The development server speaks cleartext, which Android refuses by default. Permitted
-  for the loopback address and the emulator's alias for the host machine, and nothing
-  else.
+  The development server speaks cleartext, which Android refuses by default, so it is
+  permitted for the loopback address and the emulator's alias for the host machine and
+  nothing else.
 -->
 <network-security-config>
   <domain-config cleartextTrafficPermitted="true">

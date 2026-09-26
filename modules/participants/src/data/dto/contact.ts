@@ -2,9 +2,9 @@ import type { ContactPerson } from "../../model/ContactDetails"
 import { contactSlots, type ContactEmails, type ContactSlot } from "../../model/Participant"
 import { answer, type Answers } from "./answers"
 
-// The contact reads the listing and the detail share. One definition of what a person's
-// email is and who counts as a närstående, so a row in the list and the person opened
-// from it can never disagree about either.
+// The listing and the detail read contacts through these, so a row in the list and the
+// person opened from it can never disagree about a person's email or who their
+// närstående are.
 
 /**
  * A contact exists when their name was given – the other fields follow it.
@@ -29,13 +29,13 @@ export function toContactPerson(answers: Answers, prefix: string): ContactPerson
 }
 
 /**
- * The addresses of everybody the registration names around a person – the två närstående
- * and the two nödkontakter – kept under the slot each was named in, so a list can write
+ * The addresses of everybody the registration names around a person – the närstående
+ * and the nödkontakter – kept under the slot each was named in, so a list can write
  * to all of them at once and a sheet can give each its own column.
  *
  * Whether somebody wanted their contacts written to is a question the registration asks
  * and the participants service does not publish, so every named address is gathered. A
- * form that asks for no nödkontakt simply has no answers under those keys.
+ * form that asks for no nödkontakt has no answers under those keys.
  * @param answers The flattened answers.
  * @returns The addresses by slot – empty when nobody gave one.
  */
@@ -62,10 +62,10 @@ export function toRelatives(answers: Answers): readonly ContactPerson[] {
  * The current value of something Scoutnet holds and the registration copied down: the
  * basic block's own field, and where that holds nothing, the copy in the answers.
  *
- * The copy is what Scoutnet held on the day the application was made – the form's
+ * The copy is what Scoutnet held on the day the person signed up – the form's
  * "Information redan i Scoutnet" section shows it to be confirmed rather than written, so
- * it can only be as current as the registry was then, never more. A young member whose
- * record carried a parent's address when they applied carries it here still.
+ * it can only be as current as Scoutnet was then. A young member whose record carried a
+ * parent's address when they signed up carries it here still.
  * @param live The basic block's own field, as the service sent it.
  * @param answers The flattened answers.
  * @param key The question key the registration copied the field into.

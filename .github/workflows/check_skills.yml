@@ -6,9 +6,7 @@ name: Check skills
 #
 # Filtered inside the job rather than by `on: paths:`. A workflow skipped by a
 # path filter reports no status, and a required check waits on that status
-# forever; a skipped job reports as passing, so this stays a check that can
-# block a merge while still doing no work on a pull request that touches no
-# skill.
+# forever; a skipped job reports as passing.
 
 on:
   pull_request:
@@ -82,13 +80,14 @@ jobs:
             version="$(printf '%s\n' "$frontmatter" | sed -n 's/^[[:space:]]*version:[[:space:]]*//p' | head -n1 | tr -d '"')"
             description="$(printf '%s\n' "$frontmatter" | sed -n 's/^description:[[:space:]]*//p' | head -n1)"
 
-            # release_skills.yml skips a skill missing either, and it never ships.
+            # release_skills.yml skips a skill without a name or a version, so it
+            # would never ship.
             [ -n "$name" ] || fail "$skill_md" "Missing frontmatter name."
             [ -n "$version" ] || fail "$skill_md" "Missing metadata.version."
             [ -n "$description" ] || fail "$skill_md" "Missing frontmatter description – the release notes are built from it."
 
-            # The zip is named from the frontmatter and found by its directory,
-            # so a mismatch releases the wrong thing.
+            # The zip is named from the frontmatter and filled from the directory,
+            # so a mismatch would release one under the other's name.
             if [ -n "$name" ] && [ "$name" != "$dir_name" ]; then
               fail "$skill_md" "Frontmatter name \"$name\" does not match directory \"$dir_name\"."
             fi

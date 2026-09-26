@@ -4,8 +4,8 @@
  */
 
 /**
- * One of the contingent's units, numbered rather than named – the names are secret until the
- * units learn them, and this repository is public.
+ * One of the seed's units, named by number alone. The units' real names and glyphs are
+ * the web application's own data, and never the mock's.
  */
 export interface Unit {
   /**
@@ -20,8 +20,8 @@ export interface Unit {
 
 /**
  * Someone a developer can sign in as – an account at the ScoutID stand-in. Their roles are not
- * here: the auth service mints them from the list of participants, exactly as it does for a real account,
- * so a persona holds whatever their row in the list says.
+ * here, because they are minted from their row in the list of participants exactly as a real
+ * account's are.
  */
 export interface Persona {
   /**
@@ -103,7 +103,7 @@ export type AccessLevel =
   "Avdelningsledare" | "Hälsa plus intern information" | "Ingen" | "Intern information"
 
 /**
- * One answer: the option text or free text given, or every option picked where a question
+ * One answer – the option text or free text given, or every option picked where a question
  * takes several.
  */
 export type Answer = string | readonly string[]
@@ -117,8 +117,8 @@ export interface Participant {
    */
   readonly accessLevel?: AccessLevel
   /**
-   * Their answers, keyed by question key. Sparse: an unanswered question is absent, which is
-   * what the list of participants really looks like.
+   * Their answers, keyed by question key. An unanswered question is absent, which is what the
+   * list of participants really looks like.
    */
   readonly answers: Readonly<Record<string, Answer>>
   readonly birthDate: string

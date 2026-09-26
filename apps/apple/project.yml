@@ -17,13 +17,10 @@ options:
 attributes:
   BuildIndependentTargetsInParallel: true
 
-# Three environments, differing in one setting: the origin the shell loads the web
-# application from. Everything else – the bundle identifier, the app name, the icon – is
-# shared, so the three cannot sit on a phone side by side and are not meant to.
-#
-# Xcode's own Debug and Release are gone: a configuration here is an environment crossed
-# with a build type, which is what XcodeGen's configVariants below turn into one scheme
-# per environment.
+# The environments differ in one setting, the origin the shell loads the web application
+# from, which each environment's xcconfig sets. A configuration is an environment crossed
+# with a build type, and XcodeGen's configVariants turn them into one scheme per
+# environment.
 configs:
   Local (Debug): debug
   Local (Release): release
@@ -43,7 +40,7 @@ configFiles:
 settings:
   # No target links AppIntents.framework, so Xcode's metadata processor has nothing to
   # extract and says so once per target on every build. Telling it not to look is the only
-  # way to stop it; this comes back the day an App Intent is added.
+  # way to stop it, and it also hides from the system any App Intent a target adds.
   LM_SKIP_METADATA_EXTRACTION: YES
   DEAD_CODE_STRIPPING: true
   ENABLE_USER_SCRIPT_SANDBOXING: true
@@ -56,9 +53,8 @@ fileGroups:
 targets:
   Campfire:
     type: application
-    # iOS only. iPadOS, macOS, watchOS, tvOS, and visionOS are out of scope. This bounds
-    # the platform; TARGETED_DEVICE_FAMILY below bounds the device, and both are needed –
-    # on its own this still produces an iPad build.
+    # iOS only. This bounds the platform and TARGETED_DEVICE_FAMILY bounds the device,
+    # because an iOS destination alone still produces an iPad build.
     supportedDestinations: [iOS]
 
     sources:
@@ -72,9 +68,8 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: $(CAMPFIRE_BUNDLE_ID)
         PRODUCT_NAME: $(CAMPFIRE_APP_NAME)
-        # iPhone alone. supportedDestinations above bounds the platform, not the device
-        # family, which defaults to "1,2" and would ship an iPad build – a device this
-        # phone-width web application is not laid out for.
+        # iPhone alone, because the phone-width web application is not laid out for an
+        # iPad.
         TARGETED_DEVICE_FAMILY: "1"
         # Automatic signing with a real team, so the shell can run on a device. A
         # Simulator build never signs, so this costs the Simulator path nothing.
@@ -90,18 +85,18 @@ targets:
         CFBundleShortVersionString: $(CAMPFIRE_VERSION_NUMBER)
         CFBundleVersion: $(CAMPFIRE_BUILD_NUMBER)
 
-        # Read by Config.swift. The one place the address of the web application appears.
+        # Read by Config.swift, and the one place the address of the web application
+        # appears.
         Campfire:
           WebOrigin: $(CAMPFIRE_WEB_ORIGIN)
 
-        # The development server speaks cleartext on the loopback address, which App
-        # Transport Security refuses by default. This permits it for local addresses and
-        # nothing else.
+        # The development server speaks cleartext, which App Transport Security refuses
+        # by default, so it is permitted for local addresses and nothing else.
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
 
-        # The launch screen is the tonal blue the app icon and the web share, drawn before
-        # any of the app's code runs.
+        # The window the system shows while the process starts, in the icon's tonal
+        # blue.
         UILaunchScreen:
           UIColorName: LaunchScreenBackground
         UISupportedInterfaceOrientations:
@@ -109,10 +104,10 @@ targets:
         ITSAppUsesNonExemptEncryption: false
 
     scheme:
-      # One scheme per environment – Campfire Local, Campfire Dev, Campfire Prod – each
-      # bound to that environment's pair of configurations. Prod leads so that a fresh
-      # checkout opens on it in Xcode's scheme menu; the scripts name the scheme they
-      # want and never rely on the selection.
+      # One scheme per environment, each bound to that environment's pair of
+      # configurations. Prod leads so that a fresh checkout opens on it in Xcode's scheme
+      # menu, and the scripts name the scheme they want rather than rely on the
+      # selection.
       configVariants:
         - Prod
         - Dev

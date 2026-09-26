@@ -70,8 +70,7 @@ function mobilityRows(health: HealthProfile): readonly FieldRow[] {
     ...(mobility.otherAids === undefined ? [] : [mobility.otherAids]),
   ].join(", ")
 
-  // Declared but nothing to show: a "Ja" whose follow-ups are all blank is absence,
-  // not an empty row.
+  // A "Ja" whose follow-ups are all blank is absence, not an empty row.
   if (aids === "" && mobility.limitations === undefined) {
     return []
   }

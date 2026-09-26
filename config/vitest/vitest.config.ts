@@ -19,8 +19,8 @@ export default defineConfig({
         test: {
           name: "ui",
           root: "libraries/ui",
-          // node, not a DOM: the only tested logic here is pure, and the components are
-          // verified in Storybook instead (ADR 023).
+          // Node rather than a DOM, because the only tested logic here is pure and the
+          // components are verified in Storybook instead (ADR 023).
           environment: "node",
           include: ["src/**/*.test.ts"],
         },
@@ -91,8 +91,8 @@ export default defineConfig({
       // `pnpm clean`, rather than a `coverage/` at the root that git can pick up mid-run.
       reportsDirectory: ".build/coverage",
       // The logic the screens stand on. Components and screens are proved by Storybook
-      // and the Playwright walk-through in each module's `test-ui`, so `libraries/ui`
-      // and the modules' components stay outside the denominator on purpose.
+      // and each module's Playwright walk-through, so `libraries/ui` and the modules stay
+      // outside the denominator on purpose.
       include: [
         "libraries/host/src/**",
         "libraries/utils/src/**",
@@ -111,9 +111,9 @@ export default defineConfig({
         "libraries/utils/src/user/UserProvider.tsx",
         "**/*.test.ts",
       ],
-      // A ratchet, not a target: each number sits just below what the suite achieves
-      // today, so a change that stops covering something fails, and a change that covers
-      // more is followed by raising the bar to just under the new figure.
+      // A ratchet, not a target. Each number sits just below what the suite achieves, so
+      // a change that stops covering something fails, and a change that covers more is
+      // followed by raising the bar to just under the new figure.
       thresholds: {
         statements: 97,
         branches: 91,

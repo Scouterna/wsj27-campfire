@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <resources>
-  <!-- The adaptive icon's background, behind the campfire mark. The tonal blue from
-       the contingent palette, which the web holds as the `color-theme-blue` custom
-       property; the guidebook uses the official red instead, because it sits beside
-       the contingent logotype. -->
+  <!-- The adaptive icon's background behind the campfire mark, the contingent
+       palette's tonal blue that the web holds as `color-theme-blue`. -->
   <color name="ic_launcher_background">#2A778A</color>
 
-  <!-- The starting window, drawn before any of this app's code runs – the splash
-       screen's background on Android 12 and newer, and a plain window on Android 11.
-       The same tonal blue as the icon, which the web holds as the `color-theme-blue`
-       custom property. A resource rather than a Compose color, because no Compose
-       code has run yet when the system draws it. -->
+  <!-- The starting window's background, the same tonal blue as the icon. A resource
+       rather than a Compose color, because the system draws it before any of this
+       app's code runs. -->
   <color name="launch_background">#2A778A</color>
 </resources>

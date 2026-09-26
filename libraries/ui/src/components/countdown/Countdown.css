@@ -1,5 +1,4 @@
-/* The countdown: a plain white card, the clock in four tiles on the theme's own
-   color. */
+/* The countdown: a plain white card, the clock in tiles on the theme's own color. */
 
 @layer component {
   .countdown {
@@ -60,8 +59,8 @@
     text-wrap: balance;
   }
 
-  /* Four tiles overflow the narrowest phones at their comfortable size, so the tiles
-     tighten before the clock would wrap. */
+  /* The tiles overflow the narrowest phones at their comfortable size, so they tighten
+     before the clock would wrap. */
   @media (max-width: 379px) {
     .countdown-figure {
       min-width: 56px;

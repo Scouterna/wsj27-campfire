@@ -1,7 +1,7 @@
 name: Promote web
 
 # Moves the web image's :prod tag to a version that has already been released, and
-# does nothing else (ADR 035). Nothing is built, pulled, or pushed but the tag: the
+# does nothing else (ADR 035). Nothing is built, pulled, or pushed but the tag – the
 # manifest behind :<version> is copied to :prod as is, so prod runs the digest dev ran.
 #
 # Nothing here deploys either. A manual step on the cluster side takes what :prod
@@ -13,10 +13,8 @@ name: Promote web
 # Rolling back is this same workflow, run with an earlier version.
 #
 # The job runs in the prod environment, so every run – promoted or refused – is a
-# deployment with its creator, its status, a link to its run, and a link to the site,
-# and the repository's Deployments page is the history. The run summary names who, the
-# version, the outcome, the new and the previous digest, and the command that rolls
-# back.
+# deployment with its creator, its status, and links to its run and the site, and the
+# repository's Deployments page is the history.
 
 on:
   workflow_dispatch:
@@ -41,7 +39,7 @@ jobs:
     environment:
       name: prod
       url: https://campfire.wsj27.se
-    # Scoped to the job that needs it: contents to read the version tags, packages to
+    # Scoped to the job that needs it – contents to read the version tags, packages to
     # move the image tag.
     permissions:
       contents: read
@@ -126,7 +124,7 @@ jobs:
 
       # Read before the move, so the summary can say what this promotion replaced and
       # how to go back to it. The version is found by matching digests against the
-      # newest twenty releases; older than that, the digest alone is recorded.
+      # newest releases, and past those the digest alone is recorded.
       - name: Read what prod runs now
         id: previous
         env:

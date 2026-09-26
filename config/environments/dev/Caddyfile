@@ -2,7 +2,7 @@
 # served by Vite so a change on the host reaches the browser. This is where the real
 # sign-in flow is exercised – the one thing the mock cannot do.
 #
-# The three front doors all serve http://localhost:8000, so the web application and
+# The front doors all serve http://localhost:8000, so the web application and
 # the shells never know which environment is running.
 #
 # One Caddy config per way Campfire is served, one folder per environment:
@@ -11,8 +11,8 @@
 #   prod/Caddyfile        `pnpm start:prod`, the built image against the real back-end
 #   prod/image.Caddyfile  inside the image, wherever it is deployed
 :8000 {
-	# The prefix is stripped before proxying: the real service serves its endpoints at its
-	# root, and the deployed ingress does the same. The matcher names the bare prefix
+	# The prefix is stripped before proxying, because the real service serves its endpoints
+	# at its root, and the deployed ingress strips it too. The matcher names the bare prefix
 	# beside the subtree, because the ingress answers both – so `/api/auth` reaches the
 	# service's health check rather than falling through to the web application.
 	@auth path /api/auth /api/auth/*

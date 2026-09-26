@@ -79,7 +79,7 @@ export function formatVersion(version: Version): string {
 /**
  * Returns the version a release of these commits gets.
  * @param input - What the next version is computed from.
- * @param input.last - The last released version, or undefined when there is none yet.
+ * @param input.last - The last released version, or undefined before the first release.
  * @param input.subjects - The subjects of the commits since that release.
  * @param input.year - The current year, which a feature release adopts.
  * @returns The next version, or undefined when no subject earns a release. A first

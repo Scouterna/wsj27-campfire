@@ -16,10 +16,9 @@ const config: Config = {
   ],
   overrides: [
     {
-      // The organize-imports plugin needs vue-tsc to read a single-file component
-      // and says so on every run otherwise. The guidebook theme has one such
-      // component with two imports, so it is formatted without that plugin rather
-      // than pulling in a second TypeScript front-end for the sake of a sort.
+      // The organize-imports plugin needs vue-tsc to read a single-file component and
+      // says so on every run otherwise, so a Vue component is formatted without it
+      // rather than pulling in a second TypeScript front-end for the sake of a sort.
       files: "*.vue",
       options: {
         plugins: ["@prettier/plugin-xml", "prettier-plugin-curly", "prettier-plugin-packagejson"],

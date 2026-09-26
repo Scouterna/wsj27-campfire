@@ -1,10 +1,9 @@
 import type { Unit } from "../src/types.ts"
 
 /**
- * The two seeded units, by number alone – two, because a leader's boundary needs a unit on
- * each side of it. Their names are secret until the units learn them, and this repository
- * is public. The participants module owns the unit type once it lands; until then the
- * seed carries the numbers and nothing that could name a unit.
+ * The two seeded units – two, because a leader's boundary needs a unit on each side of
+ * it. Each is named by its number alone, because the units' real names and glyphs are
+ * the web application's own data, and never the mock's.
  */
 export const units: readonly Unit[] = [
   { number: 1, name: "Avdelning 1" },

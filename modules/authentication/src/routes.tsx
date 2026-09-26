@@ -12,13 +12,11 @@ declare module "@scouterna/wsj27-campfire-ui" {
 }
 
 /**
- * The authentication module's screens, by address. `satisfies` rather than a type
- * annotation, so the table's keys stay the narrow literals the router checks links
- * against.
+ * The authentication module's screens, by address.
  *
- * The profile page belongs to the home section, which is everybody's, so the page is
- * too – but it names no parent: it is a start of its own, reached from the chrome at
- * any depth of any section, and a detail of none of them.
+ * The profile page belongs to the home section, which is everybody's, but names no
+ * parent, because it is reached from the chrome at any depth of any section and is a
+ * detail of none of them.
  */
 export const authenticationRoutes = {
   "/profile": { Component: ProfileScreen, tab: "home" },

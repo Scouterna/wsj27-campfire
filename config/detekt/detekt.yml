@@ -3,7 +3,7 @@
 # Detekt adds in a future release arrives switched on.
 #
 # Every exception below is here because Compose's conventions and Detekt's
-# defaults genuinely disagree, not because a rule was inconvenient.
+# defaults disagree, not because a rule was inconvenient.
 
 complexity:
   LongParameterList:
@@ -32,7 +32,7 @@ style:
     maxLineLength: 100
   ReturnCount:
     # A guard clause that returns early is clearer than the nesting that avoids
-    # it, so guard clauses do not count towards the limit. Tangled control flow
+    # it, so guard clauses do not count toward the limit. Tangled control flow
     # still does.
     excludeGuardClauses: true
   MagicNumber:

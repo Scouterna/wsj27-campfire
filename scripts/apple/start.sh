@@ -36,11 +36,10 @@ open -a Simulator
 
 sh "$here/build.sh" local
 
-# Asked of the build rather than constructed or read out of an xcconfig. The products
-# directory is named after the configuration – ".build/Build/Products/Local
-# (Debug)-iphonesimulator", spaces and parentheses included – and the bundle
-# identifier and product name are whatever the xcconfig chain resolved them to, so
-# reading the settings the build itself used is the one answer that cannot drift.
+# Asked of the build rather than constructed or read out of an xcconfig, because the
+# products directory is named after the configuration, spaces and parentheses included,
+# and the bundle identifier and product name are whatever the xcconfig chain resolved.
+# The settings the build itself used are the one answer that cannot drift.
 settings=$(
   xcodebuild \
     -project Campfire.xcodeproj \

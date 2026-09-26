@@ -9,8 +9,8 @@ import type { StorybookConfig } from "@storybook/react-vite"
 const repository = path.resolve(import.meta.dirname, "../..")
 
 // Storybook's configuration, kept in config/ with every other tool's (ADR 006). One
-// instance for the whole monorepo: it indexes the ui library's components and every
-// module's widgets and screens, so the whole visual vocabulary is browsable in one place.
+// instance for the whole monorepo indexes the ui library's components and every module's
+// widgets and screens, so the whole visual vocabulary is browsable in one place.
 const config: StorybookConfig = {
   framework: "@storybook/react-vite",
   stories: [
@@ -20,7 +20,7 @@ const config: StorybookConfig = {
   ],
   addons: ["@storybook/addon-docs"],
   // The guidebook's icon set, served to the manager so the sidebar can carry the same
-  // app icon the guidebook's nav bar does (see manager.ts) without a second copy of it.
+  // app icon the guidebook's nav bar does without a second copy of it.
   staticDirs: [{ from: "../vitepress/assets", to: "/brand" }],
   core: {
     // Storybook phones home with usage data by default. Nothing in this repository

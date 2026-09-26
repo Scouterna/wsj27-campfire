@@ -45,8 +45,8 @@ export type WidgetsFrom<TOwner extends string> = Readonly<{
 
 /**
  * A table of widgets by id – what the application hands `WidgetsProvider` once the
- * modules' tables are merged. A
- * widget takes no props: what it needs it reads where it is used, from the ambient
- * session or its own queries, so the placing screen has nothing to thread.
+ * modules' tables are merged. A widget takes no props, because it reads what it needs
+ * where it is used, from the ambient session or its own queries, so the placing screen
+ * has nothing to thread.
  */
 export type Widgets = Readonly<Partial<Record<WidgetId, ComponentType>>>

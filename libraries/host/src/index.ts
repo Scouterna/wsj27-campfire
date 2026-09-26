@@ -1,6 +1,5 @@
 /**
- * Where the web application is running. Importing this module is what computes the
- * answer, so it happens once, at module evaluation, before anything renders.
+ * Where the web application is running, computed once when this module is imported.
  */
 
 export { host, type Tier } from "./host"

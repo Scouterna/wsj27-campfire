@@ -21,9 +21,9 @@ type InfoLevel = "basic" | "full"
  * Query options for one person in full, with everything they answered when they signed up –
  * as much of it as the viewer may read.
  *
- * The info level is the viewer's best case: a leader reads their own unit in full and a
- * health grant reads everyone in full, so both start at `full`; management without the
- * grant may not, so they start at `basic`. The one seam is a leader who also serves in the
+ * The info level is the viewer's best case. A leader reads their own unit in full and a
+ * health grant reads everyone in full, so both start at `full`, and management without
+ * the grant may not, so they start at `basic`. The one seam is a leader who also serves in the
  * management, reading outside their unit – `full` answers 403 where `basic` would answer,
  * so a 403 retries once at `basic` rather than reading as a failure. A second refusal is
  * the answer.
@@ -31,9 +31,8 @@ type InfoLevel = "basic" | "full"
  * A member number nobody holds throws, and so does one outside the viewer's scope, on
  * purpose indistinguishably – the service answers 404 to both, and so does a payload that
  * is not a person. The screen words all of them the same way.
- * @param memberNo The person's member number, as a row from `fetchParticipantsQuery`
- * carries it.
- * @param viewer Who is reading, from `useViewer`.
+ * @param memberNo The person's member number, as a listing row carries it.
+ * @param viewer Who is reading.
  * @returns Options for `useQuery`, `useSuspenseQuery`, or `ensureQueryData`.
  */
 export function fetchParticipantQuery(
@@ -88,7 +87,7 @@ async function ask(memberNo: string, level: InfoLevel): Promise<ParticipantDetai
 
 /**
  * Where one person is asked for. Encoded because the member number is read from a service
- * payload: a value carrying a reserved character must not rewrite the path it is asked on.
+ * payload, and a reserved character in it must not rewrite the path it is asked on.
  * @param memberNo The person's member number.
  * @param level How much of the record to ask for.
  * @returns The origin-relative address.

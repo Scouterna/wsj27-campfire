@@ -3,9 +3,8 @@ import { serve } from "@hono/node-server"
 import { createApp } from "./app.ts"
 
 /**
- * Where the mock listens. The local Caddy proxies `/api/auth/*`, `/api/project/*`, and
- * `/__mock__/*` here from the one origin everything shares, `http://localhost:8000` –
- * nothing talks to this port directly except Caddy.
+ * Where the mock listens. The local Caddy proxies the mock's paths here from the one origin
+ * everything shares, and nothing else talks to this port.
  */
 const port = 8003
 

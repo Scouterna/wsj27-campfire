@@ -32,8 +32,7 @@ serial=$(sh "$here/emulator.sh")
 # reverse tunnel, which the Local flavor's base URLs point at.
 adb -s "$serial" reverse tcp:8000 tcp:8000
 
-# The Gradle module's directory is config/app, not src/app – a build file under src/
-# lands inside the Kotlin source set that src/ defines. settings.gradle.kts says why.
+# The app module's build file sits under config/, not src/ – settings.gradle.kts says why.
 namespace=$(sed -n 's/^ *namespace = "\(.*\)"/\1/p' config/app/build.gradle.kts)
 
 # ANDROID_SERIAL scopes the Gradle install to the resolved device; without it, the
