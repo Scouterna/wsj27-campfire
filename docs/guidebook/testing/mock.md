@@ -1,38 +1,49 @@
 # The mock back-end
 
-Campfire's real back-end is a set of Python services in their own repositories ([ADR 013](/decisions/013-build-the-back-end-as-python-services-in-their-own-repositories)) – `wsj27-auth-api` and `wsj27-project-api` – and reaching them takes Docker, credentials, and a realm that is up. Local development should cost none of that, so the local environment gets a stand-in: `tools/mock`, a small Hono server that answers everything the application asks for in the real services' own shapes, seeded with invented people ([ADR 021](/decisions/021-stand-in-for-the-back-end-with-a-seeded-mock)).
+Campfire's real back-end is services in their own repositories ([ADR 013](/decisions/013-keep-the-back-end-services-in-their-own-repositories)), and reaching them takes Docker, credentials, and an identity provider that is up. Almost every screen also depends on who is looking, so trying one against the real services takes an account per role. The mock in `tools/mock` removes all of that on a developer's machine: a small server that answers as the real services do, seeded with invented people, so local work and the walk-throughs never touch a network ([ADR 021](/decisions/021-develop-against-a-mock-back-end)).
 
-Nothing in a local session or a test run reaches a network. That is the whole point of it.
+It copies what the services' code does rather than inventing behavior – the same routes, response bodies, refusals, and cookies, at the same paths the deployed environments serve. The web application only fetches paths on its own origin, so neither it nor a shell can tell the mock from the real thing, and an address that works locally works against dev unchanged ([ADR 012](/decisions/012-run-campfire-in-three-environments-on-one-origin)).
+
+## What it stands in for
+
+In the local environment, Caddy serves everything on `http://localhost:8000`, sending the back-end paths to the mock and every other path to Vite ([The environments](../development/environments)).
+
+| Under               | Stands in for                                                                      |
+| ------------------- | ---------------------------------------------------------------------------------- |
+| `/api/auth`         | The auth service – sign-in, the session cookies, and a real signed access token    |
+| `/api/project`      | The participants service – the list of participants, scoped by the caller's roles  |
+| `/__mock__/scoutid` | ScoutID, with a persona picker where the password form would be                    |
+| `/__mock__`         | The mock's own controls – forgetting every session, and reporting who is signed in |
+
+ScoutID is the one part that is not a copy, because it is not ours to run. The auth service sends the browser there as it would to the real ScoutID, and the page that answers lists invented people instead of asking for a password. Tap a name and the browser returns through the auth service with a code, exactly as it does from the real sign-in.
+
+Access follows the real rules. A unit leader reads their own unit and nobody else's. The contingent management team reads everyone, and sees health answers only through a health role or a personal grant – a request without one is refused, never quietly answered with less. Someone with no access gets the same 404 as a person who does not exist, so a refusal never reveals who is on the list.
+
+Nothing reaches disk, and the signing key is made at start, so restarting the mock signs everyone out. The access token lasts the real service's five minutes rather than something longer and kinder, so the refresh path runs during an ordinary afternoon of local work rather than only in production.
+
+## The personas
+
+Each persona is an invented person, there for a case the access rules turn on rather than to fill the list:
+
+- a leader in each of two units, so a view that leaks from one unit to the other shows
+- the head of contingent and a member of each management function
+- the edges – a member who reads health answers through a personal grant rather than their function, a management member whose function is not mapped, and someone signed in from outside the contingent, who is refused everything
+
+The picker shows each one with a line on what signing in as them demonstrates, so "what does someone on the health team actually see" is answered by tapping a name.
+
+A persona holds no roles of their own. The mock mints them from the person's row in the list of participants, the way the participants service does, and the auth service puts them in the token. Behind the personas is the list of participants itself, invented too: each row earns its place by carrying something the others do not – an allergy, a medication, a diagnosis, incomplete vaccinations, a leader's record full of holes. The holes are deliberate, because a real list has them. The units are numbers and nothing more, as they are to the real service; their names and marks are the web application's own.
+
+## Using it
 
 ```bash
-pnpm start:mock    # the mock alone, on port 8003
-pnpm start:local   # the whole local environment, mock included, on port 8000
+pnpm start:local   # the whole local environment, mock included, on http://localhost:8000
+pnpm start:mock    # the mock alone, on port 8003, when the mock is what you are changing
 ```
 
-These are two sizes rather than two alternatives. `start:mock` is the server on its own, which is what you want when the mock itself is the thing being worked on. `pnpm start:local` puts it behind Caddy on the one origin every environment serves, `http://localhost:8000`, where `/api/auth`, `/api/project`, and `/__mock__` are proxied to it and everything else goes to Vite ([The environments](../development/environments), [ADR 012](/decisions/012-run-campfire-in-three-environments-on-one-origin)). The web application only ever fetches origin-relative paths, so it cannot tell the mock from the real thing – and neither can a shell.
-
-The mock copies what the real services' code does rather than defining anything, and the two prefixes are the ones the deployed ingress serves ([ADR 012](/decisions/012-run-campfire-in-three-environments-on-one-origin)), so an address that works here works against dev unchanged.
-
-## What it serves
-
-- **The auth service**, under `/api/auth`, route for route: `login`, `callback`, `refresh`, `user`, `logout`, `token`, `certs`, the discovery document, and the service's own `static/refresh.js`, copied in verbatim. The session is the service's cookies with its lifetimes, and the access token is a real signed JWT in its claim shape. The settings are the dev environment's, so a return address other than `localhost:8000` is refused here exactly as it is there.
-- **A stand-in for ScoutID**, under `/__mock__/scoutid`, which is the one part that is not a copy – ScoutID is not ours to run. The auth service sends the browser there as it would to ScoutID, and its sign-in page is a **persona picker**: a list of names grouped by unit, then the contingent management, then an outsider. Tap one, no password, and the browser comes back through `/api/auth/callback` with a code, as it does from the real realm. The stand-in keeps a session of its own the way Keycloak does, so while it lives a login goes straight through without the picker. Signing out ends it, which is how you switch persona.
-- **The project API**, under `/api/project`, in `wsj27-project-api`'s own behavior: `participants/troopinfo/{troop}` for one unit or member type at a time, `participants/individual/{memberNo}` for one person, and the bulk `participants/roles` map, each taking an `infolevel` of `name`, `basic`, or `full`. The gates are the real service's. An avdelningsledare reads their own unit at any level, while kontingentledningen reads everyone at `basic` and needs a health grant for `full` – refused with 403, never quietly downgraded. No access at all answers 404, indistinguishable from a member number that does not exist, so the list of participants never leaks who is in it. A leader's own contact details and health answers go only to kontingentledningen with a health grant.
-- **A health check per service**, at `/api/auth` and `/api/project`, each naming the service it stands in for. They take no authentication, exactly as the real services answer their roots, and they are what the start scripts wait for.
-- **A control surface**, under `/__mock__`, namespaced so it can never collide with a real path. `POST /__mock__/reset` makes the ScoutID stand-in forget every session, and `GET /__mock__/state` reports the sessions that exist by email and roles, never tokens. `scripts/start/local.sh` probes `state` through the front door as one of its readiness checks, so the environment is only reported up once the mock answers where the application looks for it.
-
-## What it is seeded with
-
-The personas live in `tools/mock/seed/personas/`, one file each, twelve in all – each there for a case rather than for numbers, and each shown in the picker with a short description of what signing in as them demonstrates. A leader in each of two units, so switching from one to the other shows whether anything from the first unit follows along. The head of contingent and one person per management function: Administration, the only caller allowed the role map, Communication, Program, Health, IST support, and Unit support. And the edges the role rules turn on: a Support member who reads health answers through a personal grant rather than the Health roll, a management member the funktion mapping does not name, and someone signed in from outside the contingent, who is refused everything. Signing in as one is how a role's view of the application is reproduced, so "what does someone on the health team actually see" is a question answered by tapping a name.
-
-Behind them is the list of participants itself, in `seed/participants/`: the two units' leaders, deltagare, and IST, plus the contingent management – twenty-three people, where a row earns its place by carrying something the others do not: a food allergy with severities, an allergen graded 1 beside them and a food allergy graded 1 across the board, medication with medical equipment, mobility aids, a diagnosis, a mental health condition, a phobia, incomplete vaccinations, special diets, the youngest and oldest deltagare, and a leader's record full of holes. The form template is the service's own, question for question, and the CMT roster is a CSV in the columns the service reads. The mock decodes the list of participants the way the service decodes Scoutnet's, so what a screen receives is what the service would send for the same people. The shape is the contract's and the content is nobody's – the units are numbers and nothing more, because a number is all the service holds of a unit: the names and the marks are the application's own, in `apps/web/assets/units/`. The holes in the data are deliberate too: a real list of participants has them.
-
-The stand-in's sessions live in memory and the signing key is made when the mock starts, so restarting it signs everyone out. The access token lasts five minutes and the refresh window half an hour – the real service's lifetimes, kept rather than raised on purpose, because it means the refresh path is exercised in an ordinary afternoon of local work instead of only in production.
-
-A persona carries no roles of their own. The mock mints them from the list of participants the way `wsj27-project-api` does – `wsj27:al:<troop>` for the leaders, `wsj27:cmt:<funktion>:<roll>` from the roster for the management, and the per-person `wsj27:access:<level>` grants – and the auth service puts them into the token.
+Sign-in works only through `http://localhost:8000`, the address the auth service's settings name, so the mock alone is for working on the mock rather than on the application. The mock ScoutID keeps a session of its own, as the real one does, so signing in again goes straight through without the picker – sign out to switch persona.
 
 ## Its own tests
 
-The mock is a package like any other, with its tests beside its source and its own Vitest project ([Unit tests](./unit)). They drive the routes through `createApp()` rather than a running server, with a browser that keeps cookies and a clock moved by hand, so a test can march time past an access token's five minutes and watch the refresh path recover the session.
+The mock is a package like any other, with unit tests beside its source. They drive its routes in process with a browser that keeps cookies and a clock moved by hand, so a test can age an access token past its five minutes and watch the session recover.
 
-A stand-in that quietly drifts from the contract is worse than no stand-in, so the contract it implements is asserted rather than assumed, down to the bytes: the sign-in round trip and every cookie it sets, the refusals in FastAPI's own words, every gate on the list of participants at each info level, the 404 that hides a person from a caller who may not see them, and the exact nesting of the record on the wire. That is also why it is one of the three packages the coverage ratchet measures at all, alongside the two libraries.
+A stand-in that drifts from the real contract is worse than none, so the contract is asserted rather than assumed, down to the exact bytes the services send: the sign-in round trip and every cookie it sets, every access rule on the list of participants, and the 404 that hides a person. That is also why the mock is inside the [coverage ratchet](./unit).

@@ -1,29 +1,10 @@
 # CMT – Program
 
-Program plans what the contingent does: the preparation of everyone, the round trip and the gatherings on the way, and the Swedish contributions at camp. The jamboree's own program belongs to ZHP and WOSM; what Program owns is everything around it.
+Program plans what the contingent does around the jamboree's own program: the meetings where units get together before the trip, the activities on the round trip, and the program at camp.
 
-The participants service calls the function **Program**, and its color in the contingent's identity is blue – the contingent's default.
+## Why they use Campfire
 
-## At camp and before it
+- **Planning around the units.** The unit browser opens each unit to its leaders and scouts, so a gathering or an activity is planned around who is actually coming.
+- **Reaching the leaders.** Narrowing the list of participants to the leaders and mailing them all, or copying their addresses.
 
-Program owns the Baltic tour through Latvia and Lithuania for the units that chose the rundresa, the two förträffar where a unit gets to know each other – autumn 2026 to build the group, spring 2027 to make it ready to travel – and the two in-person leader meetings across 2026 and 2027 with digital ones between.
-
-That is a calendar spread over eighteen months, and it is a calendar the whole contingent plans its life around. The dates are fixed and public: departure 21–22 July 2027 for the round trip, 26–27 July for direct travel, the opening ceremony on 30 July, and home again 9–10 August.
-
-## In the application
-
-Program gets the unscoped list of participants like the other CMT functions, and a person's page carries the one field that is genuinely theirs: how that person travels. Rundresa, direktresa, or egen resa, as the list of participants worded it.
-
-The countdown on the home screen is the other piece. It counts down to the first day of a person's journey, and through the days once it has begun, from an itinerary that is fixed and public, and therefore lives in the journey module rather than being fetched from anywhere – there is no service to fetch it from, and an itinerary that has been printed does not need one. It reads a person's travel choice to know which departure to count down to – the rundresa's buses on 21 July, the direktresa's departure for Olsztyn on 26 July, or the camp itself for everybody else – so a leader on the rundresa and a leader on the direktresa see different dates and different roads.
-
-No schedule, activity, förträff, or attendance is designed anywhere in the application.
-
-## What it is meant to give them
-
-Nothing specified. Program is on the audience list so an issue can name them; a program or schedule surface has never been designed, and neither anchor points at one. If the itinerary ever needs to change without a release, that is the moment the question gets asked properly.
-
-## Signing in, and what they see
-
-Sign-in is ScoutID like everyone else's ([ADR 019](/decisions/019-authenticate-on-the-app-origin-through-scoutid)). The role `wsj27:cmt:program` marks the function, and the front-end reads it as management without distinguishing it from the other functions.
-
-Program reads the whole list of participants at the basic level. The health answers stay behind [the health grants](./cmt-health), which Program does not carry.
+A role under `wsj27:cmt:program` marks the function. Like every CMT role it reads the whole list of participants, but not the health answers, which need the [health grant](./cmt-health).

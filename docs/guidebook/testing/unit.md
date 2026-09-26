@@ -1,42 +1,36 @@
 # Unit tests
 
-Unit tests cover the logic that needs no running application: pure functions, the boundaries where untyped input arrives, and each package's public surface. They live beside the code they cover – `string.test.ts` sits next to `string.ts` – and they are written with it, so a package lands with the tests that prove it.
+Unit tests cover the logic that needs no running application: pure functions, the boundaries where untyped input arrives, and each package's public surface. Nothing renders a component. A screen is mostly composition, and a render in a fake DOM passes while the real application shows a blank page, so the [walk-throughs](./ui) and [Storybook](../design/) prove the screens instead ([ADR 024](/decisions/024-walk-through-the-web-application-per-module-with-playwright)).
 
-## TypeScript, with Vitest
+## TypeScript
 
-`pnpm test` runs every TypeScript test in the repository through Vitest, configured in `config/vitest/vitest.config.ts` ([ADR 022](/decisions/022-test-typescript-with-vitest)).
+`pnpm test` runs every TypeScript test through Vitest, in Node with no DOM ([ADR 022](/decisions/022-test-typescript-with-vitest)). Vitest shares Vite's transform, so the application, its tests, and the catalog agree on how TypeScript becomes JavaScript.
 
-That configuration lists one project per package that has tests, written out by hand:
+The configuration in `config/vitest/` lists each package that has tests as a project of its own, by hand. A new package with tests is a new entry, added on purpose, rather than a glob that silently starts matching – or silently stops.
 
-| Project          | Package                  | What it covers                                                         |
-| ---------------- | ------------------------ | ---------------------------------------------------------------------- |
-| `utils`          | `libraries/utils`        | `stringOrFallback`, the `fetch` wrapper, and the role helpers          |
-| `ui`             | `libraries/ui`           | The theme names and checks, and the unit-to-theme table                |
-| `host`           | `libraries/host`         | Tier detection from the User-Agent, and its answer with no `navigator` |
-| `authentication` | `modules/authentication` | The session client, the role translation, and the DTO converters       |
-| `home`           | `modules/home`           | The message list, which of it is unread, and reading what was closed   |
-| `journey`        | `modules/journey`        | The trip's phase and countdown, pure functions over its fixed dates    |
-| `participants`   | `modules/participants`   | The unit identity table and the DTO converters                         |
-| `mock`           | `tools/mock`             | [The mock back-end](./mock) itself – its routes, through `createApp()` |
+| Where                    | What its tests prove                                                                                                                         |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| The libraries            | The shared helpers, the role checks, the themes and transitions, and which host the page runs in                                             |
+| `modules/authentication` | The session client, the session's expiry, the user's roles, and the DTO converters                                                           |
+| The other modules        | Their models – the journey's phases, the messages, a participant's details – their converters, and the logic behind a screen, such as search |
+| `tools/mock`             | [The mock back-end](./mock), route by route                                                                                                  |
+| `scripts/release`        | Which artifacts a commit counts toward, and each one's next version                                                                          |
 
-Hand-listing is the point. A new package with tests is a new entry here, deliberately, rather than a glob that silently starts matching – or silently stops. Every project runs in Node and picks up `src/**/*.test.ts`; `libraries/ui` runs in Node too, rather than in a DOM, because its components are proved in Storybook instead ([ADR 023](/decisions/023-catalog-the-ui-in-storybook)).
+## The coverage ratchet
 
-### The coverage ratchet
+Every run measures coverage and fails below a floor. The floors are a ratchet rather than a target: each sits just under what the suite achieves, so a change that stops covering something fails, and a change that covers more is followed by raising the bar to just under the new figure.
 
-`pnpm test` measures coverage on every run and fails below the floor each metric carries: 97% of statements, 91% of branches, 99% of functions, and 97% of lines. The numbers are a ratchet rather than a target: each sits just under what the suite achieves, so a change that stops covering something fails, and a change that covers more is followed by raising the bar to just under the new figure.
+The ratchet measures the logic everything else stands on – `libraries/host`, `libraries/utils`, the release scripts, and the mock. Components and screens stay outside it on purpose, because they are proved by Storybook and the walk-throughs rather than by a rendering test.
 
-What it measures is deliberately narrow – `libraries/host`, `libraries/utils`, and `tools/mock`, minus the mock's `main.ts`, which starts a server and has no behavior of its own to assert, and minus the utils package's one component, `RolesProvider.tsx`. Components and screens stay outside the denominator on purpose, because they are proved by Storybook and by the [Playwright walk-throughs](./ui) rather than by a rendering test.
+## The shells
 
-## Swift, on a Simulator
+Each shell's unit tests prove what the shell decides for itself: that its build settings deliver the web origin it loads, through the whole chain from build configuration to the code that reads it. The two suites mirror each other by name, because the shells do ([ADR 010](/decisions/010-deliver-the-front-end-as-one-web-application-in-native-shells)).
 
-`pnpm test:apple` runs the `CampfireTests` target through `scripts/apple/test.sh`: Swift Testing, always the Local scheme, on a Simulator the script resolves for itself.
+| Shell   | Command             | Runs                                                   |
+| ------- | ------------------- | ------------------------------------------------------ |
+| Apple   | `pnpm test:apple`   | Swift Testing on a Simulator, in the Local environment |
+| Android | `pnpm test:android` | JUnit on the JVM, in the local flavor                  |
 
-The suite is hosted by the application, so `Config` reads the real generated Info.plist rather than a fixture, and `ConfigTests` asserts that the whole chain – an xcconfig, the generated plist, and the Swift that reads it – actually delivers an origin. It asserts that the origin is read rather than what it is, which is why the other two environments have nothing of their own to prove here.
+Both run the local environment only, because the other two differ from it only in the origin and have nothing of their own to prove. The Android tests also run on a pull request that touches the shell; the Apple tests run only on a developer's machine, because no macOS runner is spent on the shell ([Continuous integration](../development/continuous-integration)).
 
-An `xcodebuild test` run builds every test target in the scheme, so a unit-test run also compiles the walk-through. That is what keeps the [UI test](./ui) from rotting between the occasions anybody runs it.
-
-## Kotlin, on the JVM
-
-`pnpm test:android` runs `testLocalDebugUnitTest` – JUnit 5 against the local flavor – plus `assembleLocalDebugAndroidTest`, which compiles the instrumented suite without running it, for the same reason.
-
-The suite mirrors the Apple one by name, because the shells mirror each other by design ([ADR 010](/decisions/010-deliver-the-front-end-as-one-web-application-in-native-shells)): `ConfigTests` asserts that the product flavor, the generated `BuildConfig`, and the Kotlin that reads it deliver `http://localhost:8000` – the local ingress on the adb-reversed localhost.
+Both commands also compile the shell's [walk](./ui) without running it, so the walk keeps building between the times anybody runs it.

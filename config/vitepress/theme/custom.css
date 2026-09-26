@@ -106,9 +106,8 @@
 /* Above 960px the sidebar is visible and already carries the logotype, so the
    nav's copy would be a duplicate – hide it there. Below that breakpoint the
    sidebar collapses into a drawer, and the nav copy is the only branding left,
-   so it stays, raised from the default 24px – a little more room than a plain
-   icon needs, but it matches the logotype's own raise from when this rule
-   covered both. */
+   so it stays, drawn larger than VitePress's default so the rounded app icon
+   reads as a mark rather than a favicon. */
 :root {
   --vp-nav-logo-height: 36px;
 }
@@ -150,9 +149,8 @@
   background-color: #fff !important;
 }
 
-/* Remove the divider line the default theme draws above every h2.
-   Drop the border and its accompanying padding; the h2's top margin
-   still gives the heading room to breathe. */
+/* No divider above every h2; the heading's top margin alone gives it room to
+   breathe. */
 .vp-doc h2 {
   border-top: 0;
   padding-top: 0;
@@ -190,8 +188,8 @@
    natural height, so a diagram wider than it is tall reads at a sensible size
    and one taller than the viewport scrolls instead of shrinking past
    legibility, on a padded, rounded surface. For a Mermaid diagram the cap is
-   its own inline max-width, its natural size, deliberately left in place:
-   unlike the exported architecture diagrams, which are far wider than any
+   its own inline max-width, its natural size, deliberately left in place,
+   because unlike the exported architecture diagrams, which are far wider than any
    viewport, a Mermaid diagram is often smaller, and stretching one past its
    natural width only magnifies its labels. */
 .image-lightbox img,
@@ -203,10 +201,9 @@
 }
 
 .image-lightbox img {
-  /* White rather than the theme variable, because a Structurizr export bakes
-     background: #ffffff into its own markup: the frame has to match the
-     diagram it wraps, and in dark mode the theme variable would ring a white
-     diagram in near-black. */
+  /* White rather than the theme variable, because a Structurizr export bakes a
+     white background into its own markup, and in dark mode the theme variable
+     would ring a white diagram in near-black. */
   background: #fff;
 }
 
@@ -225,9 +222,9 @@
 }
 
 .image-lightbox-close {
-  /* Fixed, not absolute: the lightbox itself is the scroll container, so an
-     absolutely positioned child would scroll away with the diagram instead
-     of staying reachable. */
+  /* Fixed rather than absolute, because the lightbox itself is the scroll
+     container, and an absolutely positioned child would scroll away with the
+     diagram instead of staying reachable. */
   position: fixed;
   top: 1rem;
   right: 1rem;

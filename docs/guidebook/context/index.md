@@ -1,46 +1,40 @@
 # Context
 
-Campfire is the digital companion for Scouterna's Swedish contingent to the World Scout Jamboree 2027 – roughly 2,600 people in 53 units, traveling to Wyspa Sobieszewska outside Gdansk in Poland at the end of July 2027. Its users are the unit leaders and the contingent management team, the CMT; the scouts themselves are in the list of participants Campfire reads, not in front of it. This chapter places it in its surroundings: the people who use it, and the systems it depends on.
+Campfire is the digital companion for Scouterna's Swedish contingent to the World Scout Jamboree 2027, on Wyspa Sobieszewska in Gdansk, Poland. Its users are the unit leaders and the contingent management team, the CMT. The scouts and the IST are in the list of participants Campfire shows, not among its users. This chapter places Campfire in its surroundings: the people who use it, and the systems it depends on.
 
-The application holds no data and no identity of its own. It signs members in through the auth service, which completes the round trip with ScoutID ([ADR 019](/decisions/019-authenticate-on-the-app-origin-through-scoutid)), and it reads the contingent's list of participants from the participants service, which is fed from Scoutnet. What Campfire adds is shape – which unit works in which color, what a CMT function is, and what a leader needs on a phone standing in a field with bad reception. The system context diagram below shows where Campfire fits.
+Campfire holds no data and no identity of its own. A member signs in with ScoutID through the auth service ([ADR 019](/decisions/019-authenticate-on-the-app-origin-through-scoutid)), and the list of participants comes from the participants service, which reads it from Scoutnet. What Campfire adds is shape – each unit in its own color, the CMT's functions told apart, and what a leader needs on a phone in a field with bad reception.
 
-![System context diagram, rendered from the model. Campfire stands in the middle of it. Eight audiences use the application – the unit leaders, who follow their own unit and the trip, and the contingent management team's functions, Administration, Communication, Program, and Head of Contingent, and the three parts of Support, Health, IST support, and Unit support, each following the part of the contingent it answers for. A ninth person, the internal developers, builds and maintains Campfire instead of using it, and works through GitHub, which is the only reason GitHub is on the picture at all. Two back-end services sit below Campfire: it signs members in and out through the auth service, and it reads the contingent's list of participants from the participants service. Campfire also sends a member to ScoutID to sign in, and the auth service completes the OpenID round trip with that same ScoutID. Scoutnet sits one step further out and is reached twice, once by ScoutID verifying a sign-in and once by the participants service reading member data. Every relationship is drawn as a solid line.](../../architecture/diagrams/systemContext.svg)
+The system context diagram shows where Campfire fits.
 
-The diagram is rendered from the architecture model under `docs/architecture/`, not drawn by hand, so it cannot quietly drift from the description below.
+![System context diagram. The leaders and the CMT functions – Administration, Communication, Health, IST support, Program, Unit support, and Head of Contingent – use Campfire, and the developers build and maintain it through GitHub. Campfire signs members in and out through the auth service, sends them to sign in at ScoutID, and reads the list of participants from the participants service. The auth service completes the sign-in with ScoutID. ScoutID verifies sign-ins against Scoutnet, and the participants service reads its member data from Scoutnet.](../../architecture/diagrams/systemContext.svg)
 
 ## The people
 
-The contingent's own vocabulary has four participation roles – deltagare, ledare, IST, and kontingentledning. Campfire is built for two of them, and the diagram still names nine people, because the CMT is not one audience but five functions with one of them split three ways, and the two developers belong on the picture as well. The nine are the audience list in `.github/ISSUE_TEMPLATE/feature.yml`, word for word, so an issue, the guidebook, and these diagrams name the same groups rather than three overlapping sets.
+The diagram names each CMT function as a person of its own, because what separates them is the part of the contingent each answers for. Support is one function with three parts – Health, IST support, and Unit support – and each part is drawn separately for the same reason. The same people are the audience an issue chooses from, so an issue, the guidebook, and the diagrams name the same groups.
 
-A leader leads a unit and needs their unit. A CMT function works across every unit and needs the part of the contingent it answers for. All eight see the same application – the same screens, the same colors, the same offline behavior – with what they may read decided on the back-end rather than in the app.
+Everyone gets the same application – the same screens, colors, and offline behavior – and the back-end decides what each of them may read. A leader reads their own unit, their scouts' health answers included. Every CMT function reads the whole contingent, and only a health grant adds the health answers.
 
-| Person                   | What they do                                                                                                                                  | Page                                                                  |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| Leaders                  | Lead one of the contingent's units, at home and at camp                                                                                       | [`leaders.md`](/context/people/leaders)                               |
-| CMT – Administration     | Run the finances, travel, housing, insurance, registrations, invoicing, inbound support, and the HQ                                           | [`cmt-administration.md`](/context/people/cmt-administration)         |
-| CMT – Communication      | Own the profile and the channels, market the jamboree, keep every audience informed before, during, and after it, and evaluate the experience | [`cmt-communication.md`](/context/people/cmt-communication)           |
-| CMT – Health             | Help the units and the IST with health questions, run Listening Ears, and prepare personal matters                                            | [`cmt-health.md`](/context/people/cmt-health)                         |
-| CMT – IST support        | Select and follow the IST members, support their units, and work with the host on the IST's roles                                             | [`cmt-ist-support.md`](/context/people/cmt-ist-support)               |
-| CMT – Program            | Plan the program, from the preparation of everyone through the round trip and the gatherings to the Swedish contributions at camp             | [`cmt-program.md`](/context/people/cmt-program)                       |
-| CMT – Unit support       | Select and compose the leader teams and participants, prepare them with Program, and follow and support every unit                            | [`cmt-unit-support.md`](/context/people/cmt-unit-support)             |
-| CMT – Head of Contingent | Lead the contingent, and answer for it                                                                                                        | [`cmt-head-of-contingent.md`](/context/people/cmt-head-of-contingent) |
-| Developers               | Build and maintain Campfire, and never use it                                                                                                 | [`developers.md`](/context/people/developers)                         |
-
-One page each, on purpose. What separates the CMT functions is which slice of the contingent they answer for, and a page per function can say what that slice is, what the function's year actually looks like, and how much of it Campfire touches – which for several of them is very little.
-
-Support is one function with three parts – Health, IST support, and Unit support – and each part is an audience of its own: what a health team reads about a participant, an IST team about its patrols, and a unit team about its leaders differ in scope and attention, not in surface.
-
-The scouts and the IST are in the list of participants but not on the diagram as users. Nothing rules out a participant-facing surface later, and if one arrives it is a person and a line added to the model rather than a footnote.
+| Person                                                      | What they do, and why they use Campfire                                                              |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| [Leaders](./people/leaders)                                 | Lead a unit, and use Campfire to know and reach their scouts and their leader team                   |
+| [CMT – Administration](./people/cmt-administration)         | Run finances and the contingent's records, and look up and reach anyone in the contingent            |
+| [CMT – Communication](./people/cmt-communication)           | Keep every member informed, and reach the people a message is for                                    |
+| [CMT – Health](./people/cmt-health)                         | Help with health questions, and read a participant's health answers                                  |
+| [CMT – IST support](./people/cmt-ist-support)               | Select and follow the IST, and see and reach them as one group                                       |
+| [CMT – Program](./people/cmt-program)                       | Plan the meetings before the trip, the round trip, and the program, around the units and the leaders |
+| [CMT – Unit support](./people/cmt-unit-support)             | Compose and follow the units, and answer members who do not know whom to ask                         |
+| [CMT – Head of Contingent](./people/cmt-head-of-contingent) | Lead the contingent, and see all of it at a glance                                                   |
+| [Developers](./people/developers)                           | Build and maintain Campfire rather than use it                                                       |
 
 ## The systems it depends on
 
-Four systems sit around Campfire. Two of them are its own, written by this project in Python; they still sit outside the Campfire box because each lives in its own repository and ships as its own container ([ADR 013](/decisions/013-build-the-back-end-as-python-services-in-their-own-repositories)) – a system in the C4 sense, not a part of this one. They are reached at a path on the same origin the application is served from, never at a host of their own ([ADR 012](/decisions/012-run-campfire-in-three-environments-on-one-origin)). The other two are Scouterna's, and nobody here writes them.
+The auth service and the participants service are the WSJ27 project's own back-end, written in Python. They sit outside the Campfire box because each lives in a repository of its own and ships as its own container ([ADR 013](/decisions/013-keep-the-back-end-services-in-their-own-repositories)). Campfire reaches them at a path on the origin it is served from, never at a host of their own ([ADR 012](/decisions/012-run-campfire-in-three-environments-on-one-origin)). ScoutID and Scoutnet are Scouterna's, and nobody in this project writes them.
 
-| System               | What it does for Campfire                                           | Page                                                               |
-| -------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| Auth service         | Turns a ScoutID round trip into the session behind `/api/auth`      | [`auth-service.md`](/context/systems/auth-service)                 |
-| Participants service | Serves the contingent's list of participants behind `/api/project`  | [`participants-service.md`](/context/systems/participants-service) |
-| ScoutID              | Scouterna's identity provider, where every sign-in happens          | [`scoutid.md`](/context/systems/scoutid)                           |
-| Scoutnet             | Scouterna's member registry, the source of the list of participants | [`scoutnet.md`](/context/systems/scoutnet)                         |
+| System                                                 | What it does for Campfire                                                |
+| ------------------------------------------------------ | ------------------------------------------------------------------------ |
+| [Auth service](./systems/auth-service)                 | Signs a member in through ScoutID, and holds the session and its roles   |
+| [Participants service](./systems/participants-service) | Serves the list of participants, and decides who may read what           |
+| [ScoutID](./systems/scoutid)                           | Scouterna's single sign-on, where every member proves who they are       |
+| [Scoutnet](./systems/scoutnet)                         | Scouterna's membership system, where the list of participants comes from |
 
-GitHub is on the diagram too, and it is not in that table. It serves the [Developers](./people/developers) rather than Campfire – no line runs between the two – so it is described on their page, where the rest of how the work gets built and published lives.
+GitHub is on the diagram as the developers' tool – it holds the code, runs the checks, and publishes what ships. Campfire never talks to it, so it is described on the [Developers](./people/developers) page rather than here.

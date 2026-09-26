@@ -8,16 +8,16 @@ import { withMermaid } from "vitepress-plugin-mermaid"
 // agent means adding it here and to that chapter's table.
 const agents = ["analyst", "architect", "developer", "reviewer"]
 
-// A page's title for the sidebar: its H1, which every guidebook page and
-// record carries on its first line, minus the marker. One reader for every
-// list built from disk, so a change to how a title is derived lands once.
+// A page's title for the sidebar – its H1, which every guidebook page and record
+// carries on its first line, minus the marker. One reader for every list built
+// from disk, so a change to how a title is derived lands once.
 const titleOf = (path: string): string =>
   readFileSync(path, "utf8").split("\n", 1)[0]?.replace(/^#\s*/, "") ?? ""
 
 // The ADRs, in number order, read from disk at config load. Their filenames
 // carry the number, so sorting the directory is the reading order, and a new
-// record joins the chain by existing – nothing here needs editing. `template.md`
-// is skipped by the same pattern that skips it in the build: it has no number.
+// record joins the chain by existing. The number pattern also skips the index
+// and the template, which have none.
 const decisionsDirectory = fileURLToPath(new URL("../../docs/decisions", import.meta.url))
 
 const decisions = readdirSync(decisionsDirectory)
@@ -97,14 +97,15 @@ const architecturePages = chapterPages("architecture", [
   "modules",
 ])
 
-// The Layers group – the three layers plus the navigation that cuts across
-// them – nested under Architecture, with its own overview page as the group's
-// link. Titles are read from each page's H1, as everywhere else.
+// The Layers group – the layers plus the navigation and the bridge that cut
+// across them – nested under Architecture, with its own overview page as the
+// group's link.
 const layerPages = chapterPages("architecture/layers", [
   "domain",
   "data",
   "presentation",
   "navigation",
+  "bridge",
 ])
 
 const exampleFlowPages = chapterPages("architecture/example-flows", [
@@ -180,10 +181,8 @@ const config = withMermaid(
     // than as pages of their own. Patterns match the source path before the
     // rewrite above, so "architecture/**" is the model directory, not the
     // Architecture chapter at guidebook/architecture/. Every AGENTS.md under
-    // docs/ – the prose conventions at the root and the model's own beside it –
-    // is authoring conventions, not a chapter, so the pair is excluded by glob
-    // along with the CLAUDE.md symlink beside each, and a future nested pair
-    // needs no entry here.
+    // docs/, and the CLAUDE.md symlink beside it, is authoring conventions
+    // rather than a chapter, so a glob excludes them wherever they sit.
     srcExclude: ["decisions/template.md", "architecture/**", "**/AGENTS.md", "**/CLAUDE.md"],
 
     // Prev/next links come from the sidebar order. The individual ADRs and the
@@ -230,14 +229,14 @@ const config = withMermaid(
       // to read as a mark rather than a favicon.
       logo: { src: "/icon.svg", alt: "Campfire" },
 
-      // The chapter tree, shown on every page, listing the ten chapters in
-      // order followed by the Decisions chapter (the ADR log's own index). A
-      // chapter split across pages carries them as nested items, open, so the
-      // whole guidebook is one glance; the Context chapter's two groups and
-      // the Architecture chapter's Layers and Example flows start collapsed,
-      // because Context's thirteen people and systems would otherwise push
-      // every later chapter below the fold. Every chapter keeps its own
-      // link – the index page is the chapter, not a heading over it.
+      // The chapter tree, shown on every page, listing the chapters in order
+      // followed by the Decisions chapter (the ADR log's own index). A chapter
+      // split across pages carries them as nested items, open, so the whole
+      // guidebook is one glance; the Context chapter's groups and the
+      // Architecture chapter's Layers and Example flows start collapsed,
+      // because Context's people and systems would otherwise push every later
+      // chapter below the fold. Every chapter keeps its own link – the index
+      // page is the chapter, not a heading over it.
       sidebar: [
         {
           text: "Guidebook",
@@ -316,12 +315,6 @@ const config = withMermaid(
       socialLinks: [{ icon: "github", link: "https://github.com/Scouterna/wsj27-campfire" }],
     },
 
-    // Mermaid 11 pulls in dependencies that ship CommonJS with no default
-    // ESM export. The dev server resolves them eagerly and fails on
-    // "Importing binding name 'default' cannot be resolved by star export
-    // entries" before the page renders. Pre-bundling mermaid through esbuild
-    // inlines that whole subtree with the same interop the production build
-    // gets from Rollup.
     vite: {
       // Static assets live beside this config rather than in docs/, which is
       // kept for content only. Vite copies everything here to the site root,
@@ -329,25 +322,28 @@ const config = withMermaid(
       // source root, as outDir and cacheDir above are.
       publicDir: "../config/vitepress/assets",
 
-      // Pin the dev server to 3001 and fail rather than drift: VitePress
-      // otherwise starts at 5173 and hunts for the next free port, so the URL
-      // moves whenever something else holds it. strictPort turns that silent
-      // drift into an error, so the guidebook is always at the same address,
-      // beside the web application on 3000 and Storybook on 3002.
+      // Pinned, and failing rather than drifting, because VitePress otherwise
+      // starts at 5173 and hunts for the next free port, so the guidebook's
+      // address would move whenever something else held it.
       server: {
         port: 3001,
         strictPort: true,
       },
 
+      // Mermaid pulls in dependencies that ship CommonJS with no default ESM
+      // export. The dev server resolves them eagerly and fails on "Importing
+      // binding name 'default' cannot be resolved by star export entries"
+      // before the page renders. Pre-bundling mermaid through esbuild inlines
+      // that whole subtree with the same interop the production build gets
+      // from Rollup.
       optimizeDeps: {
         include: ["mermaid"],
       },
 
-      // Mermaid's diagram renderers are the site's heaviest chunks – weight
-      // ADR 029 accepts for a documentation site. The largest is ~690 kB,
-      // past Vite's 500 kB advisory, so the ceiling sits just above the
-      // weight that was accepted: quiet for what we chose, still loud if a
-      // chunk ever grows past it.
+      // Mermaid's diagram renderers are the site's heaviest chunks, past
+      // Vite's 500 kB advisory – weight ADR 029 accepts for a documentation
+      // site. The ceiling sits just above the largest of them, so it stays
+      // quiet for what was chosen and still speaks if a chunk grows past it.
       build: {
         chunkSizeWarningLimit: 800,
       },

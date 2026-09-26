@@ -1,40 +1,54 @@
 # Design
 
-This chapter is how Campfire looks and feels. The foundations are set – the contingent's colors, five unit themes, one display face, and a token layer that keeps raw values out of components – and what is built on them is cataloged in Storybook.
+Campfire looks like the contingent: its paper and ink, its unit colors, and the jamboree's script for the wordmark. The design system lives in `libraries/ui` as tokens, components, and a catalog, and every module draws with it. The foundations below are what every screen is built on, and Storybook is where they are read.
 
-## The foundations that are set
+## Color
 
-- **The contingent's colors, not an invented palette.** `libraries/ui/assets/styles/tokens.css` holds the paper `#f4f2ec` and the ink `#1a1a1a` every page is printed in, and the five unit colors beside them: blue `#2a778a`, brown `#985b15`, green `#768b33`, red `#cd4b17`, and yellow `#f4c125` – the exact ring colors of the five badge marks, with each theme's ink the badge's inner-disc color. The badge marks are the palette's source of truth: a value that drifts from them is wrong, however slightly.
-- **Five themes, one per unit color.** A theme is `blue`, `brown`, `green`, `red`, or `yellow`, blue being the contingent's own and the default. Each is a pair of primitives – `--color-theme-bright`, the unit's stripe color, and `--color-theme-ink`, the darker tone the same identity reads and clicks in – and `[data-theme="<name>"]` swaps the pair rather than every rule that reads it, so a rule names a theme color once and follows whichever unit is in force. Two roles ride along for what sits on a fill: `--color-theme-on-bright` is white except on yellow, whose bright is too light to carry white and gets its ink instead, and `--color-theme-on-ink` is white on all five. The names are typed in `libraries/ui/src/foundations/theme/Theme.ts`, which exports the five, the `Theme` type, and `isTheme` to check an untyped one, because the theme reaches the library from outside – a stored preference, a query parameter, or Storybook's toolbar. The web application stamps the attribute on the document before React boots, so a returning brown-unit leader does not flash blue on the way in.
-- **Which theme a unit wears is a table in the `ui` library.** The list of participants knows only a unit's number, so `unitTheme` maps the 53 numbers to their colors – Campfire's own data, edited beside the themes it names – with `cmtTheme`, the management's red, and `istTheme`, red until the IST patrols get identities of their own, beside it.
-- **Raw values live in the tokens, and nowhere else.** A component names a role – `--color-theme-bright`, `--typography-display-font_family` – and never a hex code. What the tokens do not cover, a component spells out in its own stylesheet, and a value becomes a token once a second component wants it.
-- **Styling lives in a stylesheet.** Every component's rules sit in the `.css` file beside it and travel with it, and the class names are part of the library's public vocabulary – a module can write `className="logo"` as readily as it renders `<Logo>`. Nothing sets a `style` prop; the prop is reserved for values only the runtime knows.
-- **The cascade order is declared before any stylesheet loads.** `apps/web/index.html` names the layers `tokens, fonts, reset, base, component, screen` inline in the document, so load order cannot decide which rule wins. Every rule in the design system is written into one of those layers.
-- **Sizes are rem against a 17-point base.** Every font size is a `--font-size-*` token, written `calc(<N>rem / 17)` in the tokens and nowhere else – never a bare `px` – with a screen's own tuned poster values as the one exception, spelled out where they are used. The root is `calc(100% * 17 / 16)`, and on iOS and iPadOS it becomes `font: -apple-system-body` – Dynamic Type itself – so the text size the reader set in Settings carries through every role in the system. A prose column's measure follows the same logic: it is written in text units – `max-width: 21em`, never a pixel width – so grown text gets a wider column instead of shorter lines.
-- **One display face, and the platform's own for everything else.** Bravely Script is the jamboree's display face, shipped as `bravelyscript.woff2` with the UI library and used for the wordmark. Only a regular weight is drawn, so the weight is a token too: asking for bold would have the browser synthesize one, and a synthesized script is a smear. The face is waited for rather than swapped in – `font-display: block` – because a headline that repaints from a fallback face is worse than one that arrives a beat later. Body text is `system-ui` on purpose – it is the face the reader already trusts, it costs nothing to download, and it follows the platform.
+Every page is printed in ink `#1a1a1a` on paper `#f4f2ec`. Beside them sit the contingent's unit colors, taken exactly from the rings of the unit badge marks – blue `#2a778a`, brown `#985b15`, green `#768b33`, red `#cd4b17`, and yellow `#f4c125`. The badge marks are the source of truth: a value that drifts from them is wrong, however slightly.
 
-## One product across a moving seam
+The application wears one of them as its theme:
 
-Campfire is one web application inside two native shells ([ADR 010](/decisions/010-deliver-the-front-end-as-one-web-application-in-native-shells)). The shells draw the chrome – launch screen, navigation bar, tab bar – and the webview everything under it, and a reader should never notice where one ends and the other begins.
+| Who is signed in          | Theme                                     |
+| ------------------------- | ----------------------------------------- |
+| Anyone placed in a unit   | Their unit's color                        |
+| The contingent management | Red                                       |
+| Anyone else, or nobody    | The theme this browser wore last, or blue |
 
-Holding that seam shut has a cost, and the decision behind it is already taken: the bridge carries a theme _name_ and never a color ([ADR 018](/decisions/018-bridge-the-web-application-and-the-shells-with-versioned-messages)), so each shell keeps its own copy of the palette. The alternative would be shipping colors over the bridge, which would make the shells thin renderers of whatever the web sent and would break the moment an old app met a new web. Duplicating a few hex values by hand is the cheaper mistake, and the comment at the top of `tokens.css` says so: a change to the paper is a change in three places or none.
+A theme is two tokens – the unit's bright color, its flag, and a darker ink of the same identity that text and controls use. A `data-theme` attribute swaps the pair rather than every rule that reads it, so a rule names a theme color once and follows whichever unit is in force. What sits on an ink fill is white in every theme, and so is what sits on a bright fill, except on yellow, which is too light to carry white and takes its ink instead.
 
-Each shell maps the name it is sent to a palette of its own – per-theme inks used as tint and title color on Apple, a full Material 3 color scheme per theme on Android – and both launch screens hold the contingent's blue, `#2a778a`, before the first document paints. [Applications](../architecture/applications) lists where else the two shells differ.
+The theme goes on the document before React starts, so a returning brown-unit leader is greeted in brown rather than a flash of blue. Which unit wears which color is Campfire's own table in the design system, because the list of participants knows a unit only by its number.
 
-## The catalog is Storybook
+Status – an all-clear, an unanswered question, a severity – has tones of its own, apart from the unit colors, because what a fact means must not change with the unit reading it.
 
-Storybook is where the design system is read ([ADR 023](/decisions/023-catalog-the-ui-in-storybook)). `pnpm start:storybook` runs it on port 3002, and it indexes every `*.stories.tsx` under `libraries/ui` and `modules/*` – so one instance shows a component and a whole screen.
+## Type
 
-The sidebar runs Introduction, Foundations, Components, Modules, in that order rather than alphabetically. The Introduction page states the rules the system is written under, Foundations and Components hold the design system itself, and Modules holds each module's screens and widgets.
+Body text is the platform's own `system-ui` – the face the reader already trusts, with nothing to download, and one that follows the platform. Bravely Script, the jamboree's display face, carries the wordmark and the page titles. It has only a regular weight, so the weight is a token too, and a browser is never asked to synthesize a bold – a synthesized script is a smear. It is waited for rather than swapped in, because a headline repainting from a fallback face looks worse than one arriving a beat later.
 
-Three properties are worth naming.
+Every font size is rem against a 17-point base – iOS's default body size, where the web assumes 16 ([why the base is 17](https://joakimkemeny.com/writing/2024-09-05-dynamic-size/)) – so a size read off a design is written as the same number. On iOS the root size is Dynamic Type itself, so the text size a reader sets in Settings scales every role in the system together. A prose column's width is set in text units rather than pixels, so grown text gets a wider column instead of shorter lines.
 
-- **Every story renders in a theme.** A decorator wraps each story in the unit color the toolbar picked, and the toolbar offers all five, so the catalog has to hold up in each of them. The mark goes on a wrapper rather than on the document, so a story that themes itself still wins locally.
-- **Storybook is themed like the guidebook.** `config/storybook/theme.ts` gives the manager and the Docs pages the guidebook's own look – the contingent's official red where VitePress puts its brand color, VitePress's grays and font stack, and the same app icon its nav bar carries – so the catalog and the guidebook read as one project. Only the guidebook is published; Storybook is built in continuous integration and hosted nowhere.
-- **It reports nowhere.** Storybook's telemetry is switched off. Nothing in this repository phones home.
+## The rules components follow
+
+- **Raw values live in the tokens.** A component names a role – the theme's bright, the display face, a step in the type scale – and never a hex code or a pixel size. What the tokens do not cover, a component spells out in its own stylesheet, and a value becomes a token once a second component wants it.
+- **Styling lives in a stylesheet.** Each component's rules sit in the `.css` file beside it and travel with it, and its class names are part of the library's vocabulary. The `style` prop is only for values the runtime alone knows ([ADR 015](/decisions/015-style-the-web-application-with-plain-layered-css)).
+- **The cascade order is declared up front.** The document names the layers – tokens, fonts, reset, base, component, screen – before any stylesheet loads, so load order never decides which rule wins.
+
+The components are the chrome – tab bar, navigation bar, side menu, page heading – the surfaces and controls the screens are built from, such as cards, rows, buttons, and search fields, and the icon set.
+
+## Web and native
+
+Campfire is one web application inside two native shells ([ADR 010](/decisions/010-deliver-the-front-end-as-one-web-application-in-native-shells)). The shells draw the launch screen, the navigation bar, and the tab bar, and the webview draws everything under them. A reader should not notice where one ends and the other begins.
+
+The bridge carries a theme's name and never a color ([ADR 018](/decisions/018-bridge-the-web-application-and-the-shells-with-versioned-messages)). Each shell maps the name to a palette of its own – tints and title colors on Apple, a Material 3 color scheme on Android – and an unknown name falls back to blue. Colors sent over the bridge would make the shells renderers of whatever the web sent, and would break the moment an old app met a new web. Keeping a few values in step by hand is the cheaper cost, so a unit color changes in all three places or none. Both launch screens hold the contingent's blue before the first page paints.
+
+## Storybook
+
+Storybook is the catalog ([ADR 023](/decisions/023-catalog-the-ui-in-storybook)). `pnpm start:storybook` serves it on port 3002, and one instance indexes the stories from `libraries/ui` and every module, so it shows a single component and a whole screen side by side. The sidebar reads Introduction, Foundations, Components, and then each module's components, widgets, and screens. The Introduction states the rules the design system is written under.
+
+- **Every story renders in a theme.** A toolbar picks the unit color, so each component can be checked in all of them. The theme goes on a wrapper rather than the document, so a story that themes itself still wins locally.
+- **Nothing in a story touches a network.** A story that needs data stubs it.
+- **It reads like the guidebook.** Storybook is dressed in the guidebook's colors, type, and icon, so the two read as one project.
+- **It stays private.** Storybook is built in continuous integration and published nowhere, and its telemetry is switched off.
 
 ## Accessibility
 
-WCAG 2.2 Level AA is the target ([Quality attributes](../requirements/quality)). Two parts of it are written into the base stylesheet: every size is rem against the 17-point base, so a leader who has turned Dynamic Type up gets a bigger application, not a clipped one, and the focus ring is drawn in the unit color in force rather than removed.
-
-The rest of the target is VoiceOver and TalkBack working through the web content, animation that steps aside for reduced motion, and color contrast that meets AA. It is a target the application is held to, not a measured result.
+The target is WCAG 2.2 Level AA, with VoiceOver and TalkBack reading the web content ([Quality attributes](../requirements/quality)). A reader who turned the text up gets a bigger application rather than a clipped one, because every size follows Dynamic Type. The focus ring is drawn in the theme's bright color rather than removed, and page transitions stop entirely, fades included, for a reader who asked for reduced motion.

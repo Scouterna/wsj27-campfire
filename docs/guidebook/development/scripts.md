@@ -1,96 +1,105 @@
 # The scripts
 
-Everything is a named root script. There is no `cd` into a subdirectory, no `gradlew` invoked by hand, and no `xcodebuild` line anyone has to remember – the root `package.json` is the one front door, and the native directories stay purely native. `pnpm run` lists the live set.
+Everything runs through a named root script. Nobody changes into a subdirectory, calls Gradle by hand, or remembers an `xcodebuild` line – the root `package.json` is the one front door, and the native directories stay purely native. `pnpm run` lists the live set, and `package.json` settles any disagreement with this page.
 
-The names follow one grammar: `<verb>:<target>` and, where a target has variants, `<verb>:<target>:<flavor>`.
+## How the names work
 
-| Kind            | Examples                                                                             |
-| --------------- | ------------------------------------------------------------------------------------ |
-| Run a stack     | `pnpm start:local`, `pnpm start:dev`, `pnpm start:prod`                              |
-| Run a shell     | `pnpm start:android`, `pnpm start:apple`                                             |
-| Run one server  | `pnpm start:web`, `pnpm start:guidebook`, `pnpm start:storybook`, `pnpm start:arch`  |
-| Build an output | `pnpm build:web`, `pnpm build:image`, `pnpm build:guidebook`, `pnpm build:apple:dev` |
-| Check a change  | `pnpm check:format`, `pnpm check:types`, `pnpm check:apple:lint`                     |
-| Test            | `pnpm test`, `pnpm test:web:ui`, `pnpm test:android`, `pnpm test:apple:ui`           |
-| Regenerate      | `pnpm generate:apple` (after editing `project.yml`), `pnpm format:svg`               |
-| Open an IDE     | `pnpm ide:apple`, `pnpm ide:android`                                                 |
+The names follow one grammar: `<verb>:<target>`, and `<verb>:<target>:<flavor>` where a target has variants.
 
-## Every script
+The target of a `start:` script is the size of what it runs. The three environments – `start:local`, `start:dev`, and `start:prod` – each bring up a whole stack on `http://localhost:8000` ([ADR 012](/decisions/012-run-campfire-in-three-environments-on-one-origin)); every other `start:` script starts one thing, a single server or a shell.
 
-| Script                      | What it does                                                           |
-| --------------------------- | ---------------------------------------------------------------------- |
-| `pnpm build:android:dev`    | Assembles the Android shell against campfire.wsj27.scouterna.net       |
-| `pnpm build:android:prod`   | Assembles the Android shell against campfire.wsj27.se                  |
-| `pnpm build:apple:dev`      | Builds the Apple shell against campfire.wsj27.scouterna.net            |
-| `pnpm build:apple:prod`     | Builds the Apple shell against campfire.wsj27.se                       |
-| `pnpm build:arch`           | Exports the architecture diagrams as SVGs                              |
-| `pnpm build:guidebook`      | Builds the guidebook into `.build/docs`                                |
-| `pnpm build:image`          | Packages the built web application as a linux/amd64 Caddy image        |
-| `pnpm build:storybook`      | Builds Storybook into `.build/storybook`                               |
-| `pnpm build:web`            | Builds the web application into `apps/web/.build`                      |
-| `pnpm check:android:format` | ktlint, in check mode                                                  |
-| `pnpm check:android:lint`   | Detekt and Android Lint                                                |
-| `pnpm check:apple:format`   | SwiftFormat, in lint mode                                              |
-| `pnpm check:apple:lint`     | SwiftLint, with `--strict`                                             |
-| `pnpm check:arch`           | Validates and inspects the architecture model                          |
-| `pnpm check:format`         | Prettier, in check mode                                                |
-| `pnpm check:lint`           | ESLint, with `--max-warnings 0`                                        |
-| `pnpm check:markdown`       | markdownlint                                                           |
-| `pnpm check:types`          | `tsc --noEmit`                                                         |
-| `pnpm clean`                | Removes every `.build`, and Gradle's working directories               |
-| `pnpm format`               | Prettier, writing fixes                                                |
-| `pnpm format:android`       | ktlint, writing fixes                                                  |
-| `pnpm format:apple`         | SwiftFormat, writing fixes                                             |
-| `pnpm format:svg`           | svgo, rewriting the web and guidebook icons in place                   |
-| `pnpm generate:apple`       | XcodeGen, regenerating `Campfire.xcodeproj` from `project.yml`         |
-| `pnpm ide:android`          | Opens `apps/android` in Android Studio                                 |
-| `pnpm ide:apple`            | Opens `Campfire.xcodeproj` in Xcode                                    |
-| `pnpm prepare`              | Points git at `.githooks` – runs as part of `pnpm install`             |
-| `pnpm start:android`        | Boots an emulator and launches the Android shell against :8000         |
-| `pnpm start:apple`          | Boots a Simulator and launches the Apple shell against :8000           |
-| `pnpm start:arch`           | Structurizr, to arrange the diagrams, on port 3003                     |
-| `pnpm start:dev`            | The dev environment: the real back-end in containers, on :8000         |
-| `pnpm start:guidebook`      | The guidebook's dev server, on port 3001                               |
-| `pnpm start:local`          | The local environment: the mock back-end, on :8000                     |
-| `pnpm start:mock`           | The mock back-end alone, on port 8003                                  |
-| `pnpm start:prod`           | The prod environment: the built image, on :8000                        |
-| `pnpm start:storybook`      | Storybook – every component, widget, and screen – on port 3002         |
-| `pnpm start:web`            | The web application's dev server alone, on port 3000                   |
-| `pnpm test`                 | The TypeScript tests, across every package that has them               |
-| `pnpm test:android`         | The Android JVM unit tests, plus the instrumented compile              |
-| `pnpm test:android:ui`      | The Android instrumented tests, on an emulator                         |
-| `pnpm test:apple`           | The Apple unit tests, on a Simulator                                   |
-| `pnpm test:apple:ui`        | The Apple UI tests, on a Simulator                                     |
-| `pnpm test:web:ui`          | The Playwright walks – starts a dev server, or reuses a running one    |
-| `pnpm version:next`         | The next version an artifact would earn – `android`, `apple`, or `web` |
+The flavor belongs to `build:`, not to `start:`, and the difference is deliberate. The environment scripts choose which stack answers on this machine, while `build:android:dev` and `build:apple:prod` bake a remote site into an artifact that ships. Running a shell has no flavor at all: `start:android` and `start:apple` always point at this machine.
 
-The same table is in `AGENTS.md`, because the agents work off it. The two are kept in step by hand, and `package.json` settles any disagreement.
+## Run
 
-## `start:` runs something – the target says how much
+| Script            | What it does                                                            |
+| ----------------- | ----------------------------------------------------------------------- |
+| `start:local`     | The local environment – Caddy, the mock, and Vite                       |
+| `start:dev`       | The dev environment – the real back-end in containers                   |
+| `start:prod`      | The prod environment – the built image                                  |
+| `start:web`       | The web application's Vite dev server alone                             |
+| `start:mock`      | The mock back-end alone                                                 |
+| `start:guidebook` | This guidebook                                                          |
+| `start:storybook` | Storybook – every component, widget, and screen                         |
+| `start:arch`      | Structurizr, for arranging the architecture diagrams                    |
+| `start:android`   | Builds and runs the Android shell on a device or emulator, against 8000 |
+| `start:apple`     | Builds and launches the Apple shell on a simulator, against 8000        |
 
-The target is the size of the thing. `start:local` runs Caddy, the mock, and Vite together and checks the result through the front door before it says the stack is up; `start:web` runs the Vite dev server and nothing else. The three environment targets – `local`, `dev`, and `prod` – each bring up a whole stack on `localhost:8000` ([ADR 012](/decisions/012-run-campfire-in-three-environments-on-one-origin)); every other target starts one thing, a single server or a shell.
+## Check and test
 
-The flavor suffix belongs to `build:`, not to `start:`, and the difference is the point. `start:local`, `start:dev`, and `start:prod` choose which stack runs on `localhost:8000`. `build:android:dev` and `build:apple:prod` bake a remote origin into a shipped artifact. Running a shell has no flavor at all: `start:android` always points at this machine.
+| Script                 | What it does                                                            |
+| ---------------------- | ----------------------------------------------------------------------- |
+| `check:format`         | Prettier, in check mode                                                 |
+| `check:lint`           | ESLint, failing on any warning                                          |
+| `check:markdown`       | markdownlint                                                            |
+| `check:types`          | The TypeScript compiler, without output                                 |
+| `check:arch`           | Validates the architecture model                                        |
+| `check:android:format` | ktlint                                                                  |
+| `check:android:lint`   | Detekt and Android Lint                                                 |
+| `check:apple:format`   | SwiftFormat, in lint mode                                               |
+| `check:apple:lint`     | SwiftLint, strict                                                       |
+| `test`                 | The TypeScript unit tests, with coverage                                |
+| `test:web:ui`          | The Playwright walks, starting the local stack or reusing a running one |
+| `test:android`         | The Android unit tests, and a compile of the instrumented tests         |
+| `test:android:ui`      | The Android instrumented tests, on an emulator                          |
+| `test:apple`           | The Apple unit tests, on a simulator                                    |
+| `test:apple:ui`        | The Apple UI tests, on a simulator                                      |
 
-## The ports are chosen, not defaulted
+[The checks](./checks) says which of these run before a push and in continuous integration.
 
-| Port | What holds it                                                               |
-| ---- | --------------------------------------------------------------------------- |
-| 8000 | The one origin – host Caddy in local, the ingress container in dev and prod |
-| 8003 | The mock back-end, reached only through Caddy                               |
-| 3000 | The web application's Vite dev server                                       |
-| 3001 | This guidebook                                                              |
-| 3002 | Storybook                                                                   |
-| 3003 | The Structurizr viewer for the C4 model                                     |
+## Fix and generate
 
-Every one of them is pinned and strict – `strictPort` for Vite and VitePress, `--exact-port` for Storybook – so a server that cannot have its port says so instead of quietly moving to the next one and leaving a link in the documentation wrong. Nothing uses Vite's default 5173, deliberately.
+| Script           | What it does                                                   |
+| ---------------- | -------------------------------------------------------------- |
+| `format`         | Prettier, writing fixes                                        |
+| `format:android` | ktlint, writing fixes                                          |
+| `format:apple`   | SwiftFormat, writing fixes                                     |
+| `format:svg`     | svgo, rewriting the SVG icons in place                         |
+| `generate:apple` | XcodeGen, regenerating `Campfire.xcodeproj` from `project.yml` |
 
-Two servers can therefore run at once without either stealing the other's address. Running the same one twice is handled the other way: `scripts/start/server.sh` frees the port first and names whatever held it, so a second `pnpm start:web` replaces the first rather than failing.
+## Build and release
+
+| Script               | What it does                                                                                |
+| -------------------- | ------------------------------------------------------------------------------------------- |
+| `build:web`          | The web application                                                                         |
+| `build:image`        | The deployable web image, for linux/amd64                                                   |
+| `build:guidebook`    | This guidebook                                                                              |
+| `build:storybook`    | Storybook                                                                                   |
+| `build:arch`         | Renders the architecture diagrams as SVGs                                                   |
+| `build:android:dev`  | The Android shell against the dev site                                                      |
+| `build:android:prod` | The Android shell against the prod site                                                     |
+| `build:apple:dev`    | The Apple shell against the dev site                                                        |
+| `build:apple:prod`   | The Apple shell against the prod site                                                       |
+| `version:next`       | Prints the next version of `android`, `apple`, or `web` ([Release](../maintenance/release)) |
+
+## Housekeeping
+
+| Script        | What it does                                                 |
+| ------------- | ------------------------------------------------------------ |
+| `ide:android` | Opens the Android shell in Android Studio                    |
+| `ide:apple`   | Opens the Apple shell in Xcode                               |
+| `clean`       | Removes every build output, and Gradle's working directories |
+| `prepare`     | Points git at `.githooks`, run by `pnpm install`             |
+
+## The ports
+
+Every server has a port of its own, chosen rather than defaulted, so two can run at once without either taking the other's address.
+
+| Port | What holds it                                                                  |
+| ---- | ------------------------------------------------------------------------------ |
+| 8000 | The one origin – Caddy on the host in local, a Caddy container in dev and prod |
+| 8003 | The mock back-end, reached through Caddy                                       |
+| 3000 | The web application's Vite dev server                                          |
+| 3001 | This guidebook                                                                 |
+| 3002 | Storybook                                                                      |
+| 3003 | Structurizr, for the C4 model                                                  |
+
+Each port is strict, so a server that cannot have its port fails instead of quietly moving to the next one and leaving a link wrong. Starting the same server twice is handled the other way: the environment and server scripts free their port first and name whatever held it, so a second `pnpm start:web` replaces the first rather than failing.
 
 ## What is behind them
 
-The shell scripts live in `scripts/`, with the shells' own under `scripts/android/` and `scripts/apple/`, the Structurizr runner under `scripts/structurizr/`, and the version rule behind `pnpm version:next` under `scripts/release/`. The last two are Node rather than shell, so they run on any machine – and a missing Docker fails the Structurizr runner with a message that names it.
+The shell scripts live in `scripts/`, grouped by what they start or build. The Structurizr runner and the version rule behind `pnpm version:next` are Node rather than shell, so they run on any machine, and a missing Docker fails the Structurizr runner with a message that names it.
 
-`scripts/start/helpers.sh` is sourced by the rest and never run on its own. It holds the parts that make a script trustworthy: freeing a port and naming its previous holder, waiting until a server actually answers rather than until a process exists, supervising a set of processes so any one dying stops them all, and exiting cleanly on Ctrl+C. Three kinds of waiting are separate on purpose – any answer at all, a 2xx, and any status the back-end itself produced rather than a proxy's 502 – because a stack reported as up before it is up costs more than the wait.
+The start scripts share one set of helpers that make them trustworthy: a port is freed before it is taken, a server is reported only once it actually answers rather than once its process exists, and everything a script started stops together on Ctrl+C or when any one of them dies. Waiting comes in three kinds – any answer, a 2xx, and any status the back-end produced itself rather than a proxy's 502 – because a stack reported as up before it is up costs more than the wait.
 
-Shell scripts are the one thing Prettier does not format. `config/prettier/prettier.ignore` lists `*.sh` on purpose: they are held to review rather than to a formatter, because no formatter in the toolchain knows POSIX shell well enough to be trusted with them.
+Shell scripts are the one kind of source nothing formats. Prettier has no parser for them and no shell formatter is in the toolchain, so they are held to review instead.

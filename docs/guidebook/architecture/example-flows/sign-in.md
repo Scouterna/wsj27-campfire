@@ -1,102 +1,88 @@
 # Sign in
 
-One tap, followed through every layer. A leader opens Campfire, sees the sign-in screen, and taps the button.
-
-The page follows the contract this repository consumes ([ADR 019](/decisions/019-authenticate-on-the-app-origin-through-scoutid)) and the client the application meets it with. Locally, the [mock](../../testing/mock) answers the whole `/api/auth` contract, with a stand-in for ScoutID that shows a persona picker.
+A leader opens Campfire, sees the sign-in screen, and taps the button. Signing in happens on the application's own origin and leaves it once, for ScoutID. The session it ends with is httpOnly cookies the web application never reads, so there is no token in the browser for an injected script to steal and no decision about where to store one ([ADR 019](/decisions/019-authenticate-on-the-app-origin-through-scoutid)). Locally, the [mock](../../testing/mock) answers the same contract, with a persona picker in place of ScoutID.
 
 ## The round trip
 
-The whole of signing in happens on the application's own origin, and leaves it exactly once. The sequence below is a browser signing in with no session: the gate asks, the person taps, the auth service walks the round trip with ScoutID, and the application boots again with cookies it never sees.
+The sequence below is a browser with no session signing in and landing back in the application. The session gate is the part of the web application every screen sits behind.
 
 ```mermaid
 sequenceDiagram
-  participant Screen as SignInScreen
   participant Gate as Session gate
   participant Auth as Authentication module
   participant Service as Auth service
   participant ScoutID
+  participant List as Participants service
 
   Gate->>Auth: Who is signed in?
-  Auth->>Service: GET /api/auth/user
+  Auth->>Service: Ask, refresh once, ask again
   Service-->>Auth: Refused
-  Auth->>Service: GET /api/auth/refresh
-  Service-->>Auth: Refused – no refresh cookie either
   Auth-->>Gate: Nobody
-  Gate->>Screen: Draw sign-in
+  Gate->>Gate: Draw sign-in
 
-  Screen->>Service: Full-page navigation to /api/auth/login
-  Service->>ScoutID: Redirect into the OpenID round trip
-  ScoutID-->>Service: Back to /api/auth/callback
-  Service->>Service: Mint the session cookies, httpOnly
-  Service-->>Screen: Redirect to where sign-in started
+  Gate->>Service: Navigate to sign-in
+  Service->>ScoutID: Redirect
+  ScoutID-->>Service: Back with the person
+  Service-->>Gate: Set session cookies, redirect back
 
   Gate->>Auth: Who is signed in?
-  Auth->>Service: GET /api/auth/user
-  Service-->>Auth: The user, and their flattened roles
+  Auth->>Service: Ask
+  Service-->>Auth: The user and their roles
+  Auth->>List: The user's own record
+  List-->>Auth: Unit and travel
   Auth-->>Gate: The user
-  Gate->>Gate: Adopt the cache owner, mount the roles, resolve the theme
-  Gate->>Gate: Draw the chrome
+  Gate->>Gate: Adopt the cache, theme, and draw the chrome
 ```
 
-## What each piece did
+1. **The gate asks.** The authentication module asks the auth service who is signed in. On a refusal it refreshes once and asks again, because the access token is short-lived on purpose and a returning person usually still holds a refresh cookie. Only when that also refuses is nobody signed in.
+2. **The screen navigates.** Signing in is a full-page navigation carrying the address to come back to, not a fetch, because only a real navigation can leave the origin for ScoutID and return. The screen holds no form, no password, and no token.
+3. **The auth service holds the secret.** It walks the OpenID round trip with ScoutID and sets the session cookies on the application's origin on the way back. It is the only part of the flow that involves a secret.
+4. **The module completes the user.** The service's answer carries the roles. The person's own record in the list of participants adds how they travel, and their unit where the roles named none. A failure there leaves a user without those facts rather than no user.
+5. **The gate opens.** It hands the query cache to this member number, wiping it first if someone else owned it, so a shared phone never serves one person's list of participants to the next. Then it mounts the user and the roles, dresses the application in the unit's color, and draws the chrome. Nothing renders while any of this is pending – no spinner, and no flash of sign-in past a signed-in person.
 
-**The screen** navigated, and that is all it did. Signing in is a full-page navigation to `/api/auth/login` with the address to come back to, not a fetch – the round trip leaves the origin for ScoutID and returns, and only a real navigation can carry that. The screen holds no form, no password, and no token.
+## Roles
 
-**The authentication module** owns the addresses and the question. It builds the sign-in and sign-out URLs, asks `/api/auth/user` who is signed in, and decodes the answer defensively: the payload crosses a service boundary, so a shape the module does not recognize reads as signed out rather than as a crash in the gate.
+The auth service reports roles as flattened, colon-separated strings. One table in the authentication module turns each into the closed set the application knows – leading a unit and which one, a function of the contingent management team, and the grant that opens health answers – and an unknown string grants nothing. Everything else asks through the role helpers and never reads a role string, so a change in the provider's spelling is a change to that one table.
 
-One refusal is not the end. The access token is short-lived on purpose, so a returning session usually holds a live refresh cookie: the module makes one `/api/auth/refresh` round trip and asks again. Only when that also refuses is nobody signed in.
+Strings are compared segment by segment, never as a text prefix. `wsj27:cmtx` starts with the same characters as `wsj27:cmt` and is an unrelated role, and matching it would grant access nobody was given. The user and the roles are readable anywhere below the gate ([ADR 032](/decisions/032-hold-the-signed-in-person-in-utils)).
 
-**The auth service** did the only part that involves a secret. It redirects to ScoutID, receives the return leg at `/api/auth/callback`, and mints the session there – httpOnly cookies on the application's own origin. The web application never sees a token, which is why it never stores one and never has to decide where to ([Applications](../applications)).
+## When signing in fails
 
-**The gate** turned a user into a session. In order: hand the cache its new owner before any screen mounts, so a previous person's cached list of participants is gone before a query reads it; mount the session's roles and the signed-in user for everything below; resolve the theme; then draw the chrome. Nothing renders while the service is still answering.
+At boot, anything but a user reads as "nobody is signed in", and the screen behind that is the same one:
 
-**The role translation** is the one place the provider's spellings are read. The service reports the roles flattened, as a colon-separated hierarchy, and one table turns each spelling into the closed set the application knows – leading a unit and which one, the management and its functions, the grant that opens the health answers in the list of participants – with an unknown spelling granting nothing. The set is what travels: mounted at the gate, readable anywhere below, so a screen asks it with the helpers and never reads a role string. One table rather than scattered checks, because what the provider reports is in flux – swapping the provider's shape is that one table.
+| Failure                               | What the person sees                                    |
+| ------------------------------------- | ------------------------------------------------------- |
+| No session, and no refresh cookie     | The sign-in screen                                      |
+| No connection                         | The sign-in screen, since signing in proves the link    |
+| No auth service behind the origin     | The sign-in screen – the answer is a page, not a person |
+| An answer the module cannot decode    | The sign-in screen, rather than a crash in the gate     |
+| ScoutID refused or the person gave up | The sign-in screen, ready to try again                  |
 
-Roles are compared segment by segment, never with a string prefix. `wsj27:cmtx` starts with `wsj27:cmt` as text and is an unrelated role, and treating it as a match would grant access nobody was given.
+Reading an unreachable service as signed out is a deliberate simplification. The screen would decide the same either way, and the answer crosses a service boundary, so a shape the module does not recognize must not take the application down.
 
 ## Inside a shell
 
-The same round trip, with one difference that the shells exist to provide: a cookie jar the whole flow shares.
+A shell's part in sign-in is a shared cookie jar. It cancels a navigation to the identity provider in the main webview and reopens it in a modal sheet – a sheet on Apple, a modal bottom sheet on Android – on a webview that shares the shell's cookie store. The cookies the auth service sets on the way back land where the main webview reads them. When the round trip returns to the application's origin, the sheet closes and the page reloads into the new session. A link out of the flow opens in the system browser, and signing out takes the same route ([ADR 019](/decisions/019-authenticate-on-the-app-origin-through-scoutid)).
 
-A navigation to a configured identity origin is canceled in the main webview and reopened modally – a sheet on Apple, a modal bottom sheet on Android – on a webview that shares the shell's cookie jar. That sharing is the entire point: the cookies the auth service sets on the way back through the callback land where the main webview will read them. When the round trip returns to an ordinary app-origin URL the sheet closes, and the page underneath reloads and picks up the new session.
-
-Two details are easy to get wrong and expensive to debug. The identity webview carries no `CampfireShell` token, because the identity provider is an ordinary web site rather than a hosted app. And cookies live on `localhost` specifically – not `127.0.0.1`, not the emulator's host alias – because a session's cookies do not cross between spellings of the same machine, and ScoutID only returns to the one host name it has registered.
+Two details are easy to get wrong and slow to debug. The identity webview carries no `CampfireShell` marker in its user agent, because ScoutID is an ordinary web site rather than the hosted application. And the local origin is spelled `localhost` – never `127.0.0.1` or the emulator's host alias – because cookies do not cross between spellings of one machine, and ScoutID returns only to the one host name it knows.
 
 ## Staying signed in
 
-The auth service ships its own keep-alive script. The application loads it once per page, and it watches a public expiry cookie and refreshes the session while the app is open, so an active person is never bounced back to sign-in mid-task.
+The auth service ships its own keep-alive script, which the application loads once per page. It watches a readable expiry cookie and refreshes the session ahead of expiry, so an active person is never bounced to sign-in mid-task.
 
-The application watches the same cookie, for the one thing the script cannot tell it: a refresh the service refused, after which the script stops. Shortly after the expiry the cookie names – or at once when the page becomes visible again – a cookie that was not renewed, or is gone, makes the authentication module ask the same question as at boot ([ADR 033](/decisions/033-recover-an-ended-session-at-the-query-client-and-the-gate)). The script keeps the session alive ahead of expiry; the watcher notices when that failed.
+When a refresh is refused the script stops silently, so the application watches the same cookie for the one thing the script cannot tell it. Shortly after the time the cookie names, and whenever the page becomes visible again, a cookie that was not renewed makes the authentication module ask again. A read refused with 401 asks the same question from the query client ([ADR 033](/decisions/033-recover-an-ended-session-at-the-query-client-and-the-gate)).
 
-A restore from the back-forward cache is treated as a reason to start over: it hands back a fully rendered application with whatever session it had when it was frozen, and re-asking is cheaper than reasoning about that.
+Mid-use, only the service saying no ends a session, because ending one forgets the cache an offline phone depends on. That is the one difference from boot, where the sign-in screen forgets nothing and any doubt may read as signed out:
 
-## When it fails
+| The answer      | What happens                                                                       |
+| --------------- | ---------------------------------------------------------------------------------- |
+| The same person | The refused read runs once more, and the screen never sees the failure             |
+| No answer       | Nothing changes – the read fails as any network failure does, and the cache stays  |
+| Nobody          | The cache is forgotten, and sign-in is shown in place, so signing in returns there |
+| Another person  | The page reloads, and the gate adopts the new owner as it does at boot             |
 
-Every failure reads as "nobody is signed in", and the screen behind that is the same one:
-
-| Failure                            | Where it is seen                               | What the person sees                            |
-| ---------------------------------- | ---------------------------------------------- | ----------------------------------------------- |
-| No session, and no refresh cookie  | Both requests refused                          | The sign-in screen                              |
-| No connection                      | The request never reached anything             | The sign-in screen – signing in proves the link |
-| Nothing behind `/api/auth` at all  | The answer is a page rather than JSON          | The sign-in screen                              |
-| A payload the module does not know | The defensive decode                           | The sign-in screen, rather than a crash         |
-| ScoutID refused the sign-in        | The round trip returns without minting cookies | The sign-in screen, ready to try again          |
-
-Reading a network failure as "signed out" is a deliberate simplification: the screen behind it decides the same thing either way, and signing in is what proves the connection works.
-
-## When the session ends mid-use
-
-A session can end under an open screen – the refresh window closes, or the service ends it – and the first sign is a read refused with 401, or the expiry cookie left unrenewed. Either asks again, through the authentication module's one ask, and the answer decides ([ADR 033](/decisions/033-recover-an-ended-session-at-the-query-client-and-the-gate)):
-
-| Answer                                       | What happens                                                                                                                                                         |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The same person – the access token was stale | The refused read is made again; the screen showed its loading state, never a failure                                                                                 |
-| The service cannot be reached                | Nothing changes: the refused read fails as a network failure does, the cache stays, and the watch tries again shortly                                                |
-| Nobody                                       | The application unmounts, the cache is forgotten as sign-out forgets it, and the sign-in screen is shown in place – at the same address, so signing in returns there |
-| Another person                               | The page reloads, and the gate adopts the new owner as it does at boot                                                                                               |
-
-A read that fails on the network, or is answered 403 or 404, asks nothing: those are the module's answers to word ([Data layer](../layers/data)). Unlike the gate at boot, an ask mid-use reads only a refusal as signed out – at boot the sign-in screen forgets nothing, mid-use ending the session would forget the cache.
+A read refused with 403 or 404 asks nothing, because those are the module's own answers to word ([Data layer](../layers/data)). A page restored from the back-forward cache reloads, because it comes back drawn for whatever session it had when it was frozen, and asking again is simpler than reasoning about that.
 
 ## Signing out
 
-Signing out starts on the profile page, the one place that offers it: the application forgets its query cache, and then the same mechanism runs in reverse – a full-page navigation to `/api/auth/logout`, which drops the session and signs out of ScoutID too, and in a shell it walks through the same modal flow.
+Signing out is offered on the profile page. The application forgets its cache first, then navigates to the auth service's sign-out, which ends the session and the ScoutID one with it, and lands back on the sign-in screen. It leaves whether or not the cache could be cleared, so a browser that refuses its own storage cannot hold anyone inside a session.

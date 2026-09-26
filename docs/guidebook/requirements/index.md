@@ -1,13 +1,11 @@
 # Requirements
 
-This chapter is what Campfire has to do and how well it has to do it. Two things are true at the same time, and the chapter says both: the constraints are settled and recorded as decisions, while the feature set beyond the first feature is open and gets discovered through issues and iteration. Where something is genuinely undecided, it says so rather than inventing a requirement to look complete.
+This chapter is what Campfire has to do and what it holds to while doing it. The constraints are settled and recorded as decisions. The features beyond version 1 are not: each is decided one issue at a time, and gets its own requirements when it is picked up ([Process](../process/)).
 
-Campfire owns very little of its own. The list of participants it shows belongs to the contingent, identity belongs to ScoutID, and the application is a client over two back-end services that own the truth (see [Context](../context/)). That shapes almost everything in the pages below, and so do the three weeks in a field in Poland the whole product is aimed at.
+Campfire owns very little itself. The list of participants belongs to the contingent and is kept in Scoutnet, identity belongs to ScoutID, and the back-end services decide who may read what ([Context](../context/)). Campfire is a client over them, and that shapes most of what follows. So does where it is used: three weeks of travel and camp, where the network is unreliable and the people who could fix a problem are on the same trip.
 
-The chapter is in three parts, each its own page:
-
-| Part                            | What it covers                                                                                                                                    |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Scope](./scope)                | What Campfire is for, the first feature, the anchors behind it, what version 1 is made of, what is still open, and what it leaves to someone else |
-| [Constraints](./constraints)    | The fixed boundaries it is built inside – one origin, one web application in thin shells, a back-end in other repositories                        |
-| [Quality attributes](./quality) | The qualities it is judged on – deployability first, then working offline, privacy, accessibility, and the rest                                   |
+| Page                            | What it covers                                                                                |
+| ------------------------------- | --------------------------------------------------------------------------------------------- |
+| [Scope](./scope)                | Who Campfire is for, what version 1 does, where it goes next, and what it leaves to others    |
+| [Constraints](./constraints)    | The fixed boundaries it is built inside, and the ones the work itself sets                    |
+| [Quality attributes](./quality) | The qualities it is judged on – deployability first, then availability, privacy, and the rest |
