@@ -28,7 +28,7 @@ The architecture diagrams are rendered from one C4 model rather than drawn by ha
 
 Each chapter covers one area, and you can read them in any order – the chapter tree and search are on every page. Read from the top, they go from why Campfire exists to how it is kept running:
 
-- [Context](./context/) – who uses Campfire and why, and the systems it depends on.
+- [Context](./context/) – who uses Campfire and why, and the systems around it.
 - [Process](./process/) – how work moves from a need to reviewed code, with AI agents drafting and humans deciding at every step.
 - [Requirements](./requirements/) – what Campfire does, the constraints it is built inside, and the qualities it is held to.
 - [Architecture](./architecture/) – the applications, the modules, and the layers, and how a request travels through them.

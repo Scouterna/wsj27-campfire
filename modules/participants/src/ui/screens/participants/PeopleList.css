@@ -29,6 +29,32 @@
     border-top: none;
   }
 
+  /* One detail line however long where the person comes from runs, because the rows are
+     measured and a line that wrapped would make its row taller than the rest. */
+  .person-row small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Where the person comes from, after the unit, only where the line has room for both. */
+  .person-row-wide {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .person-row-wide {
+      display: inline;
+    }
+  }
+
+  /* The age rides quietly at the trailing edge, as on the home screen. */
+  .person-row-age {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    font-variant-numeric: tabular-nums;
+  }
+
   /* The funktionsansvarig's mark: a small chip after the name, in the theme's own
      wash, so responsibility reads at a glance without shouting. */
   .person-fa {

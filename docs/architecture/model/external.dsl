@@ -11,6 +11,11 @@ scoutnet = softwareSystem "Scoutnet" {
   tags "external"
 }
 
+openFreeMap = softwareSystem "OpenFreeMap" {
+  description "The public map tile service a unit's map is drawn over."
+  tags "external"
+}
+
 github = softwareSystem "GitHub" {
   description "The service where the code is kept, checked, and published."
   tags "external"

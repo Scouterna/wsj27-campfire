@@ -109,6 +109,10 @@ export default defineConfig({
     // can remove its output without reaching upward.
     outDir: ".build",
     emptyOutDir: true,
+    // The map library, its worker, and the postorter are one chunk, split off so only a
+    // unit's card loads it, and it is twice Vite's default. Raised just past it rather
+    // than silenced, so any other chunk that grows toward the map's size still warns.
+    chunkSizeWarningLimit: 1200,
   },
 
   server: {

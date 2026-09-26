@@ -7,7 +7,7 @@ import {
 } from "@scouterna/wsj27-campfire-ui"
 import type { ReactElement, ReactNode } from "react"
 
-import { avatarNumberFor, belonging } from "../../../model/Participant"
+import { ageOf, avatarNumberFor, belonging } from "../../../model/Participant"
 import type { ParticipantDetail } from "../../../model/ParticipantDetail"
 import { roleName } from "../../../model/ParticipantRole"
 import { funktionName, travelName } from "../../../model/Participation"
@@ -104,6 +104,7 @@ export function ProfileSection(props: ProfileSectionProps): ReactElement {
     participant.unitNumber === undefined ? undefined : identities.name(participant.unitNumber)
   const where = placing(participant, unitName)
   const avatarNumber = avatarNumberFor(participant)
+  const age = ageOf(participant, new Date())
 
   return (
     <Card title="Profil">
@@ -137,6 +138,10 @@ export function ProfileSection(props: ProfileSectionProps): ReactElement {
             label="Scoutkår"
             {...(participant.memberGroup !== undefined && { value: participant.memberGroup })}
           />
+          <Fact
+            label="Hemort"
+            {...(participant.homeTown !== undefined && { value: participant.homeTown })}
+          />
           <Fact label="Medlemsnummer" value={participant.memberNo} />
           <Fact
             label="Födelsedatum"
@@ -144,6 +149,7 @@ export function ProfileSection(props: ProfileSectionProps): ReactElement {
               value: birthDateText(participant.birthDate),
             })}
           />
+          <Fact label="Ålder" {...(age !== undefined && { value: `${String(age)} år` })} />
           <Fact
             label="Typ av resa"
             {...(participant.travel !== undefined && { value: travelName(participant.travel) })}

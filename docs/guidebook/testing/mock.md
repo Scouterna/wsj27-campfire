@@ -1,8 +1,8 @@
 # The mock back-end
 
-Campfire's real back-end is services in their own repositories ([ADR 013](/decisions/013-keep-the-back-end-services-in-their-own-repositories)), and reaching them takes Docker, credentials, and an identity provider that is up. Almost every screen also depends on who is looking, so trying one against the real services takes an account per role. The mock in `tools/mock` removes all of that on a developer's machine: a small server that answers as the real services do, seeded with invented people, so local work and the walk-throughs never touch a network ([ADR 021](/decisions/021-develop-against-a-mock-back-end)).
+Campfire's real back-end is services in their own repositories ([ADR 013](/decisions/013-keep-the-back-end-services-in-their-own-repositories)), and reaching them takes Docker, credentials, and an identity provider that is up. Almost every screen also depends on who is looking, so trying one against the real services takes an account per role. The mock in `tools/mock` removes all of that on a developer's machine: a small server that answers as the real services do, seeded with invented people, so local work and the walk-throughs never touch the real back-end ([ADR 021](/decisions/021-develop-against-a-mock-back-end)).
 
-It copies what the services' code does rather than inventing behavior – the same routes, response bodies, refusals, and cookies, at the same paths the deployed environments serve. The web application only fetches paths on its own origin, so neither it nor a shell can tell the mock from the real thing, and an address that works locally works against dev unchanged ([ADR 012](/decisions/012-run-campfire-in-three-environments-on-one-origin)).
+It copies what the services' code does rather than inventing behavior – the same routes, response bodies, refusals, and cookies, at the same paths the deployed environments serve. The web application fetches its data only from paths on its own origin, so neither it nor a shell can tell the mock from the real thing, and an address that works locally works against dev unchanged ([ADR 012](/decisions/012-run-campfire-in-three-environments-on-one-origin)).
 
 ## What it stands in for
 
@@ -14,6 +14,8 @@ In the local environment, Caddy serves everything on `http://localhost:8000`, se
 | `/api/project`      | The participants service – the list of participants, scoped by the caller's roles  |
 | `/__mock__/scoutid` | ScoutID, with a persona picker where the password form would be                    |
 | `/__mock__`         | The mock's own controls – forgetting every session, and reporting who is signed in |
+
+A unit's map is the one request the mock does not answer. Its tiles come from OpenFreeMap in every environment, the walk-throughs included, and only Storybook refuses them ([ADR 037](/decisions/037-draw-maps-on-the-device-over-openfreemaps-tiles)).
 
 ScoutID is the one part that is not a copy, because it is not ours to run. The auth service sends the browser there as it would to the real ScoutID, and the page that answers lists invented people instead of asking for a password. Tap a name and the browser returns through the auth service with a code, exactly as it does from the real sign-in.
 

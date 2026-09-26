@@ -76,16 +76,22 @@ function addressOf(input: RequestInfo | URL): string {
 }
 
 /**
- * The network as the story asked for it. Only the participants service's own addresses
- * are answered here; anything else goes to the real network, so the stub cannot take a
- * font or an image down with it.
- * @param state The state the story asked for.
+ * The network as the story asked for it. Nothing off the catalog's own origin is reached
+ * – the map's tile service included – so a story draws what it would draw offline. Of
+ * the catalog's own addresses, only the participants service's are answered here, and
+ * only when the story asked for a state; anything else goes to the real network, so the
+ * stub cannot take a font or an image down with it.
+ * @param state The state the story asked for, or undefined to serve the seeded cache.
  * @returns The stub to install.
  */
 function stubFetch(state: ApiParameters["state"]): typeof fetch {
   return async (input, init) => {
     const url = addressOf(input)
-    if (!url.includes("/api/project/participants")) {
+    if (new URL(url, location.href).origin !== location.origin) {
+      // What the browser answers when a request reaches nothing.
+      throw new TypeError("Failed to fetch")
+    }
+    if (state === undefined || !url.includes("/api/project/participants")) {
       return realFetch(input, init)
     }
     if (state === "pending") {
@@ -100,7 +106,7 @@ function stubFetch(state: ApiParameters["state"]): typeof fetch {
 
 /**
  * Puts a seeded query cache under a story that reads the list of participants, and a
- * network in the state the story asked for.
+ * network in the state the story asked for, with nothing beyond the catalog's origin.
  *
  * A story without `parameters.api` gets an empty cache and the real network – which in
  * the catalog answers nothing, so the story would sit pending forever. Say what the list
@@ -113,12 +119,9 @@ export const ApiDecorator: Decorator = (Story, context): ReactElement => {
   const api = (context.parameters["api"] ?? {}) as ApiParameters
   const [client] = useState(() => makeClient(api))
 
-  // Installed before the first query can fire, and put back when the story leaves. The
-  // stub is read on every call, so a story that seeds everything never reaches it.
-  if (api.state !== undefined) {
-    // eslint-disable-next-line unicorn/no-global-object-property-assignment -- the story's network is a test double, installed and removed again below
-    globalThis.fetch = stubFetch(api.state)
-  }
+  // Installed before the first query can fire, and put back when the story leaves.
+  // eslint-disable-next-line unicorn/no-global-object-property-assignment -- the story's network is a test double, installed and removed again below
+  globalThis.fetch = stubFetch(api.state)
   useEffect(
     () => () => {
       // eslint-disable-next-line unicorn/no-global-object-property-assignment -- the real network, put back

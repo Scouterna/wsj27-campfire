@@ -1,0 +1,80 @@
+/* The unit's map: a dimmed backdrop behind the card's text, or the card's content once
+   opened – filling the card either way. The palette is the unit theme's, mixed here and
+   read by the map at start. */
+
+@layer component {
+  .unit-map {
+    --unit-map-border: color-mix(in srgb, var(--color-theme-ink) 45%, var(--color-sheet));
+    --unit-map-green: color-mix(in srgb, var(--color-theme-bright) 14%, var(--color-sheet));
+    --unit-map-halo: var(--color-sheet);
+    --unit-map-label: color-mix(in srgb, var(--color-theme-ink) 70%, var(--color-ink));
+    --unit-map-land: color-mix(in srgb, var(--color-theme-bright) 5%, var(--color-sheet));
+    --unit-map-road: var(--color-sheet);
+    --unit-map-road-casing: color-mix(in srgb, var(--color-theme-ink) 20%, var(--color-sheet));
+    /* The ink darkened, so the number on a spot reads in white on every unit's theme. */
+    --unit-map-spot: color-mix(in oklab, var(--color-theme-ink) 75%, var(--color-ink));
+    --unit-map-urban: color-mix(in srgb, var(--color-theme-ink) 9%, var(--color-sheet));
+    --unit-map-water: color-mix(in srgb, var(--color-theme-bright) 32%, var(--color-sheet));
+
+    inset: 0;
+    overflow: hidden;
+    position: absolute;
+    transition: opacity 300ms ease;
+  }
+
+  .unit-map-canvas {
+    height: 100%;
+    width: 100%;
+  }
+
+  .unit-map-backdrop {
+    opacity: 0.8;
+  }
+
+  /* Clear of what the device draws over the screen's edge, where the map reaches it. */
+  .unit-map .maplibregl-ctrl-bottom-left {
+    padding-bottom: var(--unit-map-safe-bottom, 0px);
+    padding-left: var(--unit-map-safe-left, 0px);
+  }
+
+  .unit-map .maplibregl-ctrl-bottom-right {
+    padding-bottom: var(--unit-map-safe-bottom, 0px);
+    padding-right: var(--unit-map-safe-right, 0px);
+  }
+
+  /* The controls and the counts belong to the open map, and fade in and out with it. */
+  .unit-map .maplibregl-control-container,
+  .unit-map-count {
+    transition:
+      opacity 300ms ease,
+      visibility 300ms;
+  }
+
+  .unit-map-backdrop .maplibregl-control-container,
+  .unit-map-backdrop .unit-map-count {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  /* How many live at a spot, on the spot itself: a label in the spot's own dark, ringed
+     like the dot it covers, since it only points a town out and need not be round. */
+  .unit-map-count {
+    background: var(--unit-map-spot);
+    border: 1.5px solid var(--unit-map-halo);
+    border-radius: 5px;
+    color: var(--color-theme-on-ink);
+    display: block;
+    font-size: var(--font-size-caption);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--font-weight-strong);
+    line-height: 1;
+    min-width: 1.6em;
+    padding: 3px 5px;
+    text-align: center;
+  }
+
+  /* A count is a label, so a drag that starts on one still moves the map. */
+  .unit-map-count-marker {
+    pointer-events: none;
+  }
+}

@@ -35,6 +35,26 @@ function hiddenCopies(addresses: readonly string[]): string {
   return `mailto:?bcc=${addresses.join(",")}`
 }
 
+test("keeps a long unit's rows under the reader all the way to its end", async ({ page }) => {
+  await page.goto("/")
+  await signInAs(page, "Anders Andersson")
+  await page.locator(".sidemenu").getByRole("link", { name: "Min avdelning" }).click()
+  const list = page.getByRole("list", { name: "Deltagare" })
+  await expect(list.getByRole("listitem").first()).toBeVisible()
+
+  // Down in steps, as a wheel scrolls, so the rows are drawn and measured on the way and
+  // the list has to keep finding where it sits. A wheel lands when the page gets to it,
+  // so the steps go on until the end is reached rather than for a fixed count.
+  // Waiting on the unit's last person rather than the last row drawn, because right after
+  // a step the rows drawn for the previous one are still on screen.
+  await page.mouse.move(640, 450)
+  const end = list.locator('[role="listitem"][aria-posinset="40"]')
+  await expect(async () => {
+    await page.mouse.wheel(0, 600)
+    await expect(end).toBeInViewport({ timeout: 250 })
+  }).toPass({ timeout: 10_000 })
+})
+
 test("shows a leader their own unit, with the unit's own filter", async ({ page }) => {
   await page.goto("/")
   await signInAs(page, "Lars Lindberg")
@@ -61,6 +81,118 @@ test("shows a leader their own unit, with the unit's own filter", async ({ page 
   await filter.getByRole("button", { name: "Ledare", pressed: false }).click()
   await expect(page.getByRole("status")).toHaveText("2 av 8 personer")
   await expect(page.getByRole("link", { name: "Avdelningar" })).toHaveCount(0)
+})
+
+test("says where a leader's own people come from, and how old the deltagare are", async ({
+  page,
+}) => {
+  await page.goto("/participants")
+  await signInAs(page, "Lars Lindberg")
+  await expect(page.getByRole("status")).toHaveText("8 personer i avdelningen")
+
+  // Every row in the unit shares its unit, so where the person comes from takes the
+  // unit's place, at every width – and a deltagare's age rides at the row's end.
+  const rows = page.getByRole("listitem")
+  const ester = rows.getByRole("link", { name: /^Ester Dahl/u })
+  await expect(ester).toContainText("Deltagare · Mockåsens scoutkår · Kungsbacka")
+  await expect(ester.locator(".person-row-age")).toHaveText(/^\d{1,3} år$/u)
+  const lars = rows.getByRole("link", { name: /^Lars Lindberg/u })
+  await expect(lars).toContainText("Ledare · Mockåsens scoutkår · Göteborg")
+  await expect(lars.locator(".person-row-age")).toHaveCount(0)
+
+  await page.setViewportSize({ height: 844, width: 390 })
+  await expect(ester).toContainText("Deltagare · Mockåsens scoutkår · Kungsbacka")
+})
+
+test("says where the management's rows come from only where the line has room", async ({
+  page,
+}) => {
+  await page.setViewportSize({ height: 768, width: 1024 })
+  await page.goto("/participants")
+  await signInAs(page, "Anna Almgren")
+  await expect(page.getByRole("status")).toHaveText("59 personer i kontingenten")
+
+  // The whole contingent keeps its line – role, unit, and the unit's name – and a wide
+  // screen says where the person comes from after it. Searched for, because the rows far
+  // down a list this long are not in the document.
+  await page.getByRole("searchbox", { name: "Sök deltagare" }).fill("Lars Lindberg")
+  const lars = page.getByRole("listitem").getByRole("link", { name: /^Lars Lindberg/u })
+  await expect(lars).toContainText("Ledare · Avdelning 1")
+  const from = lars.locator(".person-row-wide")
+  await expect(from).toBeVisible()
+  await expect(from).toHaveText(" · Mockåsens scoutkår · Göteborg")
+
+  // A phone's line has no room for both, so it keeps the one it had.
+  await page.setViewportSize({ height: 844, width: 390 })
+  await expect(lars).toContainText("Ledare · Avdelning 1")
+  await expect(from).toBeHidden()
+})
+
+test("names a person's home town and age on their own page", async ({ page }) => {
+  await page.goto("/")
+  await signInAs(page, "Lars Lindberg")
+
+  await page.goto("/participants/1300035")
+  await expect(page).toHaveTitle("Ester Dahl – Campfire")
+  const profile = page.locator(".person-profile-grid")
+  await expect(profile.getByText("Hemort")).toBeVisible()
+  await expect(profile.getByText("Kungsbacka")).toBeVisible()
+  await expect(profile.getByText("Ålder")).toBeVisible()
+  await expect(profile.getByText(/^\d+ år$/u)).toBeVisible()
+})
+
+test("opens a unit's card up to the map of where it lives, and folds it back", async ({ page }) => {
+  await page.goto("/")
+  await signInAs(page, "Anna Almgren")
+
+  await page.goto("/participants/units/1")
+  await expect(page.getByRole("heading", { level: 1, name: "Avdelning 1" })).toBeVisible()
+
+  // The folded card is the button; opened, the map is a region and the same control
+  // folds it back. The walk lets the tile service through, but asks nothing of it – the
+  // dots and the control stand whether or not a tile arrives.
+  await page.getByRole("button", { name: "Visa på kartan" }).click()
+  const close = page.getByRole("button", { name: "Stäng kartan" })
+  await expect(close).toHaveAttribute("aria-expanded", "true")
+  const map = page.getByRole("region", { name: "Karta över var avdelningen bor" })
+  await expect(map).toBeVisible()
+
+  // Full screen, the map covers the whole viewport, and the only way out is back to the
+  // card – by its own control, or by Escape.
+  const viewport = page.viewportSize()
+  await page.getByRole("button", { name: "Helskärm" }).click()
+  const shrink = page.getByRole("button", { name: "Stäng helskärm" })
+  await expect(shrink).toBeVisible()
+  await expect(close).toHaveCount(0)
+  await expect
+    .poll(async () => map.boundingBox())
+    .toEqual({ height: viewport?.height, width: viewport?.width, x: 0, y: 0 })
+
+  await page.keyboard.press("Escape")
+  await expect(page.getByRole("button", { name: "Helskärm" })).toBeVisible()
+  await expect(close).toBeVisible()
+
+  await page.getByRole("button", { name: "Helskärm" }).click()
+  await shrink.click()
+  await expect(page.getByRole("button", { name: "Helskärm" })).toBeVisible()
+  await expect
+    .poll(async () => {
+      const box = await map.boundingBox()
+      return box?.y
+    })
+    .toBeGreaterThan(0)
+
+  await close.click()
+  await expect(page.getByRole("button", { name: "Visa på kartan" })).toHaveAttribute(
+    "aria-expanded",
+    "false",
+  )
+  await expect(page.getByRole("region", { name: "Karta över var avdelningen bor" })).toHaveCount(0)
+
+  // The IST and the management are no avdelning, so neither page has a unit's card.
+  await page.goto("/participants/units/ist")
+  await expect(page.getByRole("heading", { level: 1, name: "IST" })).toBeVisible()
+  await expect(page.getByRole("button", { name: "Visa på kartan" })).toHaveCount(0)
 })
 
 test("answers a leader's deep link straight into the section", async ({ page }) => {

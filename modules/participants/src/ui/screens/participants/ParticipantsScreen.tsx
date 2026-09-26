@@ -211,6 +211,7 @@ export function ParticipantsScreen(): ReactElement {
             title={offered.find((segment) => segment.filter === roll)?.label ?? "Alla"}
           >
             <PeopleList
+              isUnitScoped={scope.kind === "unit"}
               onFirstVisibleChange={jumps.onFirstVisible}
               people={found}
               registerJump={jumps.registerJump}

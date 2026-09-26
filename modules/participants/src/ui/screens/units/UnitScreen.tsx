@@ -1,8 +1,9 @@
-import { Button, Card, PageJumps, PageTitle } from "@scouterna/wsj27-campfire-ui"
+import { Button, Card, cmtTheme, PageJumps, PageTitle } from "@scouterna/wsj27-campfire-ui"
 import type { ReactElement } from "react"
 
 import type { Participant } from "../../../model/Participant"
-import { cmtSections } from "../../../model/unit-entries"
+import { cmtSections, unitNumberOf } from "../../../model/unit-entries"
+import { UnitCard } from "../../components/unitcard/UnitCard"
 import { counted, personCount } from "../../counted"
 import { PeopleList, PersonRow } from "../participants/PeopleList"
 import { useLetterJumps } from "../participants/use-letter-jumps"
@@ -22,7 +23,7 @@ import "./UnitScreen.css"
  */
 function countOf(count: number, entryKey: string): string {
   const people = personCount(count)
-  return /^\d+$/u.test(entryKey) ? `${people} i avdelningen` : people
+  return unitNumberOf(entryKey) === undefined ? people : `${people} i avdelningen`
 }
 
 interface GroupedManagementProps {
@@ -50,7 +51,7 @@ function GroupedManagement(props: GroupedManagementProps): ReactElement {
           title={section.label}
         >
           {section.people.map((person) => (
-            <PersonRow key={person.memberNo} person={person} />
+            <PersonRow isUnitScoped={false} key={person.memberNo} person={person} />
           ))}
         </Card>
       ))}
@@ -115,6 +116,8 @@ export function UnitScreen(props: UnitScreenProps): ReactElement {
     )
   }
 
+  const unitNumber = unitNumberOf(props.entryKey)
+
   return (
     <>
       <PageTitle title={title} />
@@ -125,6 +128,18 @@ export function UnitScreen(props: UnitScreenProps): ReactElement {
         <GroupedManagement people={group.people} />
       ) : (
         <>
+          {/* A unit's own card, with its map – the IST and the management are no
+              avdelning, and have neither a mark nor a home region. The unit browser is the
+              management's, so the card wears the management's color, even for a member who
+              also leads a unit of their own. */}
+          {unitNumber !== undefined && (
+            <UnitCard
+              openLabel="Visa på kartan"
+              people={group.people}
+              unitNumber={unitNumber}
+              viewerTheme={cmtTheme}
+            />
+          )}
           {/* The outline's stops over the name-sorted rows – declared, because the
               virtualized rows are not in the document for the outline to scan. */}
           <PageJumps current={jumps.current} entries={jumps.entries} onJump={jumps.onJump} />
@@ -133,6 +148,7 @@ export function UnitScreen(props: UnitScreenProps): ReactElement {
             title="Personer"
           >
             <PeopleList
+              isUnitScoped={unitNumber !== undefined}
               onFirstVisibleChange={jumps.onFirstVisible}
               people={group.people}
               registerJump={jumps.registerJump}
