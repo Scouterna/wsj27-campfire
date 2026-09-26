@@ -10,25 +10,21 @@ import { clear, createStore, del, get, set } from "idb-keyval"
  * The application's one query client, and the store that keeps its answers across a cold
  * start.
  *
- * The defaults are ADR 017's, set for a field in Poland rather than for a desk: answers
- * stay fresh for a day, survive for thirty, and a query fires even when the browser
- * believes it is offline, because a webview's guess about a camp site's connectivity is
- * not to be trusted. Nothing refetches on mount, focus, or reconnect – the data this
- * application reads changes on a human timescale.
+ * The defaults are ADR 017's, set for a field in Poland rather than for a desk. A screen
+ * draws what the cache holds at once and asks for a fresh answer every time it mounts,
+ * answers survive for thirty days, and a query fires even when the browser believes it is
+ * offline, because a webview's guess about a camp site's connectivity is not to be
+ * trusted. A fresh answer that fails leaves the cached one in place. Focus and reconnect
+ * refetch nothing, because a phone waking up in a field is not a reason to ask.
  *
- * Every service read goes through this client – the gate hands it to `currentUser`, the
- * screens' hooks read it from the provider the gate mounts – so one cache holds every
- * answer, and one IndexedDB store persists it query by query, with every read that
- * reaches the network run under the session. The store's buster is the cached shapes'
- * version: bump it whenever a persisted payload's shape changes, because a stale shape
- * read as a fresh one is worse than a cold cache. And the cache belongs to one member
- * number at a time – `adoptCacheOwner` wipes it when it changes hands, so nothing one
- * person saw can be served to the next on a shared device.
+ * Every service read goes through this client, so one cache holds every answer and one
+ * IndexedDB store persists it query by query, with every read that reaches the network
+ * run under the session. The cache belongs to one member number at a time.
  */
 
 /**
- * IndexedDB rather than localStorage: localStorage is synchronous, caps out a few
- * megabytes in, and blocks the main thread on every write.
+ * IndexedDB rather than localStorage, because localStorage is synchronous, caps out a
+ * few megabytes in, and blocks the main thread on every write.
  */
 const store = createStore("campfire", "queries")
 
@@ -36,13 +32,12 @@ const store = createStore("campfire", "queries")
  * Whether the cache has been forgotten on this page. The persister saves a read on a
  * later tick than the read resolved on, so a read that finished just before a session
  * ended could otherwise write its answer back after `forgetCache` cleared the store.
- * Never unset: forgetting ends a session or signs out, and both end in a page load.
+ * Never unset, because forgetting ends a session or signs out, and both end in a page
+ * load.
  */
 const forgotten = { value: false }
 
 const storage: AsyncStorage = {
-  // The library's contract is `null` for a miss, not `undefined` – one of the few places
-  // the repository's own preference gives way to an external type.
   // eslint-disable-next-line unicorn/no-null -- AsyncStorage.getItem is typed to return null
   getItem: async (key) => (await get(key, store)) ?? null,
   removeItem: async (key) => {
@@ -57,14 +52,13 @@ const storage: AsyncStorage = {
 }
 
 /**
- * A persister that writes each query separately, keyed by its hash. `persistQueryClient`
- * – the better-known one – re-serializes the whole cache on every mutation, which stalls
- * the UI once the cache is large; this one persists per query and restores lazily, so the
- * cost stays flat as the list of participants grows.
+ * A persister that writes each query separately, keyed by its hash, and restores lazily,
+ * so the cost stays flat as the list of participants grows instead of the whole cache
+ * being re-serialized on every change.
  */
 const persister = createQueryPersister({
-  // The cached shapes' version. A cache written by an older build cannot serve rows that
-  // are missing today's fields, so a bump discards those entries and refetches instead.
+  // The cached shapes' version. Bump it whenever a persisted payload's shape changes,
+  // because a stale shape read as a fresh one is worse than a cold cache.
   buster: "5",
   // Thirty days, not the library's twenty-four hours, and the same span as `gcTime` –
   // the default would drop the whole cache on the jamboree's second day, which is
@@ -74,14 +68,14 @@ const persister = createQueryPersister({
 })
 
 /**
- * The persister with every network read run under the session: a refusal asks the auth
- * service again, and the read runs once more only when the same person is still signed
- * in. A restore from IndexedDB never calls the query function and so never asks – only a
- * read that reached the network can be refused. What a refusal means is the
- * authentication module's to decide; this only puts the read where it can.
+ * The persister with every network read run under the session, so a refusal asks the
+ * auth service again and the read runs once more only when the same person is still
+ * signed in. A restore from IndexedDB never calls the query function and so never asks.
+ * What a refusal means is the authentication module's to decide; this only puts the
+ * read where it can.
  *
- * The client's single retry is the bound: a same-person rerun refused again rethrows,
- * the client runs the whole query function once more, and that is two asks per fetch at
+ * The client's single retry bounds it – a same-person rerun refused again rethrows, the
+ * client runs the whole query function once more, and that is two asks per fetch at
  * most.
  * @param queryFunction The query's own function, run under the session when it runs.
  * @param context The query function's context, handed through.
@@ -101,11 +95,10 @@ export const queryClient = new QueryClient({
       gcTime: 30 * 24 * 60 * 60 * 1000,
       networkMode: "offlineFirst",
       persister: persisterWithSession,
-      refetchOnMount: false,
+      refetchOnMount: "always",
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
       retry: 1,
-      staleTime: 24 * 60 * 60 * 1000,
     },
   },
 })

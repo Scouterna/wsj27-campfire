@@ -5,14 +5,14 @@ import { useViewer } from "../../../data/viewer"
 import type { ParticipantDetail } from "../../../model/ParticipantDetail"
 
 /**
- * What the screen needs to draw itself: the record, or which of the two states it is in
- * instead.
+ * What the screen needs to draw itself: the record, or the state it is in instead.
  */
 export interface ParticipantView {
   /**
    * Why the record could not be read – a member number nobody holds, one outside the
    * viewer's scope, or a payload that is not a person. The screen words all of them the
-   * same way, so what this holds never reaches a reader.
+   * same way, so what this holds never reaches a reader. Null when a fresh read failed but
+   * an earlier record is still here to show.
    */
   readonly error: Error | null
   /**
@@ -35,5 +35,8 @@ export function useParticipant(memberNo: string): ParticipantView {
   const viewer = useViewer()
   const { data, error, isPending } = useQuery(fetchParticipantQuery(memberNo, viewer))
 
-  return { error, isPending, participant: data }
+  // A read that failed with an earlier record in hand keeps showing that record, because
+  // what the phone already had is worth more in a field than an error.
+  // eslint-disable-next-line unicorn/no-null -- the view keeps TanStack Query's `Error | null`
+  return { error: data === undefined ? error : null, isPending, participant: data }
 }
