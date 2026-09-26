@@ -1,6 +1,6 @@
 name: Feature
 description: Track a feature or capability to build for Campfire
-labels: ["feature"]
+type: Feature
 body:
   - type: markdown
     attributes:
@@ -58,6 +58,6 @@ body:
     id: notes
     attributes:
       label: Alternatives and notes
-      description: Other approaches considered, open questions, links, or anything that may need an architectural decision (ADR).
+      description: Other approaches considered, open questions, links, work this waits on in another repository, or anything that may need an architectural decision (ADR).
     validations:
       required: false

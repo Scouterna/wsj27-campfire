@@ -1,6 +1,6 @@
 name: Task
 description: Track a task or chore, such as setup, configuration, or maintenance
-labels: ["task"]
+type: Task
 body:
   - type: markdown
     attributes:
@@ -30,6 +30,6 @@ body:
     id: notes
     attributes:
       label: Notes
-      description: Links, context, or anything else that helps.
+      description: Links, work this waits on in another repository, or anything else that helps.
     validations:
       required: false
