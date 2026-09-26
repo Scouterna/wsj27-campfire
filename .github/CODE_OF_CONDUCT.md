@@ -1,8 +1,8 @@
 # Code of Conduct
 
-Campfire is a small project – developed mainly by three people – with its code open for anyone to read and reuse. This code of conduct is about how we treat each other **around the project**: in issues, pull requests, and our development channels.
+Campfire is a small project, with its code open for anyone to read and reuse. This code of conduct is about how we treat each other **around the project**: in issues, pull requests, and our development channels.
 
-It is not the code of conduct the Swedish contingent follows at camp – that is a separate document for the people traveling to the jamboree. But it borrows that document's spirit, written as commitments each of us makes.
+It borrows the spirit of the contingent's own code of conduct for camp, which is a separate document, written as commitments each of us makes.
 
 ## What I commit to
 
