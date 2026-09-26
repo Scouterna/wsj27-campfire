@@ -1,12 +1,10 @@
 # Maintenance
 
-This chapter is how Campfire is kept healthy once it is in people's hands. It is the thinnest chapter in the guidebook: how the version moves and how a release is published are settled and in use, and almost everything else about running the application is still to be decided.
+This chapter is how Campfire is kept running once it is in people's hands. Three things carry a version – the web image and the two shells – and each is released on its own schedule. The web releases itself from the merge that earns a version, runs on dev at once, and reaches prod only when a maintainer promotes it. How the shells reach a phone, and how anyone learns that something has broken, are open decisions, and the pages say what shapes them.
 
-Each part is its own page:
+| Part                       | What it covers                                                                               |
+| -------------------------- | -------------------------------------------------------------------------------------------- |
+| [Release](./release)       | How each artifact is versioned, what a merge publishes, and how the web reaches dev and prod |
+| [Monitoring](./monitoring) | Errors, usage, and whether the back-end answers – and what shapes that open decision         |
 
-| Part                       | What it covers                                                                          |
-| -------------------------- | --------------------------------------------------------------------------------------- |
-| [Release](./release)       | Versioning, the web image, and how the shells would reach the App Store and Google Play |
-| [Monitoring](./monitoring) | Errors, usage, and whether the back-end is answering                                    |
-
-Both pages say plainly what is still undecided, and they fill in as the decisions are made and recorded as ADRs.
+Each open decision is recorded as an ADR once it is made, and the page that names it describes what was chosen.

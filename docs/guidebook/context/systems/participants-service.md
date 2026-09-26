@@ -1,32 +1,30 @@
 # Participants service
 
-The participants service – `wsj27-project-api` – is the one that answers `/api/project` with the contingent's list of participants: participant and role data derived from Scoutnet.
+The participants service holds the contingent's list of participants: who is in the contingent, which unit they belong to, and what they answered in the registration forms, all read from [Scoutnet](./scoutnet). It is part of the WSJ27 project's back-end, `wsj27-project-api`, which lives in a repository of its own and is released on its own ([ADR 013](/decisions/013-keep-the-back-end-services-in-their-own-repositories)). Campfire reaches it under `/api/project` on its one origin ([ADR 012](/decisions/012-run-campfire-in-three-environments-on-one-origin)).
 
-Like the [auth service](./auth-service), it is a Python service in its own repository, shipping as its own container image and released on its own cadence ([ADR 013](/decisions/013-build-the-back-end-as-python-services-in-their-own-repositories)) – which is why it is a system of its own rather than a part of Campfire. The dev and prod container environments build it from its repository's `main`, exactly as they build the auth service.
+## What Campfire uses it for
 
-## What it does for Campfire
+- **Listing people** – the members of one unit, or of a group such as the leaders, the IST, or the contingent management team.
+- **Showing one person** – their contact details and, for those allowed, their health and dietary answers.
+- **Knowing the signed-in person** – their own unit and how they travel.
+- **Deciding the roles** – every WSJ27 role is minted here, and the [auth service](./auth-service) puts them in each session.
 
-The list of participants, one troop at a time, with the caller's roles deciding how much of each answer comes back:
+The service has no "everyone I may see" listing, so Campfire builds the list of participants from the unit and group listings: a leader asks for their own unit, and the management team walks every unit. The participants module is the only part of Campfire that calls it.
 
-- `/api/project/participants/troopinfo/{troop}` lists one troop, or one member type – `al`, `ist`, and `cmt` are accepted shorthands. `/api/project/participants/individual/{memberNo}` answers for one person.
-- Every request takes an information level – name, basic, or full. Basic carries the person and their contact answers; full adds the health and dietary answers, and needs a health grant.
-- **It scopes its own answers.** A unit's leader reads their own troop at any level and nothing else; the contingent management reads everyone at basic, and full only with a health grant – refused with a 403 rather than quietly downgraded. No access at all answers 404, indistinguishable from a person who does not exist, so the list of participants does not leak who is in it.
-- **It owns the role model.** `/api/project/participants/roles` serves the finished member-to-roles map that the [auth service](./auth-service) mints into tokens: `wsj27:al:<troop>` for leaders, `wsj27:cmt:<funktion>:<roll>` for the management – the funktion split read from the contingent's own mapping, not from Scoutnet – and per-person `wsj27:access:<level>` grants. The auth service reads it with a service token of its own carrying the `wsj27:bulkread` role.
+## Who may see what
 
-[Applications](../../architecture/applications) has the rest of the contract.
+The service decides what each caller gets, so the front-end never filters what it should not have received.
 
-## Who talks to it
+| Caller                         | Sees                                                                                                |
+| ------------------------------ | --------------------------------------------------------------------------------------------------- |
+| A unit leader                  | Their own unit                                                                                      |
+| The contingent management team | Everyone's contact details, and health answers only with the health team's role or a personal grant |
+| Anyone else                    | Nobody                                                                                              |
 
-The [participants module](../../architecture/modules) is the only part of the application that calls `/api/project`, and every other module that needs a fact from the list of participants gets it as a prop or through a named doorway. The service has no "everyone I may see" endpoint, so the client composes the list of participants from the troop listings – a leader asks for their own troop, and the management walks the troops the leaders' listing names. The auth service calls the roles endpoint on a timer.
+A person the caller may not see answers exactly as someone who does not exist, so nobody can learn who is in the contingent by asking. A caller who may see a person but not at the level asked for is refused outright rather than handed less.
 
-Outward, it is the one system that reaches [Scoutnet](./scoutnet).
+The contingent management team's functions are not in Scoutnet, so the service reads them from the contingent's own roster. What leaves the service is decided by a template in its repository – a form question the template does not carry never reaches Campfire.
 
-## Where its data comes from
+## Locally
 
-Scoutnet. The service fetches the WSJ27 project's participants, forms, and answers from Scoutnet's project API, decodes the raw form answers into a stable, keyed structure, and caches the result – in the container environments on a volume of its own, so it can start from disk when Scoutnet is slow or unreachable. What it publishes is decided by a hand-maintained template in its repository: a question the template does not carry never leaves the service, which is why a screen built for an answer may have nothing to render until the template grows.
-
-## What stands in for it locally
-
-The [mock](../../testing/mock) copies the service's behavior – the endpoints, the information levels, the role minting, and the 403 and 404 semantics – against a seeded list of twenty-three people: two units of leaders, deltagare, and IST, plus the contingent management ([ADR 021](/decisions/021-stand-in-for-the-back-end-with-a-seeded-mock)). It holds the service's form template question for question, and its seed carries a few answers the template does not publish, which never leave the mock either.
-
-Because the list of participants comes from a separate service that will change shape over an eighteen-month build, the front-end validates every field at the boundary and drops a bad row rather than trusting it.
+In the [local environment](../../development/environments), the [mock](../../testing/mock) answers in its place with an invented, seeded contingent and the same access rules ([ADR 021](/decisions/021-develop-against-a-mock-back-end)).

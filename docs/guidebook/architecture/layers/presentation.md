@@ -1,66 +1,59 @@
 # Presentation layer
 
-Everything a person sees. A module's `ui/` directory holds three kinds of thing, and each has one job.
+The presentation layer is everything a person sees. A module's `ui/` holds three kinds of piece, each with one job:
 
-| Piece      | Job                                                                        |
-| ---------- | -------------------------------------------------------------------------- |
-| **Screen** | Answers at an address, and renders what a hook hands it                    |
-| **Widget** | A piece another module's screen places by id, without importing the module |
-| **Hook**   | Where the state comes from – the query, the derivation, the formatting     |
+| Piece      | Job                                                            |
+| ---------- | -------------------------------------------------------------- |
+| **Screen** | Answers at an address and renders what its hook hands it       |
+| **Widget** | Appears on another module's screen, placed by id               |
+| **Hook**   | Supplies the state – the query, the derivation, the formatting |
 
-The split is what makes behavior testable without driving a browser: a hook can be exercised on its own, and a screen that formats nothing and decides nothing has little left in it worth a unit test. The screens are proven by walking them instead ([UI tests](../../testing/ui)).
+A screen does not fetch, validate, or know which environment it runs in. The split is what makes behavior testable without a browser: a hook can be exercised on its own, and a screen that formats nothing and decides nothing has little left worth a unit test. Screens are proven by walking them instead ([UI tests](../../testing/ui)).
 
 ## Screens
 
-A screen is a React function component, and the module's route table is what gives it an address ([Navigation and routing](./navigation)). It takes what it draws from a hook beside it and renders it. It does not fetch, it does not validate, and it does not know which environment it is running in.
+A screen is a React component, and the module's route table gives it an address ([Navigation and routing](./navigation)). It takes what it draws from a hook beside it and renders it.
 
-A screen that only learns its own name once data has arrived – a person's detail page – says so, rather than having the route table guess a title that is wrong for a second.
+A screen names itself by rendering `PageTitle`, and the chrome reads that for the bar and the document's title alike. The name belongs to the page because only the page knows it – a person's detail page learns its title once the data has arrived, and the list of participants is titled by whose list it is.
 
 ## Widgets
 
-A widget is how one module's work appears on another module's screen without either importing the other. The providing module declares an id in `WidgetRegistry` and exports the table that fills it, the application merges the modules' tables into one `WidgetsProvider`, and the receiving screen places the widget by id:
+A widget lets one module's work appear on another module's screen without either importing the other. The providing module declares an id and exports a table filling it, the application merges the tables into one `WidgetsProvider`, and the receiving screen places the widget by id ([ADR 016](/decisions/016-compose-the-web-application-from-feature-modules)). The home screen places the journey's countdown and a leader's unit this way:
 
 ```tsx
-{
-  isUnitsRevealed && <Widget id="journey:countdown" />
-}
-{
-  isUnitsRevealed && isLeader && <Widget id="participants:unit" />
-}
+<>
+  {isUnitsRevealed && <Widget id="journey:countdown" />}
+  {isUnitsRevealed && isLeader && <Widget id="participants:unit" />}
+</>
 ```
 
-That is the home screen, and everything about it is home's own: what goes where, who sees it, and from when – both widgets wait behind the units reveal, and the unit widget is a leader's alone. The screen never learns which module drew what, and an id nobody registered renders nothing, which is what a story or a build assembled without that module should do.
+The placing screen decides where a widget goes, who sees it, and from when, and never learns which module drew it. An id nobody filled renders nothing, which is what a story or a build without that module should do.
 
-A widget takes no props. What it needs it reads where it is used – its own queries, or the ambient session `utils` holds, the way the countdown reads the signed-in person with `useUser` to know how they travel. Nothing is threaded through the screen that places it.
+A widget takes no props. It reads what it needs where it is used – its own queries, or the session context – the way the countdown reads how the person travels with `useUser`. Nothing is threaded through the screen that places it.
 
-## The session gate and the two chromes
+## The session gate
 
-Above every screen sits the gate, and its order is the point:
+Every screen sits behind the gate in the composition root, and its order matters:
 
-1. Ask the auth service who is signed in. Nothing renders until that answers – not a spinner, not a shell of a screen, because a sign-in screen that flashes past a signed-in person reads as being signed out.
-2. Hand the cache its owner before any screen mounts, so a cache belonging to somebody else is gone before a single query reads it ([Data layer](./data)).
-3. Show the sign-in screen, or the chrome.
+1. Ask the auth service who is signed in, and render nothing until it answers – not a spinner, not the sign-in screen, because a sign-in screen flashing past a signed-in person reads as being signed out.
+2. Hand the cache to that person before any screen mounts, so nobody reads the previous owner's data ([Data layer](./data)).
+3. Show the sign-in screen, or mount the session's providers and branch once, on the tier, into the browser chrome or the shell chrome ([Applications](../applications)).
 
-After the gate the application branches once, on the tier, into the shell chrome or the browser chrome ([Applications](../applications)).
+The gate keeps listening after boot ([ADR 033](/decisions/033-recover-an-ended-session-at-the-query-client-and-the-gate)). The authentication module holds the session as a store, and a read refused with 401 or an expiry the keep-alive did not renew both ask it again. What the answer means decides what the gate does:
 
-The gate keeps listening after boot ([ADR 033](/decisions/033-recover-an-ended-session-at-the-query-client-and-the-gate)). The authentication module holds the session as a store – one ask at a time, and the last answer – and tells the gate when the answer changes. A read refused with 401 and an expiry cookie the service's keep-alive did not renew both ask again through it ([Data layer](./data)). When the service says nobody is signed in any more, the gate unmounts the application, forgets the cache, and mounts the sign-in screen in place – at the address the person was at, so signing in returns them there, and with nothing of the signed-in application on screen meanwhile. When another person is signed in, the gate reloads the page, and the order above adopts the new owner. When it is the same person, nothing changes: the refused read is simply made again. When the service cannot be reached, nothing changes either – a lost signal is not a lost session.
+| The answer                    | The gate                                                                                                          |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Nobody is signed in           | Takes the application down, forgets the cache, and shows sign-in at the same address, so signing in returns there |
+| Somebody else is signed in    | Reloads the page, and the boot order above adopts the new owner                                                   |
+| The same person is signed in  | Nothing – the refused read is simply made again                                                                   |
+| The service cannot be reached | Nothing – a lost signal is not a lost session                                                                     |
 
-## Components, and what they look like
+## Components and styling
 
-A component is a file named after it, in PascalCase, with its stylesheet and its stories beside it in a directory of its own – `Logo.tsx`, `Logo.css`, `Logo.stories.tsx`. It takes one `props` object typed as an exported `XxxProps` type declared beside it, every field `readonly` and every field documented.
+The look belongs to the design system in `libraries/ui`. A module composes its components and never restyles them, and the design system knows what a row is but never what a participant is.
 
-What a piece looks like belongs to `libraries/ui`, not to a module. A module composes the design system's components; it does not restyle them. The design system knows what a row is and never what a participant is.
-
-- **Styling is CSS in cascade layers** – `tokens, fonts, reset, base, component, screen` – declared in `index.html` before any stylesheet loads, so nothing depends on the order its CSS arrives in. A component imports its own stylesheet, so the CSS travels with the component.
-- **No inline `style` props.** Styles live in CSS.
-- **Font sizes come from the `--font-size-*` tokens**, each `calc(<N>rem / 17)` against the 17-point base the design system's base stylesheet sets, so Dynamic Type carries the reader's own text size through every role.
-- **A theme is a name, not a stylesheet.** The contingent has five color identities – blue, brown, green, red, and yellow, with blue the default – and a theme is a pair of primitives, `--color-theme-bright` and the darker `--color-theme-ink`, that every rule naming the unit's colors reads. `[data-theme="<name>"]` swaps the pair rather than every rule that reads it, and the attribute is stamped before React boots, so a returning brown-unit leader does not flash blue on the way in. A color never crosses the bridge to a shell; the name does, and each shell holds its own palette.
-- **Swedish is what a user reads.** The document is `lang="sv"`, and the few strings the shells own are Swedish too.
+A component is a file named after it, with its stylesheet and its stories beside it in a directory of its own, and it takes one `props` object whose type is declared and exported beside it. Styling is plain CSS in cascade layers ([ADR 015](/decisions/015-style-the-web-application-with-plain-layered-css)), with raw values in tokens, every size following the reader's text size, and each unit color a theme swapped by name – [Design](../../design/) describes those foundations. Only a theme's name crosses [the bridge](./bridge), and each shell holds its own palette. Every word a user reads is Swedish ([ADR 011](/decisions/011-write-every-word-a-user-reads-in-swedish)).
 
 ## Stories
 
-Every component gets stories beside it as `Name.stories.tsx` ([ADR 023](/decisions/023-catalog-the-ui-in-storybook)). One Storybook serves the whole monorepo, on port 3002: it indexes `libraries/ui/src/**/*.stories.tsx` and `modules/*/src/**/*.stories.tsx`, so the design system's components and the modules' widgets and screens are browsable in one place, and the sidebar reads as the design system does – the introduction, the foundations, the components, then the modules.
-
-Two decorators are registered once for the whole catalog rather than story by story: one gives every story the routing context the application gives its screens, so anything that links renders outside the application ([Navigation and routing](./navigation)), and one wraps it in the unit color the toolbar picked, so every story can be read in each of the five themes. Storybook itself is dressed as the guidebook is – the contingent's red, the guidebook's grays, its font stack, and the same app icon its nav bar carries – so moving between the two reads as one thing.
-
-A story's name and its rendered output are its description, which is the one exception to the rule that every export carries a JSDoc block.
+Every component, widget, and screen has stories beside it, and one Storybook catalogs the design system and the modules together ([ADR 023](/decisions/023-catalog-the-ui-in-storybook)). A story is rendered with the routing context a screen has, so anything that links renders outside the application, and dressed in the unit color picked in the toolbar. A story that needs data stubs it, because nothing in Storybook touches a network. [Design](../../design/#storybook) covers how the catalog is organized.

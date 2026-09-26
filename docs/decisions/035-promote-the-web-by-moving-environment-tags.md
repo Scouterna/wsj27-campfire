@@ -6,37 +6,32 @@
 
 ## Context
 
-[ADR 026](026-publish-the-web-application-as-a-container-image.md) publishes the web image and stops, and [ADR 027](027-run-the-back-end-on-kubernetes-in-azure.md) leaves how a deploy is triggered undecided. Two environments now exist to deploy to, and they want different things. Dev should take every web release as it happens, so the management team tests what could ship. Prod should change only when someone decides it should, and only to an image dev already ran – never rebuilt in between. Every change to prod should be visible: who, what, when, and what it replaced.
+[ADR 026](026-publish-the-web-application-as-a-container-image.md) publishes the web image and stops, and the cluster that runs it is operated outside this repository ([ADR 027](027-run-the-web-beside-the-back-end-on-scouternas-cluster.md)). Dev should take every web release, so the contingent management tests what could ship. Prod should change only when someone decides, only to an image dev already ran, and visibly – who, what, when, and what it replaced.
 
-The cluster is run by people outside this repository, and its credentials do not belong in GitHub. Whatever signals a deploy has to be something a workflow can write with the token it already has.
+The cluster's credentials do not belong in GitHub, so a deploy has to be signaled by something a workflow can write with the token it has.
 
 ## Decision
 
 We deploy by moving two tags on the image, and nothing else.
 
-- **`:dev` follows releases.** After the release workflow has published `:<version>` and created `web-v<version>` ([ADR 034](034-version-each-artifact-from-its-own-commits.md)), it moves `:dev` to that version's digest, in a job of its own that runs in a GitHub environment named `dev`, so every move is a deployment linking to `campfire.wsj27.scouterna.net`. A push that earns no version skips that job, so it moves nothing and records nothing. `:dev` only ever points at a digest that also carries a released `:<version>`.
-- **`:prod` moves by promotion.** A workflow started by hand, `promote_web.yml`, takes a version as its one input. It refuses a version that is not CalVer-shaped, has no `web-v<version>` tag, or has no `:<version>` image, and a refusal leaves `:prod` where it was. Accepted, it copies the manifest behind `:<version>` to `:prod` with `docker buildx imagetools create` – nothing is built, pulled, or pushed but the tag, so the digest is the one dev ran. Rolling back is a promotion of an earlier version; there is no other rollback.
-- **Every promotion is a deployment.** The job runs in a GitHub environment named `prod`, so each run – accepted or refused – is a deployment record with its actor, its status, its run, and a link to `campfire.wsj27.se`, and the repository's Deployments page is the history. The run's summary names the version, the outcome, the new and the previous digest, and the command that rolls back.
-- **`:latest` is gone.** Nothing should run "whatever was last", and the release no longer publishes it. The tag that exists is removed by hand once the people who run the cluster confirm nothing pulls it.
-- **The cluster side is a manual step.** Moving a tag restarts nothing. Prod is deployed by a step on the cluster that takes what `:prod` points at; how dev follows `:dev` is settled with the people who run it. A promotion needs no credentials for the cluster and holds none.
-- **`promote_*` is a workflow kind.** [ADR 009](009-check-and-release-with-small-github-actions-workflows.md) names four; this adds one that moves a pointer to something already released, runs only by hand, and takes an input. Like a release it queues and never cancels in flight, because a canceled promotion can leave a moved tag without its record.
+- **`:dev` follows releases.** After a release ([ADR 034](034-version-each-artifact-from-its-own-commits.md)), a job in a GitHub environment named `dev` moves `:dev` to the version's digest, recorded as a deployment linking to `campfire.wsj27.scouterna.net`. A push that earns no version moves nothing.
+- **`:prod` moves by promotion.** A workflow started by hand with a released version points `:prod` at that version's own image, so the digest is the one dev ran, and refuses a version that was never released. Rolling back is promoting an earlier version.
+- **Every promotion is a deployment** in a GitHub environment named `prod`, linking to `campfire.wsj27.se`.
+- **There is no `:latest`**, because nothing should run whatever was last.
+- **The cluster side is not in this repository.** Moving a tag restarts nothing, and the cluster takes what the tag points at. A promotion holds no credentials for the cluster.
+- **`promote_*` is a workflow kind** beside those of [ADR 009](009-check-and-release-with-small-github-actions-workflows.md) – started by hand, taking an input, and queued rather than canceled, because a canceled promotion can leave a moved tag without its record.
 
-This amends ADR 026: the `package.json` trigger goes to ADR 034, `:latest` goes here, and the rest of it – `ghcr.io`, Caddy plus the bundle, `linux/amd64`, `:main` and `:sha-<short>`, publish then tag – stands.
+This amends ADR 026: `:latest` is dropped, and the rest of it stands.
 
 ## Consequences
 
-- Prod changes only when a person names a version, and only to an image that was released and offered to dev. The image promoted is byte-for-byte the image tested.
-- ADR 027's open question is answered on GitHub's side: the trigger is a moved tag. The cluster's half is a manual step, and how dev follows `:dev` is theirs to decide.
-- A promotion is one API call away from anyone with write access to the repository. The `prod` environment can require a reviewer later; that is a setting, not a change here.
-- Nothing checks that dev actually ran the version, or for how long. A promotion of a version dev never had is legal and visible.
-- The `:dev` move is the last job of a release. If it fails after the tag exists, re-running that failed job repeats it, but a new run of the workflow earns nothing and `:dev` lags until the next version; the summary says so and gives the one command that fixes it. Moving it before the tag would let `:dev` point at a version that never finished releasing, which is the worse failure.
-- Two tags now move without a commit behind them, so the registry, not the history, says what each environment runs. The Deployments page and the run summaries are the record.
+- Prod changes only when a person names a version, and the image promoted is byte-for-byte the image tested.
+- A promotion is one call away from anyone with write access, until the `prod` environment requires a reviewer.
+- Nothing checks that dev ran a version, or for how long, and promoting one it never had is legal and visible.
+- The registry, not the history, says what each environment runs, and the Deployments page is the record.
 
 ## Alternatives considered
 
-- **Pin each environment's version in a configuration repository the cluster syncs from.** Every change becomes a commit and a pull request with a history for free, and it needs a sync tool in the cluster and a second repository to keep in step. The people who run the cluster may still choose it on their side; this decision does not preclude it.
-- **Deploy straight from a workflow with cluster credentials.** It puts deploy access to the cluster in GitHub, and it ties the repository to the cluster's shape, which ADR 027 kept out.
-- **Rebuild the image at promotion time from the tagged commit.** The thing promoted would not be the thing tested, which is the whole reason to promote a digest.
-- **A separate rollback workflow.** A second way to move the same tag, with the same checks; promoting an earlier version is the rollback.
-- **Keep `:latest` as an alias for the newest version.** An environment that pulled it would take a release nobody chose for it, and nothing needs it.
-- **A pull-request-driven promotion**, editing a file in this repository. It gives review for free, and it puts a deploy in the commit history of the code, which then has to be released again to move.
+- A configuration repository the cluster syncs from – a sync tool and a second repository; the cluster's people may still choose it on their side.
+- Deploying with cluster credentials – deploy access in GitHub, and the cluster's shape in this repository.
+- Promotion by pull request – a deploy in the code's history, which then has to be released again.

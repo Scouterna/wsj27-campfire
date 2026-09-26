@@ -1,32 +1,33 @@
 # Testing
 
-Campfire is tested in layers, and the layers are not the same size. The static checks run on every change and are completely in place. Unit tests sit beside the code in all three languages. One Playwright walk-through per module drives the real web application in a real browser, and each shell has a walk of its own. Underneath all of it is the mock, which is why a test run never reaches a network.
+Campfire is tested in two layers, each aimed at a different kind of failure. Unit tests prove the logic – the models, the converters that decode what the back-end sends, the session client, the role helpers – in all three languages. Walk-throughs prove the screens, by driving the real web application in a real browser and each shell on a device, because a screen is mostly composition and its failures only show when the whole thing runs ([ADR 024](/decisions/024-walk-through-the-web-application-per-module-with-playwright)).
 
-The chapter is in three parts, each its own page:
+Underneath both is the mock back-end, a stand-in for the real services that answers as they do. The walk-throughs sign in and read the list of participants through it, so no test reaches a network, needs credentials, or touches a real person's data ([ADR 021](/decisions/021-develop-against-a-mock-back-end)).
 
-| Part                        | What it covers                                                                                  |
-| --------------------------- | ----------------------------------------------------------------------------------------------- |
-| [The mock back-end](./mock) | The stand-in for both services that the application runs against, behind `pnpm start:local`     |
-| [Unit tests](./unit)        | Vitest for the TypeScript, and each shell's own tools for the Swift and the Kotlin              |
-| [UI tests](./ui)            | The Playwright walk-throughs through the web application, and each shell's walk through its own |
+The chapter is in three parts:
 
-The formatters, linters, and type checks every change passes are not tests, and are covered as part of development in [The checks](../development/checks). What runs them on a pull request is on [Continuous integration](../development/continuous-integration).
+| Part                        | What it covers                                                             |
+| --------------------------- | -------------------------------------------------------------------------- |
+| [The mock back-end](./mock) | The stand-in for the back-end that local work and the walk-throughs run on |
+| [Unit tests](./unit)        | Vitest for the TypeScript, and each shell's own tools for its language     |
+| [UI tests](./ui)            | A Playwright walk-through per module, and a launch walk through each shell |
 
-Two habits hold across all of them. Tests live beside the code they cover rather than in a parallel tree – `string.test.ts` sits next to `string.ts`, and a module's walk-throughs sit in its own `test-ui/` – and they are written with that code rather than deferred to a phase that never comes.
+Tests live beside the code they cover rather than in a parallel tree – `string.test.ts` next to `string.ts`, a module's walk-throughs in its own `test-ui/` – and they are written with that code, so a package lands with the tests that prove it. The formatters, linters, and type checks are not tests and are covered in [The checks](../development/checks). What runs on a pull request is in [Continuous integration](../development/continuous-integration).
 
 ## What runs what
 
-| Command                | What it runs                                                                        |
-| ---------------------- | ----------------------------------------------------------------------------------- |
-| `pnpm test`            | Every TypeScript test, through Vitest, with the coverage ratchet                    |
-| `pnpm test:web:ui`     | The Playwright walk-throughs, one project per module, against the local environment |
-| `pnpm test:apple`      | The Apple unit tests on a Simulator, and a compile of the walk beside them          |
-| `pnpm test:apple:ui`   | The Apple walk, driving the real shell on a Simulator                               |
-| `pnpm test:android`    | The Android JVM unit tests, plus the instrumented compile                           |
-| `pnpm test:android:ui` | The Android walk, on an emulator the script boots                                   |
+| Command                | What it runs                                                                 |
+| ---------------------- | ---------------------------------------------------------------------------- |
+| `pnpm test`            | Every TypeScript unit test, through Vitest, with the coverage ratchet        |
+| `pnpm test:web:ui`     | The Playwright walk-throughs, one project per module, against the local mock |
+| `pnpm test:apple`      | The Apple unit tests on a Simulator, and a compile of the Apple walk         |
+| `pnpm test:apple:ui`   | The Apple walk, driving the real shell on a Simulator                        |
+| `pnpm test:android`    | The Android unit tests on the JVM, and a compile of the Android walk         |
+| `pnpm test:android:ui` | The Android walk, on an emulator the script boots                            |
 
 ## The known gaps
 
-- **Nothing renders React in a test.** `libraries/ui` and the modules test in a Node environment, and their components are proved in [Storybook](../design/) and by the Playwright walk-throughs instead of by a rendering test.
-- **The interactive back swipe is checked by hand.** The edge gesture cannot be synthesized, so neither shell walk can drive it.
-- **The bridge is the one contract implemented in all three languages.** A decoder that agrees with the encoder beside it proves nothing about the wire ([ADR 018](/decisions/018-bridge-the-web-application-and-the-shells-with-versioned-messages)).
+- **Nothing renders React in a unit test.** Components are proved in [Storybook](../design/) and by the walk-throughs instead, because a render in a fake DOM skips the routing and registration where a screen's failures live ([ADR 024](/decisions/024-walk-through-the-web-application-per-module-with-playwright)).
+- **The interactive back swipe is checked by hand** on both shells, because no walk can synthesize the edge gesture.
+- **Nothing checks the bridge across languages.** Each side is written against the one contract in [ADR 018](/decisions/018-bridge-the-web-application-and-the-shells-with-versioned-messages) and tested on its own, and a decoder that agrees with the encoder beside it proves nothing about the other side.
+- **Nothing checks the mock against the real services.** It copies them by hand, so a change in a service reaches the mock only when someone copies it ([ADR 021](/decisions/021-develop-against-a-mock-back-end)).

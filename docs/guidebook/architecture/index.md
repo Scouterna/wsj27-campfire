@@ -1,29 +1,27 @@
 # Architecture
 
-This chapter describes how Campfire is put together. The system in its surroundings – the people and the systems it depends on – is the [Context](../context/) chapter; this one starts at the boundary and works inward.
+This chapter describes how Campfire is put together. The people and systems around it are in [Context](../context/); this chapter starts at that boundary and works inward, from the applications to the modules to the layers inside one.
 
-Every diagram here is rendered from one C4 model written in Structurizr DSL, so the levels cannot silently disagree with each other or with this text ([ADR 030](/decisions/030-model-the-architecture-as-c4-in-structurizr)). The model is viewed at two levels, system context and containers, plus a deployment view per environment, and it describes the whole system. What a container is made of is described in prose on the pages below rather than drawn.
-
-| Page                                     | What it covers                                                                    |
-| ---------------------------------------- | --------------------------------------------------------------------------------- |
-| [Code organization](./code-organization) | How the code is divided – the application, the modules, the libraries, the shells |
-| [Applications](./applications)           | The web application, the two shells, and the services behind them                 |
-| [Modules](./modules)                     | The feature modules and what each is built from inside                            |
-| [Layers](./layers/)                      | Domain, data, and presentation – and the navigation that cuts across them         |
-| [Example flows](./example-flows/)        | Sign in, and a leader's unit – the layers seen working together                   |
+| Page                                     | What it covers                                                            |
+| ---------------------------------------- | ------------------------------------------------------------------------- |
+| [Code organization](./code-organization) | How the code is divided, and the rule that keeps modules apart            |
+| [Applications](./applications)           | The web application, the two shells that host it, and the one origin      |
+| [Modules](./modules)                     | What each feature module and library owns                                 |
+| [Layers](./layers/)                      | Domain, data, and presentation, and the navigation and bridge across them |
+| [Example flows](./example-flows/)        | Signing in, and a leader's unit – the layers working together             |
 
 ## Containers
 
-Campfire is one web application, hosted on a phone by an Apple shell and an Android shell. Where each of them runs, and what stands behind the one origin they all use, is the deployment story on [The environments](../development/environments). [Applications](./applications) describes the three and the shell pattern; [Modules](./modules) describes the feature modules the application is composed from.
+Campfire is one web application, used in a browser and hosted on a phone by an Apple shell and an Android shell. The application is composed from feature modules, and the modules talk to back-end services that live outside the boundary. [Applications](./applications) describes the three apps and how the shells host the web, [Modules](./modules) what each module owns, and [Environments](../development/environments) where each of them runs and what answers behind the one origin they share.
 
-![Container diagram, rendered from the model. Inside the Campfire boundary, the apps group holds the Campfire app as a member knows it, which ships as the React web application in a browser and as the Android and Apple shells, and the modules group holds the authentication, home, journey, and participants modules. The leaders and the contingent management team's seven functions each reach the Campfire app with one arrow. Each shell hosts the web application in one webview per tab and opens ScoutID sign-in on top of that. The web application signs the member in through the authentication module, and shows the start screen, the trip, and the list of participants through the home, journey, and participants modules. The authentication module signs in over /api/auth with the auth service, the participants module reads the list of participants over /api/project from the participants service, and both services sit outside the boundary. Every relationship is drawn as a solid line.](../../architecture/diagrams/containers.svg)
+![Container diagram. Leaders and each function of the contingent management team reach the Campfire app, which ships as the web app in a browser and as the Apple and Android shells. Each shell hosts the web app in one webview per tab and opens ScoutID sign-in in a modal. The web app works through the authentication, home, journey, and participants modules. The authentication module signs in with the auth service over /api/auth and reads the member's unit and travel from the participants service over /api/project; the participants module reads the list of participants from the same service. The auth service runs the OpenID round trip with ScoutID.](../../architecture/diagrams/containers.svg)
 
-The mock never ships – it runs on a developer's machine, standing in for both services so the application can be run and tested against a known state ([The mock back-end](../testing/mock)).
+The diagram leaves out two kinds of container the model holds. The libraries are reached by nearly every other container, so drawing them adds a fan of arrows and no fact about the product's shape. The [mock back-end](../testing/mock) stands in for both services on a developer's machine, but it is a developer tool and never a dependency of anything shipped.
 
-Four containers the model holds are deliberately absent from that picture. The `host`, `ui`, and `utils` libraries are left off because every module reaches all three, so drawing them adds a fan of arrows and no fact about the product's shape; the mock is left off because the diagram shows what the contingent's application depends on, and the mock is a developer tool rather than a runtime dependency of anything shipped.
+## What the model draws
 
-## What the model does not draw
+Every diagram is rendered from one C4 model written in Structurizr DSL, so the diagrams cannot disagree with each other ([ADR 030](/decisions/030-model-the-architecture-as-c4-in-structurizr)). The model has a system context view, a container view, and a deployment view per environment.
 
-The model stops at the container level on purpose. What a container is made of is the code's own business, so there are no component views: the [layers](./layers/) inside a module are prose here, checked against the source rather than against a picture.
+Each app, module, and library is a container of its own rather than a component inside one front-end box. That is what they are – separately bounded packages the web application assembles at build time – and drawing them that way keeps the module rule visible, along with each module's edge to the service it talks to. The back-end services are drawn as software systems of their own, because they are built and run outside this repository.
 
-The data model is not written down either. The wire shapes belong to the participants service, whose own repository decides what the list of participants publishes, and the domain shapes belong to the module that reads them. A third copy here would be a copy that goes stale.
+The model stops at containers. What a container is made of is described in prose under [Layers](./layers/) and checked against the code rather than against a picture. The data model is not written down either: the wire shapes belong to the services, and the domain shapes to the module that reads them, so a third copy here would only go stale.

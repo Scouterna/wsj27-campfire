@@ -6,31 +6,31 @@
 
 ## Context
 
-Campfire's users are the leaders and the contingent management team – a few hundred adults who plan at a desk in the years before the jamboree and then stand in a field in Poland with a phone. That is three surfaces: the browser, an Android app, and an iPhone app, built by a handful of volunteers.
+Campfire's users are the leaders and the contingent management team – a few hundred adults who plan at a desk before the jamboree and then stand in a field in Poland with a phone. That is three surfaces – the browser, Android, and iPhone – built by a handful of volunteers.
 
-One force outweighs every other: deployability. During the three weeks of the trip a broken flow has to be fixable in minutes, and anything that ships through an app store waits days on a review while the people waiting are running a camp. What lives on the web deploys in one push. Behind it, clearly second: every screen built twice is a screen that drifts, and this team cannot staff three implementations of one UI.
-
-A browser alone does not cover the phones. Asking hundreds of leaders to install the app has to be one instruction, and "search for Campfire in the store" is that instruction – Safari's share sheet is not. And the plans ahead will want a capability only native code has, reliable push first among them.
+Deployability outweighs everything else. During the trip a broken flow has to be fixable in minutes, and anything that ships through an app store waits days on review. Second, every screen built twice drifts, and this team cannot staff three implementations of one UI. But on a phone Campfire has to feel like an app: the tab bar, the navigation bar, and the back gesture are what people touch most, and they are exactly what a webview imitates worst. Installing has to be one instruction – "search for Campfire in the store" – and some capabilities, such as reliable push, exist only in native code.
 
 ## Decision
 
-We build every screen once, in the web application, and put it on phones inside native shells of our own – Kotlin and Compose on Android, Swift and SwiftUI on iOS – each hosting the web application in the platform's webview.
+We build every screen once, in the web application, and host it in native shells of our own – Kotlin and Compose on Android, Swift and SwiftUI on iOS – drawn so the app feels native even though its content is not.
 
-- **The shells are thin by rule.** Every word a user reads comes from the web application, and a shell owns only what the web cannot reach. Whatever a shell holds ships through store review, so the less it holds, the less ever waits on one.
-- **The shell owes the web the platform.** Safe-area padding is the shell's job on Android, where `env(safe-area-inset-*)` reads zero, and context menus and link previews are off because they belong to a browser, not an app screen.
-- **What crosses between them is a contract**, versioned through the shells' `CampfireShell` User-Agent token – kept compatible, never refactored as an internal call.
+- **The shell draws the chrome; the web draws the content.** The tab bar, the navigation bar, and the swipe back from the screen's edge are native, and a screen's title, back, actions, and menus appear in the bars as native controls. The web describes them; the shell renders them.
+- **The web makes its own navigation feel native.** Moving between screens runs as a view transition in the direction of travel, and returning to a screen restores where it was scrolled, so the seam between web and native does not show.
+- **The shells are otherwise thin.** Every word a user reads comes from the web application, and a shell owns only what the web cannot reach, so as little as possible ever waits on store review.
+- **What crosses between them is a versioned contract** ([ADR 018](018-bridge-the-web-application-and-the-shells-with-versioned-messages.md)), kept compatible.
 
 ## Consequences
 
-- A fix reaches the browser, Android, and iOS in one web deploy – during camp, in minutes instead of a store review. The single UI codebase comes with it.
+- A fix reaches the browser, Android, and iOS in one web deploy – in minutes rather than a store review – and there is one UI codebase.
+- The native feel is only as good as the contract. Each screen's chrome crosses the bridge, so a screen the web describes badly looks wrong in both shells at once.
 - The shells change rarely, so store releases are rare, small, and boring.
-- Apple's minimum-functionality guideline is a real review risk for an app that is "just a website", and how Campfire reaches devices – the public store, TestFlight, or managed distribution – is still open.
-- Kotlin and Swift join the repository under ADR 006 and ADR 005, and a JDK and Xcode become prerequisites for whoever touches a shell and nobody else. Android is checked in continuous integration; Swift only in the pre-push hook, because a macOS runner is not spent on a shell that is only a webview.
+- Apple's minimum-functionality guideline is a real review risk for an app built on a webview.
+- Kotlin and Swift join the repository under [ADR 005](005-pin-every-dependency-and-let-new-releases-age.md) and [ADR 006](006-lint-and-format-with-a-shared-strict-toolchain.md), and a JDK and Xcode become prerequisites for whoever touches a shell.
 
 ## Alternatives considered
 
-- **The PWA alone.** Zero native code, and it already installs from the browser. No store presence, an iOS install that cannot be talked through at contingent scale, and no road to native capabilities. It is not discarded: the shells wrap the same application.
-- **React Native, with Expo.** One React codebase for the phones and, in theory, the browser. In practice the UI is rebuilt in React Native's primitives, the web becomes the second-class output, and a large, fast-moving dependency layer arrives between the app and both platforms.
-- **Flutter, or Compose Multiplatform.** Both solve one UI for many platforms by replacing the web stack rather than reusing it – a new language or toolkit for a team invested in TypeScript.
-- **Fully native apps.** The best feel on each platform, at the price of three implementations of every screen and two store reviews for every camp-time fix.
-- **An off-the-shelf shell, such as Capacitor.** It does what these shells do and brings a plugin ecosystem, along with a framework's release cadence between the app and both platforms. The hand-rolled shells are a few hundred lines each, owned end to end.
+- React Native, with Expo – native controls throughout, but the UI is rebuilt in its primitives, the browser becomes the second-class output, and a fix reaches phones without a store review only through a paid update service or an update server we host ourselves.
+- The web application alone, installed from the browser – no native code, but a web-drawn tab strip feels like a website every time it moves, an iPhone install nobody can talk hundreds of leaders through, and no native capabilities.
+- Flutter, or Compose Multiplatform – one UI by replacing the web stack, a new toolkit for a team invested in TypeScript.
+- Fully native apps – the best feel on each platform, for three implementations of every screen and two store reviews for every fix at camp.
+- An off-the-shelf shell such as Capacitor – a plugin ecosystem, and a framework's release cadence between the app and both platforms, where the hand-written shells are small and owned end to end.

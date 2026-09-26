@@ -6,32 +6,30 @@
 
 ## Context
 
-Campfire produces five things with almost nothing in common at build time: the agent skills, packaged as releases; the guidebook, a static site; and the web, Android, and iOS apps – three toolchains, three sets of credentials, and, for iOS, a runner that bills at ten times the rate of the others. What they share is the repository-wide check, which runs across everything because its rules cross package boundaries.
-
-So continuous integration answers two questions separately – what gates a pull request, and what happens when one lands – and they want different triggers, permissions, and failure behavior: a failed check blocks a merge, while a failed release must not leave a half-published artifact behind. There is also a trap in required status checks. A workflow skipped by an `on: paths:` filter reports no status at all, and a required check that never reports blocks the merge forever.
+Campfire's outputs have almost nothing in common at build time – the agent skills as releases, the guidebook as a static site, and the web, Android, and iOS apps, with their own toolchains, credentials, and, for iOS, a runner that bills far above the rest. What they share is the repository-wide check. Gating a pull request and shipping what lands want different triggers, permissions, and failure behavior: a failed check blocks a merge, while a failed release must not leave a half-published artifact. And a workflow skipped by an `on: paths:` filter reports no status at all, so a required check behind one can block a merge forever.
 
 ## Decision
 
-We automate checks and releases with GitHub Actions – where the code, the issues, the pull requests, the releases, and the guidebook already are – and keep each workflow small and single-purpose:
+We automate checks and releases with GitHub Actions, where the code, the issues, and the releases already are, in small single-purpose workflows:
 
-- **Workflows are named for what they do.** `check_*` validates without building, `test_*` drives an output, `build_*` compiles one output to prove it compiles, and `release_*` ships one output and is the only kind that writes anywhere. Checks, tests, and builds trigger on pull requests; releases trigger on a push to `main` and carry a manual trigger so a failed one can be retried without an empty commit.
-- **A check filters inside the job, never with `on: paths:`.** A job skipped by an `if:` reports as passing, so a check stays eligible to be required while doing no work when it is irrelevant. A release, which nothing waits on, filters at the trigger.
-- **Every check reports separately.** `check.yml` runs one step per check script, each executing after a sibling failed, so one run reports every problem rather than the first.
-- **Least privilege, declared explicitly.** Read-only workflows say so, and a release scopes its write permission to the job that needs it.
-- **Pull request runs cancel on supersede; releases queue and never cancel.** A canceled check wastes nothing. A canceled release can leave a tag without its release, or a site half-deployed.
-- **Releases trust the pull request gate** rather than re-validating on `main`.
+- **Workflows are named for what they do.** `check_*` validates without building, `test_*` drives an output, `build_*` compiles one output, `release_*` ships one, and `promote_*` moves a pointer to something already released. Only the last two write anywhere. Releases run on a push to `main` and can be retried by hand; a promotion runs only by hand.
+- **A check filters inside the job, never with `on: paths:`**, because a job skipped by an `if:` still reports as passing. A release, which nothing waits on, filters at the trigger.
+- **Every check reports separately.** `check.yml` runs one step per check script, each running after a sibling failed.
+- **Least privilege, declared.** Read-only workflows say so, and a release scopes its write permission to the job that needs it.
+- **Pull request runs cancel when superseded; releases and promotions queue and never cancel**, because a canceled one can leave a tag without its release or a site half-deployed.
+- **Releases trust the pull request gate** rather than checking again on `main`.
 
 ## Consequences
 
-- Any check can be a required status check, because every one reports on every pull request whether or not it had work to do.
-- A pull request that touches one output does no work for the other four, so cost tracks the change rather than the repository.
-- `check.yml` enumerates its scripts, so a new `check:*` script means a new step. One step running them all would stop at the first failure and hide every other one behind a round trip.
-- Trusting the gate holds while one person merges one change at a time onto an up-to-date branch. With concurrent merges, two changes can pass alone and break together, and only a run on `main` would catch it.
-- iOS has no workflow at all. Checking Swift needs macOS with Xcode, and no runner is spent on it, so the pre-push hook is the whole gate for Swift.
+- Any check can be required, because every one reports on every pull request.
+- A pull request that touches one output does no work for the others, so cost follows the change.
+- A new `check:*` script needs its own step in `check.yml`.
+- Trusting the gate holds while one person merges one change at a time. Two concurrent merges can pass alone and break together.
+- No workflow checks Swift, so the pre-push hook is its whole gate ([ADR 008](008-check-commits-with-git-hooks.md)).
 
 ## Alternatives considered
 
-- **Another continuous integration service** – CircleCI, Buildkite, or similar. Some are faster or cheaper at scale, and all of them mean a second account, credentials granting access to this repository, and an integration to keep working.
-- **One workflow with a job per output.** Fewer files, and `needs:` between jobs. It mixes read-only work with the jobs that hold publishing credentials, and loses the property that every `release_*` file is one that can write somewhere.
-- **Path filters at the workflow level.** The obvious way to skip irrelevant work, and the reason required checks silently stop being satisfiable.
-- **Checks on `main` as well as on pull requests.** Catches the concurrent-merge case, redundant while one person merges at a time, and easy to add the day that stops being true.
+- Another continuous integration service – some are faster or cheaper, but each is a second account, credentials into this repository, and an integration to keep working.
+- One workflow with a job per output – fewer files, but read-only work sits beside the jobs that hold publishing credentials.
+- Path filters at the workflow level – the obvious way to skip work, and the reason required checks stop being satisfiable.
+- Checks on `main` as well – a second full run on every merge, for a break it could only report after the fact.

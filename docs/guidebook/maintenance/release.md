@@ -1,78 +1,75 @@
 # Release
 
-Versioning and publication are settled and in use – each artifact's version is worked out from its own commits, four workflows publish what this repository produces, and prod is promoted by hand. How the shells reach a phone is an open decision.
+Campfire releases three things: the web image, the Android shell, and the Apple shell. The web changes often and must reach phones in minutes, while a shell changes rarely and waits on a store review, so each has its own version and its own way out ([ADR 010](/decisions/010-deliver-the-front-end-as-one-web-application-in-native-shells)).
 
 ## Versioning
 
-Three things carry a version: the web image, the Android shell, and the Apple shell. Each has a version of its own, in Calendar Versioning's shape `YEAR.FEATURE.PATCH`, and each lives in a git tag – `web-v<version>`, `android-v<version>`, `apple-v<version>` ([ADR 034](/decisions/034-version-each-artifact-from-its-own-commits)). The tag is the source of truth for an artifact's last version; nothing in the tree carries one.
+Each artifact has a CalVer version, `YEAR.FEATURE.PATCH`, kept in a git tag – `web-v`, `android-v`, or `apple-v` followed by the version ([ADR 034](/decisions/034-version-each-artifact-from-its-own-commits)). The tag is the source of truth, and nothing in the tree carries a version.
 
-The next version is worked out from the commits since the artifact's last tag that touch its paths – the web's are the release workflow's own trigger list, Android's `apps/android/`, Apple's `apps/apple/`. A commit touching several artifacts counts toward each, and its message never decides which. The subject's type decides how far:
+The next version is worked out from the commits since the artifact's last tag that touch its paths – for the web, the paths that trigger its release workflow; for a shell, its own directory. A commit that touches several artifacts counts toward each. Its type decides how far the version moves:
 
-- **The feature segment**, resetting the patch – any `feat`, or any type marked `!`.
-- **The patch segment** – otherwise, any `fix` or `revert`.
-- **Nothing** – otherwise. `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, and `chore` move nothing.
+| Commits since the last tag       | Next version                                        |
+| -------------------------------- | --------------------------------------------------- |
+| Any `feat`, or any type with `!` | Feature segment up and patch reset to 0             |
+| Otherwise, any `fix` or `revert` | Patch segment up                                    |
+| Anything else                    | No version – `docs`, `refactor`, `chore`, and so on |
 
-Several commits earn at most one version, the largest bump among them. A feature bump in a later year than the last version's gives `<year>.1.0`; a patch stays on its version's year. An artifact with no tag yet starts at `<year>.1.0`.
+Several commits earn one version, the largest bump among them. A feature bump in a new year starts over at `<year>.1.0`, a patch stays on its version's year, and an artifact with no tag starts at `<year>.1.0`. The history is what the rule reads, which is why commits follow Conventional Commits without a scope and the history is kept linear by rebasing.
 
-The rule is one piece of TypeScript under `scripts/release/`, tested on every pull request, and `pnpm version:next <web|android|apple>` asks what an artifact's next version would be. It reads the tags and the history, so it needs a full clone.
+The rule is written once, tested on every pull request, and runnable locally. It reads the tags and the history, so it needs a full clone:
 
-The three numbers drift apart, and that is expected: they name three binaries, not one release. A newer web in an older shell is the bridge working as designed ([ADR 018](/decisions/018-bridge-the-web-application-and-the-shells-with-versioned-messages)), and the bridge's own protocol version is a fourth number, unrelated to these. Anywhere a person sees a version, the artifact is named beside it, because the strings look alike.
+```sh
+pnpm version:next web
+```
 
-## The version in a build
+The three numbers drift apart on purpose, because they name three binaries rather than one release. A newer web inside an older shell is the bridge working as designed, and the bridge's protocol version is a separate number again ([ADR 018](/decisions/018-bridge-the-web-application-and-the-shells-with-versioned-messages)). Wherever a person sees a version, the artifact is named beside it.
 
-Every workspace `package.json` says `0.0.0`, `apps/apple/config/Shared.xcconfig` says `0.0.0` on build number `1`, and so does `versionName` in `apps/android/config/app/build.gradle.kts`. Those are placeholders, and no release edits them. A release passes the version in:
+### The version in a build
 
-- **The web image** takes `CAMPFIRE_VERSION` as a Docker build argument, and the Vite build writes it into `index.html` as `<meta name="campfire-version">`. Read it from the browser's console: `document.querySelector('meta[name="campfire-version"]').content`.
-- **Android** reads the Gradle properties `campfire.version` and `campfire.build` – `-Pcampfire.version=2026.3.0 -Pcampfire.build=412`.
-- **Apple** takes `CAMPFIRE_VERSION_NUMBER` and `CAMPFIRE_BUILD_NUMBER` as build settings on the `xcodebuild` command line, over the xcconfig, and `project.yml` maps them into `Info.plist`.
+The tree says `0.0.0` everywhere – in every `package.json`, the Apple xcconfig, and the Android build script. A release passes the real version into the build, and a build given nothing, such as `pnpm build:web` or a run from Xcode or Android Studio, is `0.0.0`. No build reads git to claim otherwise. A web build carries its version in a `campfire-version` meta tag in the page head, so the version a browser is running can be read from the page.
 
-A build given nothing – `pnpm build:*`, `pnpm start:*`, Xcode, Android Studio – is `0.0.0` build `1`. That is the honest value for a build that is not a release, and no build reads git to claim otherwise.
+## What a merge publishes
 
-## Releasing
+Each release is a small GitHub Actions workflow that runs on a merge to `main` touching its paths, and can also be started by hand to retry a failure ([ADR 009](/decisions/009-check-and-release-with-small-github-actions-workflows)). Releases queue rather than race, and one in flight is never canceled, because a canceled release can leave a tag without the thing it names.
 
-Four workflows write somewhere ([ADR 009](/decisions/009-check-and-release-with-small-github-actions-workflows)). Three of them release on a merge to `main`; the fourth is promotion, started by hand.
+| What          | Publishes to                                                                                                                                      |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The web image | The GitHub Container Registry, as `ghcr.io/scouterna/wsj27-campfire` ([ADR 026](/decisions/026-publish-the-web-application-as-a-container-image)) |
+| The skills    | A GitHub Release per skill whose version changed ([ADR 025](/decisions/025-publish-agent-skills-as-versioned-releases))                           |
+| The guidebook | GitHub Pages ([ADR 029](/decisions/029-render-the-guidebook-with-vitepress))                                                                      |
 
-| What          | Workflow          | Runs on                                                                | Publishes to                                   |
-| ------------- | ----------------- | ---------------------------------------------------------------------- | ---------------------------------------------- |
-| The web image | Release web       | A merge to `main` touching the web application, or by hand             | `ghcr.io/scouterna/wsj27-campfire`, and `:dev` |
-| The web image | Promote web       | By hand, naming a version                                              | `:prod` on the same image                      |
-| The skills    | Release skills    | A merge to `main` touching `.agents/skills/`, or by hand               | A GitHub Release per skill                     |
-| The guidebook | Release guidebook | A merge to `main` touching `docs/` or the VitePress config, or by hand | GitHub Pages                                   |
+**The web image.** Every merge that touches the web publishes `:main`, a moving pointer, and `:sha-<short>`, a fixed one for that commit. A merge that earns a version builds the image with that version, publishes `:<version>` as well, and only then creates the `web-v` tag, so a tag never names an image that failed to publish. A failed release is retried by running it again, and it works out the same version, because the failed run created no tag. The image is built for amd64 only, the cluster's platform.
 
-**The web image.** Every merge that touches the web application publishes `:main` and `:sha-<short>` – a moving pointer, and an immutable one to roll back to. When the merge earns a version, the same build carries it and also publishes `:<version>`; the git tag `web-v<version>` is created once the image is there, so a tag never names an image that failed to publish; and `:dev` is moved to that image last, so dev only ever follows a version that finished releasing ([ADR 026](/decisions/026-publish-the-web-application-as-a-container-image), [ADR 035](/decisions/035-promote-the-web-by-moving-environment-tags)). A merge that earns nothing publishes `:main` and `:sha-<short>` and creates no tag. The image is amd64 and only amd64 – the cluster's platform. Releases queue rather than race and are never canceled in flight, because a canceled release can leave a tag without its image. A failed release is retried by re-running it or starting it by hand: it works out the same version, because the tag was never created, and overwrites whatever the failed run left.
+**The skills.** A skill is released when no tag exists for its version, and an unchanged version is skipped. A pull request that edits a skill without bumping its version fails its check, because that change would otherwise never ship.
 
-**The skills.** Each skill under `.agents/skills/` is published as its own GitHub Release when its `<name>-v<version>` tag does not exist yet; an unchanged version is skipped ([ADR 025](/decisions/025-publish-agent-skills-as-versioned-releases)). A pull request that edits a skill and leaves its version alone fails the check, because the alternative is a change that silently never ships.
+**The guidebook.** A merge that touches the docs builds the site and deploys it to GitHub Pages, under the repository's project path.
 
-**The guidebook.** It builds on every pull request that touches `docs/`, and a merge to `main` deploys the built site to GitHub Pages ([ADR 029](/decisions/029-render-the-guidebook-with-vitepress)). The site is served from the repository's own project URL, which is why every link in it resolves from that subpath rather than from a domain root.
+## Dev and prod
 
-## Deploying
+Two tags on the web image say what each environment runs, and nothing else moves ([ADR 035](/decisions/035-promote-the-web-by-moving-environment-tags)):
 
-Two tags on the image say what each environment runs, and nothing else moves ([ADR 035](/decisions/035-promote-the-web-by-moving-environment-tags)).
+- **`:dev` follows every release.** Once a version is tagged, `:dev` moves to that image, so what the contingent management team tests at `campfire.wsj27.scouterna.net` is exactly what could be promoted. A merge that earns no version moves nothing.
+- **`:prod` moves only by promotion.** A maintainer names a released version, and the promotion points `:prod` at that version's image. Nothing is rebuilt, so prod runs byte for byte the image dev ran.
 
-**Dev follows releases.** `:dev` moves to every new web version as it is released, so what the management team tests at `campfire.wsj27.scouterna.net` is what could be promoted. It never points at a digest that does not also carry a released `:<version>`. The move is its own job, run in the GitHub environment `dev`, so each one is a deployment linking to the site; a merge that earns no version moves nothing and records nothing. When the move fails after the tag exists, re-running that failed job repeats it, but a new run of the workflow does not – it earns no version – so the run's summary also gives the command that moves `:dev` by hand.
-
-**Prod is promoted.** `promote_web.yml` is started from the Actions tab or the command line, naming a version:
+Promotion is started from the Actions tab or the command line:
 
 ```sh
 gh workflow run promote_web.yml -f version=2026.9.0
 ```
 
-It refuses a version that is not CalVer-shaped, has no `web-v<version>` tag, or has no `:<version>` image, and a refusal leaves `:prod` where it was. Accepted, it copies the manifest behind `:<version>` to `:prod` – nothing is built, pulled, or pushed but the tag, so the digest is the one dev ran. Rolling back is a promotion of an earlier version; there is no other way to move `:prod`. Promotions queue and never cancel, like releases.
+A version that is not CalVer-shaped, has no tag, or has no image is refused, and prod stays where it was. Rolling back is promoting an earlier version – there is no other way to move `:prod`. There is no `:latest`, because nothing should run whatever happened to be published last.
 
-Every promotion runs in the GitHub environment `prod`, so each one – accepted or refused – is a deployment on the repository's Deployments page, linking to `campfire.wsj27.se`: who started it, which version, and how it ended. The run's summary adds the new digest, the digest `:prod` pointed at before, and the command that rolls back.
+Every move of `:dev` and every promotion, refused ones included, is a deployment on the repository's Deployments page, linking to the site it changed: who started it, which version, and how it ended. That page, not the git history, is the record of what each environment has run. A promotion's run summary also names the version it replaced and the command that goes back to it.
 
-**The cluster side is a step by hand.** Moving a tag restarts nothing. Prod, at `campfire.wsj27.se`, is deployed by a step on the cluster that takes what `:prod` points at, and how dev follows `:dev` is settled with the people who run it ([ADR 027](/decisions/027-run-the-back-end-on-kubernetes-in-azure)). A promotion holds no credentials for the cluster.
+Moving a tag restarts nothing. The web runs on Scouterna's Kubernetes cluster in Azure, behind the same ingress as the back-end services, and the people who operate the cluster pick up what a tag points at through a step on their side – for prod, a step taken by hand. GitHub therefore holds no credentials for the cluster ([ADR 027](/decisions/027-run-the-web-beside-the-back-end-on-scouternas-cluster)). `pnpm start:prod` is the same shape on one machine: the built image behind one origin with the real back-end ([Environments](../development/environments)).
 
-The direction for what runs there is recorded: the back-end services as containers on Kubernetes in Azure, with the web image behind the same ingress, so production keeps the one-origin rule the local environment already keeps ([ADR 027](/decisions/027-run-the-back-end-on-kubernetes-in-azure), [ADR 012](/decisions/012-run-campfire-in-three-environments-on-one-origin)). `pnpm start:prod` is the shape of it on one machine: Caddy, the real auth service, the real project API, and the built image serving the web, all on `http://localhost:8000` ([The environments](../development/environments)).
+## The shells
 
-## Reaching a phone
+A shell is released by hand, one platform at a time, and neither touches the other's version. The release works out that platform's version from the shell's own commits and stops when there is none, takes its build number from the release run, and creates the tag last. A failed release is retried as a new run, so a store never sees the same build number twice ([ADR 034](/decisions/034-version-each-artifact-from-its-own-commits)).
 
-Both shells build and neither ships.
+Two decisions stand between that and a phone, and both are open:
 
-- **Android.** The prod flavor names the production origin and nothing more: it is a debuggable build with no signing configuration. `build_android.yml` proves the shell assembles, and stops there.
-- **Apple.** There is no Apple workflow at all, because a build needs macOS with Xcode and no runner is spent on it. The pre-push hook is the whole gate, and it skips out loud where the toolchain is missing.
-- **Both.** The three environments share one identity – `se.scouterna.campfire` on both platforms – so they cannot sit on a phone side by side. That is the accepted cost of not maintaining three identities for a difference that is one URL.
+- **Signing and store upload from continuous integration.** The shells build – the Android shell on every pull request, the Apple shell on a developer's Mac, since no runner is spent on Xcode – but neither build is signed.
+- **How leaders install Campfire.** Public stores, TestFlight, or managed distribution each bring their own accounts, beta track, and cadence. Whatever is chosen has to keep installing to one instruction, "search for Campfire in the store", because hundreds of leaders will follow it ([ADR 010](/decisions/010-deliver-the-front-end-as-one-web-application-in-native-shells)).
 
-How a shell will be released is decided and recorded, and what it waits on is signing and store upload from continuous integration, an open decision of its own ([ADR 034](/decisions/034-version-each-artifact-from-its-own-commits)). Each shell gets a workflow started by hand, with no inputs: it works out that platform's version from its own commits and stops when there is none, takes its build number from the run's number, builds and uploads with both, and creates `<platform>-v<version>` last. A failed shell release is retried as a new run rather than a re-run, so a store never sees a build number twice, and neither shell's release touches the other's version.
-
-Whether the shells reach leaders through the public stores, TestFlight, or managed distribution is undecided ([ADR 010](/decisions/010-deliver-the-front-end-as-one-web-application-in-native-shells)), and the answer brings signing, store accounts, a beta track, and a cadence with it. Asking hundreds of leaders to install the application has to be one instruction, which is the force that will decide it. Whatever is chosen is recorded as an ADR and described here once it runs.
+The three environments share one app identity on each platform, so a dev build and a prod build cannot sit on a phone side by side. That is the accepted cost of not keeping three identities for a difference that is one URL.

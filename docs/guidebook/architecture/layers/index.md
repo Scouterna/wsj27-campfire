@@ -1,51 +1,44 @@
 # Layers
 
-Every module is built in the same three layers, and a dependency may only point inward ([ADR 016](/decisions/016-compose-the-web-application-from-feature-modules)).
+Every module is built in up to three layers of a simplified Clean Architecture, and a dependency only points inward ([ADR 016](/decisions/016-compose-the-web-application-from-feature-modules)). The use cases, repositories, and dependency container of a fuller Clean Architecture are left out: a screen calls a hook, the hook reads a query the data layer builds, and that chain does the same work with less machinery.
 
-| Layer            | Holds                                       | Knows                            |
-| ---------------- | ------------------------------------------- | -------------------------------- |
-| **Domain**       | Models and the pure functions over them     | Nothing – not even the platform  |
-| **Data**         | Query factories and the DTOs they validate  | The domain it implements against |
-| **Presentation** | Screens, widgets, and the hooks behind them | The domain                       |
+| Layer                          | Holds                                                   | Depends on              |
+| ------------------------------ | ------------------------------------------------------- | ----------------------- |
+| [Domain](./domain)             | Models and the pure functions over them                 | Nothing                 |
+| [Data](./data)                 | Query factories, and the DTOs and converters they read  | The domain              |
+| [Presentation](./presentation) | Screens, widgets, and the hooks that read the factories | The domain and the data |
 
-The domain sits in the middle and depends on neither side. Presentation reads it; data produces it. Nothing in the domain imports React, `fetch`, or a TanStack package, so the rules the product actually has can be read and tested without a browser.
+The domain sits in the middle and depends on neither side. Data produces domain values from what the services send, and presentation reads them. Nothing in the domain imports React, the network, or a TanStack package, so the rules the product actually has can be read and tested without a browser. Presentation reaches into data only through the query factories, and never sees a wire shape.
 
-A module with all three layers takes the shape below, and the participants module is the one it was drawn from.
+A module with all three layers takes this shape, drawn from the participants module:
 
 ```text
 modules/<name>/src/
 ├── data/
 │   ├── dto/          the wire shapes, every field typed unknown, and their converters
-│   └── fetch-*.ts    one query-option factory per endpoint
+│   └── fetch-*.ts    one query factory per read
 ├── model/            the domain types and their pure functions
 ├── ui/
-│   ├── screens/      one directory per screen
-│   ├── widgets/      one directory per widget other modules' screens place
+│   ├── screens/      one directory per screen, its hooks beside it
+│   ├── widgets/      what other modules' screens place by id
 │   └── storybook/    the decorators and fixtures the module's own stories need
+├── routes.tsx        the addresses the module answers at
+├── widgets.ts        the widgets it provides
 └── index.ts          the public surface – everything else is internal
 ```
 
-Not every module needs all three. Journey has a model and no data layer, because the trip's dates are fixed and public and are written down rather than fetched. Home is the same shape, smaller: a one-file model holding the contingent's messages, and no data layer, because it places what other modules provide and fetches nothing. A module missing a layer is a legitimate shape, not a shortcut around the rule – the directory arrives when there is something to put in it.
-
-Until a module has more than one screen, the screen sits directly in `src/` beside `index.ts`.
+A module has only the layers it needs, and a missing one is a legitimate shape rather than a shortcut around the rule. Journey and home have a model and a presentation layer but no data layer, because what they show – the trip's dates and the contingent's messages – is written down rather than fetched. Until a module has more than one screen, the screen may sit directly in `src/` beside `index.ts`.
 
 ## How a piece gets what it needs
 
-There is no dependency container and no injection framework. A module is a set of components and hooks, and what they need reaches them three ways:
+There is no injection framework. A module is a set of components and hooks, and what they need reaches them one of three ways:
 
-- **Through props**, inside a module. A screen hands its own components what they draw, the way the countdown widget hands its card the moment. Nothing crosses a module boundary as a prop: the application composes, and computes nothing on a module's behalf.
-- **Through context**, mounted once above the screens. The signed-in `User` and their roles, the theme, the unit identities, the merged widget table, and who is reading the list of participants are each stated once at the session gate and read wherever they are needed, so a test or a story can replace one by mounting a different provider. This is how a fact one module resolved reaches another: the authentication module decodes the `User`, `utils` holds it, and the journey's countdown reads how the person travels with `useUser`.
-- **Through registration**, for routes and widgets. A module declares the addresses and the widget ids it owns into interfaces in `libraries/ui`, and the application collects the tables. The library never learns which modules exist, and two modules claiming one address or one id still collide at compile time. A screen places another module's widget by id, and decides for itself who sees it.
+- **Props**, inside a module. A screen hands its own components what they draw. Nothing crosses a module boundary as a prop, because the application composes and computes nothing on a module's behalf ([ADR 032](/decisions/032-hold-the-signed-in-person-in-utils)).
+- **Context**, mounted once at the session gate – the signed-in `User` and their roles, the theme, the unit identities, the reveals, the widget table, and who is reading the list of participants. This is how a fact one module settles reaches another: the authentication module fills in the `User`, `libraries/utils` holds it, and the journey's countdown reads how the person travels with `useUser`. A test or a story replaces any of them by mounting another provider.
+- **Registration**, for routes and widgets. A module declares the addresses and widget ids it owns into interfaces in `libraries/ui`, and the application merges the tables. The library never learns which modules exist, and two modules claiming one address still collide at compile time.
 
-A hook is the unit that gets tested and reused, not a class. A screen calls one hook, gets the state it renders, and decides nothing about where the state came from.
+A hook is the unit that gets reused and tested, not a class. A screen calls one, gets the state it renders, and knows nothing about where that state came from.
 
-## What cuts across
+## Across the layers
 
-Navigation sits in no single layer, so it has [a page of its own](./navigation). [Example flows](../example-flows/) follow the whole stack working together.
-
-| Page                                   | What it covers                                                    |
-| -------------------------------------- | ----------------------------------------------------------------- |
-| [Domain layer](./domain)               | The domain types, valid by construction, and their pure functions |
-| [Data layer](./data)                   | The query factories, the DTOs, and the boundary they guard        |
-| [Presentation layer](./presentation)   | Screens, widgets, hooks, and the stories that catalog them        |
-| [Navigation and routing](./navigation) | The routes, the addresses, and what owns the navigation state     |
+Two concerns belong to no single layer. [Navigation and routing](./navigation) covers the addresses, the sections, and back, and [The bridge](./bridge) covers the contract with the native shells. [Example flows](../example-flows/) follow a request through the whole stack.
