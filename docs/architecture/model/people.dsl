@@ -1,33 +1,30 @@
-# The nine people Campfire is drawn for. They are the audience list in
-# `.github/ISSUE_TEMPLATE/feature.yml`, word for word, so an issue, the project board,
-# and these diagrams name the same groups rather than three overlapping sets.
+# The people Campfire is drawn for, named as the audience list in
+# `.github/ISSUE_TEMPLATE/feature.yml` names them, so an issue and these diagrams name the
+# same groups.
 #
-# The contingent is about 2,600 people in 53 units, and the scouts are not on this
-# diagram: they are data in the list of participants, not users of the app, and drawing them as
-# people would promise a surface that does not exist.
+# The scouts are not here. They are data in the list of participants, not users of the
+# app, and drawing them as people would promise a surface that does not exist.
 
-# The people Campfire is built for (8). Eight audiences, one app – what differs between
-# them is scope and attention, not surface: a leader sees their own unit, a CMT function
-# sees the contingent through the part of it they answer for.
+# The people Campfire is built for. They all get the same app, and what separates them is
+# the part of the contingent each answers for, not the surface.
 
 leaders = person "Leaders" {
-  description "The adults who lead a unit of the contingent, at home and at camp."
+  description "The adults who lead a unit, from preparation to the jamboree."
   tags "user"
 }
 
 cmtAdministration = person "CMT – Administration" {
-  description "The function that runs the contingent's finances and administration."
+  description "The function for the contingent's finances, legal matters, and records."
   tags "user"
 }
 
 cmtCommunication = person "CMT – Communication" {
-  description "The function that runs the contingent's communication and profile."
+  description "The function that keeps every member of the contingent informed."
   tags "user"
 }
 
-# Support is one function with three parts, and each part is an audience of its own:
-# what a health team reads about a participant, an IST team about its patrols, and a
-# unit team about its leaders differ in scope and attention, not in surface.
+# Support is one function, and each of its parts is drawn as a person of its own for the
+# same reason the functions are.
 
 cmtHealth = person "CMT – Health" {
   description "The part of Support that looks after health, care, and welfare."
@@ -35,17 +32,17 @@ cmtHealth = person "CMT – Health" {
 }
 
 cmtIstSupport = person "CMT – IST support" {
-  description "The part of Support that selects and follows the IST members."
+  description "The part of Support that selects and follows the contingent's IST."
   tags "user"
 }
 
 cmtProgram = person "CMT – Program" {
-  description "The function that plans the contingent's program and preparation."
+  description "The function that plans what the contingent does around the jamboree."
   tags "user"
 }
 
 cmtUnitSupport = person "CMT – Unit support" {
-  description "The part of Support that selects, prepares, and follows the units."
+  description "The part of Support that composes and follows the units."
   tags "user"
 }
 
@@ -54,11 +51,10 @@ cmtHeadOfContingent = person "CMT – Head of Contingent" {
   tags "user"
 }
 
-# Internal (1). Not a user of the finished app, and on the diagram anyway: a two-person
-# team is a real force on this architecture, and the picture is more honest with them
-# on it.
+# Not a user of the app, and drawn anyway, because the team that builds it is a
+# real force on this architecture.
 
 developers = person "Developers" {
-  description "The people who build and maintain Campfire without being users of it."
+  description "The people who build and maintain Campfire rather than use it."
   tags "internal"
 }

@@ -1,7 +1,6 @@
-# One container view for the whole system – Campfire is one product with one audience,
-# so there is nothing to split it by. The mock is excluded, and its relationships go
-# with it: this level shows what the contingent's application depends on, and the mock
-# is a developer tool, never a runtime dependency of anything shipped.
+# One container view for the whole system, because there is nothing to split it by. The
+# mock is excluded with its relationships, because this level shows what the shipped
+# product depends on and the mock never ships.
 
 container campfire "containers" {
   include *
@@ -11,9 +10,8 @@ container campfire "containers" {
   # uses, so they say nothing at this level.
   exclude developers
 
-  # The three libraries are what the modules are built from, not what the product does:
-  # every module reaches all of them, so drawing them adds a fan of arrows and no fact
-  # about the product's shape. Which library does what is the code's own business.
+  # Every module reaches the same libraries, so drawing them adds a fan of arrows and no
+  # fact about the product's shape.
   exclude hostLibrary uiLibrary utilsLibrary
 
   description "The product, the apps it ships as, the modules, and which module talks to which service."

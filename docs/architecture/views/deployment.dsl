@@ -1,14 +1,6 @@
-# One deployment view per environment, each with its own stable, human-authored key.
-# The environment names are the three `pnpm start:` stacks carry, and the views show
-# where each one runs and what stands behind its one origin.
-#
-# No view carries an `autolayout` line: every diagram is hand-arranged, and the positions
-# live in workspace.json. Arrange them in `pnpm start:arch`.
-#
-# Each view hides the arrow from a shell to the web application. That arrow is the
-# container level's fact – a shell embeds the application – and here it would draw a
-# path that does not exist: a shell reaches the application through the environment's
-# one origin, and the origin is what these views are about.
+# Each view hides the arrow from a shell to the web application. A shell embeds the
+# application, but at run time it reaches it through the environment's one origin, so
+# here the arrow would draw a path that does not exist.
 
 deployment campfire "Local" "deploymentLocal" {
   include *

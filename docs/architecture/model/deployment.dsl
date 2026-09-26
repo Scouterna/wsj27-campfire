@@ -1,20 +1,14 @@
-# Where Campfire runs. Three environments, and they differ in what sits behind the one
-# origin: the mock on a developer's machine, or the real services in containers behind
-# an ingress. The deployed environments run in Azure; `pnpm start:dev` and
-# `pnpm start:prod` bring the same containers up in Docker on a developer's machine, and
-# the guidebook's environments page describes those stacks.
-#
-# A deployment node is described like any other element – one sentence, saying what it
-# is – and carries the technology it runs on.
+# The environments differ in what sits behind the one origin – the mock on a developer's
+# machine, or the real services in containers behind an ingress.
 
 deploymentEnvironment "Local" {
 
   deploymentNode "Developer's machine" {
-    description "The one machine that runs the whole stack behind localhost."
+    description "The machine that runs the whole local environment."
     technology "macOS"
 
     localCaddy = infrastructureNode "Caddy" {
-      description "The one origin, on port 8000."
+      description "The front door and the one origin, on port 8000."
       technology "Caddy"
     }
 
@@ -31,13 +25,13 @@ deploymentEnvironment "Local" {
     }
 
     deploymentNode "iOS Simulator" {
-      description "The Apple shell, pointed at localhost."
+      description "The simulator that runs the Apple shell against localhost."
       technology "Xcode"
       localApple = containerInstance appleShell
     }
 
     deploymentNode "Android emulator" {
-      description "The Android shell, with port 8000 reversed to the host."
+      description "The emulator that reaches the host's port 8000 through adb reverse."
       technology "Android SDK"
       localAndroid = containerInstance androidShell
     }
@@ -52,15 +46,15 @@ deploymentEnvironment "Local" {
 deploymentEnvironment "Dev" {
 
   deploymentNode "Azure" {
-    description "The deployed dev environment, at campfire.wsj27.scouterna.net."
+    description "The cloud that hosts the dev site at campfire.wsj27.scouterna.net."
     technology "Microsoft Azure"
 
     deploymentNode "Kubernetes cluster" {
-      description "The cluster that runs the web image and the two services."
+      description "Scouterna's cluster, running the web image beside the back-end services."
       technology "Kubernetes"
 
       devIngress = infrastructureNode "Ingress" {
-        description "The one origin, over HTTPS."
+        description "The one origin over HTTPS, the deployed form of the front door."
         technology "Kubernetes ingress"
       }
 
@@ -71,13 +65,13 @@ deploymentEnvironment "Dev" {
       }
 
       deploymentNode "Auth service" {
-        description "The auth service's own image."
+        description "The auth service's own container, built from its repository."
         technology "Python, container"
         devAuth = softwareSystemInstance authService
       }
 
       deploymentNode "Participants service" {
-        description "The participants service's own image."
+        description "The participants service's own container, built from its repository."
         technology "Python, container"
         devProject = softwareSystemInstance participantsService
       }
@@ -109,15 +103,15 @@ deploymentEnvironment "Dev" {
 deploymentEnvironment "Prod" {
 
   deploymentNode "Azure" {
-    description "The production environment, at campfire.wsj27.se."
+    description "The cloud that hosts the prod site at campfire.wsj27.se."
     technology "Microsoft Azure"
 
     deploymentNode "Kubernetes cluster" {
-      description "The cluster that runs the web image and the two services."
+      description "Scouterna's cluster, running the web image beside the back-end services."
       technology "Kubernetes"
 
       prodIngress = infrastructureNode "Ingress" {
-        description "The one origin, over HTTPS."
+        description "The one origin over HTTPS, the deployed form of the front door."
         technology "Kubernetes ingress"
       }
 
@@ -128,13 +122,13 @@ deploymentEnvironment "Prod" {
       }
 
       deploymentNode "Auth service" {
-        description "The auth service's own image."
+        description "The auth service's own container, built from its repository."
         technology "Python, container"
         prodAuth = softwareSystemInstance authService
       }
 
       deploymentNode "Participants service" {
-        description "The participants service's own image."
+        description "The participants service's own container, built from its repository."
         technology "Python, container"
         prodProject = softwareSystemInstance participantsService
       }
