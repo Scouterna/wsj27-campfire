@@ -2,30 +2,22 @@
 # The dev and prod environments, in one command: generates the signing key on first run
 # and brings the containers up behind http://localhost:8000.
 #
-# The environment is the first argument – dev or prod, dev when there is none. It selects the
-# folder under config/environments/, and that folder is the whole difference: dev serves
-# the web from Vite, prod from the built image. Called by `pnpm start:dev` and
-# `pnpm start:prod`.
+# The environment is the first argument – dev or prod, dev when there is none. It selects
+# the folder under config/environments/, and that folder is the whole difference – dev
+# serves the web from Vite, prod from the built image.
 #
-# `--user-id <memberNo>` (dev only) fakes the sign-in: the auth service signs every
-# /login straight in as that member, with no ScoutID round trip, while the roles are
-# still minted from the register – so the session is real everywhere but the identity
-# screens. `--roles <csv>` adds the auth service's DEFAULT_ROLES on top, granted to any
-# member the register does not know – fake a number outside the register and the
-# session wears exactly the hats the flag names. Prod stays real on purpose: it exists
-# to prove the artifact as deployed.
+# `--user-id <memberNo>` (dev only) fakes the sign-in. The auth service signs every login
+# straight in as that member, with no ScoutID round trip, while the roles still come from
+# the list of participants – so the session is real everywhere but the identity screens.
+# `--roles <csv>` grants roles to a member the list of participants does not know. Prod
+# stays real, because it exists to prove the artifact as deployed.
 #
-# Whatever holds port 8000 first – the local environment's Caddy, or this one's own
-# containers from an earlier run – is stopped and named. The stack is reported as up only once
-# the ingress answers and the web application answers through it; Ctrl+C takes the
-# containers down rather than leaving them stopped.
+# Whatever holds port 8000 is stopped and named. The stack is reported as up only once
+# the web application and the back-end services answer through the ingress, and Ctrl+C
+# takes the containers down rather than leaving them stopped.
 #
-# The credentials live in the environment's own .env, which you write and this never
-# overwrites – the Keycloak client for the auth service, and the Scoutnet project keys
-# for the project API. It is gitignored, and it is the only place credentials belong.
-# On a machine that has none, the first run says exactly what to write.
-#
-# Secret values never pass through this script; nothing prints them.
+# The credentials live in the environment's own gitignored .env, which you write and this
+# never overwrites or prints. On a machine that has none, the first run says what to write.
 set -eu
 
 environment="dev"
@@ -87,17 +79,15 @@ if ! docker info >/dev/null 2>&1; then
   exit 1
 fi
 
-# prod runs the artifact rather than building one, so it has to exist first – and a
-# stale image is worse than a missing one, because it looks like it worked.
+# prod runs the artifact rather than building one, so the image has to exist first.
 if [ "$environment" = "prod" ] && ! docker image inspect wsj27-campfire >/dev/null 2>&1; then
   echo "No wsj27-campfire image – build it first:" >&2
   echo "  pnpm build:image" >&2
   exit 1
 fi
 
-# The credentials are yours to write, once, and nothing here touches the file after
-# that. Both halves matter: without the Keycloak client nobody can sign in, and
-# without the Scoutnet keys the project API refuses to start at all.
+# Without the Keycloak client nobody can sign in, and without the Scoutnet keys the
+# project API refuses to start.
 if [ ! -f .env ]; then
   echo "No credentials for the $environment environment." >&2
   echo >&2
@@ -119,25 +109,25 @@ fi
 if [ ! -f signing-key.pem ]; then
   (umask 077 && openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out signing-key.pem 2>/dev/null)
 fi
-# Every run, not only on the run that created it: a key written before this line existed
-# is still on disk, and a private key readable by anything on the machine is not one.
+# Every run, so a key written with looser permissions is tightened too – a private key
+# readable by anything on the machine is not private.
 chmod 600 signing-key.pem
 
 # The fake sign-in file is rewritten every run – written with the flag, removed without
-# it – so a faked user can never survive into the next plain start. The identity is a
-# placeholder: the roles come from the register by member number either way, and a full
-# identity belongs in your .env as FAKE_USER_ID when the name on the greeting matters.
+# it – so a faked user never survives into the next plain start. The identity is only a
+# placeholder, because the roles come from the list of participants by member number.
+# A full identity belongs in your .env as FAKE_USER_ID when the name on the greeting
+# matters.
 rm -f fake-user.env
 if [ -n "$user_id" ]; then
   printf 'FAKE_USER_ID={"name": "Testperson %s", "preferred_username": "scoutnet|%s"}\n' \
     "$user_id" "$user_id" > fake-user.env
   echo "Fake sign-in: every login lands as member $user_id, without ScoutID."
   if [ -n "$user_roles" ]; then
-    # DEFAULT_ROLES reach any member the register's role map does not know, so they
-    # only decide the session when the member number is outside the register – a
-    # registered member's real roles win the moment the map loads.
+    # DEFAULT_ROLES reach only a member the list of participants does not know, so they
+    # decide the session only for a member number outside it.
     printf 'DEFAULT_ROLES=%s\n' "$user_roles" >> fake-user.env
-    echo "Fake roles: a member the register does not know signs in with $user_roles."
+    echo "Fake roles: a member the list of participants does not know signs in with $user_roles."
   fi
 fi
 
@@ -146,8 +136,8 @@ fi
 CAMPFIRE_SIGNING_KEY=$(awk 'NR>1{printf "\\n"} {printf "%s", $0}' signing-key.pem)
 export CAMPFIRE_SIGNING_KEY
 
-# An earlier run of this mode is taken down whole, containers and all, before the
-# port check – a stopped container still owns nothing, but a running one owns 8000.
+# An earlier run of this environment is taken down before the port check, because its
+# running containers hold 8000.
 docker compose down >/dev/null 2>&1 || true
 free_port ingress 8000
 
@@ -174,11 +164,9 @@ wait_for ingress http://localhost:8000/ 60
 # means the application is really there.
 wait_for_ok "the web through the ingress" http://localhost:8000/ 600
 
-# And the auth service, which boots on its own schedule. It answers 401 to an
-# unauthenticated request, and a 401 means it is there – so this waits for any status the
-# service itself produced, not for the ingress's own 502. Without it the prod environment
-# reports ready the moment the image serves, which is immediately, and the first sign-in
-# attempt meets a 502 from a proxy whose backend has not started.
+# The auth service boots on its own schedule and answers 401 without a session. Without
+# this wait, prod reports ready the moment the image serves, and the first sign-in meets
+# the ingress's 502.
 wait_for_backend "the auth service through the ingress" http://localhost:8000/api/auth/user 120
 
 # The project API answers its health check without authentication, so any status it

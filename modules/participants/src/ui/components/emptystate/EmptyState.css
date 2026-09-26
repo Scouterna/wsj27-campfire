@@ -6,8 +6,8 @@
     align-items: center;
     display: flex;
     flex-direction: column;
-    /* Twice the section gap above and below: the block stands in for a whole list, and
-       at one gap it reads as a squeezed-in footnote rather than the answer. */
+    /* Twice the section gap above and below, because the block stands in for a whole
+       list, and at one gap it reads as a squeezed-in footnote rather than the answer. */
     padding: calc(var(--spacing-section) * 2) var(--spacing-group);
     text-align: center;
   }

@@ -13,7 +13,7 @@ import {
 import { avatarNumberFor, fullName, type Participant } from "../../../model/Participant"
 import { roleName } from "../../../model/ParticipantRole"
 import { funktionName } from "../../../model/Participation"
-import { PersonBadge } from "../../badge/PersonBadge"
+import { PersonBadge } from "../../components/badge/PersonBadge"
 
 import "./PeopleList.css"
 
@@ -33,9 +33,9 @@ const overscan = 8
  * The line under a name: the role first, then what places the person. A deltagare or a
  * ledare is placed by their unit – with its name joined on when the identities know it –
  * the management by their funktion where the roster details one, and the IST by the one
- * word alone, since their patrols are not placed yet.
+ * word alone, since the participants service does not carry their patrols.
  * @param person The row's person.
- * @param nameOf What a unit is called, from the identity register.
+ * @param nameOf What a unit is called, from the unit identities.
  * @returns The row's detail line.
  */
 function rowDetail(
@@ -55,15 +55,23 @@ function rowDetail(
 }
 
 /**
+ * The person a `PersonRow` opens onto.
+ */
+export interface PersonRowProps {
+  /**
+   * The person the row names and links to. Compared by identity, so a row whose
+   * person is unchanged skips rendering.
+   */
+  readonly person: Participant
+}
+
+/**
  * One row – a doorway into the person. Memoized on the person, because narrowing the
  * list re-renders it with most of its rows unchanged, and a row that stays needs no
  * work.
  */
-export const PersonRow = memo(function PersonRow({
-  person,
-}: {
-  readonly person: Participant
-}): ReactElement {
+export const PersonRow = memo(function PersonRow(props: PersonRowProps): ReactElement {
+  const { person } = props
   const identities = useUnitIdentities()
   const detail = rowDetail(person, identities.name)
   const avatarNumber = avatarNumberFor(person)
@@ -136,7 +144,7 @@ interface RowsProps {
 }
 
 /**
- * The rows the virtualizer says exist, placed where it says. Shared by the two variants
+ * The rows the virtualizer says exist, placed where it says. Shared by the variants
  * below, which differ only in the hook that made the virtualizer.
  * @param props The people, where the list sits, and the virtualizer placing the rows.
  * @returns The sizing container, and the rows inside it.
@@ -145,11 +153,11 @@ function Rows(props: RowsProps): ReactElement {
   const { listRef, onFirstVisibleChange, people, registerJump, resetKey, scrollMargin } = props
   const { virtualizer } = props
 
-  // The caller's way to a row that has no DOM yet: the virtualizer knows every row's
-  // place, so it scrolls there and the rows follow. A negative row means the very top,
-  // above the rows. Nearby jumps glide so the movement reads as movement; a far jump
-  // lands instantly – smooth-scrolling across thousands of unmeasured rows is territory
-  // the virtualizer cannot measure ahead of, and the reader is told nothing by a blur.
+  // The caller's way to a row that has no DOM yet, which works because the virtualizer
+  // knows every row's place and the rows follow the scroll. A negative row means the very
+  // top, above the rows. A near jump glides so the movement reads as movement, and a far
+  // one lands instantly, because the virtualizer cannot measure ahead of a smooth scroll
+  // across unmeasured rows, and the reader is told nothing by a blur.
   useEffect(() => {
     registerJump?.((index) => {
       const offset = virtualizer.scrollOffset ?? 0
@@ -177,8 +185,8 @@ function Rows(props: RowsProps): ReactElement {
   // A reader deep in the list who narrows it would otherwise land past its new end, so a
   // change of narrowing starts them over at the top – only when they had scrolled past
   // the controls they just used. A layout effect, so it lands in the same flushed update.
-  // Never on mount: mounting is not a narrowing, and a history pop remounts the list
-  // exactly when the chrome has just restored the reader's scroll position.
+  // Never on mount, because mounting is not a narrowing, and a history pop remounts the
+  // list exactly when the chrome has just restored the reader's scroll position.
   const mountedResetKey = useRef(resetKey)
   useLayoutEffect(() => {
     if (mountedResetKey.current === resetKey) {
@@ -186,8 +194,8 @@ function Rows(props: RowsProps): ReactElement {
     }
     mountedResetKey.current = resetKey
     if ((virtualizer.scrollOffset ?? 0) > scrollMargin) {
-      // Instant rather than smooth: this is a correction the reader did not ask for, and
-      // animating it is motion nobody requested.
+      // Instant rather than smooth, because this is a correction the reader did not ask
+      // for, and animating it is motion nobody requested.
       virtualizer.scrollToOffset(0, { behavior: "auto" })
     }
     // The narrowing is the trigger; the offset and the margin are read, not watched.
@@ -198,7 +206,7 @@ function Rows(props: RowsProps): ReactElement {
     <div
       // The list is one list however few of its rows exist, so it says so – and its rows
       // carry their real position and count, because the DOM holds only the visible ones
-      // and a screen reader would otherwise announce a list of twelve.
+      // and a screen reader would otherwise announce a list of just those.
       aria-label="Deltagare"
       className="people-list"
       ref={listRef}
@@ -247,8 +255,8 @@ function ElementScrolledRows(
   props: VariantProps & { readonly scrollParent: HTMLElement },
 ): ReactElement {
   // The virtualizer hands back functions that are new every render, which the React
-  // Compiler cannot memoize – it is told to leave this component alone rather than
-  // memoizing a stale list.
+  // Compiler cannot memoize, so it skips this component rather than memoizing a stale
+  // list.
   // eslint-disable-next-line react-hooks/incompatible-library -- see above
   const virtualizer = useVirtualizer<HTMLElement, HTMLDivElement>({
     count: props.people.length,
@@ -311,7 +319,7 @@ export interface PeopleListProps {
 /**
  * The people as a virtual list: as tall as every row would be, so the scrollbar reads as
  * one long list, with only the rows near the viewport in the document, so narrowing
- * costs the same at forty rows as at two and a half thousand.
+ * costs the same for a unit as for the whole contingent.
  *
  * Finds what scrolls it once it is in the document, then hands the rows to the variant
  * that watches that – which is why the first render draws an empty list at the right

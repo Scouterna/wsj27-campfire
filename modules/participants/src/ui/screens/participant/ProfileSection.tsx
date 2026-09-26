@@ -11,7 +11,7 @@ import { avatarNumberFor, belonging } from "../../../model/Participant"
 import type { ParticipantDetail } from "../../../model/ParticipantDetail"
 import { roleName } from "../../../model/ParticipantRole"
 import { funktionName, travelName } from "../../../model/Participation"
-import { PersonBadge } from "../../badge/PersonBadge"
+import { PersonBadge } from "../../components/badge/PersonBadge"
 
 export interface ProfileSectionProps {
   /**
@@ -20,8 +20,8 @@ export interface ProfileSectionProps {
   readonly participant: ParticipantDetail
 }
 
-// Constructed once, and read in UTC: the service sends a plain date, which parses as UTC
-// midnight, and formatting that in a timezone behind it would report the day before.
+// Read in UTC, because the service sends a plain date, which parses as UTC midnight, and
+// formatting that in a timezone behind it would report the day before.
 const swedishDate = new Intl.DateTimeFormat("sv-SE", { dateStyle: "long", timeZone: "UTC" })
 
 /**
@@ -80,8 +80,8 @@ function placing(
     const fa = participant.isFunktionsansvarig === true ? " · FA" : ""
     return { label: "Funktion", value: `${funktionName(participant.funktion)}${fa}` }
   }
-  // The IST's patrols are not placed yet, and the line above already says IST – so the
-  // belonging is honestly an open question rather than the role repeated.
+  // The participants service does not carry an IST's patrol, and the line above already
+  // says IST, so the belonging is honestly an open question rather than the role repeated.
   if (participant.role === "ist") {
     return { label: "Tillhörighet", value: "?" }
   }

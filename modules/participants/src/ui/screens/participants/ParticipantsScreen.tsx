@@ -15,8 +15,8 @@ import { useMemo, type ReactElement } from "react"
 
 import { narrow, type RoleFilter } from "../../../model/narrowing"
 import type { ListScope } from "../../../model/ParticipantsList"
+import { EmptyState } from "../../components/emptystate/EmptyState"
 import { counted, personCount } from "../../counted"
-import { EmptyState } from "../../emptystate/EmptyState"
 import { PeopleList } from "./PeopleList"
 import { participantsSectionLabel } from "./section-label"
 import { useAddressMenu } from "./use-address-menu"
@@ -41,25 +41,25 @@ const segments: readonly { readonly filter: RoleFilter | undefined; readonly lab
 
 /**
  * The unit scope's segments: a unit holds deltagare and ledare, so offering IST and
- * CMT would be two filters that can never match anyone.
+ * CMT would be filters that can never match anyone.
  */
 const unitSegments = segments.slice(0, 3)
 
-// Constructed once: a formatter is expensive to build, and the count line is rewritten on
-// every keystroke.
+// Constructed once, because a formatter is expensive to build and the count line is
+// rewritten on every keystroke.
 const swedish = new Intl.NumberFormat("sv-SE")
 
-// The way into the unit browser: the title row's one action, at every width. A link
-// rather than a handler, so the navigation animates and remembers itself like any
-// other. A constant, because the chrome republishes what it is handed.
+// The title row's one action, the way into the unit browser at every width. A link
+// rather than a handler, so the navigation animates and remembers itself like any other,
+// and a constant, because the chrome republishes what it is handed.
 const unitsAction = {
   icon: <ParticipantsIcon size={24} strokeWidth={2.2} />,
   label: "Avdelningar",
   link: { to: "/participants/units" },
 } as const
 
-// The two designed empty answers, constants because their words never depend on the
-// render: an empty scope has nothing to narrow, and an empty search has a way forward.
+// The designed empty answers, constant because their words never depend on the render.
+// An empty scope has nothing to narrow, while an empty search has a way forward.
 const nobodyState = (
   <EmptyState
     hint="Listan med deltagare är tom just nu."
@@ -120,11 +120,6 @@ function statusOf(status: Status): string {
  * The section root: everyone the viewer may read, narrowed by a search and by the roles,
  * each row a doorway into the person.
  *
- * The narrowing lives in the address rather than in the screen, so a narrowed list can be
- * shared, bookmarked, and returned to – while the field itself stays locally controlled,
- * because a field that waits for a round trip through the router drops keystrokes. The
- * address catches up once the typing settles.
- *
  * A leader searches and narrows their unit exactly as the management narrows the
  * contingent – in a unit's smaller vocabulary – but the way in by unit stays the
  * management's, because a leader already has the only unit they may read.
@@ -136,8 +131,6 @@ export function ParticipantsScreen(): ReactElement {
   const { onText, pickRole, query, roll: rawRoll, text } = useNarrowing()
 
   const isWholeContingent = scope.kind === "all"
-  // A unit's list is searched and narrowed like the contingent's, in its own smaller
-  // vocabulary; only the way in by unit stays the management's.
   const offered = isWholeContingent ? segments : unitSegments
   // A roll the chips do not offer – a bookmarked cmt filter opened in unit scope –
   // narrows nothing, because a filter no chip shows is an invisible one.
@@ -199,8 +192,6 @@ export function ParticipantsScreen(): ReactElement {
         }}
       />
 
-      {/* The one line assistive technology hears, whatever the screen is doing – spoken
-          but unshown where a designed empty block carries the same answer visually. */}
       <p className={statusClass} role="status">
         {status}
       </p>
