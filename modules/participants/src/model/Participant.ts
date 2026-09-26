@@ -118,23 +118,28 @@ export function avatarNumberFor(person: Participant): number | undefined {
 
 /**
  * How old a person is on a given day, in whole years. Undefined when the birth date is
- * absent or is not a date – an absent age is shown as nothing, never as a guess.
+ * absent, is not a date, or is still to come – an absent age is shown as nothing, never
+ * as a guess.
  * @param person The person whose age to compute.
- * @param today The day to count to.
+ * @param today The moment to count to, read as the calendar day it is where the reader
+ *   is – the day an export is also named for.
  * @returns The age in whole years, or undefined.
  */
 export function ageOf(person: Participant, today: Date): number | undefined {
   if (person.birthDate === undefined || !/^\d{4}-\d{2}-\d{2}$/u.test(person.birthDate)) {
     return undefined
   }
+  // Parsed as UTC only to be checked and read back as a plain calendar date, which it is.
+  // A day past its month's end parses too – the 30th of February lands in March – so the
+  // date is held to reading back as it was written.
   const born = new Date(`${person.birthDate}T00:00:00Z`)
-  if (Number.isNaN(born.getTime())) {
+  if (Number.isNaN(born.getTime()) || born.toISOString().slice(0, 10) !== person.birthDate) {
     return undefined
   }
-  let age = today.getUTCFullYear() - born.getUTCFullYear()
+  let age = today.getFullYear() - born.getUTCFullYear()
   const isBeforeBirthday =
-    today.getUTCMonth() < born.getUTCMonth() ||
-    (today.getUTCMonth() === born.getUTCMonth() && today.getUTCDate() < born.getUTCDate())
+    today.getMonth() < born.getUTCMonth() ||
+    (today.getMonth() === born.getUTCMonth() && today.getDate() < born.getUTCDate())
   if (isBeforeBirthday) {
     age -= 1
   }
