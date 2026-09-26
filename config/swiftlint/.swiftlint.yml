@@ -9,9 +9,9 @@
 # many rules report a warning by default – yoda_condition and identifier_name
 # among them – and --strict is what makes those fail the build too.
 
-# The paths to lint are given on the command line rather than here: SwiftLint
-# resolves a config file's own paths relative to that file, and this one lives
-# in config/ with every other tool's.
+# The paths to lint are given on the command line rather than here, because
+# SwiftLint resolves a config file's own paths relative to that file, and this one
+# lives in config/ with every other tool's.
 
 # On top of the defaults: the opt-in rules worth having.
 opt_in_rules:
@@ -71,9 +71,6 @@ line_length:
 identifier_name:
   # `id` and `to` are good names, and both are shorter than the default floor.
   min_length: 2
-  excluded:
-    - id
-    - to
 
 type_body_length:
   error: 250

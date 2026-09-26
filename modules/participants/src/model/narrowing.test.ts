@@ -18,7 +18,7 @@ function person(overrides: Partial<Participant> = {}): Participant {
 }
 
 /**
- * A register that knows one unit: 2 is Myran, and nothing else is named.
+ * A lookup that knows one unit: 2 is Myran, and nothing else is named.
  * @param unitNumber The unit asked about.
  * @returns The name, for the one unit that has one.
  */
@@ -59,10 +59,10 @@ describe("matching one person against a query", () => {
     expect(matches(person({ role: "ist" }), "2")).toBe(false)
   })
 
-  it("matches the unit's name through the handed-in register", () => {
+  it("matches the unit's name through the handed-in lookup", () => {
     expect(matches(person({ unitNumber: 2 }), "myran", nameOf)).toBe(true)
     expect(matches(person({ unitNumber: 3 }), "myran", nameOf)).toBe(false)
-    // Without a register no unit has a name, and the query falls through to no match.
+    // Without a lookup no unit has a name, and the query falls through to no match.
     expect(matches(person({ unitNumber: 2 }), "myran")).toBe(false)
   })
 

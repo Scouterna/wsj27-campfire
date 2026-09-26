@@ -30,12 +30,11 @@ function initial(name: string): string {
 
 /**
  * The fallback tile in front of a person's name – their initials on the theme's wash –
- * for the few people no unit mark places: the surfaces lead with `UnitAvatar` and reach
- * for this where there is no number to draw. Decoration rather than information – the
- * name is right beside it – so it is hidden from assistive technology.
+ * for the few people no unit mark places. It is hidden from assistive technology, because
+ * the name is right beside it.
  *
- * Deliberately plain. A unit's identity is the contingent's own secret until the reveal,
- * so there is no unit artwork here and no color that says what somebody is.
+ * Deliberately plain, because a unit's artwork and color belong to its mark, and a color
+ * here would say what somebody is.
  * @param props The person's names, and where the badge sits.
  * @returns The badge.
  */
