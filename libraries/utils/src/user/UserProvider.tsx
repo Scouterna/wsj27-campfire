@@ -4,6 +4,9 @@ import type { User } from "./user"
 
 const UserContext = createContext<User | undefined>(undefined)
 
+/**
+ * The person to hold, and the subtree that may read them.
+ */
 export interface UserProviderProps {
   /**
    * The subtree that may ask – in practice the whole signed-in application.
@@ -30,7 +33,7 @@ export function UserProvider(props: UserProviderProps): ReactElement {
 /**
  * The signed-in person the nearest `UserProvider` holds.
  * @returns The person, or undefined outside a provider – a story, or a screen drawn
- * before anybody is signed in – which honestly reads as knowing nothing about them.
+ * before anybody is signed in – which reads as knowing nothing about them.
  */
 export function useUser(): User | undefined {
   return useContext(UserContext)

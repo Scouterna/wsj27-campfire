@@ -1,22 +1,16 @@
 #!/bin/sh
-# The repository checks, run before the work leaves the machine. Commits are
-# frequent and often unfinished; a push is the point where somebody else could
-# see it, so that is where the checks belong.
+# The repository checks, run before the work leaves the machine. A commit is often
+# unfinished, and a push is where somebody else could see it.
 #
-# The shared checks and the TypeScript tests always run – they need only Node and
-# pnpm, which is what this repository is built on. Each platform's native checks
-# and tests run only when that toolchain is usable, probed by running the tool
-# rather than by a PATH lookup – macOS ships failing stubs at /usr/bin/java and
-# /usr/bin/xcodebuild that a `command -v` check would wrongly treat as present. A
-# machine missing a toolchain skips that platform loudly and still pushes; a real
-# finding on a present toolchain blocks the push. Kotlin and Swift are optional
-# because not everyone has a Mac and not everyone works on the shells – the web
-# application needs neither.
+# The shared checks and the TypeScript tests always run, because they need only Node
+# and pnpm. Each shell's checks and tests run only where its toolchain is usable,
+# probed by running the tool, because macOS ships failing stubs at /usr/bin/java and
+# /usr/bin/xcodebuild that `command -v` would treat as present. A missing toolchain
+# skips its platform loudly and still pushes, since the web application needs
+# neither and not everyone has a Mac.
 #
-# The checks run in sequence and the hook stops at the first failure, so the
-# finding stays on screen instead of scrolling away behind the checks that
-# follow, and a push is not held up waiting on every check to finish when the
-# first one already says no.
+# The hook stops at the first failure, so the finding stays on screen instead of
+# scrolling away behind the checks that follow.
 
 set -e
 
@@ -25,36 +19,31 @@ usable() {
   "$@" >/dev/null 2>&1
 }
 
-# Names a skipped platform and the toolchain it needed: a check nobody knows was
-# skipped is worse than one that did not run.
+# Names a skipped platform and the toolchain it needed, because a check nobody knows
+# was skipped is worse than one that did not run.
 skip() {
   echo
   echo "Skipping $1: $2 is not available here."
 }
 
-# The shared toolchain. These need only Node.
 for check in check:format check:lint check:markdown check:types; do
   pnpm "$check"
 done
 
-# The TypeScript tests, in the same breath as the checks: they need only Node too,
-# and a suite that runs when someone remembers is a suite that goes red unnoticed.
+# A suite that runs only when someone remembers goes red unnoticed.
 pnpm test
 
-# True when Gradle can locate an Android SDK, asked the way Gradle asks: sdk.dir
-# in the gitignored apps/android/local.properties first, then ANDROID_HOME, then
-# ANDROID_SDK_ROOT. The directory has to be there – a local.properties naming an
-# SDK that was moved or never installed is the same as no SDK at all.
+# True when Gradle can locate an Android SDK, looked up the way Gradle does it –
+# local.properties first, then ANDROID_HOME, then ANDROID_SDK_ROOT. The directory has
+# to exist, because an sdk.dir naming a moved SDK is the same as none.
 android_sdk() {
   sdk="$(sed -n 's/^sdk\.dir=//p' apps/android/local.properties 2>/dev/null | tail -n1)"
   [ -d "${sdk:=${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}}" ]
 }
 
-# Kotlin: ktlint checks the formatting, and Detekt and Gradle's lint check the
-# code. Both need a JDK, and Gradle's lint needs an Android SDK – both, not just
-# the JDK. A machine with a JDK and no SDK passes a java-only gate and then fails
-# the push on Gradle's "SDK location not found", which is the obscure message
-# this hook exists to turn into a skip.
+# Gradle's lint needs an Android SDK as well as a JDK. Gated on the JDK alone, a
+# machine without an SDK would fail the push on Gradle's "SDK location not found"
+# instead of skipping.
 if usable java -version && android_sdk; then
   pnpm check:android:format
   pnpm check:android:lint
@@ -63,9 +52,7 @@ else
   skip "the Kotlin checks and tests" "a complete Android toolchain (a JDK and an SDK)"
 fi
 
-# Swift: SwiftFormat lints the formatting and SwiftLint checks the code, both
-# self-contained binaries from Homebrew. There is no continuous integration
-# behind them, so a skip here is the whole gap.
+# No continuous integration runs the Swift checks, so a skip here is the whole gap.
 if usable swiftformat --version && usable swiftlint --version; then
   pnpm check:apple:format
   pnpm check:apple:lint

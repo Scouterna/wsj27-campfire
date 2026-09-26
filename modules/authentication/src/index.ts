@@ -1,14 +1,10 @@
 /**
- * The authentication module's public surface: the screen anyone who is not signed in
- * lands on, the session client the application's gate asks, the three doorways the
- * session opens after boot – `withSession` for the query client to run every read
- * under, `subscribeToSession` for the gate to hear the session end or change owner,
- * and `watchExpiry` for the gate to start beside the service's keep-alive – the route
- * table holding the profile page, and the doorway the gate hands that page its way out
- * through. The wire shapes, the registration read, the session store's own state, and
- * the provider's own spellings stay inside. The `User` the answer decodes to and the
- * role vocabulary are `utils`' to hand out, not this module's – every module may ask
- * who is signed in.
+ * The authentication module's public surface. Beside the route table, the application's
+ * gate needs the sign-in screen, the session – asked at boot, then kept alive, watched
+ * for its end, and run under every read – and the provider that hands the profile page
+ * its way out. The wire shapes, the registration read, and the provider's spellings stay
+ * inside. The `User` and the role vocabulary are `utils`' to hand out, because every
+ * module may ask who is signed in.
  */
 
 export { currentUser, keepSessionAlive, signOut } from "./data/auth"

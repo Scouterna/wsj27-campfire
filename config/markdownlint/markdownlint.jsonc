@@ -3,8 +3,8 @@
 // enabled rather than silently absent.
 //
 // What each override is for is written once, in the Markdownlint section of
-// .agents/skills/writing-markdown/references/tooling-guide.md. Kept there rather
-// than repeated here, so there is one copy to keep true.
+// .agents/skills/writing-markdown/references/tooling-guide.md, so there is one copy
+// to keep true.
 {
   "default": true,
   "MD003": { "style": "atx" },

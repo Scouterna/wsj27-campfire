@@ -22,7 +22,7 @@ describe("the mock's own surface", () => {
     }
     for (const path of ["/api/auth", "/api/auth/"]) {
       const response = await app.request(`${origin}${path}`)
-      // Twelve members hold roles: three leaders and nine in the contingent management.
+      // Every leader and everyone in the contingent management holds roles; nobody else does.
       expect(await response.json()).toEqual({
         status: "ok",
         service: "wsj27-auth-api",

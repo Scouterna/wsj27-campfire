@@ -1,6 +1,4 @@
-/* The messages widget: one plate per message in the theme's bright color, the way the
-   sign-in hero wears it, with the label, the title, the text, and the one control that
-   closes that message. The kind decides the weight, which is the label's presence and
+/* One plate per message. The kind decides the weight, which is the label's presence and
    the title's case and size – never a second typeface, because every plate is the same
    voice. */
 
@@ -9,9 +7,9 @@
     background: var(--color-theme-bright);
     border-radius: var(--border-radius-surface);
 
-    /* White on every theme, the yellow included. `--color-theme-on-bright` would put the
-       yellow's ink here instead, and a gold paragraph on yellow reads worse than a
-       white one – the plate is one look across the five units, by decision. */
+    /* White on every theme, the yellow included, so the plate is one look across the
+       units. `--color-theme-on-bright` would put the yellow's ink here instead, and a
+       gold paragraph on yellow reads worse than a white one. */
     color: #fff;
     padding: var(--spacing-section);
   }
@@ -26,16 +24,15 @@
     margin: 0 0 var(--spacing-group);
   }
 
-  /* A message that reports rather than proclaims: the theme's wash instead of its bright
-     fill, and the page's ink instead of white. A different surface rather than a smaller
-     title on the same one – size within one surface is what a subheading is, so a quiet
-     plate under the welcome read as a part of it rather than as a message of its own. */
+  /* A message that reports rather than proclaims takes the theme's wash and the page's
+     ink. It is a different surface rather than a smaller title on the same one, because
+     size within one surface is what a subheading is, and a quiet plate under the
+     welcome would read as a part of it rather than as a message of its own. */
   .messages-quiet {
     background: var(--color-theme-wash);
     color: var(--color-ink);
   }
 
-  /* The label over the title it belongs to. */
   .messages-lead {
     display: flex;
     flex-direction: column;
@@ -54,16 +51,16 @@
     text-transform: uppercase;
   }
 
-  /* On the wash the label carries the theme's own ink at full strength: the thinned
-     white that places it on a bright fill would be a grey nothing here. */
+  /* On the wash the label carries the theme's own ink at full strength, because the
+     thinned white that places it on a bright fill would be a gray nothing here. */
   .messages-quiet .messages-label {
     color: var(--color-theme-ink);
     opacity: 1;
   }
 
-  /* Every title carries the contingent's voice, so all of them wear the display face –
-     the same face as the page's title above them. A welcome proclaims: uppercase, and a
-     step smaller than that page title. */
+  /* Every title carries the contingent's voice, so all of them wear the display face of
+     the page's title above them. A welcome proclaims, in uppercase a step smaller than
+     that page title. */
   .messages-headline {
     font-family: var(--typography-display-font_family);
     font-size: var(--font-size-title);
@@ -75,9 +72,9 @@
     text-wrap: balance;
   }
 
-  /* Anything that is not a welcome: the same voice, said rather than proclaimed. The
-     capitals are most of the loudness – a correction set in them reads as though
-     everything before it had been wrong. */
+  /* Anything that is not a welcome is said rather than proclaimed. The capitals are most
+     of the loudness, and a correction set in them reads as though everything before it
+     had been wrong. */
   .messages-headline-quiet {
     font-size: var(--font-size-display-mini);
     text-transform: none;
@@ -121,16 +118,16 @@
     }
   }
 
-  /* The page's ink rather than the theme's or the text's white: it is the one color
-     here that clears a focus indicator's 3:1 against all five bright fills – white
+  /* The page's ink rather than the theme's or the text's white, because it is the one
+     color here that clears a focus indicator's 3:1 against every bright fill – white
      disappears into the yellow, and a theme's ink into its own bright. */
   .messages-close:focus-visible {
     outline: 2px solid var(--color-ink);
     outline-offset: 2px;
   }
 
-  /* A paragraph has to read: a measure, and no margin of its own – the plate's padding
-     and the blocks' spacing place it. */
+  /* A measure, and no margin of its own, because the plate's padding and the blocks'
+     spacing place a paragraph. */
   .messages-text {
     font-size: var(--font-size-value);
     line-height: 1.5;
@@ -139,8 +136,7 @@
     text-wrap: pretty;
   }
 
-  /* Paragraph to paragraph, which is the only place the text sets its own spacing: the
-     plate's padding still places the first one and the blocks around it. */
+  /* Paragraph to paragraph is the only place the text sets its own spacing. */
   .messages-text + .messages-text {
     margin-top: var(--spacing-group);
   }

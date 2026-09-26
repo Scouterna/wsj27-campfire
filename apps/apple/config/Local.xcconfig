@@ -1,8 +1,7 @@
 #include "config/Shared.xcconfig"
 
-// The web application on this machine – the one origin every environment serves, so this
-// address is right whichever stack is running.
+// The web application on this machine, at the one origin every stack serves.
 //
-// `localhost` rather than the loopback address on purpose: a session's cookies do not
-// cross between spellings of the same machine.
+// `localhost` rather than the loopback address, because a session's cookies do not cross
+// between spellings of one machine and ScoutID returns only to this host name.
 CAMPFIRE_WEB_ORIGIN = http:/$()/localhost:8000

@@ -1,12 +1,13 @@
 # The prod environment's containers: Caddy as the front door, the real wsj27-auth-api
-# against the real ScoutID, and the deployable image serving the web – so what runs is
-# the artifact that would be deployed rather than a dev server standing in for it.
-# Serves http://localhost:8000, like every other environment.
+# against the real ScoutID, the real project API, and the deployable image serving the
+# web, so what runs is the artifact that would be deployed rather than a dev server
+# standing in for it. Serves http://localhost:8000, like every other environment.
 #
 # `pnpm start:prod` generates the signing key the auth service reads and brings this up;
 # the credentials in the .env beside this file are yours to write. The dev environment
-# has its own copy of this file, differing only in what serves the web – duplicated on
-# purpose, so each environment can be read on its own.
+# has its own copy of this file, differing in what serves the web and in the fake
+# sign-in only dev offers – duplicated on purpose, so each environment can be read on
+# its own.
 services:
   ingress:
     image: caddy:2-alpine
@@ -14,8 +15,8 @@ services:
       - "8000:8000"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
-    # No depends_on: it orders starts, not readiness. Caddy answers 502 until its
-    # back-end is up, and the start script waits for a status the back-end itself
+    # No depends_on, because it orders starts, not readiness. Caddy answers 502 until
+    # its back-end is up, and the start script waits for a status the back-end itself
     # produced before it reports the environment ready.
 
   # The real auth service, built from its repository's main – the one exception to
@@ -42,11 +43,11 @@ services:
       # Generated on first run and exported by the start script, which is why compose is
       # not the way to bring these containers up by hand.
       SIGNING_KEY: ${CAMPFIRE_SIGNING_KEY:?start this with pnpm start:dev or pnpm start:prod}
-      # Local only: the stack is plain http.
+      # Local only, because the stack is plain http.
       INSECURE_COOKIES: "true"
       # Where the roles this service mints come from. The SERVICE_CLIENT_ROLES entry
-      # is what authorizes the call: the service mints its own token as wsj27-auth,
-      # so there is no secret to configure.
+      # is what authorizes the call, because the service mints its own token as
+      # wsj27-auth, so there is no secret to configure.
       PROJECT_API_URL: http://ingress:8001
       SERVICE_CLIENT_ROLES: '{"wsj27-auth": ["wsj27:bulkread"]}'
 
@@ -63,8 +64,9 @@ services:
     environment:
       # 8001, because the ingress already holds 8000 in the shared namespace.
       PORT: 8001
-      # Explicit, with the trailing slash its URL joining needs: the derived default
-      # builds the discovery URL from the incoming request and lands outside /api/auth.
+      # Explicit, with the trailing slash its URL joining needs, because the derived
+      # default builds the discovery URL from the incoming request and lands outside
+      # /api/auth.
       OIDC_SERVER_PATH: http://localhost:8000/api/auth/
       # The Scoutnet credentials live in the gitignored .env beside this file, with
       # the Keycloak client's. Without them the service runs and serves nobody.
@@ -74,7 +76,7 @@ services:
       # file is gitignored – real people – and the service logs a warning and keeps
       # the plain role when the mount holds nothing.
       CMT_ROLES_FILE: /app/cmt-roles.csv
-      # No POSTGRES_DSN: the /cases feature stays off, and everything else works.
+      # Without POSTGRES_DSN the cases feature stays off, and everything else works.
     volumes:
       # The fetched Scoutnet data survives a restart, so the service can start from
       # its disk cache when Scoutnet is slow or unreachable.

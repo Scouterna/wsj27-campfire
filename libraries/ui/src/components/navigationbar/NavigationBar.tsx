@@ -18,8 +18,8 @@ export interface NavigationBarProps {
 /**
  * The condensed bar across a phone's top edge: transparent over the page's own
  * heading, and – once the heading scrolls away – a translucent glass strip carrying
- * the title small. The page's real `h1` is `PageHeading`'s; the bar's copy is spoken
- * by neither, so a reader never hears the name twice.
+ * the title small. The page's real `h1` is `PageHeading`'s, and the bar's copy is hidden
+ * from assistive technology, so a reader never hears the name twice.
  *
  * @param props The title, and the trailing controls.
  * @returns The bar.
@@ -38,9 +38,9 @@ export function NavigationBar(props: NavigationBarProps): ReactElement {
 }
 
 /**
- * Whether the window has scrolled past the large heading. With hysteresis – condense
- * past 28, expand only back under 8 – because the condensing itself removes scroll
- * range, which would otherwise flip the state straight back.
+ * Whether the window has scrolled past the large heading. With hysteresis, because the
+ * condensing itself removes scroll range, which would otherwise flip the state straight
+ * back.
  * @returns True once the bar should carry the title.
  */
 function useIsCondensed(): boolean {

@@ -28,8 +28,7 @@ export interface ClaimChecks {
   readonly now: number
 }
 
-// The clock skew joserfc's claims registry allows either way – both services construct it
-// with thirty seconds.
+// The clock skew joserfc's claims registry allows either way, as both services construct it.
 const leewaySeconds = 30
 
 /**

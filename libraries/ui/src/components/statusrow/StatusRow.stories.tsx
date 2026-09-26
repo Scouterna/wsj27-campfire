@@ -53,7 +53,7 @@ export const Unanswered: Story = {
 }
 
 /**
- * The three together, as a card lists them.
+ * Rows together, as a card lists them.
  */
 export const AsAList: Story = {
   render: (): ReactElement => (

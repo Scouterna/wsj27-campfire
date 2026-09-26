@@ -1,10 +1,9 @@
 import type { Theme } from "./Theme"
 
 /**
- * The theme each unit works in – Campfire's own data, because the list of participants knows only
- * the number. The colors are real; nothing here names a unit, and nothing here may: the
- * units' names and artwork are secret until the day the units learn them, and this
- * repository is public.
+ * The theme each unit works in – Campfire's own data, because the list of participants
+ * knows only the number. A unit's name and glyph are runtime data the application loads,
+ * so nothing here names a unit.
  */
 const unitThemes: Readonly<Record<number, Theme>> = {
   1: "yellow",
@@ -70,8 +69,7 @@ const unitThemes: Readonly<Record<number, Theme>> = {
  * does not know.
  */
 export function unitTheme(unitNumber: number): Theme {
-  // The key is a number, and a numeric key cannot name a prototype member.
-  // eslint-disable-next-line security/detect-object-injection -- key is a number
+  // eslint-disable-next-line security/detect-object-injection -- a number cannot name a prototype member
   return unitThemes[unitNumber] ?? "blue"
 }
 
@@ -81,7 +79,6 @@ export function unitTheme(unitNumber: number): Theme {
 export const cmtTheme: Theme = "red"
 
 /**
- * The theme IST works in – red, until the patrols get identities of their own. A
- * per-patrol lookup returns when the first patrol identity does.
+ * The theme IST works in – red, because IST patrols have no identities of their own.
  */
 export const istTheme: Theme = "red"

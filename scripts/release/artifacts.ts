@@ -1,7 +1,6 @@
-// The three things Campfire versions on their own – the web application and the two
-// shells – and which commits count toward each one's next version. An artifact is a tag
-// prefix and a set of git pathspecs, so the release scripts ask git one question per
-// artifact rather than carrying a list of their own.
+// The parts of Campfire versioned on their own – the web application and each shell –
+// and which commits count toward each one's next version. An artifact is a tag prefix
+// and a set of git pathspecs, so the release scripts ask git one question per artifact.
 //
 // The web's paths are read from the trigger of its release workflow rather than written
 // down again here, so the paths that start a release and the paths that decide its
@@ -11,7 +10,7 @@ import { readFileSync } from "node:fs"
 import path from "node:path"
 
 /**
- * One of the three things with a version.
+ * A part of Campfire released under a version of its own.
  */
 export type Artifact = "android" | "apple" | "web"
 

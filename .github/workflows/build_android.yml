@@ -3,12 +3,12 @@ name: Build Android
 # Assembles the Android shell on every pull request, so a change that does not
 # compile fails the pull request rather than someone's emulator.
 #
-# A debug build, and unsigned: signing keys and store distribution are not part
-# of this repository, and proving it compiles is what a build workflow is for.
+# A debug build, and unsigned, because signing keys and store distribution are not
+# part of this repository.
 #
 # The Apple shell has no equivalent. Building it needs macOS with Xcode, which
-# this project deliberately does not spend a runner on – so `pnpm build:apple:dev`
-# on a developer's machine is the whole gate there.
+# this project deliberately does not spend a runner on, so a developer's machine
+# is the whole gate there.
 #
 # Filtered inside the job rather than by `on: paths:`. A workflow skipped by a
 # path filter reports no status, and a required check waits on that status

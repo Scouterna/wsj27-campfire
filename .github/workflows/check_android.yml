@@ -4,9 +4,9 @@ name: Check Android
 # check.yml because it needs a JDK and the Android SDK, and a change that touches
 # no Kotlin should not pay for either.
 #
-# The instrumented tests are deliberately absent: they need an emulator, which is
-# slow enough and flaky enough on a hosted runner to cost more attention than it
-# saves. `pnpm test:android:ui` runs them on demand.
+# The instrumented tests are deliberately absent, because they need an
+# emulator, which is slow enough and flaky enough on a hosted runner to cost
+# more attention than it saves. `pnpm test:android:ui` runs them on demand.
 #
 # The Swift shell has no equivalent workflow. Checking it needs macOS with Xcode,
 # which this project deliberately does not spend a runner on, so the pre-push hook
@@ -36,12 +36,8 @@ jobs:
     steps:
       # Everything the Android shell is made from: its own directory, the shared
       # Detekt configuration, the .editorconfig ktlint reads its rules from, and
-      # this workflow.
-      #
-      # The web application is deliberately not on this list. It will belong here
-      # once the bridge lands, because the shell will then keep its own copy of
-      # the message shapes and the tests that catch the two drifting apart – but
-      # today the shell asserts nothing about the web beyond an origin.
+      # this workflow. The web application is not on the list, because the shell
+      # asserts nothing about the web beyond its origin.
       - name: Look for Android changes
         id: changed
         env:
@@ -99,9 +95,8 @@ jobs:
         run: ./gradlew detekt lintLocalDebug
 
       # assembleLocalDebugAndroidTest compiles the instrumented suite without
-      # running it. Nothing else does – ktlint, Detekt, Android Lint, the unit
-      # tests, and the debug build all pass on an instrumented source that does
-      # not compile – so without this the suite rots silently until someone runs
+      # running it. Every other check passes on an instrumented source that does
+      # not compile, so without this the suite rots silently until someone runs
       # it on an emulator by hand.
       - name: Run the tests
         if: ${{ !cancelled() && steps.changed.outputs.android == 'true' && steps.format.conclusion != 'skipped' }}

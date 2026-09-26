@@ -23,7 +23,7 @@ describe("asking a service for JSON", () => {
   })
 
   it("names the address when the request never reached a server", async () => {
-    // No network, refused connection, DNS failure – different from a server saying no.
+    // No network, a refused connection, or a DNS failure, which is not a server saying no.
     networkAnswers(() => Promise.reject(new TypeError("Load failed")))
 
     await expect(fetch("/api/project/participants")).rejects.toThrow(
@@ -60,8 +60,7 @@ describe("asking a service for JSON", () => {
   })
 
   it("throws an HttpError carrying the status when the service refused", async () => {
-    // Load-bearing: a caller branches on `instanceof HttpError` and on the status – a
-    // 403 means "ask for less", a 404 means "there is no such thing". Asserting the
+    // A caller branches on `instanceof HttpError` and on the status, so asserting the
     // fields alone would pass for a plain Error with them pasted on.
     networkAnswers(() => Promise.resolve(new Response("{}", { status: 403 })))
 
@@ -87,7 +86,7 @@ describe("asking a service for JSON", () => {
   })
 
   it("says so when the answer was not JSON at all", async () => {
-    // What a dev server with no API behind it returns: the app's own index.html.
+    // A dev server with no API behind it answers with the application's own index.html.
     networkAnswers(() => Promise.resolve(new Response("<!doctype html><html></html>")))
 
     await expect(fetch("/api/project/participants")).rejects.toThrow("not JSON")

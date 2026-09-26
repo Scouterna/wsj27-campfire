@@ -1,9 +1,8 @@
 #!/bin/sh
 # Map an environment word to the name Xcode knows it by.
 #
-# The three environments are `local`, `dev`, and `prod`; Xcode names the scheme
-# "Campfire <name>" and the configuration "<name> (Debug)", so every script derives
-# both from one word. Defaults to `local` when no environment is given.
+# Xcode names the scheme "Campfire <name>" and the configuration "<name> (Debug)", so
+# every script derives both from one word. Defaults to `local`.
 #
 # Usage:
 #   environment.sh [local|dev|prod]   ->  prints "Local", "Dev", or "Prod"

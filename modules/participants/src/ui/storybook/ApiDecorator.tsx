@@ -40,7 +40,7 @@ export interface ApiParameters {
 /**
  * A cache with the story's answers already in it. Nothing is stale and nothing is
  * retried, so what the story seeds is what the screen reads, and a refusal shows the
- * first time rather than after three retries.
+ * first time rather than after the query client's retries.
  * @param api What the story said about the service.
  * @returns The client to put under the story.
  */
@@ -64,7 +64,7 @@ function makeClient(api: ApiParameters): QueryClient {
 const realFetch = fetch
 
 /**
- * The address a request was made to, whichever of the three shapes it arrived in.
+ * The address a request was made to, whichever shape it arrived in.
  * @param input What the caller passed as the request.
  * @returns The address, as a string.
  */

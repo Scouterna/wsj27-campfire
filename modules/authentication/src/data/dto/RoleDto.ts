@@ -1,10 +1,10 @@
 import type { Role } from "@scouterna/wsj27-campfire-utils"
 
 /**
- * The converter for the auth service's role spellings – the flattened, colon-separated
- * strings `/api/auth/user` reports. This file is ADR 019's adapter seam: the only place
- * a provider spelling is ever read. Everything above it asks with `Role` and the role
- * helpers, so swapping the provider's shape is this one table.
+ * The converter for the auth service's role spellings, the flattened, colon-separated
+ * strings the identity answer reports. It is ADR 019's adapter seam and the only place a
+ * provider spelling is read, so everything above it asks with `Role` and a change in the
+ * provider's shape is a change here alone.
  */
 
 /**
@@ -13,8 +13,8 @@ import type { Role } from "@scouterna/wsj27-campfire-utils"
  */
 const managementFunctions = new Map<string, Role>([
   ["admin", { kind: "admin" }],
-  // The roster spells the head of contingent "HoC", which the service slugs to "hoc";
-  // the longer spelling is kept as a tolerated alias from before the roster existed.
+  // The roster spells the head of contingent "HoC", which the service slugs to "hoc",
+  // and the longer spelling is accepted as an alias.
   ["hoc", { kind: "headOfContingent" }],
   ["kommunikation", { kind: "communication" }],
   ["kontingentledare", { kind: "headOfContingent" }],
@@ -37,7 +37,7 @@ const supportRolls = new Map<string, Role>([
 const healthAccessLevel = "Hälsa plus intern information"
 
 /**
- * The roles a `wsj27:al…` spelling grants: always a leader, of the unit its third
+ * The roles a `wsj27:al…` spelling grants – always a leader, of the unit its third
  * segment names when that segment reads as digits.
  * @param segments The spelling, already split on `:`.
  * @returns The leader role, with a unit number where one could be read.
@@ -53,8 +53,8 @@ function leaderRoles(segments: readonly string[]): readonly Role[] {
 }
 
 /**
- * The roles a `wsj27:cmt…` spelling grants: `cmt` itself, plus the management function
- * or support roll its deeper segments name, if any.
+ * The roles a `wsj27:cmt…` spelling grants – `cmt` itself, plus any management function
+ * or support roll its deeper segments name.
  * @param segments The spelling, already split on `:`.
  * @returns `cmt` alone, or `cmt` and the function or roll it names.
  */
@@ -76,7 +76,7 @@ function cmtRoles(segments: readonly string[]): readonly Role[] {
  *
  * Compared segment by segment on `:`, never by string prefix, so `wsj27:cmtx` grants
  * nothing even though it starts with the same characters as `wsj27:cmt`.
- * @param spelling One role, exactly as `/api/auth/user` spells it.
+ * @param spelling One role, exactly as the auth service spells it.
  * @returns The roles that spelling grants – empty for a spelling this converter does
  * not recognize.
  */

@@ -1,7 +1,6 @@
 /* The page's heading: the eyebrow back control over the title, and the title row's
-   trailing actions. Sized for a phone here – the large title small, the row's button
-   and menu hidden because the bar carries them – and the consumer's stylesheet grows
-   it at desktop widths, where the heading is the page's whole top. */
+   trailing actions. Sized for a phone first, and grown from desktop width, where the
+   heading is the page's whole top. */
 
 @layer component {
   .pageheading {
@@ -40,8 +39,8 @@
     display: none;
   }
 
-  /* The eyebrow: the parent's name behind a back chevron, floating above the title
-     rather than sitting in the flow – the heading never moves for it. */
+  /* The eyebrow, the parent's name behind a back chevron, floats above the title
+     rather than sitting in the flow. */
   .eyebrow {
     align-items: center;
     background: none;
@@ -86,7 +85,7 @@
     }
 
     /* The row's button hugs its label rather than filling the row, so the title keeps
-       the room – the 44-point height is the button's own, never taller than the title. */
+       the room. */
     .pageheading-row .button {
       display: inline-flex;
       flex: none;
@@ -97,8 +96,8 @@
       display: block;
       flex: none;
 
-      /* Half the row's gap: the menu belongs to the action beside it, not to the
-         title's rhythm. */
+      /* Half the row's gap, because the menu belongs to the action beside it rather than
+         to the title's rhythm. */
       margin-left: calc(var(--spacing-section) / -2);
     }
   }

@@ -8,28 +8,26 @@ import type {
 import { isRecord } from "./validation"
 
 /**
- * The participants service publishes a person's form answers as two nested blocks:
- * `contact_info` (section → key → answer, basic access) and `forms_data` (form → tab →
- * section → key → answer, health access). The nesting mirrors the registration form's
- * layout, which is presentation the application does not share – so the first thing this
- * module does is flatten both into one map keyed by the question keys, which the template
- * guarantees are unique across the whole form.
+ * A person's form answers in one flat map keyed by question key, which the registration
+ * template keeps unique across the whole form. The service nests the answers the way the
+ * form is laid out, and that layout is presentation the application does not share.
  */
 export type Answers = Readonly<Record<string, string | readonly string[]>>
 
 /**
- * One flat answer map from the payload's two blocks. Unanswered questions are simply
- * absent upstream and stay absent here; anything that is not a string, a number, or a list
- * of strings is dropped rather than guessed at.
+ * One flat answer map from the payload's contact block, readable at basic access, and its
+ * forms block, readable only with health access. Unanswered questions are absent upstream
+ * and stay absent here, and anything that is not a string, a number, or a list of strings
+ * is dropped rather than guessed at.
  * @param contactInfo The `contact_info` block, or whatever arrived in its place.
  * @param formsData The `forms_data` block, or whatever arrived in its place.
  * @returns Every answer the payload holds, keyed by question key.
  */
 export function flattenAnswers(contactInfo: unknown, formsData: unknown): Answers {
-  // contact_info: section → {key: answer}
+  // The contact block nests its answers by section.
   const contactSections = isRecord(contactInfo) ? Object.values(contactInfo) : []
 
-  // forms_data: form → tab → section → {key: answer}
+  // The forms block nests them by form, tab, and section.
   const formSections = isRecord(formsData)
     ? Object.values(formsData)
         .filter((form) => isRecord(form))
@@ -69,9 +67,7 @@ function sectionEntries(section: unknown): [string, string | readonly string[]][
 }
 
 /**
- * One single-valued answer by a computed key, or undefined when it was never given or
- * arrived as a list. Every key passed in this folder is one of its own literals or table
- * entries, never input.
+ * One single-valued answer, or undefined when it was never given or arrived as a list.
  * @param answers The flattened answers.
  * @param key The question key to read.
  * @returns The answer, or undefined when there is no single-valued one.
@@ -83,8 +79,9 @@ export function answer(answers: Answers, key: string): string | undefined {
 }
 
 /**
- * A multi-select answer, mapped through its label table. The service sends a list;
- * anything the table does not know – including a plain "Nej" – is no selection.
+ * A multi-select answer, mapped through its label table. The service sends a list or a
+ * comma-separated string, and anything the table does not know – including a plain "Nej"
+ * – is no selection.
  * @param answers The flattened answers.
  * @param key The question key to read.
  * @param byLabel The Swedish labels this question's options map through.
@@ -102,15 +99,12 @@ export function selections<T>(answers: Answers, key: string, byLabel: ReadonlyMa
     .filter((selection): selection is T => selection !== undefined)
 }
 
-/**
- * The Swedish labels Scoutnet's answers carry, mapped to the domain model's literals. The
- * tables absorb the registration's own quirks – the "kokött" and "ODC" typos are the real
- * form's spelling, and they stop here so the screens never see them.
- */
+// The Swedish labels Scoutnet's answers carry, mapped to the domain model's literals. The
+// tables absorb the registration form's own spelling, so the screens never see it.
 
 /**
- * The special diet options. "Ingen specialkost" is deliberately absent – no special diet
- * is no diet at all.
+ * The special diet options. "Ingen specialkost" is deliberately absent, because no special
+ * diet is no diet at all, and "kokött" is the form's own spelling.
  */
 export const dietByLabel: ReadonlyMap<string, SpecialDiet> = new Map([
   ["Vegetarian", "vegetarian"],

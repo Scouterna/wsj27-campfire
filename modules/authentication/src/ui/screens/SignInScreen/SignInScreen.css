@@ -1,14 +1,12 @@
-/* The sign-in screen as one brand surface: a colored hero carrying the mark, and under it
-   the headline, the sentence, and the action. The values here are this screen's own – a
-   hero height, a headline size, a white sheet – and stay spelled out until a second screen
-   wants one of them. */
+/* The sign-in screen as one brand surface. Its values – a hero height, a headline size,
+   a white sheet – belong to no other screen, so they are spelled out rather than drawn
+   from tokens. */
 
 @layer screen {
   /* The screen fills the window with its own surfaces, so the application's reading
-     column and its paper step aside while sign-in is up: the hero has to reach the edges,
-     and inside a shell the webview runs edge to edge – past where CSS viewport units
-     reach, WebKit keeps the bottom safe area out of them, and a white body is what
-     continues the sign-in surface down there instead of paper. */
+     column and its paper step aside while sign-in is up. The hero has to reach the
+     edges, and inside a shell the webview runs past the bottom safe area, which WebKit
+     keeps out of the viewport units, so a white body continues the surface down there. */
   body:has(.sign-in) {
     background: #fff;
     margin: 0;
@@ -38,11 +36,10 @@
     width: 290px;
   }
 
-  /* The mark's entry: it zooms in and settles with a small bounce, quickly – once per page
-     load, which inside a shell is the moment the webview fades in over the launch screen's
-     blue. `backwards` rather than `both`: a browser that never starts the animation – a
-     background tab, say – then shows the finished mark instead of holding frame zero's
-     invisibility forever. */
+  /* The mark zooms in and settles once per page load, which inside a shell is the moment
+     the webview fades in over the launch screen's blue. `backwards` rather than `both`,
+     because a browser that never starts the animation – a background tab, say – then
+     shows the finished mark instead of holding frame zero's invisibility forever. */
   @media (prefers-reduced-motion: no-preference) {
     .sign-in-hero .logo {
       animation: logo-entry 450ms cubic-bezier(0.22, 0.9, 0.36, 1) backwards;
@@ -74,8 +71,8 @@
     display: flex;
     flex: 1;
     flex-direction: column;
-    /* The gap is the floor under the auto margins: on a short screen they collapse to
-       nothing, and without it the text would sit right on the action. */
+    /* The gap is the floor under the auto margins, because on a short screen they
+       collapse to nothing and the text would sit right on the action. */
     gap: var(--spacing-section);
     padding: 30px 26px calc(30px + env(safe-area-inset-bottom));
     text-align: center;
@@ -105,13 +102,14 @@
   }
 
   /* A quieter tone of the page's own ink, mixed rather than picked, so it reads the same
-     under every theme. A token the day a second screen wants this tone. */
+     under every theme. */
   .sign-in-pitch {
     color: color-mix(in srgb, var(--color-ink) 68%, white);
     font-size: calc(16.5rem / 17);
     line-height: 1.55;
-    /* The measure in text units, not pixels: the type scales with the reader's own
-       text size, and a fixed column would squeeze grown text onto extra short lines. */
+    /* The measure in text units rather than pixels, because the type scales with the
+       reader's own text size and a fixed column would squeeze grown text onto short
+       lines. */
     max-width: 21em;
     text-wrap-style: balance;
   }
@@ -122,10 +120,9 @@
     width: 100%;
   }
 
-  /* A tall stacked screen – an iPad in portrait, narrower than the split point – stops
-     pinning the action to the bottom edge: the text and the action travel as one
-     centered group, as they do in the split layout. No phone is this tall, so the
-     thumb-reach pinning stays what phones get. */
+  /* A tall stacked screen – an iPad in portrait, narrower than the split point – centers
+     the text and the action as one group, as the split layout does. No phone is this
+     tall, so phones keep the action pinned within thumb reach. */
   @media (min-height: 1000px) {
     .sign-in-body {
       justify-content: center;

@@ -26,11 +26,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      # Everything the built site is made from: its pages, the agent definitions
-      # the agent pages include, the VitePress config and theme, the TypeScript
-      # configuration, the lockfile, the Node version the runner installs, the
-      # workspace's install policy, and this workflow – the same list
-      # build_web.yml calls a toolchain change.
+      # Everything the built site is made from – the agent definitions its agent
+      # pages pull in among them – and this workflow.
       - name: Look for guidebook changes
         id: changed
         env:

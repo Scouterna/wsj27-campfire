@@ -5,7 +5,7 @@ import type { Booster, Vaccinations } from "../../../model/HealthProfile"
 
 export interface VaccinationsSectionProps {
   /**
-   * The three vaccination answers everybody gives.
+   * The vaccination answers everybody gives.
    */
   readonly vaccinations: Vaccinations
 }
@@ -48,8 +48,8 @@ function BoosterRow(props: BoosterRowProps): ReactElement {
 }
 
 /**
- * Vaccinationer: the childhood program and the two boosters as status rows.
- * @param props The three vaccination answers.
+ * Vaccinationer: the childhood program and the boosters as status rows.
+ * @param props The vaccination answers.
  * @returns The card.
  */
 export function VaccinationsSection(props: VaccinationsSectionProps): ReactElement {

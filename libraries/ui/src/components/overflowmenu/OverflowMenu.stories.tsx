@@ -117,7 +117,7 @@ export const Icons: Story = {
 
 /**
  * Work that answers: the menu stays open, the entry says what the work came to over its
- * faded label, and the menu closes two seconds later. The second entry fails. Placed as
+ * faded label, and the menu closes shortly after. The second entry fails. Placed as
  * the chrome places it, so the panel is only as wide as its entries – and holds that
  * width while the longest of them speaks.
  */

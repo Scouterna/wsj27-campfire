@@ -14,9 +14,9 @@ android {
     applicationId = "se.scouterna.campfire"
     minSdk = 30
     targetSdk = 36
-    // A release passes -Pcampfire.version=… -Pcampfire.build=…; without them – Android
-    // Studio, pnpm build:*, pnpm start:* – the shell builds as 0.0.0 build 1. The build
-    // never reads git.
+    // The shell's version lives in its own git tag rather than the tree, and the build
+    // never reads git, so a release passes -Pcampfire.version and -Pcampfire.build and
+    // any other build is 0.0.0 build 1.
     versionCode =
       providers
         .gradleProperty("campfire.build")
@@ -27,10 +27,10 @@ android {
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
 
-  // Three environments, differing in one setting: the address the shell loads the web
+  // The environments differ in one setting, the origin the shell loads the web
   // application from. They share an applicationId, so installing one replaces another –
-  // the accepted cost of not maintaining three identities for a difference that is one
-  // URL.
+  // the accepted cost of not maintaining an identity per environment for a difference
+  // that is one URL.
   flavorDimensions += "stage"
 
   productFlavors {
@@ -39,23 +39,26 @@ android {
       // `pnpm start:android` does.
       isDefault = true
       dimension = "stage"
-      // localhost, not the emulator's 10.0.2.2 alias: the sign-in cookies only work on
-      // the one host name ScoutID sends the flow back to, so scripts/android/start.sh
-      // maps the device's localhost:8000 to the host's with `adb reverse`. 8000 is
-      // Caddy, the one origin `pnpm start:local` puts in front of the web server and
-      // the mock backend – the same origin the Apple shell's Local.xcconfig uses.
+      // The web application on this machine, at the one origin every stack serves,
+      // which scripts/android/start.sh maps from the device with `adb reverse`.
+      //
+      // localhost rather than the emulator's 10.0.2.2 alias, because a session's cookies
+      // do not cross between spellings of one machine and ScoutID returns only to this
+      // host name.
       buildConfigField("String", "CAMPFIRE_WEB_ORIGIN", "\"http://localhost:8000\"")
     }
 
     create("dev") {
       dimension = "stage"
+      // The deployed development build of the web application.
       buildConfigField("String", "CAMPFIRE_WEB_ORIGIN", "\"https://campfire.wsj27.scouterna.net\"")
     }
 
     create("prod") {
       dimension = "stage"
-      // An origin, not a shippable artifact: this is still a debuggable build with no
-      // signing configuration, and how Campfire reaches a device is undecided.
+      // The deployed production build of the web application. The shell itself stays a
+      // debuggable build with no signing configuration, because how Campfire reaches a
+      // device is undecided.
       buildConfigField("String", "CAMPFIRE_WEB_ORIGIN", "\"https://campfire.wsj27.se\"")
     }
   }
@@ -71,20 +74,19 @@ android {
   }
 
   // Android Lint knows things neither ktlint nor Detekt does – API levels, manifest
-  // mistakes, resource problems. A warning is a failure here for the same reason it is
-  // everywhere else in this repository (ADR 005).
+  // mistakes, resource problems. A warning is a failure here, as everywhere else in this
+  // repository (ADR 006).
   lint {
     warningsAsErrors = true
     abortOnError = true
 
     disable +=
       setOf(
-        // Which API level to target is a decision with behavior consequences, taken
-        // deliberately above. It is not something to change because a linter noticed a
-        // newer one exists.
+        // The target API level changes behavior, so it moves deliberately rather than
+        // whenever a newer one exists.
         "OldTargetApi",
-        // Dependency versions are pinned exactly and updated deliberately (ADR 004).
-        // A check that reports every newer release is the opposite of that policy.
+        // Dependency versions are pinned exactly and updated deliberately rather than
+        // whenever a newer release exists (ADR 005).
         "GradleDependency",
         "AndroidGradlePluginVersion",
         "NewerVersionAvailable",
@@ -101,8 +103,7 @@ android {
   }
 
   // config/, assets/, and src/ mean the same thing in every app here, so the Android
-  // source sets are remapped onto them rather than the other way round. There is no
-  // src/main/kotlin and no src/main/res.
+  // source sets are remapped onto them rather than the other way round.
   sourceSets {
     getByName("test") {
       kotlin.directories.add("../../test")

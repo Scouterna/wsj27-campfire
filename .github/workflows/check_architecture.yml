@@ -4,8 +4,8 @@ name: Check architecture
 # every element is described and every relationship labeled.
 #
 # Its own workflow rather than a step in check.yml, because it reports its own
-# status and needs something the other four checks do not: Docker, and a pinned
-# Structurizr image. The four checks stay fast and need only pnpm.
+# status and needs Docker and a pinned Structurizr image, while the checks there
+# stay fast and need only pnpm.
 #
 # Filtered inside the job rather than by `on: paths:`. A workflow skipped by a
 # path filter reports no status, and a required check waits on that status
@@ -27,9 +27,8 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
-    # The check runs in the same pinned Structurizr image the export uses, and the
-    # runner pulls all 6 GB of it first, so this is slower than the other checks by
-    # some margin.
+    # The check runs in the pinned Structurizr image the export uses, and the runner
+    # pulls all of its several gigabytes first.
     timeout-minutes: 30
     steps:
       # Everything the diagrams are built from: the model itself, the scripts
@@ -62,8 +61,8 @@ jobs:
         uses: actions/checkout@v7
 
       # The check is one Node script and a container. Docker is already on the
-      # runner; Node comes from the same setup the other workflows use, and pnpm
-      # only so the script is run the way it is run everywhere else.
+      # runner, and pnpm is set up only so the script runs the way it runs
+      # everywhere else.
       - name: Set up pnpm
         if: steps.changed.outputs.architecture == 'true'
         uses: pnpm/action-setup@v6

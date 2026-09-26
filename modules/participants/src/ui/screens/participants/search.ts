@@ -17,8 +17,8 @@ export type ParticipantsSearch = {
   readonly roll?: RoleFilter
 }
 
-// The four the chips offer, as a set rather than a list: this is a membership test on a
-// value that arrived from outside, which is the one thing the type system cannot do.
+// The filters the chips offer, as a set because this is a membership test on a value that
+// arrived from outside, which the type system cannot do.
 const filters: ReadonlySet<string> = new Set<RoleFilter>(["cmt", "deltagare", "ist", "ledare"])
 
 /**
@@ -35,7 +35,7 @@ function isRoleFilter(value: unknown): value is RoleFilter {
  * params.
  *
  * Nothing is trusted: an address is hand-typed, bookmarked from an older build, or
- * pasted between people, so anything that is not a usable search text or one of the four
+ * pasted between people, so anything that is not a usable search text or one of the
  * role filters is dropped rather than carried into the screen. The worst a stale address
  * can do is open the clean list.
  * @param search The search params the router parsed out of the address.

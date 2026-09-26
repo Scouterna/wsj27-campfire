@@ -1,8 +1,7 @@
-/* The unit browser, and the one unit behind a row of it. */
+/* The unit browser. */
 
 @layer screen {
-  /* What the screen has to say when it has no rows to show, and the count over the rows
-     it does. Quiet, because it labels the list rather than competing with it. */
+  /* What the screen says in place of its rows – fetching, failing, or nobody to show. */
   .units-status {
     color: var(--color-ink-secondary);
     font-size: var(--font-size-footnote);

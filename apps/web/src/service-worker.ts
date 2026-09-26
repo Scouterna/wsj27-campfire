@@ -1,16 +1,15 @@
 /**
  * The update half of the PWA. vite-plugin-pwa generates the worker and registers it,
  * which is what makes an offline start work at all; this wiring decides when a new
- * deploy reaches a page that is already open. The generated worker takes control the
- * moment it installs (`registerType: "autoUpdate"` means `skipWaiting` and
- * `clientsClaim`), so "a new worker took control" and "a new deploy is live" are the
- * same event – and the page answers it by reloading itself onto the new version.
+ * deploy reaches a page that is already open. The generated worker skips waiting and
+ * claims its clients, so "a new worker took control" and "a new deploy is live" are the
+ * same event, and the page answers it by reloading itself onto the new version.
  */
 
 /**
- * Starts the two update behaviors, once, at boot: one reload when a new deploy takes
- * control of an already-controlled page, and an update check whenever the application
- * returns to the foreground. A browser without service workers – the dev server never
+ * Starts the update behaviors once, at boot – one reload when a new deploy takes control
+ * of an already-controlled page, and an update check whenever the application returns
+ * to the foreground. A browser without service workers – the dev server never
  * registers one either – gets a no-op.
  */
 export function wireServiceWorkerUpdates(): void {

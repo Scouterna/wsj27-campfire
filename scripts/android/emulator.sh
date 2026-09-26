@@ -46,13 +46,13 @@ if [ -z "$serial" ]; then
   emulator -avd "$avd" -port "$port" -no-snapshot-load -no-boot-anim >/dev/null 2>&1 &
 fi
 
-# One deadline for both waits below, so an emulator that never comes up fails loudly
+# One deadline for the waits below, so an emulator that never comes up fails loudly
 # instead of hanging.
 deadline=$(($(date +%s) + 300))
 
-# Not `adb wait-for-device`: that blocks forever, so an emulator that dies on launch –
-# a broken AVD, no hardware acceleration, a port already taken – leaves the terminal
-# with nothing at all. Poll for the serial against the deadline instead.
+# Polled rather than `adb wait-for-device`, which blocks forever, so an emulator that
+# dies on launch – a broken AVD, no hardware acceleration, a port already taken – fails
+# at the deadline instead of leaving the terminal with nothing at all.
 until adb devices | grep -q "^${serial}[[:space:]][[:space:]]*device$"; do
   if [ "$(date +%s)" -ge "$deadline" ]; then
     echo "$serial never appeared within five minutes." >&2

@@ -24,9 +24,8 @@ export interface PageOutlineProps {
 
 /**
  * The desktop outline: the page's sections listed beside it, the one being read marked
- * by a line that slides along the rail as the mark moves. Which sections a page has,
- * and what choosing one scrolls to, are the caller's – this draws the list and says
- * which entry was picked.
+ * by a line that slides along the rail. Which sections a page has, and what choosing
+ * one scrolls to, are the caller's.
  *
  * @param props The entries, the current one, and what choosing one does.
  * @returns The column.
@@ -35,9 +34,9 @@ export function PageOutline(props: PageOutlineProps): ReactElement {
   const items = useRef<HTMLDivElement>(null)
   const { current, entries } = props
 
-  // The marker's geometry, written as custom properties before paint: on the first
-  // render the line appears in place, and on every later change the stylesheet's
-  // transition slides it there.
+  // The marker's geometry, written as custom properties before paint, so the line
+  // appears in place on the first render and the stylesheet's transition slides it on
+  // every later change.
   useLayoutEffect(() => {
     const list = items.current
     const target = list?.querySelectorAll("button").item(current)
@@ -55,8 +54,8 @@ export function PageOutline(props: PageOutlineProps): ReactElement {
         <span className="outline-marker" />
         {props.entries.map((entry, index) => (
           <button
-            // The position, not the text: two sections may share a heading, and the
-            // list is positional – the caller selects by index.
+            // Keyed by position, because two sections may share a heading and the caller
+            // selects by index.
             key={index}
             type="button"
             aria-current={index === props.current ? "true" : undefined}

@@ -5,10 +5,10 @@ import { ThemeScope } from "../foundations/theme/ThemeProvider"
 
 /**
  * Wraps every story in the theme the toolbar picked, so the whole catalog can be read in
- * any of the five unit colors. `ThemeScope` carries both halves of a theme – the
- * `data-theme` attribute the tokens key on, and the context a component such as the
- * logo picks its asset by – on a local wrapper rather than on the document, so a story
- * that themes itself – a five-up comparison – still wins locally.
+ * any unit color. `ThemeScope` carries both halves of a theme – the `data-theme`
+ * attribute the tokens key on, and the context a component such as the logo picks its
+ * asset by – on a local wrapper rather than on the document, so a story that themes
+ * itself, such as a comparison of every theme, still wins locally.
  *
  * @param Story The story being rendered.
  * @param context The story's context.

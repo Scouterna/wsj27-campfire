@@ -7,8 +7,8 @@
     container-type: inline-size;
     display: flex;
     flex-direction: column;
-    /* The stack keeps the chrome's rhythm: the same gap the content column puts between
-       cards. */
+    /* The same gap the content column puts between cards, so the stack keeps the chrome's
+       rhythm. */
     gap: var(--spacing-container);
   }
 
@@ -81,7 +81,7 @@
     overflow-wrap: anywhere;
   }
 
-  /* Nothing on record: the same quiet ink the icon field's absent state wears. */
+  /* Nothing on record wears the same quiet ink as the icon field's absent state. */
   .person-profile-grid em {
     color: var(--color-ink-tertiary);
     font-size: var(--font-size-entry);
@@ -306,8 +306,8 @@
   }
 
   /* --- The wide layout ---
-     Sections that pair on a wide screen: the cards stretch so the pair reads as one band,
-     and the contact grids go two-up. */
+     On a wide screen the paired sections stretch their cards so the pair reads as one
+     band, and the contact grids go two-up. */
 
   .person-pair {
     display: grid;

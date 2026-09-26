@@ -8,8 +8,8 @@
  */
 
 /**
- * Which of the two tiers the web application is running in: an ordinary browser, or a
- * webview inside one of the native shells.
+ * The place the web application runs in – an ordinary browser, or a webview inside a
+ * native shell.
  */
 export type Tier = "browser" | "shell"
 
@@ -19,9 +19,8 @@ export type Tier = "browser" | "shell"
 const shellToken = "CampfireShell"
 
 /**
- * Reads the tier off the User-Agent. Node has no `navigator` on every version this runs
- * on, and neither does a worker, so an absent one is the browser tier rather than a
- * crash at import time.
+ * Reads the tier off the User-Agent. Node and a worker may have no `navigator`, so an
+ * absent one is the browser tier rather than a crash at import time.
  *
  * @returns The tier this document is running in.
  */
@@ -31,7 +30,7 @@ function detectTier(): Tier {
 }
 
 /**
- * The host, frozen at module evaluation. Frozen because every reader must see the same
- * answer: a tier that could be reassigned is a tier two components could disagree about.
+ * The host, frozen at module evaluation so every reader sees the same tier and no two
+ * components can disagree about it.
  */
 export const host: { readonly tier: Tier } = Object.freeze({ tier: detectTier() })

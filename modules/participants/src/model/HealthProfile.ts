@@ -159,7 +159,7 @@ export interface FoodAllergy {
 
 /**
  * One booster's answer. A union rather than an optional because the screen tells the
- * three states apart – a year pill, an explicit no, and "Ej besvarad".
+ * states apart – a year pill, an explicit no, and "Ej besvarad".
  */
 export type Booster =
   | { readonly kind: "given"; readonly year: number }
@@ -176,11 +176,11 @@ export interface Vaccinations {
    */
   readonly childhoodProgram: boolean
   /**
-   * The diphtheria booster, in its three states.
+   * The diphtheria booster as an adult.
    */
   readonly diphtheria: Booster
   /**
-   * The tetanus booster, in its three states.
+   * The tetanus booster as an adult.
    */
   readonly tetanus: Booster
 }

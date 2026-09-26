@@ -22,7 +22,7 @@ import { applySession, isRedirectUriAllowed, type AuthDependencies } from "./ses
 import { verifyAccessToken } from "./tokens.ts"
 
 /**
- * The auth service's browser contract – the five routes a browser navigates or fetches – each
+ * The auth service's browser contract – the routes a browser navigates or fetches – each
  * answering as `routes.py` answers.
  */
 
@@ -171,7 +171,7 @@ export function user(context: Context, dependencies: AuthDependencies): Response
   })
 }
 
-// A claim as the body carries it: what the token holds, or null.
+// A claim as the body carries it, which is what the token holds, or null.
 function claim(claims: Claims, name: string): unknown {
   // eslint-disable-next-line unicorn/no-null -- an absent claim is null in the service's body
   return field(claims, name) ?? null

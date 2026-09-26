@@ -58,9 +58,9 @@ jobs:
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm check:types
 
-      # A sibling of the four checks rather than a workflow of its own: it needs the
-      # same Node and the same install, and reporting alongside them is what makes one
-      # run answer "is this branch sound?" in full.
+      # A step beside the checks rather than a workflow of its own, because it needs the
+      # same Node and the same install, and reporting alongside them makes one run
+      # answer "is this branch sound?" in full.
       - name: Test
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm test

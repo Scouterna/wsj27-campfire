@@ -7,7 +7,7 @@ import type { SigningKey } from "../keys.ts"
 import { settings } from "../settings.ts"
 
 /**
- * The service's `iss`: its public URL without the trailing slash.
+ * The service's `iss`, which is its public URL without the trailing slash.
  */
 export const issuer = settings.publicUrl.slice(0, -1)
 

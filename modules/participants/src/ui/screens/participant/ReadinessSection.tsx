@@ -5,7 +5,7 @@ import type { Readiness } from "../../../model/Readiness"
 
 export interface ReadinessSectionProps {
   /**
-   * The two exported readiness factors and the clarification behind them.
+   * The readiness factors the service exports, and the clarification behind them.
    */
   readonly readiness: Readiness
 }

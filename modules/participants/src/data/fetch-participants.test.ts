@@ -34,7 +34,7 @@ const ist = [row(31, "Ivar Ek", "IST", "")]
 const cmt = [row(41, "Pernilla Palm", "Kontingentledning", "")]
 
 /**
- * The whole contingent as the five listings answer it, ready to be queued per address.
+ * The whole contingent as its listings answer it, ready to be queued per address.
  */
 function contingentAnswers(): Record<string, Response[]> {
   return {

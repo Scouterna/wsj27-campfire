@@ -3,10 +3,10 @@ name: Release guidebook
 # Builds the guidebook from main and deploys it to GitHub Pages.
 
 on:
-  # Everything the built site is made from – the same list build_guidebook.yml
-  # filters on. That workflow filters inside the job because a skipped
-  # required check blocks the pull request; a deploy is not a required check,
-  # so the path filter can live on the trigger.
+  # The paths build_guidebook.yml filters on, with this workflow in place of
+  # that one. That workflow filters inside the job because a skipped required
+  # check blocks the pull request, and a deploy is not a required check, so
+  # here the filter lives on the trigger.
   push:
     branches:
       - main
@@ -63,7 +63,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # Scoped to the job that needs it: id-token signs the deployment, pages
+    # Scoped to the job that needs it – id-token signs the deployment, and pages
     # publishes it.
     permissions:
       pages: write

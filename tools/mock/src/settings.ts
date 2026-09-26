@@ -14,13 +14,13 @@ export const settings: {
 } = {
   // ACCESS_TOKEN_TTL_SECONDS, left at the service's default.
   accessTokenTtlSeconds: 300,
-  // ALLOWED_REDIRECT_DOMAINS: the hosts login and logout send a browser back to.
+  // ALLOWED_REDIRECT_DOMAINS, the hosts login and logout may send a browser back to.
   allowedRedirectDomains: ["localhost:8000"],
   // AUDIENCE, left at the service's default.
   audience: "wsj27",
-  // INSECURE_COOKIES: the stack is plain http, so no cookie is marked Secure.
+  // INSECURE_COOKIES, set because the stack is plain http, so no cookie is marked Secure.
   insecureCookies: true,
-  // OIDC_CLIENT_ID: the client the service is registered as at ScoutID.
+  // OIDC_CLIENT_ID, the client the service is registered as at ScoutID.
   oidcClientId: "wsj27-auth",
   // PUBLIC_URL, with the one trailing slash the service normalizes it to.
   publicUrl: "http://localhost:8000/api/auth/",

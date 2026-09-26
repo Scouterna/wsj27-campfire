@@ -4,7 +4,7 @@ import type { IconProps } from "../IconProps"
 import { stroke } from "../stroke"
 
 /**
- * Home.
+ * Home: the house and its door.
  * @param props The size and line weight asked for.
  * @returns The icon.
  */

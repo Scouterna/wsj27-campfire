@@ -6,12 +6,10 @@ import { signInUrl } from "../../../data/auth"
 import "./SignInScreen.css"
 
 /**
- * The sign-in screen: the contingent's mark on a colored hero, the headline, the pitch,
- * and the one button. The hero, the title, and the action read the theme's tokens, so the
+ * The sign-in screen. The hero, the title, and the action read the theme's tokens, so the
  * screen greets a returning visitor in their own unit's color before anyone has signed
- * in. Pressing the button leaves the page entirely – ScoutID owns the credentials, and
- * this screen has no field to type one into – so the pending state only has to survive
- * until the navigation takes.
+ * in. Pressing the button leaves the page entirely, because ScoutID owns the
+ * credentials, so the pending state only has to survive until the navigation takes.
  *
  * @returns The screen.
  */

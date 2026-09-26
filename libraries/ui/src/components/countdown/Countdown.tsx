@@ -13,8 +13,7 @@ interface Remaining {
 }
 
 /**
- * What remains until a moment, split for the clock. A moment already passed remains
- * as all zeros rather than negatives, so the clock never counts backwards.
+ * What remains until a moment, split for the clock and never below zero.
  * @param at The moment counted down to.
  * @param now The moment counting from.
  * @returns The remaining days, hours, minutes, and seconds.
@@ -53,10 +52,10 @@ export interface CountdownProps {
 }
 
 /**
- * A countdown to a moment: days, hours, minutes, and seconds in four tiles on the
- * theme's color, ticking once a second, with a line over the clock and a hint under
- * it. It only ever counts – what happens at zero is the caller's, and a passed moment
- * shows a standing zero rather than negatives.
+ * A countdown to a moment, ticking once a second in tiles on the theme's color, with a
+ * line over the clock and a hint under it. It only ever counts – what happens at zero
+ * is the caller's, and a passed moment shows a standing zero rather than negatives, so
+ * the clock never counts backwards.
  *
  * @param props The moment, the words around the clock, and its accessible name.
  * @returns The countdown.

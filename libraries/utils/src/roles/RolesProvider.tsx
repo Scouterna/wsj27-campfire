@@ -31,8 +31,8 @@ export function RolesProvider(props: RolesProviderProps): ReactElement {
 
 /**
  * The roles the nearest `RolesProvider` holds.
- * @returns The roles in force, or the empty set outside a provider – which honestly
- * reads as nobody granted anything.
+ * @returns The roles in force, or none outside a provider, which reads as nobody
+ * granted anything.
  */
 export function useRoles(): readonly Role[] {
   return useContext(RolesContext)

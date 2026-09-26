@@ -17,10 +17,8 @@ export interface UnitIdentities {
   readonly name: (unitNumber: number) => string | undefined
 }
 
-// The answer before anything is known – what every lookup gives until the
-// application loads the identities.
 function unknown(): undefined {
-  // Undefined, always – the declared return type is the whole of it.
+  // Empty on purpose, because the declared return type is the whole answer.
 }
 
 /**
@@ -34,6 +32,9 @@ const nothingKnown: UnitIdentities = {
 
 const UnitIdentitiesContext = createContext(nothingKnown)
 
+/**
+ * The identities a `UnitIdentitiesProvider` hands down, and the subtree that reads them.
+ */
 export interface UnitIdentitiesProviderProps {
   /**
    * The identities as the application loaded them.
@@ -46,9 +47,7 @@ export interface UnitIdentitiesProviderProps {
 }
 
 /**
- * Puts the units' identities where every avatar and name line can read them. Mounted
- * once by the composition root, with whatever its identity data held – possibly
- * nothing, which every consumer must wear gracefully.
+ * Puts the units' identities where every avatar and name line can read them.
  *
  * @param props The loaded identities, and the subtree reading them.
  * @returns The subtree.

@@ -51,8 +51,7 @@
     font-size: var(--font-size-title);
   }
 
-  /* A leader's mark: a star sitting in a notch masked out of the mark's corner, in
-     the theme's own ink. */
+  /* A leader's mark, with the star sized from the mark it sits in. */
   .unit-avatar-leader {
     --unit-avatar-star: calc(var(--unit-avatar-size, 44px) * 0.3);
 

@@ -5,8 +5,8 @@
 
 /**
  * Whether an untyped value is an object whose keys can be read further. The keys are
- * destructured or bracket-read rather than dot-accessed – every value behind one is still
- * `unknown`.
+ * destructured or bracket-read rather than dot-accessed, because every value behind one
+ * is still `unknown`.
  * @param value The untyped value to check.
  * @returns True when the value is a readable record.
  */

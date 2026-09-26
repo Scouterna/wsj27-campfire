@@ -7,10 +7,8 @@ import { wireNavigation } from "./navigation"
 import { router } from "./routes"
 import { wireServiceWorkerUpdates } from "./service-worker"
 
-// The theme goes on before the first paint: the sign-in screen must greet a returning
-// brown-unit leader in brown, not flash blue until React catches up. `?theme=brown`
-// seeds it for a visitor who has never been here, and is remembered from that point
-// like any other stored preference.
+// The theme goes on before the first paint, so the sign-in screen greets a returning
+// brown-unit leader in brown rather than flashing blue until React catches up.
 applyInitialTheme()
 
 // The direction listeners go on before the router mounts, so the very first click is
@@ -21,10 +19,9 @@ wireNavigation()
 // during boot still reaches the page as one reload rather than staying invisible.
 wireServiceWorkerUpdates()
 
-// A back-forward cache restore is not a load: Safari brings the whole document back
-// with screens drawn for a session whose sign-out may have happened in another
-// document. The gate only asks on a load, so a restore reloads – and the gate asks
-// again against the cookies as they are now.
+// Safari's back-forward cache brings the whole document back, with screens drawn for a
+// session whose sign-out may have happened in another document. The gate asks only on
+// a load, so a restore reloads, and the gate asks against the cookies as they are now.
 window.addEventListener("pageshow", (event) => {
   if (event.persisted) {
     location.reload()
@@ -36,9 +33,6 @@ if (!container) {
   throw new Error("index.html has no #root element to mount into")
 }
 
-// The router owns the tree from here: the composition root is routes.tsx, the one
-// place that knows every module, and its AppChrome is the session gate in front of
-// every address.
 createRoot(container).render(
   <StrictMode>
     <RouterProvider router={router} />

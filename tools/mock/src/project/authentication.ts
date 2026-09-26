@@ -76,7 +76,7 @@ export function roleSuffixes(held: readonly string[], prefix: string): ReadonlyS
 /**
  * The dependency every route runs first. No token, or one that does not verify, answers 401; a
  * token that carries no `wsj27:` role at all answers 403. The token's issuer and audience are
- * not checked – the project API checks neither.
+ * not checked, because the project API checks neither.
  * @param context The request.
  * @param key The auth service's signing key, standing in for its published key set.
  * @param now The clock, in milliseconds.

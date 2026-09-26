@@ -23,7 +23,7 @@ export interface ParticipantRecord {
   readonly mobile: string | null
   readonly name: string
   /**
-   * The travel package, normalized across the three questions that ask for it.
+   * The travel package, normalized across the per-member-type questions that ask for it.
    */
   readonly participation_type: string
   /**
@@ -55,14 +55,14 @@ const participationTypes: ReadonlyMap<string, ReadonlySet<string>> = new Map([
   ["Kontingentledning", new Set(["Direktresa", "Rundresa"])],
 ])
 
-// Tabs that leave the template as contact_info rather than forms_data. The split is an access
-// one: contact details come with basic access, the rest only with full.
+// Tabs that leave the template as contact_info rather than forms_data. The split follows access,
+// because contact details come with basic access and the rest only with full.
 const contactTabs: ReadonlySet<string> = new Set(["Grundläggande information"])
 
 /**
- * Decodes the seeded list of participants the way the service decodes Scoutnet's: the basic block, the roles
- * minted once, and the answers walked through the form template into `contact_info` and
- * `forms_data`.
+ * Decodes the seeded list of participants the way the service decodes Scoutnet's – the basic
+ * block, the roles minted once, and the answers walked through the form template into
+ * `contact_info` and `forms_data`.
  * @param participants The raw list of participants.
  * @param forms The form template.
  * @param cmtDetails The CMT roster, read.
@@ -111,8 +111,8 @@ export function decodeParticipantsList(
   return participantsList
 }
 
-// The troop the list of participants carries: the unit for a leader or a deltagare. The project API does
-// not carry the IST's patrols, and the contingent management has no troop.
+// The troop the list of participants carries, which is the unit for a leader or a deltagare. The
+// project API does not carry the IST's patrols, and the contingent management has no troop.
 function troopOf(participant: Participant): string {
   const isInUnit = participant.role === "deltagare" || participant.role === "ledare"
   return isInUnit && participant.unitNumber !== undefined ? String(participant.unitNumber) : ""

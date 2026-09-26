@@ -1,14 +1,13 @@
-# Editor defaults, for the editor rather than for Prettier: wherever Prettier formats
-# a file, every value below already matches what it does, so the two cannot
-# disagree. What it buys is an editor that gets it right as you type, and a rule for
-# the files Prettier leaves alone – the git hooks and shell scripts, the Caddyfiles,
-# the Structurizr DSL, the xcconfigs, and the Swift and Kotlin sources.
+# Editor defaults, for the editor rather than for Prettier. Wherever Prettier
+# formats a file these values already match it, so the two cannot disagree; what
+# they add is an editor that gets it right while typing, and a rule for the files
+# Prettier leaves alone – the git hooks and shell scripts, the Caddyfiles, the
+# Structurizr DSL, the xcconfigs, and the Swift and Kotlin sources.
 #
-# It sits at the root because .editorconfig is found by walking up from the file
-# being edited, and `root = true` is what stops that walk. One of the few pieces
-# of tool configuration that cannot live under config/ (ADR 005). ktlint's Gradle
-# plugin reads its rules from this file too, by the same walk, which is why the
-# Kotlin section below is rules rather than editor defaults.
+# It sits at the root rather than under config/ (ADR 006), because .editorconfig
+# is found by walking up from the file being edited and `root = true` ends that
+# walk. ktlint's Gradle plugin reads its rules by the same walk, which is why the
+# Kotlin section is rules rather than editor defaults.
 root = true
 
 [*]

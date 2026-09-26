@@ -20,7 +20,8 @@ export function field(value: unknown, name: string): unknown {
 }
 
 /**
- * Orders two strings the way Python's `sorted()` does – by code unit, not by locale.
+ * Orders two strings by code unit rather than by locale, which matches Python's `sorted()`
+ * everywhere outside the astral planes.
  * @param left One string.
  * @param right The other.
  * @returns Negative when `left` sorts first, positive when `right` does, zero when equal.

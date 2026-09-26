@@ -16,15 +16,14 @@ const grace = 20_000
 const longestDelay = 2_147_483_647
 
 /**
- * The auth service's one cookie a script can read: the access token's expiry, set on
- * every sign-in and refresh with the token's own Max-Age, so the browser drops it at
- * expiry.
+ * The access token's expiry cookie, set on every sign-in and refresh with the token's
+ * own Max-Age, so the browser drops it at expiry.
  */
 const pattern = /(?:^| )wsj27-auth_expires-at=([^;]+)/
 
 /**
  * The auth service's cookie for when the refresh window closes, set with the refresh
- * token's own Max-Age – so while the browser holds it, a session can be refreshed.
+ * token's own Max-Age, so while the browser holds it, a session can be refreshed.
  */
 const refreshPattern = /(?:^| )wsj27-auth_refresh-expires-at=[^;]/
 
@@ -45,8 +44,8 @@ export function readExpiry(cookie: string): number | undefined {
 
 /**
  * Whether the cookie header carries the refresh window's cookie. Only its presence is
- * read, never the time inside it: the browser drops the cookie when the window closes,
- * and comparing its time with the device's clock would be wrong on a phone set wrong.
+ * read, never the time inside it, because the browser drops the cookie when the window
+ * closes and a phone's clock may be set wrong.
  * @param cookie A `document.cookie` string.
  * @returns True when the cookie is present with a value.
  */

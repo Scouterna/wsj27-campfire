@@ -3,13 +3,14 @@ import { roleName } from "./ParticipantRole"
 
 // The sheet the list hands to a spreadsheet: one row per person shown, naming them and
 // every address the registration holds for them. It is a CSV rather than a workbook
-// because eight columns of plain text need nothing a workbook has, and writing one would
-// mean a dependency shipped into every phone that caches the application.
+// because columns of plain text need nothing a workbook has, and writing one would mean
+// a dependency shipped into every phone that caches the application.
 
-// What Excel reads a CSV as, none of it its default: the byte order mark is what makes it
-// open the file as UTF-8 rather than as the system's code page – without it "Närstående"
-// arrives mangled – and the semicolon is the separator it expects wherever the decimal
-// mark is a comma, Sweden included. The line ending is the one the format specifies.
+// What Excel needs to read the file, none of it its default. The byte order mark makes it
+// open the file as UTF-8 rather than in the system's code page, without which
+// "Närstående" arrives mangled, and the semicolon is the separator it expects wherever
+// the decimal mark is a comma, Sweden included. The line ending is the one the format
+// specifies.
 const byteOrderMark = "\u{FEFF}"
 const lineEnding = "\r\n"
 const separator = ";"
@@ -37,7 +38,7 @@ const headingBySlot: Readonly<Record<ContactSlot, string>> = {
 }
 
 // The whole sheet, left to right. The name and what they signed up as lead, so a row can
-// be recognized, and the four contact columns follow the order the form asks for them in.
+// be recognized, and the contact columns follow the order the form asks for them in.
 const columns: readonly SheetColumn[] = [
   { heading: "Namn", read: (person) => `${person.firstName} ${person.lastName}`.trim() },
   // The same word the list puts in a row, rather than a second vocabulary for one fact.
@@ -45,7 +46,7 @@ const columns: readonly SheetColumn[] = [
   { heading: "E-post", read: (person) => person.email },
   { heading: "Alternativ e-post", read: (person) => person.alternateEmail },
   ...contactSlots.map((slot) => ({
-    // eslint-disable-next-line security/detect-object-injection -- a slot is one of the model's own four literals
+    // eslint-disable-next-line security/detect-object-injection -- a slot is one of the model's own literals
     heading: headingBySlot[slot],
     // eslint-disable-next-line security/detect-object-injection -- as above
     read: (person: Participant) => person.contactEmails?.[slot],
@@ -71,8 +72,7 @@ function cell(value = ""): string {
  * all, because a blank cell is what says somebody is missing one.
  *
  * The nödkontakt columns stand empty for a deltagare or an IST however complete their
- * registration is: their form's template publishes no such questions, so nothing ever
- * arrives under those keys.
+ * registration is, because their form's template publishes no such questions.
  * @param people The people, as the list shows them.
  * @returns The file's whole contents, ready to be downloaded.
  */

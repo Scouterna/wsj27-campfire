@@ -6,8 +6,7 @@ import { funktionName, type CmtFunktion } from "./Participation"
  */
 export interface UnitEntry {
   /**
-   * What `/participants/units/$unit` carries – `"1"` through `"53"` for a unit, `"ist"`,
-   * or `"cmt"`.
+   * What the entry's address carries – a unit number, `"ist"`, or `"cmt"`.
    */
   readonly key: string
   /**
@@ -39,7 +38,7 @@ const istEntry = { key: "ist", label: "IST" }
 const cmtEntry = { key: "cmt", label: "CMT" }
 
 /**
- * Whether a key names the entry a person is in. A numeric key is a unit number; the two
+ * Whether a key names the entry a person is in. A numeric key is a unit number, and the
  * word keys are the member types that belong to no unit.
  * @param person The person to place.
  * @param key The key an entry carries.
@@ -126,8 +125,8 @@ export interface CmtSection {
   readonly people: readonly Participant[]
 }
 
-// The order the sections read in: the head of contingent leads, then the funktioner
-// alphabetically by their labels, and the undetailed close the list.
+// The head of contingent leads, then the funktioner alphabetically by their labels, and
+// "Övriga" closes the list.
 const sectionOrder: readonly CmtFunktion[] = [
   "kontingentledare",
   "administration",
@@ -139,10 +138,9 @@ const sectionOrder: readonly CmtFunktion[] = [
 ]
 
 /**
- * The contingent management partitioned by funktion, for the grouped view: the head of
- * contingent first, then the funktioner alphabetically, then "Övriga" for anyone the
- * roster has not detailed. A funktion nobody serves in gets no section. Order within a
- * section is the caller's – this partitions and never re-sorts.
+ * The contingent management partitioned by funktion, for the grouped view. A funktion
+ * nobody serves in gets no section, and order within a section is the caller's, because
+ * this never re-sorts.
  * @param people The management's members.
  * @returns The non-empty sections, in reading order.
  */

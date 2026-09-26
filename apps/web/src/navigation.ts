@@ -3,8 +3,8 @@ import { useLayoutEffect } from "react"
 
 /**
  * The application's navigation memory, and the bookkeeping that writes it. All of it
- * in-memory on purpose: after a reload the trails are empty, and every reader falls
- * back to what a cold deep link shows.
+ * lives in memory, so after a reload the trails are empty and every reader falls back
+ * to what a cold deep link shows.
  */
 
 /**
@@ -19,7 +19,7 @@ export function historyIndex(): number | undefined {
 
 /**
  * Stamp the current entry with its position, counting from wherever the session
- * started. Called by the bookkeeping on every navigation.
+ * started.
  * @param previous The index the last navigation left.
  * @param type How the entry was arrived at.
  * @returns The entry's index, stamped now or already there.
@@ -64,18 +64,17 @@ export function scrollBehavior(): ScrollBehavior {
 }
 
 /**
- * How far a scripted return to the top may glide. Past this it lands instantly: a
- * glide across thousands of pixels of virtualized rows shows only a blur, and rows
- * measuring themselves mid-flight write to the scroller, which cancels the glide.
+ * How far a scripted return to the top may glide. Past this it lands instantly,
+ * because a glide across thousands of pixels of virtualized rows shows only a blur,
+ * and rows measuring themselves mid-flight write to the scroller and cancel the glide.
  */
 const glideWithinPx = 10_000
 
 /**
  * Scroll whichever of the window and the content column scrolls at this width to the
  * top – the answer to tapping the section control of the page already shown. Nearby
- * it glides and far away it lands at once – and either way it settles: a virtual
- * list measuring its rows can cancel a glide mid-flight, so a scroll that stalls
- * short of the top is finished with an instant write rather than left hanging.
+ * it glides and far away it lands at once, and a scroll that stalls short of the top
+ * is finished with an instant write rather than left hanging.
  */
 export function scrollToTop(): void {
   const column = document.querySelector(".page")
@@ -86,10 +85,10 @@ export function scrollToTop(): void {
   scrollTo({ top: 0, behavior })
   column?.scrollTo({ top: 0, behavior })
 
-  // The settle: follow the scroll frame by frame, and the moment it stands still
-  // anywhere but the top – a canceled glide, a late measurement nudge – finish the
-  // move instantly. Bounded, so a reader who starts scrolling somewhere else mid-way
-  // is never fought for long.
+  // A virtual list measuring its rows can cancel a glide mid-flight, so the scroll is
+  // followed frame by frame and finished instantly the moment it stands still anywhere
+  // but the top. Bounded, so a reader who starts scrolling elsewhere is never fought
+  // for long.
   const startedAt = performance.now()
   let lastSeen = -1
   let stillFrames = 0
@@ -119,9 +118,8 @@ export function scrollToTop(): void {
 
 /**
  * Where each history entry had scrolled the content column, by history index. The
- * desktop content column scrolls itself – the window holds still so the rubberband
- * stays off the chrome – which puts it beyond the router's own scroll restoration, so
- * the same per-entry memory is kept here by hand.
+ * desktop content column scrolls itself, which puts it beyond the router's own scroll
+ * restoration, so the per-entry memory is kept here by hand.
  */
 const scrollTrail = new Map<number, number>()
 
@@ -178,37 +176,32 @@ function restoreScroll(index: number, windowTop: number, columnTop: number): voi
  * directly rather than through a link.
  *
  * The click listener marks every link and the pop listener marks every pop, so a
- * programmatic `navigate` is the one navigation nothing sees: without this it would be
- * stamped with whatever the *previous* navigation was. After a pop that means reusing
- * the entry's own index, so the new entry overwrites the title, root, and scroll trails
- * of the one it was pushed on top of.
+ * programmatic navigation is the one nothing sees, and without this it is stamped with
+ * whatever the *previous* navigation was. After a pop that reuses the entry's own
+ * index, and the new entry overwrites the title, root, and scroll trails of the one it
+ * was pushed on top of.
  */
 export function markPush(): void {
   lastNavigation.type = "push"
 }
 
 /**
- * Everything the chrome has to remember about a navigation: the title of each history
+ * Everything the chrome has to remember about a navigation – the title of each history
  * entry, which entries are section roots, the phase mark the crumb morph reads, and
- * the scroll positions. Runs on every location change, from the chrome.
+ * the scroll positions. Runs on every location change.
  *
  * @param pathname Where the navigation landed.
  * @param title What the screen showing now is called.
  */
 export function useNavigationBookkeeping(pathname: string, title: string | undefined): void {
-  // Before paint, so the scroll restore is what the view transition snapshots. The
+  // Before paint, so the scroll position is what the view transition snapshots. The
   // index is stamped first, because everything else is keyed by it.
   useLayoutEffect(() => {
     const index = stampIndex(lastNavigation.index, lastNavigation.type)
     const isPop = lastNavigation.type === "pop"
     lastNavigation.index = index
 
-    // Scroll restoration, ours alone: a pop returns to where the scroller was left; a
-    // push or replace starts at the top. Written before paint, so the position is what
-    // the view transition snapshots – and, on a pop, kept warm for a moment: the
-    // router swaps the outlet a beat after the location changes, so at this point the
-    // leaving screen still decides the scroller's height and a tall position clamps
-    // to nothing. The retry re-applies it once the arriving screen has the height.
+    // A pop returns to where the scroller was left; a push or replace starts at the top.
     if (isPop) {
       restoreScroll(index, windowScrollTrail.get(index) ?? 0, scrollTrail.get(index) ?? 0)
     } else {
@@ -237,9 +230,8 @@ export function useNavigationBookkeeping(pathname: string, title: string | undef
     document.documentElement.dataset["vtNew"] = ""
   }, [pathname])
 
-  // The title trail: what each history entry was called, by its index. The screen's
-  // own PageTitle can arrive a beat after the navigation, so the trail follows the
-  // title too.
+  // A screen can name itself a beat after the navigation lands, so the title trail
+  // follows the title as well as the address.
   useLayoutEffect(() => {
     const index = historyIndex()
     if (index !== undefined && title !== undefined && title !== "") {
@@ -249,12 +241,12 @@ export function useNavigationBookkeeping(pathname: string, title: string | undef
 }
 
 /**
- * The listeners that decide direction, installed once. The source of the click decides
- * it, not the shape of the URL: the side menu and the tab strip cross-fade between
- * sections, and everything else – content, the top bar – pushes, however the paths
- * compare, unless the link declares a direction of its own, as the profile control
- * does. Back is the back control's to set. One capture-phase listener sees every
- * link before the router does, so no module has to know navigations are animated.
+ * The click listener that decides direction. The source of the click decides it rather
+ * than the shape of the URL – the side menu and the tab strip cross-fade between
+ * sections, and everything else pushes, however the paths compare, unless the link
+ * declares a direction of its own, as the profile control does. Back is the back
+ * control's to set. One capture-phase listener sees every link before the router does,
+ * so no module has to know navigations are animated.
  * @param event The click, seen at capture phase before the router acts on it.
  */
 const onClick = (event: MouseEvent): void => {
@@ -295,14 +287,13 @@ const onPop = (): void => {
   delete document.documentElement.dataset["vtNew"]
 }
 
-// Registered at module evaluation rather than in wireNavigation: the router
-// subscribes to popstate when routes.tsx creates it, popstate listeners run in
-// registration order, and React flushes the pop's render – restore included –
-// synchronously inside the router's own handler. A listener registered after the
-// router learns about the pop only after the restore already ran as a push and
-// scrolled the page to its top. routes.tsx imports this module, so evaluating here
-// is what puts this listener first.
-// eslint-disable-next-line unicorn/no-top-level-side-effects -- the registration order against the router is the whole point; see above
+// Registered at module evaluation rather than at wiring, because popstate listeners run
+// in registration order and React flushes the pop's render – restore included –
+// synchronously inside the router's own listener, added when the router is created. A
+// listener registered after it hears of the pop only once the restore has run as a push
+// and scrolled the page to its top. The router's module imports this one, so evaluating
+// here puts this listener first.
+// eslint-disable-next-line unicorn/no-top-level-side-effects -- it must be registered before the router's own popstate listener
 addEventListener("popstate", onPop)
 
 // Every scroll writes the entry's position; a passive listener keeps it free. On the
@@ -336,9 +327,9 @@ function requiresIndex(data: unknown): data is Record<string, unknown> {
  * Install the listeners, once, at startup.
  */
 export function wireNavigation(): void {
-  // Ours alone. Left on "auto", WebKit restores a pop's scroll position itself,
-  // asynchronously, racing the SPA's own render and the view transition – that race is
-  // what puts the painted page out of step with where taps land.
+  // Left on "auto", WebKit restores a pop's scroll position itself, asynchronously,
+  // racing the SPA's own render and the view transition, and that race puts the painted
+  // page out of step with where taps land.
   history.scrollRestoration = "manual"
 
   // A replace navigation – a screen writing its state into the address – hands the

@@ -126,7 +126,7 @@ describe("the ScoutID stand-in", () => {
       time.advance(25 * 60 * 1000)
       tokens = scoutId.refresh(tokens.refresh_token)
     }
-    // Nine hours and thirty-five minutes in, the refresh token lives only as long as the session.
+    // This close to the maximum lifespan, the refresh token lives only as long as the session.
     expect(tokens.refresh_expires_in).toBe(25 * 60)
     time.advance(25 * 60 * 1000)
     expect(() => scoutId.refresh(tokens.refresh_token)).toThrow(InvalidGrant)

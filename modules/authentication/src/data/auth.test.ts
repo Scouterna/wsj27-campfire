@@ -22,8 +22,8 @@ function userPayload(user: Readonly<Record<string, unknown>>): unknown {
 }
 
 /**
- * Stands in for the platform's `fetch`: each address answers from its own queue, and an
- * address with nothing left to say reads as a dead network. Returns the list the stub
+ * Stands in for the platform's `fetch`, where each address answers from its own queue
+ * and an address with nothing left to say reads as a dead network. Returns the list the stub
  * appends to, so a test can count what was asked and in what order.
  */
 function networkAnswers(queues: Readonly<Record<string, readonly Response[]>>): readonly string[] {

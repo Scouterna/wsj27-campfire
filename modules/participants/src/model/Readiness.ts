@@ -1,5 +1,5 @@
 /**
- * How ready somebody is for the jamboree's activities – the two factors the participants
+ * How ready somebody is for the jamboree's activities – the factors the participants
  * service exports, and the free text that qualifies a no. The form asks more, but the
  * rest never leaves Scoutnet.
  */

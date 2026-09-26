@@ -4,8 +4,8 @@ import { field } from "../json.ts"
 /**
  * The member-to-roles map the auth service caches from the project API, and what it answers
  * for a member the map does not list. The real service polls the map over HTTP every hour; the
- * mock's list of participants cannot change while it runs, so the cache is filled once, from the same map
- * `/api/project/participants/roles` serves.
+ * mock's list of participants cannot change while it runs, so the cache is filled once, from the
+ * same map `/api/project/participants/roles` serves.
  */
 export class RoleCache {
   readonly #loadedAt: number

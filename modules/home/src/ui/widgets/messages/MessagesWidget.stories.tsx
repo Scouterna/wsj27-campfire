@@ -65,7 +65,7 @@ const news: Message = {
 const meta: Meta<typeof MessagesWidget> = {
   title: "Modules/Home/Widgets/MessagesWidget",
   component: MessagesWidget,
-  // Closing is remembered on the device, and the canvas is a device: without this a
+  // Closing is remembered on the device, and the canvas is a device, so without this a
   // story closed once would render nothing on every visit after it.
   beforeEach: forgetClosedMessages,
   decorators: [ColumnDecorator],
@@ -77,7 +77,8 @@ export default meta
 type Story = StoryObj<typeof MessagesWidget>
 
 /**
- * The app introducing itself: the theme's bright fill, and the only title that proclaims.
+ * The app introducing itself on the theme's bright fill, under the only title that
+ * proclaims.
  */
 export const Welcome: Story = {
   args: { messages: [welcome] },
@@ -92,14 +93,14 @@ export const Important: Story = {
 }
 
 /**
- * Something new to know, which is the kind there will be most of.
+ * Something new to know.
  */
 export const News: Story = {
   args: { messages: [news] },
 }
 
 /**
- * The three together, which is the arrangement the weights have to hold up in: a plate
+ * Every kind together, which is the arrangement the weights have to hold up in – a plate
  * each, closed one at a time, and no plate reading as a part of the one above it.
  */
 export const Together: Story = {

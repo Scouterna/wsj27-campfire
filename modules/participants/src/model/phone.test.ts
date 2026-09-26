@@ -9,7 +9,7 @@ describe("formatting a phone number for display", () => {
   })
 
   it("reads a number the same whatever shape it arrived in", () => {
-    // The three spellings of one number all land on the one display shape.
+    // Every spelling of one number lands on the one display shape.
     expect(formatPhoneNumber("070-8277486")).toBe("070-827 74 86")
     expect(formatPhoneNumber("070-827 74 86")).toBe("070-827 74 86")
     expect(formatPhoneNumber("0046 70 827 74 86")).toBe("070-827 74 86")

@@ -1,9 +1,8 @@
 name: Release skills
 
 # Packages every skill under .agents/skills whose version has not been released
-# yet and publishes it as its own GitHub Release, one release per skill.
-# metadata.version is the source of truth: the tag is <name>-v<version>, so
-# bumping the version cuts a release and an unchanged version is skipped.
+# and publishes it as its own GitHub Release. The tag is <name>-v<version>, so
+# bumping metadata.version cuts a release and an unchanged version is skipped.
 #
 # check_skills.yml has already validated these skills on the pull request.
 # Also runnable by hand, to retry a release that failed.
@@ -16,9 +15,9 @@ on:
       - ".agents/skills/**"
   workflow_dispatch:
 
-# Releases queue rather than race: two merges in quick succession would
-# otherwise create the same tag twice. Never cancel one in flight – a
-# canceled release can leave a tag without its release.
+# Releases queue rather than race, because two merges in quick succession would
+# otherwise create the same tag twice. One in flight is never canceled, because
+# a canceled release can leave a tag without its release.
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
@@ -27,7 +26,8 @@ jobs:
   release:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # Scoped to the job that needs it: creating a release writes to the repository.
+    # Scoped to the job that needs it, because creating a release writes to the
+    # repository.
     permissions:
       contents: write
     steps:
@@ -65,7 +65,8 @@ jobs:
               continue
             fi
 
-            # The skill's name must match its directory (the packaging invariant).
+            # The zip is named from the frontmatter and filled from the directory,
+            # so a mismatch would release one under the other's name.
             if [ "$name" != "$dir_name" ]; then
               echo "::warning::Skipping $skill_dir – frontmatter name \"$name\" does not match directory \"$dir_name\""
               continue
@@ -73,9 +74,8 @@ jobs:
 
             tag="${name}-v${version}"
 
-            # Already released at this version – its tag exists, so skip.
-            # (The tag is the version's identity and what gh release create
-            # collides on; to re-release a version, delete its tag.)
+            # The tag is the version's identity and what gh release create collides
+            # on, so an existing tag means released. Deleting it re-releases.
             if git ls-remote --exit-code origin "refs/tags/${tag}" >/dev/null 2>&1; then
               echo "Skipping $name – tag $tag already exists."
               continue

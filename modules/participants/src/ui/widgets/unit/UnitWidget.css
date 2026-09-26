@@ -14,9 +14,9 @@
     display: grid;
     gap: var(--spacing-stack);
 
-    /* minmax(0, …), never a bare 1fr: a bare track's minimum is the widest pill's
-       min-content, so one long name and kår would burst the columns out of the card
-       instead of truncating. */
+    /* minmax(0, …), never a bare 1fr, because a bare track's minimum is the widest
+       pill's min-content, so one long name and kår would burst the columns out of the
+       card instead of truncating. */
     grid-template-columns: minmax(0, 1fr);
 
     /* Bled to the row pattern's inset rather than the card's own padding – on every
@@ -25,8 +25,8 @@
     margin: calc(var(--spacing-container) - var(--card-padding, var(--spacing-section)));
   }
 
-  /* Two columns only from 1024px: at 768 the side menu has already taken its track,
-     and two columns in what remains truncate more names than they show. */
+  /* Two columns only from 1024px, because at 768 the side menu has already taken its
+     track, and two columns in what remains truncate more names than they show. */
   @media (min-width: 1024px) {
     .unit-widget-people {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

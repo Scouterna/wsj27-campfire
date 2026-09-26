@@ -13,7 +13,7 @@ const preview: Preview = {
   // the toolbar picked.
   tags: ["autodocs"],
   decorators: [RouterDecorator, ThemeDecorator],
-  // The five unit colors, switchable for every story from the toolbar – the whole
+  // The unit colors, switchable for every story from the toolbar – the whole
   // catalog must hold up in each of them.
   globalTypes: {
     theme: {

@@ -30,8 +30,8 @@ interface Round {
   readonly people: readonly Participant[]
   /**
    * Why the round failed, kept so it can be rethrown rather than a message invented in
-   * its place: the 401 whenever any listing was refused, since that is the one the query
-   * client acts on, and otherwise the first failure.
+   * its place. It is the 401 whenever any listing was refused, since that is the one the
+   * query client acts on, and otherwise the first failure.
    */
   readonly reason?: unknown
 }
@@ -39,19 +39,12 @@ interface Round {
 /**
  * Query options for the list of participants as the viewer may read it.
  *
- * The participants service has no "everyone I may see" endpoint – it lists one troop or
- * one member type at a time, and refuses what the caller may not read – so the list is
- * composed here. A leader asks for their own unit and gets exactly what they are allowed.
- * The contingent management walks the contingent the only way the service offers: the
- * leaders' listing names every unit, then each unit, the IST, and the management itself
- * are fetched and merged. Management wins over leadership for anybody who is both, because
- * the wider answer contains the narrower one.
- *
- * Describes the request rather than making it. Query options are what a route loader
- * prefetches with, a component reads with, and a test substitutes – one definition for all
- * three, which TanStack Query collapses into a single request and a single cache entry
- * however many callers there are.
- * @param viewer Who is reading, from `useViewer`.
+ * The participants service lists one troop or one member type at a time, and refuses what
+ * the caller may not read, so the list is composed here. A leader asks for their own unit
+ * and gets exactly what they are allowed, and the contingent management walks the whole
+ * contingent. Management wins over leadership for anybody who is both, because the wider
+ * answer contains the narrower one.
+ * @param viewer Who is reading.
  * @returns Options for `useQuery`, `useSuspenseQuery`, or `ensureQueryData`.
  */
 export function fetchParticipantsQuery(
@@ -124,8 +117,8 @@ async function round(keys: readonly string[]): Promise<Round> {
   let refusal: HttpError | undefined
 
   for (const [index, key] of keys.entries()) {
-    // Promise.allSettled answers in the order it was asked, so the outcomes line up with
-    // the keys; an outcome that somehow is not there counts as a failure.
+    // The outcomes line up with the keys, and one that is somehow missing counts as a
+    // failure.
     // eslint-disable-next-line security/detect-object-injection -- index is the key list's own
     const outcome = settled[index]
     if (outcome?.status === "fulfilled") {
@@ -147,17 +140,15 @@ async function round(keys: readonly string[]): Promise<Round> {
 
 /**
  * The whole contingent: every unit the leaders' listing names, the IST, and the contingent
- * management, merged and deduplicated by member number – a leader appears in their unit's
- * listing as well as in the leaders' one, and is one person either way.
+ * management, deduplicated by member number, since a leader appears in their unit's
+ * listing as well as in the leaders' one.
  *
- * A unit, IST, or management listing that fails for anything but a 404 or a 401 is asked
- * once more, on its own. If it still fails – or the leaders' listing, which names the
- * units and is asked only once, fails at all – so does the whole query: a partial
- * contingent looks exactly like a complete one to whoever is reading it, and "this unit is
- * missing" is not a thing a screen can say about a list it cannot tell is short. A
- * listing refused with 401 is not asked again here, and the refusal is what the query
- * throws, in either round and ahead of any other failure – whether to ask again is the
- * query client's call, once it knows who is signed in.
+ * A unit, IST, or management listing that fails for anything but a refusal is asked once
+ * more. If it fails again, or the leaders' listing fails at all, so does the whole query,
+ * because a partial contingent looks exactly like a complete one and no screen can say a
+ * unit is missing from a list it cannot tell is short. A 401 is never asked again here,
+ * and it is what the query throws ahead of any other failure, because whether to ask
+ * again is the query client's call once it knows who is signed in.
  * @returns Everyone in the contingent, each of them once.
  */
 async function wholeContingent(): Promise<readonly Participant[]> {
@@ -178,8 +169,8 @@ async function wholeContingent(): Promise<readonly Participant[]> {
     throw refusal
   }
   if (second !== undefined && second.failed.length > 0) {
-    // Rethrown rather than wrapped: the original names the address that refused, which
-    // is what reading the failure in a console needs.
+    // Rethrown rather than wrapped, because the original names the address that failed,
+    // which is what reading the failure in a console needs.
     throw second.reason instanceof Error
       ? second.reason
       : new Error("The list of participants could not be assembled", { cause: second.reason })

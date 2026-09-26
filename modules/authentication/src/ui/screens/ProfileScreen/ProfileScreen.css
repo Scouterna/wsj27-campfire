@@ -1,6 +1,3 @@
-/* The profile page: the mark beside the name and the role under it, and the way out
-   beneath the card. */
-
 @layer screen {
   .profile-screen {
     align-items: center;

@@ -45,8 +45,8 @@ export const WholeContingent: Story = {
 }
 
 /**
- * The list at the contingent's real size – about 2,600 people. What narrowing costs is
- * only visible here: the cast above is two dozen rows, and the real list is not.
+ * The list at the contingent's real size. What narrowing costs is only visible here,
+ * because the cast the other stories read is a small fraction of the real list.
  */
 export const WholeContingentAtScale: Story = {
   parameters: { api: { list: largePeopleList() } },

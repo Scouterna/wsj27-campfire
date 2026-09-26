@@ -12,8 +12,8 @@ export default meta
 type Story = StoryObj<typeof CountdownCard>
 
 /**
- * Months out on the rundresa: the count to the buses already runs to the minute, and the
- * bar is still dashed.
+ * Months out on the rundresa, with the count to the buses already running to the minute
+ * and the bar still dashed.
  */
 export const Distant: Story = {
   args: {
@@ -35,7 +35,7 @@ export const DistantToTheSecond: Story = {
 }
 
 /**
- * Weeks out: the same count, with the days running low.
+ * Weeks out, with the same count and the days running low.
  */
 export const Approaching: Story = {
   args: {
@@ -45,7 +45,7 @@ export const Approaching: Story = {
 }
 
 /**
- * On the road: the count turns to the journey's days, the travel days fill in, and
+ * On the road, where the count turns to the journey's days, the travel days fill in, and
  * today stands taller.
  */
 export const Traveling: Story = {
@@ -56,7 +56,7 @@ export const Traveling: Story = {
 }
 
 /**
- * At camp: the status counts the camp's days, and the legend says which one.
+ * At camp, where the status counts the camp's days and the legend says which one.
  */
 export const Camping: Story = {
   args: {
@@ -66,8 +66,8 @@ export const Camping: Story = {
 }
 
 /**
- * The direktresa counts to its own departure for Olsztyn, and its road is three days
- * rather than eight.
+ * The direktresa counts to its own departure for Olsztyn, on a shorter road than the
+ * rundresa's.
  */
 export const DistantDirektresa: Story = {
   args: {
@@ -77,7 +77,7 @@ export const DistantDirektresa: Story = {
 }
 
 /**
- * The rundresa's road days are somebody else's: while its buses are in Latvia, the
+ * The rundresa's road days are somebody else's, so while its buses are in Latvia the
  * direktresa is still counting down.
  */
 export const ApproachingDirektresa: Story = {
@@ -98,8 +98,8 @@ export const TravelingDirektresa: Story = {
 }
 
 /**
- * At camp on the direktresa: the camp's days are everybody's, and the road to Olsztyn
- * is behind.
+ * At camp on the direktresa, where the camp's days are everybody's and the road to
+ * Olsztyn is behind.
  */
 export const CampingDirektresa: Story = {
   args: {
@@ -120,7 +120,7 @@ export const DistantOnTheirOwn: Story = {
 }
 
 /**
- * Weeks out on one's own: still counting to the camp, with no road on the bar.
+ * Weeks out on one's own, still counting to the camp with no road on the bar.
  */
 export const ApproachingOnTheirOwn: Story = {
   args: {
@@ -130,7 +130,7 @@ export const ApproachingOnTheirOwn: Story = {
 }
 
 /**
- * At camp for somebody who traveled on their own: the same camp, a shorter bar.
+ * At camp for somebody who traveled on their own – the same camp on a shorter bar.
  */
 export const CampingOnTheirOwn: Story = {
   args: {
@@ -140,8 +140,8 @@ export const CampingOnTheirOwn: Story = {
 }
 
 /**
- * Home again: the bar is done, the homecoming day is checked, and the caveat about the
- * dates is gone – they happened.
+ * Home again, with the bar done, the homecoming day checked, and the caveat about the
+ * dates gone, because they happened.
  */
 export const Home: Story = {
   args: {
@@ -151,7 +151,7 @@ export const Home: Story = {
 }
 
 /**
- * Home again on the direktresa: the same thank-you over the shorter bar.
+ * Home again on the direktresa, with the same thank-you over the shorter bar.
  */
 export const HomeDirektresa: Story = {
   args: {
@@ -161,8 +161,8 @@ export const HomeDirektresa: Story = {
 }
 
 /**
- * Home again for somebody who traveled on their own: the thank-you over the shortest
- * bar.
+ * Home again for somebody who traveled on their own, with the thank-you over the
+ * shortest bar.
  */
 export const HomeOnTheirOwn: Story = {
   args: {

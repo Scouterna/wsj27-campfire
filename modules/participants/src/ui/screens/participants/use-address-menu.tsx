@@ -18,7 +18,7 @@ import {
 import { contactSheet, contactSheetName } from "../../../model/contact-sheet"
 import type { Participant } from "../../../model/Participant"
 
-// Constructed once: a formatter is expensive to build and free to reuse.
+// Constructed once, because a formatter is expensive to build and free to reuse.
 const swedish = new Intl.NumberFormat("sv-SE")
 
 const nobodyReason = "Inga e-postadresser i listan."
@@ -37,10 +37,10 @@ interface EntryFace {
 }
 
 /**
- * What the four entries are called, and the glyphs the people's two wear. The contacts'
- * entries go without, indented under them: the same two acts again, for the people around
- * the ones above. "Kontaktpersoner" rather than "närstående", because the set is both the
- * närstående somebody named and their nödkontakter.
+ * What the entries are called, and the glyphs the people's entries wear. The contacts'
+ * entries go without, indented under them, because they are the same acts again for the
+ * people around the ones above. "Kontaktpersoner" rather than "närstående", because the
+ * set is both the närstående somebody named and their nödkontakter.
  */
 const entries: Readonly<
   Record<AddressSetKind, { readonly copy: EntryFace; readonly mail: EntryFace }>
@@ -57,7 +57,7 @@ const entries: Readonly<
 
 /**
  * Put the addresses on the clipboard, and say what came of it – the menu shows the
- * answer on the entry that was chosen. Never rejects: a refusal is an answer too.
+ * answer on the entry that was chosen. Never rejects, because a refusal is an answer too.
  * @param addresses The addresses, from `addressSet`.
  * @returns How many were copied, or that they could not be.
  */
@@ -78,8 +78,8 @@ async function copy(addresses: readonly string[]): Promise<OverflowMenuReceipt> 
 }
 
 /**
- * Hand the sheet to the browser as a file to save. Never throws: a refusal is a receipt
- * like any other, and the menu says it on the entry that was chosen.
+ * Hand the sheet to the browser as a file to save. Never throws, because a refusal is a
+ * receipt like any other, and the menu says it on the entry that was chosen.
  * @param found The people the list shows.
  * @returns How many rows were written, or that they could not be.
  */
@@ -92,8 +92,8 @@ function save(found: readonly Participant[]): OverflowMenuReceipt {
     link.download = contactSheetName(new Date())
     link.href = url
     link.click()
-    // Released a turn later rather than here: a browser that has not finished reading the
-    // blob when the url is revoked cancels the download it just started.
+    // Released later rather than here, because a browser that has not finished reading
+    // the blob when the url is revoked cancels the download it just started.
     setTimeout(() => {
       URL.revokeObjectURL(url)
     }, revokeMs)
@@ -106,18 +106,18 @@ function save(found: readonly Participant[]): OverflowMenuReceipt {
 }
 
 /**
- * One kind's two entries: mail, then copy. Both unavailable where nobody shown has an
+ * One kind's entries, mail then copy. Both unavailable where nobody shown has an
  * address, and mail alone where the link would be too long to trust.
  * @param found The people the list shows.
  * @param kind Whose addresses the entries act on.
- * @returns The two entries, in menu order.
+ * @returns The entries, in menu order.
  */
 function entriesFor(
   found: readonly Participant[],
   kind: AddressSetKind,
 ): readonly OverflowMenuItem[] {
   const addresses = addressSet(found, kind)
-  // eslint-disable-next-line security/detect-object-injection -- kind is one of the table's own two keys
+  // eslint-disable-next-line security/detect-object-injection -- kind is one of the table's own keys
   const { copy: copyEntry, mail: mailEntry } = entries[kind]
   if (addresses.length === 0) {
     return [

@@ -1,5 +1,4 @@
-/* The floating action button: a filled circle in the theme's ink, the icon white.
-   Where it floats is the consumer's stylesheet's decision. */
+/* The floating action button: a filled circle in the theme's ink, the icon white. */
 
 @layer component {
   .fab {
@@ -19,8 +18,8 @@
     width: 56px;
   }
 
-  /* Darkening steps mixed over the ink rather than picked per theme, so all five
-     respond to a press the same way. */
+  /* Darkening steps mixed over the ink rather than picked per theme, so every theme
+     responds to a press the same way. */
   .fab:active {
     background: color-mix(in srgb, var(--color-theme-ink) 72%, black);
   }

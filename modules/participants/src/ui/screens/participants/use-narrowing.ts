@@ -6,7 +6,7 @@ import { toParticipantsSearch, type ParticipantsSearch } from "./search"
 
 /**
  * How long the typing has to settle before the address is rewritten. Long enough that a
- * word is one entry in the history rather than eight, short enough that letting go of the
+ * word is one navigation rather than one per letter, short enough that letting go of the
  * keyboard and sharing the address gives what is on screen.
  */
 const settleMs = 150
@@ -16,11 +16,11 @@ const settleMs = 150
  */
 export interface Narrowing {
   /**
-   * The search field's keystrokes land here, immediately.
+   * Takes the search field's keystrokes, immediately.
    */
   readonly onText: (value: string) => void
   /**
-   * Picking a participation-role chip, or undefined for "Alla". Takes the address
+   * Picks a participation-role chip, or undefined for "Alla", and takes the address
    * there at once, keeping the search text.
    */
   readonly pickRole: (filter: RoleFilter | undefined) => void
@@ -44,7 +44,7 @@ export interface Narrowing {
  * bookmarked, and returned to – while the field itself stays locally controlled,
  * because a field that waits for a round trip through the router drops keystrokes.
  * The address catches up once the typing settles.
- * @returns The narrowing, and the two ways to change it.
+ * @returns The narrowing, and the ways to change it.
  */
 export function useNarrowing(): Narrowing {
   const navigate = useNavigate()

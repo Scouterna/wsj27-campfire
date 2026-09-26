@@ -1,9 +1,9 @@
 import { useLayoutEffect, useSyncExternalStore } from "react"
 
 /**
- * The jump entries the current page declared, and who is listening. Module state for
- * the same reason as the page title's: the declaring page and the reading chrome sit
- * on opposite sides of the router's outlet.
+ * The jump entries the current page declared, and who is listening. Module state,
+ * because the declaring page and the reading chrome sit on opposite sides of the
+ * router's outlet.
  */
 const state: { declared: PageJumpsProps | undefined } = { declared: undefined }
 const listeners = new Set<() => void>()
@@ -44,14 +44,14 @@ export type PageJumpsProps = {
 }
 
 /**
- * Declares the page's jump stops from anywhere in a page, the way `PageTitle` declares
- * its name: the chrome's outline column offers them in place of the scanned headings.
- * For a page whose sections are not in the document – a virtualized list has rows for
- * the viewport only – this is the one way the outline can know them. Renders nothing;
- * withdrawn on unmount, and the outline falls back to its heading scan.
+ * Declares the page's jump stops from anywhere in a page, for the chrome's outline
+ * column to offer in place of the scanned headings. For a page whose sections are not
+ * in the document – a virtualized list has rows for the viewport only – this is the
+ * one way the outline can know them. On unmount the declaration is withdrawn and the
+ * outline falls back to its heading scan.
  *
  * @param props The stops, the current one, and what choosing one does.
- * @returns Nothing – the component renders nothing.
+ * @returns Always null, because the outline draws the stops.
  */
 export function PageJumps(props: PageJumpsProps): null {
   const { current, entries, onJump } = props

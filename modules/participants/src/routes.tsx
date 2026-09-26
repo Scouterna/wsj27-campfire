@@ -35,9 +35,8 @@ declare module "@scouterna/wsj27-campfire-ui" {
  * against.
  *
  * The browser sits under the list and one unit under the browser, so back walks the way
- * the reader came – and `/participants/units` is a literal segment where
- * `/participants/$memberNo` is a parameter, which is what keeps a unit from being read
- * as a member number.
+ * the reader came – and the browser's segment is a literal where a person's is a
+ * parameter, which is what keeps a unit from being read as a member number.
  */
 export const participantsRoutes = {
   "/participants": {

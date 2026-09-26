@@ -1,16 +1,14 @@
 import { expect, test, type Locator, type Page } from "@playwright/test"
 
-// The reveal file itself rather than the ui package, as in the home walk: the package
-// surface pulls component stylesheets along, which the test runner cannot swallow.
+// The reveal file itself rather than the ui package, as in the home walk, because the
+// package surface pulls component stylesheets along, which the test runner cannot swallow.
 // eslint-disable-next-line import-x/no-relative-packages -- see above
 import { unitsReveal } from "../../../libraries/ui/src/foundations/reveal/reveals"
 import { closedMessagesKey, messages, type Message } from "../src/model/messages"
 
-// The contingent's messages on the start screen: a welcome for each role, closed
-// together, and remembered on the device. A fresh browser context has closed nothing,
-// so every walk here opens on the welcome unless it says otherwise – and nothing here
-// may clear the stored value from an init script, which would run again on the reload
-// the remembering is proved by.
+// A fresh browser context has closed nothing, so every walk here opens on the welcome
+// unless it says otherwise. Nothing here may clear the stored value from an init
+// script, which would run again on the reload the remembering is proved by.
 
 /**
  * The welcome written for one role.
@@ -119,8 +117,7 @@ function closeControls(page: Page): Locator {
 
 /**
  * The titles of the messages written for a role, in list order – what the plates put
- * into the page outline, so the walk does not hard-code a message that will be joined
- * by others.
+ * into the page outline, read from the list so the walk holds as messages are added.
  * @param role The role kind to read for.
  * @returns The titles, oldest first.
  */

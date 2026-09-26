@@ -44,8 +44,7 @@ export function Logo(props: LogoProps): ReactElement {
   return (
     <img
       className="logo"
-      // The key is one of the five literals the type allows, not anything data-driven.
-      // eslint-disable-next-line security/detect-object-injection -- key is a checked literal
+      // eslint-disable-next-line security/detect-object-injection -- a Theme, never free input
       src={logos[theme]}
       alt={props.alt ?? "26th World Scout Jamboree Poland 2027 – Swedish Contingent"}
     />

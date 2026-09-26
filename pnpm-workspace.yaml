@@ -1,8 +1,7 @@
-# The pnpm workspace: where packages live, and the policy every install is
-# held to. pnpm reads its configuration from this file.
+# Where the workspace's packages live, and the policy every install is held to.
 
-# Supply chain. A version published less than three days ago is refused, so a
-# compromised release has time to be noticed before it can be installed here.
+# A version published less than three days ago is refused, so a compromised
+# release has time to be noticed before it can be installed here.
 # Strict mode also refuses a package that carries no publish timestamp, which
 # would otherwise slip past the window unchecked.
 minimumReleaseAge: 4320
@@ -21,23 +20,18 @@ allowBuilds:
 # install can never quietly resolve to something the lockfile did not describe.
 savePrefix: ""
 
-# An unmet peer dependency is a failure, not a warning.
-#
-# This is why `workbox-build` and `workbox-window` sit in the root
-# devDependencies with nothing in the repository importing either:
-# vite-plugin-pwa declares both as required peers, and an undeclared peer is a
-# failed install here rather than a warning. They are not dead weight – removing
-# either breaks `pnpm install`. package.json is strict JSON and cannot say so
-# itself, which is why it is said here.
+# An unmet peer dependency fails the install rather than warning. That is why
+# `workbox-build` and `workbox-window` sit in the root devDependencies although
+# nothing imports either – vite-plugin-pwa requires both as peers. It is said
+# here because package.json is strict JSON and cannot say it itself.
 strictPeerDependencies: true
 autoInstallPeers: false
 
 # VitePress bundles Algolia's DocSearch, which asks for `search-insights` to
-# report search analytics. The guidebook uses VitePress's built-in local
-# search, so DocSearch never runs and the analytics package would be dead
-# weight. Declared missing on purpose rather than installed. The same DocSearch
-# also pins its React peer below 19; since it never renders, the workspace's
-# React 19 is allowed to satisfy it rather than blocking every install.
+# report search analytics. The guidebook uses VitePress's built-in local search,
+# so DocSearch never runs, and the analytics package is left missing on purpose.
+# DocSearch also pins its React peer below 19; since it never renders, the
+# workspace's React 19 is allowed to satisfy it rather than failing every install.
 peerDependencyRules:
   allowedVersions:
     "@docsearch/react>react": "19"
@@ -49,12 +43,12 @@ peerDependencyRules:
 # Prefer a workspace package over the registry when both could satisfy a range.
 preferWorkspacePackages: true
 
-# The four package roots: the deployable apps, the generic libraries, the
-# feature modules, and the developer tooling. Every one of them exports raw
-# TypeScript source and has no build step of its own: Vite compiles what the web
-# application imports, and Node's type stripping runs the tools. `apps/apple`
-# and `apps/android` are native projects with no package.json – they are driven
-# by root scripts that shell into Xcode and Gradle, which pnpm does not manage.
+# The package roots – the deployable apps, the generic libraries, the feature
+# modules, and the developer tooling. Every package exports raw TypeScript source
+# with no build step of its own, because Vite compiles what the web application
+# imports and Node's type stripping runs the tools. `apps/apple` and
+# `apps/android` are native projects with no package.json, driven by root
+# scripts that shell into Xcode and Gradle.
 packages:
   - apps/*
   - libraries/*

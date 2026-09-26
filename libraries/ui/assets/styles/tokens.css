@@ -1,7 +1,7 @@
-/* The design system's tokens. Raw values live here and nowhere else: a component names a
-   role, never a value. A theme crosses to a shell as a name, and each shell holds its own
-   copy of the color behind it, so a unit color changes in three places or none. Today the
-   only copy is the blue behind each shell's launch screen. */
+/* The design system's tokens. Raw values live here and nowhere else, so a component names
+   a role, never a value. A shell receives a theme only as a name, so a color it draws
+   itself – the blue behind its launch screen – is a copy that changes here and in each
+   shell together or not at all. */
 
 @layer tokens {
   :root {
@@ -19,39 +19,39 @@
        pill behind the section being read. */
     --color-sheet: #fff;
 
-    /* The hairline between chrome and content: the ink at a tenth. */
+    /* The hairline between chrome and content, the ink at a tenth. */
     --color-divider: rgb(26 26 26 / 10%);
 
     /* The translucent glass a floating piece of chrome stands on – the condensed bar,
        the overflow trigger – always over a backdrop blur. */
     --color-glass: rgb(255 255 255 / 62%);
 
-    /* The contingent's five unit colors – the exact outer-ring values from the five
-       badge marks, which are the authoritative artwork for the color identities. */
+    /* The unit colors – the exact outer-ring values from the badge marks, which are the
+       authoritative artwork for the color identities. */
     --color-theme-blue: #2a778a;
     --color-theme-brown: #985b15;
     --color-theme-green: #768b33;
     --color-theme-red: #cd4b17;
     --color-theme-yellow: #f4c125;
 
-    /* The unit color in force. Blue is the contingent's own and the default; a themed
-       scope swaps the pointer rather than every rule that reads it. */
+    /* The unit color in force. Blue is the contingent's own and the default, and a
+       themed scope swaps the pointer rather than every rule that reads it. */
     --color-theme-bright: var(--color-theme-blue);
 
-    /* The darker tone of the same identity: the one text reads in and controls fill
+    /* The darker tone of the same identity, the one text reads in and controls fill
        with. The bright is the identity's flag, the ink is the identity at work. Each
        value is the badge mark's inner-disc color, so the wordmark's plate, the badge,
        and the controls all wear one tone per theme. */
     --color-theme-ink: #215262;
 
-    /* What sits on an ink fill. All five inks are dark enough to carry white, so this
+    /* What sits on an ink fill. Every theme's ink is dark enough to carry white, so this
        one is said once and never per theme. */
     --color-theme-on-ink: #fff;
 
     /* The tones a fact wears when it says something about itself – positive for an
        all-clear, caution for a question nobody answered, danger for the top of a
-       severity scale, info for a plain reading. They stand apart from the five unit
-       colors on purpose: what a fact means must not swing with the unit wearing it.
+       severity scale, info for a plain reading. They stand apart from the unit colors
+       on purpose, because what a fact means must not swing with the unit wearing it.
        A tone carries only the roles a surface asks for – the wash a tinted plate sits
        on, the ink read on that wash, and the mark a filled dot fills with – so a tone
        with no plate has no wash. Empty is the unfilled step of a scale, mixed from the
@@ -68,15 +68,15 @@
     --color-tone-positive-ink: #2e4b36;
     --color-tone-positive-wash: #dce8de;
 
-    /* The corners: a control, a default surface, a large surface, and the full pill. */
+    /* The corners of a control, a default surface, a large surface, and the full pill. */
     --border-radius-control: 12px;
     --border-radius-default: 16px;
     --border-radius-round: 999px;
     --border-radius-surface: 18px;
 
-    /* Rhythm: the spaces between things, named for what they separate rather than for
-       a size, so a step in the scale reads as a relationship. A screen's own tuned
-       poster values stay in the screen; these are the systematic steps. */
+    /* The spaces between things, named for what they separate rather than for a size,
+       so a step in the scale reads as a relationship. A screen's own tuned poster values
+       stay in the screen, and these are the systematic steps. */
     --spacing-card: 24px;
     --spacing-container: 16px;
     --spacing-group: 12px;
@@ -86,15 +86,14 @@
 
     /* The type scale, each size in rem against the 17-point base so Dynamic Type
        scales every role together – the rem-per-17 math lives here and nowhere else.
-       Named for the role a size plays, like the rhythm above: body is plain running
+       Named for the role a size plays, like the spaces above: body is plain running
        text and a card's heading, caption the uppercase label over a list, detail the
        quiet line under a name, display the page title in the display face – full on a
        desktop, small on a phone, mini in the condensed bar – entry a menu or outline
        entry and a button's label, footnote an aside or the eyebrow over a title, name
        the profile control's name, tab the tab strip's labels, title a plain heading,
        and value the strong line one fact is stated in – a value lifted out of a card,
-       a contact's name, an address to reach them at. A screen's own tuned poster
-       values stay in the screen. */
+       a contact's name, an address to reach them at. */
     --font-size-body: calc(17rem / 17);
     --font-size-caption: calc(10rem / 17);
     --font-size-detail: calc(11.5rem / 17);
@@ -108,9 +107,9 @@
     --font-size-title: calc(28rem / 17);
     --font-size-value: calc(15rem / 17);
 
-    /* The weight the scale is written in beside the regular: strong, for emphasized
-       chrome text – a lit tab, a name, a marked entry, a button's label. The display
-       face's own weight sits with the face below. */
+    /* The strong weight the scale uses beside the regular, for emphasized chrome text
+       such as a lit tab, a name, a marked entry, or a button's label. The display face's
+       own weight sits with the face below. */
     --font-weight-strong: 700;
 
     /* The display face, for the wordmark and the headings that carry the brand. Only a

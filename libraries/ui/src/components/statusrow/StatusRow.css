@@ -50,8 +50,8 @@
     color: var(--color-tone-caution-ink);
   }
 
-  /* A row nobody answered says so in quiet type: the absence is a fact about the
-     record, not an answer, so it reads lighter than one. */
+  /* A row nobody answered says so in quiet type, because the absence is a fact about
+     the record rather than an answer, so it reads lighter than one. */
   .status-row em {
     color: var(--color-ink-tertiary);
     font-size: var(--font-size-detail);
@@ -66,7 +66,7 @@
     padding: 3px var(--spacing-stack);
   }
 
-  /* Heard, never seen: the mark says it to the eye. */
+  /* Heard, never seen, because the mark says it to the eye. */
   .status-row-spoken {
     block-size: 1px;
     clip-path: inset(50%);

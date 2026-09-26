@@ -41,13 +41,13 @@ export interface OverflowMenuReceipt {
  */
 interface OverflowMenuEntry {
   /**
-   * The glyph ahead of the label, drawn at 20. Where any entry in a menu has one, the
-   * entries without are indented to match, so every label starts on the same line.
+   * The glyph ahead of the label. Where any entry in a menu has one, the entries without
+   * are indented to match, so every label starts on the same line.
    */
   readonly icon?: ReactElement
   /**
-   * What the entry is called. Unique within a menu: it is how the menu tells its entries
-   * apart, and which of them a receipt belongs to.
+   * What the entry is called. Unique within a menu, because it is how the menu tells its
+   * entries apart, and which of them a receipt belongs to.
    */
   readonly label: string
 }
@@ -68,8 +68,8 @@ export type OverflowMenuItem =
   | (OverflowMenuEntry & {
       /**
        * Work whose outcome the person has to be told. The menu stays open while it runs,
-       * says the receipt on the entry, over its faded label, and closes itself two
-       * seconds later. Must not reject – a failure is a receipt too.
+       * says the receipt on the entry, over its faded label, and closes itself once it
+       * has been read. Must not reject – a failure is a receipt too.
        */
       readonly onPerform: () => Promise<OverflowMenuReceipt>
     })
@@ -129,8 +129,8 @@ export function OverflowMenu(props: OverflowMenuProps): ReactElement {
   const root = useRef<HTMLDivElement>(null)
   const trigger = useRef<HTMLButtonElement>(null)
   const panel = useRef<HTMLDivElement>(null)
-  // Which end the panel takes focus at, decided by the key that opened it: ArrowUp opens
-  // a menu at its last entry, as a menu button does everywhere else.
+  // Which end the panel takes focus at, decided by the key that opened it, because
+  // ArrowUp opens a menu at its last entry, as a menu button does everywhere else.
   const opensAt = useRef<"first" | "last">("first")
   const receipts = useReceipts()
   const name = props.label ?? "Fler åtgärder"
@@ -157,7 +157,7 @@ export function OverflowMenu(props: OverflowMenuProps): ReactElement {
   }, [close, isOpen])
 
   /**
-   * Close, and put focus back where it came from. Every keyboard exit runs through here,
+   * Close, and put focus back on the trigger. Escape and a choice leave through here,
    * because a menu that unmounts under the focus leaves it on the body and the reader
    * loses their place.
    */
@@ -219,7 +219,7 @@ export function OverflowMenu(props: OverflowMenuProps): ReactElement {
         >
           {props.items.map((item, index) =>
             item === "divider" ? (
-              // Position, not content: two dividers are indistinguishable.
+              // Keyed by position, because two dividers are indistinguishable.
               <div key={index} className="overflow-divider" role="separator" />
             ) : (
               <MenuEntry
@@ -236,8 +236,9 @@ export function OverflowMenu(props: OverflowMenuProps): ReactElement {
           )}
         </div>
       ) : null}
-      {/* Outside the menu, which holds entries alone; there from the opening, because a
-          live region announces a change and not its arrival; gone with the menu. */}
+      {/* Outside the menu, which holds entries alone, and there from the opening, because
+          a live region announces a change and not its own arrival. It goes with the
+          menu, so a page is never left with a second, silent status region. */}
       {isOpen ? <Announcement words={receipts.said?.words} /> : null}
     </div>
   )
@@ -347,8 +348,7 @@ type PerformingItem = Extract<OverflowMenuItem, { readonly onPerform: unknown }>
 
 interface MenuEntryProps {
   /**
-   * Whether any entry in the menu has an icon – where one does, every entry keeps the
-   * icon's room, so the labels line up.
+   * Whether any entry in the menu has an icon, which gives every entry the icon's room.
    */
   readonly hasIcons: boolean
   /**
@@ -386,9 +386,9 @@ function MenuEntry(props: MenuEntryProps): ReactElement {
         </span>
       ) : null}
       <span className="overflow-item-text">
-        {/* The label keeps its place under the receipt, unseen: it is what sized the
-            panel, and a panel that shrank around a shorter receipt would move under
-            the hand that just pressed it. */}
+        {/* The label keeps its place under the receipt, unseen, because it is what
+            sized the panel, and a panel that shrank around a shorter receipt would move
+            under the hand that just pressed it. */}
         <span className="overflow-item-line">
           <span
             className={
@@ -420,8 +420,8 @@ function MenuEntry(props: MenuEntryProps): ReactElement {
   )
 
   if ("unavailable" in item) {
-    // `aria-disabled` rather than `disabled`: a disabled button leaves the arrow-key
-    // order, and an entry nobody can reach cannot tell anybody why it is unavailable.
+    // `aria-disabled` rather than `disabled`, because a disabled button leaves the
+    // arrow-key order, and an entry nobody can reach cannot say why it is unavailable.
     return (
       <button
         type="button"
@@ -488,7 +488,7 @@ function MenuEntry(props: MenuEntryProps): ReactElement {
  * The menu's focusable entries, in the order they are drawn – the dividers are not among
  * them, because a separator is never a stop.
  * @param panel The open panel, or null before it mounts.
- * @returns The entry buttons, in document order.
+ * @returns The entries, in document order.
  */
 function entriesOf(panel: HTMLDivElement | null): readonly HTMLElement[] {
   return panel === null ? [] : [...panel.querySelectorAll<HTMLElement>(".overflow-item")]
@@ -536,7 +536,7 @@ function didMoveFocus(panel: HTMLDivElement | null, key: string): boolean {
 /**
  * Where a navigation key moves focus within the menu, wrapping at both ends.
  * @param key The key pressed.
- * @param at The index focus sits at, or -1 when it sits on neither entry.
+ * @param at The index focus sits at, or -1 when it sits on no entry.
  * @param count How many entries the menu has.
  * @returns The index to move to, or undefined for a key the menu does not handle.
  */

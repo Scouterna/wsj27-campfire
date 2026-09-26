@@ -17,7 +17,7 @@ export default meta
 type Story = StoryObj<typeof UnitsScreen>
 
 /**
- * The browser over the mock's contingent: two units, then the IST and the contingent
+ * The browser over the mock's contingent: its units, then the IST and the contingent
  * management, each with how many people it holds.
  */
 export const Entries: Story = {
@@ -25,8 +25,8 @@ export const Entries: Story = {
 }
 
 /**
- * The browser at the contingent's real size – fifty-three units, then the two entries
- * that are not units.
+ * The browser at the contingent's real size – every unit, then the entries that are not
+ * units.
  */
 export const EveryUnit: Story = {
   parameters: { api: { list: largePeopleList() } },

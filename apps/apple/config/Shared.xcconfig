@@ -1,14 +1,14 @@
-// Settings every configuration shares. This shell has its own version, released under
-// its own tag (apple-v<version>), so nothing in the tree bumps it – a release
-// passes CAMPFIRE_VERSION_NUMBER=… CAMPFIRE_BUILD_NUMBER=… as trailing xcodebuild
-// settings, the way scripts/apple/build.sh passes CAMPFIRE_WEB_ORIGIN. Without them –
-// Xcode, pnpm build:*, pnpm start:* – the shell builds as 0.0.0 build 1.
+// Settings every configuration shares.
+//
+// The shell's version lives in its own git tag rather than the tree, and the build never
+// reads git, so a release passes CAMPFIRE_VERSION_NUMBER and CAMPFIRE_BUILD_NUMBER to
+// xcodebuild and any other build is 0.0.0 build 1.
 CAMPFIRE_VERSION_NUMBER = 0.0.0
 CAMPFIRE_BUILD_NUMBER = 1
 
-// One identity across all three environments. The three cannot sit on a phone side by
-// side, which is the accepted cost of not maintaining three bundle identifiers, three
-// app names, and three icons for a difference that is one URL.
+// One identity across every environment, so installing one replaces another – the
+// accepted cost of not maintaining an identity per environment for a difference that is
+// one URL.
 CAMPFIRE_BUNDLE_ID = se.scouterna.campfire
 CAMPFIRE_APP_NAME = Campfire
 

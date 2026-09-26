@@ -2,8 +2,8 @@ import react from "@vitejs/plugin-react"
 import { defineConfig, type Plugin } from "vite"
 import { VitePWA } from "vite-plugin-pwa"
 
-// The version this build is, handed in by whoever runs it rather than read from the tree:
-// the release workflow passes the version it is releasing. A build given none –
+// The version this build is, handed in by whoever runs it rather than read from the tree.
+// The release workflow passes the version it is releasing. A build given none –
 // locally, `pnpm build:image`, a push that earns no release – is 0.0.0, which no release
 // ever carries. Checked here, at load, so a malformed value fails the dev server and the
 // build alike before either does any work. Leading zeros are refused, as the release rule
@@ -24,7 +24,7 @@ if (!/^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)$/.test(version)) {
 function campfireVersion(): Plugin {
   return {
     name: "campfire-version",
-    // A meta tag rather than a global: nothing in the application reads the version, so
+    // A meta tag rather than a global, because nothing in the application reads it, so
     // it stays out of the bundle, and a person in the browser's console or a Playwright
     // walk can still read which version a running build is.
     transformIndexHtml: () => [
@@ -60,8 +60,8 @@ export default defineConfig({
       injectRegister: "script-defer",
 
       workbox: {
-        // Stated because the plugin does not derive them from `registerType` here: without
-        // them the generated worker only skips waiting on a SKIP_WAITING message nothing
+        // Stated because the plugin does not derive them from `registerType` here. Without
+        // them the generated worker skips waiting only on a SKIP_WAITING message nothing
         // sends, and a deploy waits until every tab is closed. With them a new worker takes
         // over as soon as it installs, which fires the `controllerchange` the application's
         // own update wiring answers with one reload.
@@ -70,7 +70,7 @@ export default defineConfig({
 
         globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2}"],
         // The worker answers every navigation with the precached shell, which is right
-        // for a screen and wrong for anything else the ingress serves on this origin:
+        // for a screen and wrong for anything else the ingress serves on this origin –
         // sign-in and sign-out are full-page navigations to /api/auth, and the CMS lives
         // under /_services/cms. A shell served in their place means they work only until
         // the worker is installed – on a browser's very first visit, and never again.
@@ -92,8 +92,8 @@ export default defineConfig({
         scope: "/",
         display: "standalone",
         theme_color: "#215262",
-        // The same paper as `body` in app.css and the shells' Palette.paper, so the
-        // splash an installed PWA shows before first paint continues the page.
+        // The design system's paper, so the splash an installed PWA shows before first
+        // paint continues the page.
         background_color: "#f4f2ec",
         icons: [
           { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
@@ -105,30 +105,28 @@ export default defineConfig({
   ],
 
   build: {
-    // Inside the app, not at the repository root: every app builds into its own .build/
-    // so that its own `clean` script can remove its own output without reaching upward.
-    // The root .build/ belongs to the guidebook.
+    // Inside the app rather than at the repository root, so the app's own `clean` script
+    // can remove its output without reaching upward.
     outDir: ".build",
     emptyOutDir: true,
   },
 
   server: {
-    // Every interface, IPv4 included, so all three hosts can reach the server: a browser
+    // Every interface, IPv4 included, so every host can reach the server – a browser
     // via 127.0.0.1, the Android emulator via 10.0.2.2 (an alias for the host's IPv4
     // loopback), and a real phone via the machine's LAN address. The cost is that the
     // server is visible on the local network while it runs.
     host: true,
 
-    // Written down rather than left to Vite's default, which VitePress shares: the
-    // guidebook would take 5173 first and this server would then fail outright, because
-    // strictPort below refuses to move. The dev servers sit together – the web on 3000,
-    // the guidebook on 3001, and Storybook on 3002.
+    // Written down rather than left to Vite's default, which VitePress shares, because
+    // the guidebook would take 5173 first and this server would then fail outright, as
+    // strictPort below refuses to move.
     port: 3000,
 
     // The local Caddy on 8000 – the one origin the browser and the shells use – proxies
     // here, and a port that quietly shifted would read as the whole app being down.
-    // Routing /api/auth and the rest of the back-end is Caddy's job, not a proxy here: this
-    // server serves the application and nothing else.
+    // Caddy routes the back-end paths, with no proxy here, so this server serves the
+    // application and nothing else.
     strictPort: true,
   },
 

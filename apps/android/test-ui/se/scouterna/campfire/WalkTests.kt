@@ -8,7 +8,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Launches the real shell and proves it starts and stays up. */
+/**
+ * Launches the real shell and asks whether its activity resumed – enough to prove the
+ * instrumented test target builds, installs, and drives the app.
+ */
 @RunWith(AndroidJUnit4::class)
 class WalkTests {
   @get:Rule

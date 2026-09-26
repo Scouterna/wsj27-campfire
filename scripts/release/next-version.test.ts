@@ -79,8 +79,8 @@ function nextVersion(artifact: string, cwd = repo): { output: string; status: nu
 beforeEach(() => {
   repo = mkdtempSync(path.join(tmpdir(), "campfire-next-version-"))
   git("init", "--quiet", "--initial-branch=main")
-  // The last line of defense: every git call below writes, so refuse to go on unless git
-  // resolves to the throwaway repository rather than one the environment points at.
+  // Every git call below writes, so the test refuses to go on unless git resolves to the
+  // throwaway repository rather than one the environment points at.
   if (realpathSync(git("rev-parse", "--show-toplevel")) !== realpathSync(repo)) {
     throw new Error(`git does not resolve to the throwaway repository at ${repo}`)
   }

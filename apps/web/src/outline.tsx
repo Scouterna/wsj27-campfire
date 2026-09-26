@@ -4,6 +4,9 @@ import { useEffect, useRef, useState, type ReactElement } from "react"
 
 import { scrollBehavior, scrollToTop } from "./navigation"
 
+/**
+ * What the outline needs from the chrome around it.
+ */
 export interface OutlineProps {
   /**
    * The page's own title – the outline's single entry on a page with no headings.
@@ -11,7 +14,7 @@ export interface OutlineProps {
   readonly title: string
 }
 
-// What counts as a page section: the headings the page renders into the content column.
+// A page's sections are the headings it renders into the content column.
 const sections = "main h2"
 
 /**
@@ -19,8 +22,7 @@ const sections = "main h2"
  * module never has to declare its own table of contents. A page without headings still
  * gets one entry, its own title, so the column never sits empty. The current entry
  * follows the column's scroll; a click selects immediately and holds the choice until
- * the smooth scroll has settled, so the spy cannot argue with it mid-flight. The
- * drawing is the ui library's `PageOutline`.
+ * the smooth scroll has settled, so the spy cannot argue with it mid-flight.
  *
  * @param props The page's own title.
  * @returns The outline column.
@@ -32,8 +34,8 @@ export function Outline(props: OutlineProps): ReactElement | null {
   const holdUntil = useRef(0)
 
   // A page whose sections are not in the document – a virtualized list – declares its
-  // own stops through `PageJumps`, and the declaration wins over the heading scan: the
-  // page knows where its content is, and the spy below can only see rendered rows.
+  // own stops, and the declaration wins over the heading scan, because the page knows
+  // where its content is and the spy below can only see rendered rows.
   const jumps = usePageJumps()
 
   useEffect(() => {
@@ -115,8 +117,8 @@ export function Outline(props: OutlineProps): ReactElement | null {
           scrollToTop()
           return
         }
-        // `.at` rather than `.item`: the DOM can have shortened since the scan landed
-        // in state, and `NodeListOf.item` is typed as though it never returns null.
+        // `.at` rather than `.item`, because the DOM can have shortened since the scan
+        // landed in state, and `.item` is typed as though it never returns null.
         const heading = [...document.querySelectorAll(sections)].at(index)
         heading?.scrollIntoView({ behavior: scrollBehavior(), block: "start" })
       }}

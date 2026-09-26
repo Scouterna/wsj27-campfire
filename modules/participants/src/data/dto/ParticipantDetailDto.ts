@@ -11,17 +11,16 @@ import { toParticipant, type ParticipantDto } from "./ParticipantDto"
 import { isRecord } from "./validation"
 
 /**
- * One person in full, as `GET /api/project/participants/individual/{memberNo}` sends them:
- * the basic block, the travel package the service normalizes for them, the contact answers
- * (`contact_info`, basic access), and the health and dietary answers (`forms_data`, health
- * access – absent for a caller without it, and for a `basic` fetch).
+ * One person in full, as the participants service sends them – the basic block, the travel
+ * package the service normalizes for them, and the health and dietary answers, which are
+ * absent for a caller without health access and for a `basic` fetch.
  */
 export interface ParticipantDetailDto extends ParticipantDto {
   readonly forms_data?: unknown
   readonly participation_type?: unknown
 }
 
-// The travel packages the participants service normalizes the registration's three
+// The travel packages the participants service normalizes the registration's travel
 // questions into, mapped to the domain's. The contingent management carries the empty
 // string, and a package a later registration invents is no travel at all rather than a
 // label the screens would have to guess a word for.
@@ -33,19 +32,13 @@ const travelByLabel: ReadonlyMap<string, Travel> = new Map([
 
 /**
  * One person as the domain knows them, or undefined when the payload is not a person this
- * module recognizes. The caller turns that into the screen's "could not be shown" state –
- * unlike a list, there is nothing else left to show.
+ * module recognizes. The caller turns that into the screen's "could not be shown" state,
+ * because unlike a list there is nothing else left to show.
  *
- * The answers arrive as the applicant gave them – Swedish labels, "Ja"/"Nej" gates, graded
- * severities – nested the way the registration form was laid out. Everything here reads
- * the flattened answers by their stable question keys, so the form's layout can change
- * without this module noticing.
- *
- * Two of the domain's fields have no question behind them in the template the service
- * publishes, so nothing fills them: the ID-card name and the graded languages. They stay
- * absent, which the screens already draw as absence. The management's funktion has no
- * question either, but the roster mints it into the record's roles, and the basic
- * converter reads it back out of them.
+ * The ID-card name and the graded languages have no question behind them in the template
+ * the service publishes, so nothing fills them and the screens draw them as absent. The
+ * management's funktion has no question either, but the roster mints it into the record's
+ * roles, and the basic converter reads it back out of them.
  * @param dto The record the participants service answered with.
  * @returns The person, or undefined when the payload is not one.
  */
@@ -66,7 +59,7 @@ export function toParticipantDetail(dto: ParticipantDetailDto): ParticipantDetai
     ...base,
     ...(travel !== undefined && { travel }),
     contact: toContactDetails(dto, answers),
-    // The health block exists exactly when the service sent `forms_data` – a viewer
+    // The health block exists exactly when the service sent `forms_data`, so a viewer
     // without health access, or a basic fetch, gets a person without one, and the screens
     // render nothing rather than a caveat.
     ...(isRecord(dto.forms_data) && { health: toHealthProfile(answers) }),
@@ -91,9 +84,9 @@ function yesOrNo(value: string | undefined): boolean | undefined {
 }
 
 /**
- * How ready somebody is for the jamboree's activities – the two exported factors and the
- * free text that qualifies a no. Undefined when none of the three was answered, so a
- * person the questions were never put to renders no section rather than an empty one.
+ * How ready somebody is for the jamboree's activities. Undefined when nothing was
+ * answered, so a person the questions were never put to renders no section rather than an
+ * empty one.
  * @param answers The flattened answers.
  * @returns The readiness, or undefined when nothing was answered.
  */
@@ -160,10 +153,9 @@ function toExperience(answers: Answers): Experience | undefined {
 }
 
 /**
- * Contact details as they stand now: Scoutnet's own email and mobile, with the
- * registration's copy of either standing in where the registry has none. The
- * alternative address and the people around them are the registration's alone – nothing
- * in the basic block says who a person's närstående are, so the answers are all there is.
+ * Contact details as they stand now, from Scoutnet where it holds them. The alternative
+ * address and the people around a person exist only in the registration's answers,
+ * because nothing in the basic block says who a person's närstående are.
  * @param dto The record the participants service answered with.
  * @param answers The flattened answers.
  * @returns How to reach them and the people around them.
@@ -183,10 +175,10 @@ function toContactDetails(dto: ParticipantDetailDto, answers: Answers): ContactD
 }
 
 /**
- * The same contact, ranked so the screen can put the first call first.
+ * A nödkontakt, ranked so the screen can put the first call first.
  * @param answers The flattened answers.
  * @param prefix The question keys' shared prefix, such as `emergencyContact1`.
- * @param rank Which of the two to try first.
+ * @param rank Whether to try them first or second.
  * @returns The ranked contact, or undefined when no name was given.
  */
 function toEmergencyContact(
@@ -199,9 +191,9 @@ function toEmergencyContact(
 }
 
 /**
- * The free-text messages, each addressed to whoever the form said would read it: the
+ * The free-text messages, each addressed to whoever the form said would read it. The
  * participant form asks one question for the unit leader and one for the contingent
- * management, the leader form only the latter.
+ * management, and the leader form only the latter.
  * @param answers The flattened answers.
  * @returns The notes that were written, each with its audience.
  */

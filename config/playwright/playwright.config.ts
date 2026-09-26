@@ -6,8 +6,8 @@ import { fileURLToPath } from "node:url"
 // them the proof that a screen still works – the screens themselves have almost no unit
 // tests, on purpose.
 //
-// Paths are resolved from this file rather than from the working directory, because the
-// suite is always run from the repository root.
+// The repository root, resolved from this file's location so no path below depends on
+// the working directory.
 const root = fileURLToPath(new URL("../..", import.meta.url))
 
 /**
@@ -16,7 +16,7 @@ const root = fileURLToPath(new URL("../..", import.meta.url))
  * --project=participants` is the whole of what the participants module claims to do –
  * and continuous integration can skip a module the pull request never touched.
  *
- * The same four, in the same order, as the `module` matrix in
+ * The same modules, in the same order, as the `module` matrix in
  * .github/workflows/test_web.yml. A module added to one and not the other either runs
  * nowhere or fails with "no project named X".
  */
@@ -25,15 +25,14 @@ const modules = ["authentication", "home", "journey", "participants"] as const
 /**
  * Where the local environment answers: Caddy on the one origin, with the mock behind
  * `/api` and the Vite dev server behind everything else. The walks drive sign-in, and
- * sign-in needs a back-end – bare Vite on 3000 answers HTML on every `/api` path, which
- * is exactly the failure the mock exists to prevent.
+ * sign-in needs a back-end, because bare Vite answers HTML on every `/api` path.
  */
 const origin = "http://localhost:8000"
 
 export default defineConfig({
   // One project per module, each finding its specs beside the module they are about.
-  // `test-ui` rather than `test`, because that is what the two shells already call the
-  // suites that drive a running application.
+  // `test-ui` rather than `test`, because that is what the shells call the suites that
+  // drive a running application.
   projects: modules.map((name) => ({
     name,
     testDir: `${root}modules/${name}/test-ui`,
@@ -58,8 +57,8 @@ export default defineConfig({
   // continuous integration, so there it is a failure instead.
   forbidOnly: Boolean(process.env["CI"]),
 
-  // One retry in continuous integration, none locally: a retry hides a flake on a
-  // developer's machine, where the flake is the thing worth seeing.
+  // One retry in continuous integration and none locally, because a retry hides a flake
+  // on a developer's machine, where the flake is the thing worth seeing.
   retries: process.env["CI"] ? 1 : 0,
 
   reporter: process.env["CI"] ? [["github"], ["list"]] : [["list"]],
@@ -68,15 +67,15 @@ export default defineConfig({
   // clean` already removes and git already ignores.
   outputDir: `${root}.build/playwright`,
 
-  // The same three processes `pnpm start:local` runs, but started by Playwright one by
-  // one rather than through scripts/start/local.sh: that script puts each server in a
-  // process group of its own, and Playwright's teardown then stops the wrapper and
-  // leaves the three of them holding their ports – so the run never exits. Each entry
-  // here is a direct command Playwright can kill, and each is reused when a developer
-  // already has the environment up.
-  // Started in this order, because Playwright waits for each server's url before
-  // launching the next: the two back-ends first, then Caddy, whose readiness check
-  // runs through the proxy and therefore needs the mock already answering.
+  // The processes `pnpm start:local` runs, started by Playwright one by one rather than
+  // through that script, because the script puts each server in a process group of its
+  // own, and Playwright's teardown would stop the wrapper and leave the servers holding
+  // their ports, so the run never exits. Each entry is a direct command Playwright can
+  // kill, reused when a developer already has the environment up.
+  //
+  // Playwright waits for each server's url before launching the next, so the mock and
+  // Vite start first and Caddy last, because its readiness check runs through the proxy
+  // and needs the mock already answering.
   webServer: [
     {
       command: "pnpm --filter @scouterna/wsj27-campfire-mock start",
@@ -95,8 +94,8 @@ export default defineConfig({
     {
       command: "caddy run --config config/environments/local/Caddyfile --adapter caddyfile",
       cwd: root,
-      // Through the front door and past the proxy: this answers 2xx only once Caddy
-      // and the mock are both up, so a half-started environment never counts as ready.
+      // Through the front door and past the proxy, so this answers 2xx only once Caddy
+      // and the mock are both up, and a half-started environment never counts as ready.
       url: "http://localhost:8000/__mock__/state",
       reuseExistingServer: true,
       timeout: 120_000,

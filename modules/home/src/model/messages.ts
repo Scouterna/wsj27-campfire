@@ -1,10 +1,9 @@
 import { hasAnyRole, type Role } from "@scouterna/wsj27-campfire-utils"
 
 /**
- * What kind of thing a message is, which is what decides how loudly the plate says it.
- * A welcome introduces Campfire and is the only one that proclaims; an important one
- * has to be noticed without being celebrated; news is the quietest, and the kind there
- * will be most of.
+ * What kind of thing a message is, which decides how loudly the plate says it. A
+ * welcome introduces Campfire and is the only one that proclaims, and the others report,
+ * told apart by their label.
  */
 export type MessageKind = "important" | "news" | "welcome"
 
@@ -15,8 +14,9 @@ export type MessageKind = "important" | "news" | "welcome"
  */
 export interface Message {
   /**
-   * The roles it is for, in the application's own role kinds: whoever holds one of
-   * them reads it. Never empty – a message for nobody is a message nobody can close.
+   * The roles it is for, in the application's own role kinds, so whoever holds one of
+   * them reads it. Never empty, because a message for nobody is a message nobody can
+   * close.
    */
   readonly audience: readonly Role["kind"][]
   /**
@@ -46,27 +46,24 @@ export interface Message {
 
 /**
  * Where the closed ids live between visits – per device rather than per person, so a
- * message closed once stays closed through a sign-out. Beside the parser that reads
- * its value.
+ * message closed once stays closed through a sign-out.
  */
 export const closedMessagesKey = "campfire.messages.closed"
 
 /**
- * Every message the start screen can show, oldest first. The next message is another
- * entry at the end: it shows, alone, to everyone in its audience who closed the
- * earlier ones.
+ * Every message the start screen can show, oldest first. A new message is another
+ * entry at the end, and shows alone to everyone in its audience who closed the earlier
+ * ones.
  *
- * The welcome comes once per role, because it says what the reader can do here and
- * that is not the same for both – and only what they can do: the management's says
- * nothing of allergies, which most of them cannot read. Each ends by naming where its
- * reader hears what is new – the leaders on Discord, the management on Teams – and
- * both sit under a page title that already says välkommen, so their own title says
- * something else. Somebody who holds both roles reads both, one under the other: each
- * is true for them, as the participants section gives them the unit and everyone.
+ * The welcome comes once per role, because it says only what the reader can do here,
+ * and that differs – the management's says nothing of allergies, which most of them
+ * cannot read. Both sit under a page title that already says välkommen, so their own
+ * title says something else. Somebody who holds both roles reads both, because each is
+ * true for them.
  *
- * The contact note that follows goes to both, because both write to the addresses it is
- * about. It is written to be read once and closed, and it says what was wrong rather
- * than how the reading works – a leader cannot act on which source we prefer.
+ * The contact note goes to both roles, because both write to the addresses it is
+ * about. It says what was wrong rather than how the reading works, because a leader
+ * cannot act on which source we prefer.
  */
 export const messages: readonly Message[] = [
   {
@@ -110,9 +107,8 @@ export const messages: readonly Message[] = [
 ]
 
 /**
- * The messages a reader should see now: those for a role they hold that this device
- * has not closed, in the order they were added. A closed id the list does not hold
- * changes nothing, and somebody holding none of a message's roles never sees it.
+ * The messages a reader should see now – those for a role they hold that this device
+ * has not closed. A closed id the list does not hold changes nothing.
  * @param list The messages to choose from.
  * @param roles The roles the reader holds.
  * @param closed The ids this device has closed.
@@ -127,10 +123,10 @@ export function unreadMessages(
 }
 
 /**
- * The closed ids, from whatever storage holds. Storage is not trusted: a missing
+ * The closed ids, from whatever storage holds. Storage is not trusted, so a missing
  * value, broken JSON, and a shape somebody else wrote all read as nothing closed, and
- * an array keeps only its strings – a message shown twice beats a start screen that
- * will not render. Never throws.
+ * an array keeps only its strings, because a message shown twice beats a start screen
+ * that will not render. Never throws.
  * @param stored The raw stored value, or undefined when the key is absent.
  * @returns The ids that were closed.
  */

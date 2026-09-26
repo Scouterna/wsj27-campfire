@@ -14,8 +14,8 @@ export type AddressSetKind = "contacts" | "people"
  */
 export const mailLinkLimit = 2000
 
-// One address and nothing else: a value holding a separator, a space, or an angle
-// bracket would be read by a mail client as several recipients, or as none.
+// One address and nothing else, because a value holding a separator, a space, or an
+// angle bracket would be read by a mail client as several recipients, or as none.
 const singleAddress = /^[^\s,;<>@]+@[^\s,;<>@]+$/u
 
 /**
@@ -38,7 +38,7 @@ export function addressSet(
     const given =
       kind === "people"
         ? [person.email, person.alternateEmail]
-        : // eslint-disable-next-line security/detect-object-injection -- a slot is one of the model's own four literals
+        : // eslint-disable-next-line security/detect-object-injection -- a slot is one of the model's own literals
           contactSlots.map((slot) => person.contactEmails?.[slot])
     for (const value of given) {
       const address = value?.trim() ?? ""
@@ -62,8 +62,8 @@ export function clipboardText(addresses: readonly string[]): string {
 
 /**
  * The link that opens a new mail with every address as a hidden copy, so no recipient
- * sees the others. Whatever its length – whether it is short enough to offer is
- * `isMailable`'s question.
+ * sees the others. It is built whatever its length, and whether it is short enough to
+ * offer is a separate question.
  * @param addresses The addresses, from `addressSet`.
  * @returns The `mailto:` address.
  */

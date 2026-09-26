@@ -15,9 +15,9 @@ import { useSignOut } from "../../SignOutProvider"
 import "./ProfileScreen.css"
 
 /**
- * The profile page: who is signed in – their mark, their name, and what they are in
- * the contingent – and the one way out. Everything on it is the ambient `User`'s, so
- * the page asks the network nothing and reads the same offline.
+ * The profile page, showing who is signed in and holding the one way out. Everything on
+ * it is the ambient `User`'s, so the page asks the network nothing and reads the same
+ * offline.
  *
  * Which unit somebody belongs to is part of the surprise, so the mark and the unit on
  * the role line wait for the units reveal – the rule the chrome's profile control
@@ -30,8 +30,8 @@ export function ProfileScreen(): ReactElement {
   const isUnitShown = useIsRevealed(unitsReveal.id)
   const signOut = useSignOut()
 
-  // Only outside a session – a story without a provider. The gate mounts the person
-  // before any screen.
+  // Only outside a session, in a story without a provider, because the gate mounts the
+  // person before any screen.
   if (user === undefined) {
     return <PageTitle title="Profil" />
   }

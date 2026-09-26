@@ -5,11 +5,11 @@ import jsdoc from "eslint-plugin-jsdoc"
 import * as jsonc from "eslint-plugin-jsonc"
 import pluginN from "eslint-plugin-n"
 import noSecrets from "eslint-plugin-no-secrets"
-// @ts-expect-error - no published types
+// @ts-expect-error – no published types
 import promise from "eslint-plugin-promise"
 import reactHooks from "eslint-plugin-react-hooks"
 import * as regexp from "eslint-plugin-regexp"
-// @ts-expect-error - no published types
+// @ts-expect-error – no published types
 import security from "eslint-plugin-security"
 import sonarjs from "eslint-plugin-sonarjs"
 import unicorn from "eslint-plugin-unicorn"
@@ -20,24 +20,23 @@ import tseslint, { type ConfigArray } from "typescript-eslint"
  * The one ESLint configuration for the whole repository: strict, type-aware TypeScript
  * linting plus JSON, security, and code-quality rules. Flat config expresses "these rules,
  * for these paths" directly, so there is no per-package eslint.config.ts – this single
- * root file covers every package. Markdown belongs to markdownlint.
+ * root file covers every package.
  *
  * Most rules apply everywhere. The sections at the end are the ones that do not: browser
  * globals and React's rules for the code that runs in a browser, and the layering ban for
  * the code that must not reach upward.
  */
 
-// Everything that runs in a browser. The two shells hold no TypeScript at all, so this is
-// the whole of it.
+// Everything that runs in a browser. The shells hold no TypeScript at all, so this is the
+// whole of it.
 const browser = ["apps/web/**/*.{ts,tsx}", "libraries/**/*.{ts,tsx}", "modules/**/*.{ts,tsx}"]
 
 export default tseslint.config(
-  // Global ignores. config/** is deliberately absent – tooling configuration is real code
-  // and gets linted. Markdown is markdownlint's alone (see config/markdownlint/): ESLint
-  // parsed it only to report the same findings a second time, so it does not look at it
-  // now. The Structurizr workspace is written by the tool – the compiled model plus each
-  // view's layout – and the generated element identifiers in it read as high-entropy
-  // strings to the secret scanner.
+  // Global ignores. config/** is deliberately absent, because tooling configuration is
+  // real code and gets linted. Markdown is markdownlint's alone. The Structurizr workspace
+  // is written by the tool – the compiled model plus each view's layout – and the
+  // generated element identifiers in it read as high-entropy strings to the secret
+  // scanner.
   {
     ignores: [
       "**/.build/**",
@@ -274,8 +273,8 @@ export default tseslint.config(
   {
     // A cycle between modules works right up until one of them reads the other's
     // binding at evaluation time, and then it is an "X is undefined" at import time
-    // with no obvious cause. Banned while the graph is young, so no cycle lives long
-    // enough to look load-bearing.
+    // with no obvious cause. Banned, so no cycle lives long enough to look
+    // load-bearing.
     files: ["**/*.{ts,tsx}"],
     rules: {
       "import-x/no-cycle": "error",
@@ -284,8 +283,8 @@ export default tseslint.config(
   {
     // tools/* and scripts/* run their TypeScript natively on Node, which resolves a
     // relative import only with its explicit `.ts` extension. Everything else is bundled,
-    // where extensionless is correct, so this holds for those two alone – and holds at
-    // lint time rather than as a "module not found" the first time a script is run.
+    // where extensionless is correct, so this holds for them alone – and holds at lint
+    // time rather than as a "module not found" the first time a script is run.
     files: ["scripts/**/*.ts", "tools/**/*.ts"],
     rules: {
       "import-x/extensions": ["error", "always", { ignorePackages: true, checkTypeImports: true }],
@@ -319,18 +318,18 @@ export default tseslint.config(
   {
     // The mock's seed: stand-in records and the form template they answer, held as
     // TypeScript so the compiler checks their shape. A line limit is a rule about how
-    // much logic one file should hold, and there is none here – a register is long
-    // because every row carries a whole registration form, and splitting it by line
-    // count would scatter it for nothing.
+    // much logic one file should hold, and there is none here – the list of
+    // participants is long because every row carries a whole registration form, and
+    // splitting it by line count would scatter it for nothing.
     files: ["tools/mock/seed/**/*.ts"],
     rules: {
       "max-lines": "off",
     },
   },
   {
-    // `.test` is Vitest's and `.spec` is the Playwright walk-throughs' – two suites,
-    // one set of relaxations. A walk-through is exactly the file that grows past 400
-    // lines and reaches for `!` on a locator.
+    // `.test` is Vitest's and `.spec` is the Playwright walk-throughs' – one set of
+    // relaxations for both suites. A walk-through is exactly the file that grows past
+    // the line limits and reaches for `!` on a locator.
     files: ["**/*.{test,spec}.{ts,tsx}"],
     rules: {
       "@typescript-eslint/no-non-null-assertion": "off",
@@ -410,7 +409,7 @@ export default tseslint.config(
     },
   },
   {
-    // eslint-plugin-n reads every file as Node's, and this code is the browser's: it
+    // eslint-plugin-n reads every file as Node's, and this code is the browser's, so it
     // reports `navigator` – a browser global since forever – as an experimental Node
     // builtin. The rest of the plugin's rules still apply here.
     files: browser,
@@ -422,7 +421,7 @@ export default tseslint.config(
   // React's rules of hooks, for the code that has hooks. The plugin sets a few of its own
   // rules to `warn`; `--max-warnings 0` makes them failures like everything else.
   //
-  // `configs.flat` is the flat-config shape; `configs.recommended` beside it is still the
+  // `configs.flat` is the flat-config shape; `configs.recommended` beside it is the
   // eslintrc one, whose `plugins: ["react-hooks"]` array flat config cannot read. The
   // `-latest` variant is the rule set for the newest React, which is the React pinned
   // here – a plugin update may add a rule to it, and ADR 006 takes that trade knowingly.
@@ -443,9 +442,9 @@ export default tseslint.config(
   // The dependency direction in ADR 002's layout runs one way: an app may import a
   // library, a library may never import an app or a feature module, and no package
   // reaches into another by relative path. A relative path is the form that would
-  // resolve and work where it must not, so two rules refuse it: no-restricted-imports
+  // resolve and work where it must not, so it is refused – no-restricted-imports refuses
   // any path into apps/ or modules/, and import-x/no-relative-packages any path into
-  // another package – which is what catches a module reaching a sibling module, or a
+  // another package, which is what catches a module reaching a sibling module, or a
   // library a sibling library, through a path that never names either directory.
   // Reaching by package name instead fails the type check, because a package that is
   // not a declared dependency does not resolve for TypeScript.
@@ -470,9 +469,8 @@ export default tseslint.config(
     },
   },
 
-  // Linting the lint configuration itself: spreading untyped plugin configs and keeping
-  // the deprecated tseslint.config() cannot satisfy these rules, so they are off for this
-  // file only.
+  // This file spreads untyped plugin configs and keeps the deprecated tseslint.config(),
+  // which cannot satisfy these rules, so they are off for this file only.
   {
     files: ["eslint.config.ts"],
     rules: {
@@ -486,7 +484,7 @@ export default tseslint.config(
     },
   },
 
-  // Prettier (disable conflicting rules – MUST BE LAST)
+  // Prettier, last, so it switches off every rule that would argue with its formatting.
   {
     ...prettier,
     files: ["**/*.{ts,tsx,json,jsonc}"],

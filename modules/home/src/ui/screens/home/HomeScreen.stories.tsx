@@ -11,11 +11,11 @@ const meta = {
   component: HomeScreen,
   decorators: [ScreenDecorator],
   parameters: {
-    // A screen fills the frame, as sign-in's does – the decorator draws the page
-    // surface, so the canvas adds no padded box around it.
+    // A screen fills the frame, because the decorator draws the page surface, so the
+    // canvas adds no padded box around it.
     layout: "fullscreen",
   },
-  // Closing is remembered on the device, and the canvas is a device: without this the
+  // Closing is remembered on the device, and the canvas is a device, so without this the
   // screen's messages would be gone from the story the first time somebody closed them.
   beforeEach: forgetClosedMessages,
 } satisfies Meta<typeof HomeScreen>
@@ -26,8 +26,8 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
-// Stand-ins for the other modules' widgets: home places by id and never imports the
-// modules that fill them, and neither does its story.
+// Stand-ins for the other modules' widgets, because home places by id and never imports
+// the modules that fill them, and neither does its story.
 const standIns = {
   "journey:countdown": (): ReactElement => (
     <Card title="Resan">
@@ -55,7 +55,7 @@ export const LeaderWithWidgets: Story = {
 }
 
 /**
- * Anybody else's: the unit widget is a leader's alone.
+ * Anybody else's start screen, without the unit widget, which is a leader's alone.
  */
 export const WithWidgets: Story = {
   render: (): ReactElement => (

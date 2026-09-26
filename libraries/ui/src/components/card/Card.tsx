@@ -5,9 +5,10 @@ import "./Card.css"
 export interface CardProps {
   /**
    * The quiet line at the heading row's trailing edge – a count, a date. Phrasing
-   * content only: it is drawn inside a `span`, outside the heading, so the page outline
-   * lists the title alone and assistive technology reads the aside after it. Drops
-   * under the title where the row cannot hold both. Nothing without a `title`.
+   * content only, because it is drawn inside a `span`. The span sits outside the
+   * heading, so the page outline lists the title alone and assistive technology reads
+   * the aside after it. Drops under the title where the row cannot hold both. Nothing
+   * without a `title`.
    */
   readonly aside?: ReactNode
   /**

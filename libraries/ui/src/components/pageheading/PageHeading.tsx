@@ -19,22 +19,21 @@ export interface PageHeadingProps {
   readonly back?: { readonly label: string; readonly onBack: () => void } | undefined
   /**
    * The page's one primary action, on the title row, pressing or leading exactly as
-   * the page declared it. Desktop only – a phone's actions live in the bar and the
-   * content.
+   * the page declared it. Desktop only, because on a phone the same action is the
+   * floating action button.
    */
   readonly action?: PageActionsProps["action"]
   /**
    * The page's extra actions, as the overflow menu on the title row. On a phone the
-   * chrome places the same menu in the bar instead, so the consumer's stylesheet hides
-   * this one there.
+   * chrome places the same menu in the bar instead, so this one is hidden there.
    */
   readonly menu?: readonly OverflowMenuItem[] | undefined
 }
 
 /**
  * The page's heading: the eyebrow back control over the title, and the title row's
- * trailing actions. It scrolls with the page – large on every width – while the
- * condensed bar takes over once it is out of sight.
+ * trailing actions. It scrolls with the page, and the condensed bar takes over once it
+ * is out of sight.
  *
  * @param props The title, the back control, and the row's actions.
  * @returns The heading, carrying the page's one `h1`.

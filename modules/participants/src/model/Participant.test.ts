@@ -36,7 +36,7 @@ describe("where a participant belongs", () => {
 
   it("places an IST member in the IST, whatever the service sent as their troop", () => {
     // The participants service sends an empty troop for every IST member, so the number
-    // that would be a unit is simply absent.
+    // that would be a unit is absent.
     expect(belonging(person({ role: "ist" }))).toBe("IST")
   })
 

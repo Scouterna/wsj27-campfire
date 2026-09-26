@@ -38,8 +38,8 @@ export interface TabBarProps {
    */
   readonly current: string | undefined
   /**
-   * What tapping the section already shown does. Without it the tap navigates like any
-   * other, which on the same page is a no-op.
+   * What tapping the section already shown at its clean start does. That tap never
+   * navigates, so without this it does nothing.
    */
   readonly onReselect?: (() => void) | undefined
 }
@@ -64,10 +64,10 @@ export function TabBar(props: TabBarProps): ReactElement {
           search={{}}
           aria-current={item.id === props.current ? "page" : undefined}
           onClick={(event) => {
-            // The exact page this tab links to is already shown: the caller decides
-            // what that means – scrolling it up, typically. Any other page – an
-            // address narrowed by search params included – navigates, so a tab
-            // always means the section's own clean start.
+            // Swallowed only when the section's start is already exactly what is
+            // shown, and the caller decides what that means – scrolling it up,
+            // typically. An address narrowed by search params navigates instead, so a
+            // tab always means the section's own clean start.
             if (location.pathname !== item.path || location.searchStr !== "") {
               return
             }

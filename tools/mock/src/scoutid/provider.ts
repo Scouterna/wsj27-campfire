@@ -5,8 +5,8 @@ import { settings } from "../settings.ts"
 import type { Persona } from "../types.ts"
 
 /**
- * Where the ScoutID stand-in answers – on the origin every environment serves, beside the auth
- * service's public URL.
+ * Where the ScoutID stand-in answers – on the local stack's one origin, beside the auth service's
+ * public URL.
  */
 export const scoutIdUrl = "http://localhost:8000/__mock__/scoutid/"
 
@@ -20,7 +20,7 @@ export const scoutIdSessionCookie = "mock-scoutid_session"
  */
 export const sessionMaxLifespanSeconds = 10 * 60 * 60
 
-// Keycloak's defaults: a session idles out after half an hour, and a code is good for a minute.
+// Keycloak's defaults for how long a session may idle and how long a code stays good.
 const idleTimeoutMs = 30 * 60 * 1000
 const maxLifespanMs = sessionMaxLifespanSeconds * 1000
 const codeLifespanMs = 60 * 1000
@@ -82,7 +82,7 @@ interface RefreshGrant {
 /**
  * The ScoutID stand-in – the one part of the local environment that is not a copy of a real
  * service, because ScoutID is not ours to run. It is shaped like the Keycloak realm it replaces:
- * a session of its own that outlives the auth service's cookies, a one-minute code checked
+ * a session of its own that outlives the auth service's cookies, a short-lived code checked
  * against its PKCE challenge, refresh tokens that die with the session, and an end-session
  * endpoint. Signing in is picking a persona, with no password.
  */
@@ -222,7 +222,7 @@ export class ScoutId {
   }
 
   /**
-   * Redeems a code for tokens. A code works once, within a minute, for the verifier whose
+   * Redeems a code for tokens. A code works once, before it expires, for the verifier whose
    * challenge it was issued against, and only while its session lives.
    * @param code The code the callback received.
    * @param codeVerifier The PKCE verifier the auth service kept.

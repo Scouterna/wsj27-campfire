@@ -1,8 +1,8 @@
-/* The Resan card: the count beside the heading, the day-by-day bar, and the legend
+/* The Resan card – the count beside the heading, the day-by-day bar, and the legend
    naming each leg at the width its days occupy. The heading row itself is the Card's. */
 
 @layer component {
-  /* The count, in the card's aside: the label and its figures on the heading's own
+  /* The count in the card's aside, its label and figures on the heading's own
      baseline. */
   .countdown-status {
     align-items: baseline;
@@ -42,15 +42,15 @@
     gap: 3px;
   }
 
-  /* The pips' own radii and heights are the bar's tuned poster values: at one day of
-     width the token steps read as shapeless. */
+  /* The pips' radii and heights are raw values rather than tokens, because at one day
+     of width the token steps read as shapeless. */
   .countdown-bar span {
     border-radius: 6px;
     flex: 1;
     height: 34px;
   }
 
-  /* A day still planned: an empty, dashed slot. */
+  /* A day still planned. */
   .countdown-bar .is-planned {
     outline: 1.5px dashed color-mix(in srgb, var(--color-theme-ink) 40%, transparent);
     outline-offset: -1.5px;
@@ -70,13 +70,13 @@
     background: color-mix(in srgb, var(--color-theme-ink) 10%, transparent);
   }
 
-  /* The homecoming day ahead: part of the theme's family, not a status – a strength
-     between the future days' wash and the filled days. */
+  /* The homecoming day ahead, in the theme's family rather than a status tone – a
+     strength between the future days' wash and the filled days. */
   .countdown-bar .is-home {
     background: color-mix(in srgb, var(--color-theme-bright) 28%, transparent);
   }
 
-  /* Home, reached: the one all-clear in the bar, in the positive tone's own pair. */
+  /* Home reached, the one all-clear in the bar, in the positive tone's own pair. */
   .countdown-bar .is-home-done {
     align-items: center;
     background: var(--color-tone-positive-ink);
@@ -111,8 +111,7 @@
     margin-top: 2px;
   }
 
-  /* Each leg is as wide as the days it spans: eight on the rundresa's road, three on
-     the direktresa's, twelve at the camp. */
+  /* Each leg is as wide as the days it spans, so these flex values are day counts. */
   .countdown-legend .is-rundresa {
     flex: 8;
   }
@@ -145,10 +144,10 @@
     margin: var(--spacing-group) 0 0;
   }
 
-  /* At phone width three legend columns do not fit, so the legs stack in journey
+  /* At phone width the legend's columns do not fit, so the legs stack in journey
      order – the same order as the bar above them – and a leg's width stops meaning
-     its days. The homecoming stands down: it is the day after the camp leg's last
-     date, and the bar's last pip already marks it. */
+     its days. The homecoming stands down, because the bar's last pip already marks
+     it. */
   @media (max-width: 560px) {
     .countdown-legend {
       flex-direction: column;

@@ -40,13 +40,13 @@ export interface SideMenuProps {
    */
   readonly current: string | undefined
   /**
-   * What clicking the section already shown does. Without it the click navigates like
-   * any other, which on the same page is a no-op.
+   * What clicking the section already shown at its clean start does. That click never
+   * navigates, so without this it does nothing.
    */
   readonly onReselect?: (() => void) | undefined
   /**
-   * A line under the sections saying what is on its way – so a menu of two items
-   * reads as a beginning rather than the whole app. Nothing renders without it.
+   * A line under the sections saying what is on its way, so a short menu reads as a
+   * beginning rather than the whole app. Nothing renders without it.
    */
   readonly teaser?: string
   /**
@@ -78,8 +78,9 @@ export function SideMenu(props: SideMenuProps): ReactElement {
             aria-current={item.id === props.current ? "page" : undefined}
             onClick={(event) => {
               // Swallowed only when the section's start is already exactly what is
-              // shown. An address narrowed by search params navigates instead, so a
-              // section link always means the section's own clean start.
+              // shown, and the caller decides what that means. An address narrowed by
+              // search params navigates instead, so a section link always means the
+              // section's own clean start.
               if (location.pathname !== item.path || location.searchStr !== "") {
                 return
               }

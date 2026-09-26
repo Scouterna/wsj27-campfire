@@ -17,8 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 
 /**
- * The shell's one activity. A shell owns the phone's chrome and nothing else, which is
- * why the whole screen is one centered word.
+ * The shell's one activity, drawing one screen so that the project, the flavors, and the
+ * toolchain have something to build and run.
  */
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,9 +26,9 @@ class MainActivity : ComponentActivity() {
     enableEdgeToEdge()
 
     setContent {
-      // The system appearance decides the colors, as it does for the Apple shell's one
-      // screen – plain white or black, not Material's tinted surfaces. enableEdgeToEdge
-      // reads the same setting for the status bar icons, so the two always contrast.
+      // Plain white or black from the system appearance rather than Material's tinted
+      // surfaces, matching the Apple shell. enableEdgeToEdge reads the same setting for
+      // the status bar icons, so the two always contrast.
       val dark = isSystemInDarkTheme()
 
       MaterialTheme {

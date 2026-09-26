@@ -11,7 +11,7 @@ export interface SigningKey {
    */
   readonly jwk: Readonly<Record<string, string>>
   /**
-   * The key id: the public key's RFC 7638 thumbprint, which is how joserfc names a key.
+   * The key id, the public key's RFC 7638 thumbprint, which is how joserfc names a key.
    */
   readonly kid: string
   readonly privateKey: KeyObject
@@ -28,7 +28,7 @@ export function generateSigningKey(): SigningKey {
   if (e === undefined || kty === undefined || n === undefined) {
     throw new Error("An RSA public key exported without its parameters")
   }
-  // RFC 7638: the required members in lexicographic order, with no whitespace.
+  // RFC 7638 hashes the required members in lexicographic order, with no whitespace.
   const kid = createHash("sha256").update(JSON.stringify({ e, kty, n })).digest("base64url")
   return {
     jwk: { n, e, kty, kid, use: "sig", alg: "RS256" },

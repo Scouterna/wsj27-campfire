@@ -1,6 +1,6 @@
 /**
- * How someone travels to the jamboree. A closed set, like the roles – the registration
- * offers exactly these three, and the contingent management travels outside them.
+ * How someone travels to the jamboree. A closed set, like the roles, because the
+ * registration offers exactly these and the contingent management travels outside them.
  */
 export type Travel = "rundresa" | "direktresa" | "egenResa"
 
@@ -25,8 +25,8 @@ export function travelName(travel: Travel): string {
 
 /**
  * The function a contingent management member serves in. The contingent's own roster
- * maps member numbers to these – the participants service mints it into the record's
- * roles, and the detail converter reads it back out of them.
+ * maps member numbers to these, the participants service mints them into the record's
+ * roles, and the participant converter reads them back out.
  */
 export type CmtFunktion =
   | "administration"

@@ -1,8 +1,8 @@
 /* How the stories lay their examples out. This is the Storybook canvas's own furniture,
    not the design system – `preview.tsx` loads it, the application never does – but it
    lives here rather than in `config/storybook/` so the scaffolding sits beside the
-   components it frames. Every story in the repository may use these classes: the ui
-   library is the one package every module already depends on, so a module's story
+   components it frames. Every story in the repository may use these classes, because the
+   ui library is the one package every module already depends on, so a module's story
    reaching for `.story-column` reaches no further than its own imports do. */
 
 .story-stack {
@@ -20,8 +20,6 @@
   max-width: 400px;
 }
 
-/* A screen, framed as the application frames it: the bar over the content column, on
-   the page's own surface, filling the fullscreen canvas the screen stories ask for. */
 /* A screen's page column, mirroring where `apps/web`'s app.css puts a screen: the
    heading and the content pad themselves at phone width, and from 768px the column
    takes the padding over – the side menu's own at first, twice that once there is room.
@@ -143,11 +141,11 @@
 }
 
 /* The H1 of an MDX page – the Introduction – set in the contingent's display face, the
-   same way the guidebook sets its page titles, so the two sites read as one. The face
-   itself arrives with the design system's stylesheet, which preview.tsx loads. A
-   generated Docs page keeps its title in the body face: the face has no lowercase, and
-   a component's name is a word whose case means something. An MDX heading is a direct
-   child of the content column, which keeps a heading inside a rendered story out too. */
+   same way the guidebook sets its page titles, so the two sites read as one. A generated
+   Docs page keeps its title in the body face, because the display face has no lowercase
+   and a component's name is a word whose case means something. An MDX heading is a
+   direct child of the content column, which keeps a heading inside a rendered story
+   out too. */
 .sbdocs-content > h1:not(.sbdocs-title) {
   font-family: var(--typography-display-font_family);
   font-size: 3rem;

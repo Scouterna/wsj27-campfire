@@ -24,9 +24,9 @@ import { askAgain } from "./session"
 const injected = { refresh: false }
 
 /**
- * Where to send the browser to sign in. A full-page navigation, not a fetch – the
- * service redirects on to ScoutID and back – and it asks for Swedish, so the provider's
- * own screens arrive in the language the rest of Campfire speaks.
+ * Where to send the browser to sign in. It is a full-page navigation rather than a
+ * fetch, because the service redirects on to ScoutID and back, and it asks for Swedish,
+ * so the provider's own screens arrive in the language the rest of Campfire speaks.
  * @param returnTo The absolute URL to land on afterwards, usually `location.href`.
  * @returns The sign-in address.
  */
@@ -57,7 +57,6 @@ export function signOut(returnTo: string): void {
  * rather than asking twice, and the answer becomes the session every later read is
  * checked against.
  *
- * The auth service's readable cookies decide whether to ask at all – see `canBeSignedIn`.
  * @param client The application's one query client, so the participants-service read
  * behind the unit and the travel choice shares the cache every other read uses.
  * @returns The signed-in user, or undefined when nobody is.
@@ -71,20 +70,20 @@ export async function currentUser(client: QueryClient): Promise<User | undefined
 }
 
 /**
- * Whether a session could exist on this browser, judged from the two cookies the auth
- * service lets a script read – so nothing here depends on storage the browser may wipe
- * while the session lives on. Asking where no session exists costs two refused requests,
- * each an error in the console of a visitor who has done nothing wrong.
+ * Whether a session could exist on this browser, judged from the auth service's cookies
+ * rather than from storage the browser may wipe while the session lives on. It answers
+ * true without either cookie as well, because the refresh window's cookie is httpOnly,
+ * so its absence does not mean nobody.
  * @returns True when the page should ask the auth service who is signed in.
  */
-// eslint-disable-next-line sonarjs/no-invariant-returns -- deliberate, until the auth service ships the cookie
+// eslint-disable-next-line sonarjs/no-invariant-returns -- the httpOnly refresh cookie leaves every path asking
 function canBeSignedIn(): boolean {
   const cookie = document.cookie
   // The refresh window is open, so a session exists however long ago the token lapsed.
   if (hasRefreshWindow(cookie)) {
     return true
   }
-  // A token minted in the last five minutes – the landing straight after sign-in, too.
+  // A live access token, which the landing straight after sign-in carries too.
   if (readExpiry(cookie) !== undefined) {
     return true
   }
@@ -100,12 +99,10 @@ function canBeSignedIn(): boolean {
 }
 
 /**
- * Completes the user from the list of participants, through the query cache: the unit
- * where the roles gave none, and how they travel – a fact only the list holds, so even
- * a placed leader costs the one cached read. Every failure is simply a user without
- * the facts – the answer is allowed to be nothing, and nobody is put on a bus the list
- * did not book. Only a refusal is remembered; a service that could not be reached is
- * asked again the next time.
+ * Completes the user from the list of participants, through the query cache, with the
+ * unit where the roles gave none and with how they travel. Only the list holds the
+ * travel, so even a placed leader costs the one cached read. Every failure is a user
+ * without the facts, so nobody is put on a bus the list did not book.
  * @param client The query client the read caches in.
  * @param user The decoded user, with whatever unit the roles gave.
  * @returns The user, completed with whatever the list of participants knows.
@@ -127,8 +124,8 @@ async function withRegistration(client: QueryClient, user: User): Promise<User> 
     return user
   }
 
-  // The roles' unit wins where both know one: the role is the appointment, the list a
-  // reading of it.
+  // The roles' unit wins where both know one, because the role is the appointment and
+  // the list a reading of it.
   const unit = user.unit ?? registration.unit
   // A unit the list supplied changes the mark the person wears, and – for a leader
   // whose role named no unit – the line that names it.

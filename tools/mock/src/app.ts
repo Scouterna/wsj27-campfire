@@ -29,11 +29,9 @@ export interface MockOptions {
 }
 
 /**
- * Builds the mock: wsj27-auth-api under `/api/auth` and wsj27-project-api under `/api/project`,
- * both answering as the real services answer, with the ScoutID stand-in under
- * `/__mock__/scoutid` and the control surface under `/__mock__`. The two service prefixes are the
- * ones the deployed ingress serves, so an address that works here works against dev unchanged.
- * Importing this module starts no server; `main.ts` does that.
+ * Builds the mock – both services answering as the real ones answer, beside the ScoutID stand-in
+ * and the control surface. The service prefixes are the ones the deployed ingress serves, so an
+ * address that works here works against dev unchanged. Building it starts no server.
  * @param options The key and the clock, when a test supplies its own.
  * @returns The routes, ready to be served or to answer a request in a test.
  */
@@ -46,8 +44,8 @@ export function createApp(options: MockOptions = {}): Hono {
 
   const app = new Hono()
   app.use("/api/*", noCache)
-  // Each service answers its root with or without the slash: the ingress strips the prefix, and
-  // both spellings arrive as the service's own `/`.
+  // Each service answers its root with or without the slash, because the ingress strips the
+  // prefix and both spellings arrive as the service's own `/`.
   app.get("/api/auth/", (context) => authHealth(context, roles))
   app.get("/api/project/", (context) => projectHealth(context))
   app.route("/api/auth", authRoutes({ key, now, roles, scoutId }))
