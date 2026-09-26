@@ -85,11 +85,12 @@ async function copy(addresses: readonly string[]): Promise<OverflowMenuReceipt> 
  */
 function save(found: readonly Participant[]): OverflowMenuReceipt {
   try {
+    const today = new Date()
     const url = URL.createObjectURL(
-      new Blob([contactSheet(found)], { type: "text/csv;charset=utf-8" }),
+      new Blob([contactSheet(found, today)], { type: "text/csv;charset=utf-8" }),
     )
     const link = document.createElement("a")
-    link.download = contactSheetName(new Date())
+    link.download = contactSheetName(today)
     link.href = url
     link.click()
     // Released later rather than here, because a browser that has not finished reading
