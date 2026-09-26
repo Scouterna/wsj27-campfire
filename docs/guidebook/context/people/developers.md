@@ -1,6 +1,6 @@
 # Developers
 
-The developers build and maintain Campfire rather than use it. Their work runs through GitHub, which holds the code, the issues, and the pull requests, runs the checks on every change ([ADR 009](/decisions/009-check-and-release-with-small-github-actions-workflows)), and publishes what ships – the web image, the agent skills, and this guidebook. That is the only reason GitHub is on the context diagram: Campfire itself never talks to it.
+The developers build and maintain Campfire rather than use it. Their work runs through [GitHub](../systems/github), which holds the code and the work, runs the checks, and publishes what ships.
 
 The [Development](../../development/) chapter covers how they set up, run, and check the code, and the [Process](../../process/) chapter how work moves from an issue to a commit.
 

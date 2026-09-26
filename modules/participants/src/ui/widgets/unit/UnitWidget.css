@@ -55,6 +55,7 @@
     transform: scaleX(-1);
   }
 
+  /* The name, and where the person comes from on a line of its own under it. */
   .unit-widget-person-text {
     display: flex;
     flex: 1;
@@ -64,6 +65,7 @@
     padding-block: var(--spacing-stack);
   }
 
+  /* A name longer than the line is the one thing cut short. */
   .unit-widget-person-name {
     font-size: var(--font-size-value);
     font-weight: var(--font-weight-strong);
@@ -72,13 +74,12 @@
     white-space: nowrap;
   }
 
-  /* The kår at home, under the name in quiet ink. */
-  .unit-widget-person-group {
+  /* Where they come from, in quiet ink, never cut – it wraps as many times as it needs
+     rather than lose the end of a town. */
+  .unit-widget-person-from {
     color: var(--color-ink-secondary);
     font-size: var(--font-size-detail);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: anywhere;
   }
 
   /* The age rides quietly at the trailing edge – a fact, not a second label. */

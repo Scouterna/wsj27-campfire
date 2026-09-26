@@ -175,4 +175,5 @@ campfire = softwareSystem "Campfire" {
   authenticationModule -> authService "Signs in and reads the session over /api/auth"
   authenticationModule -> participantsService "Reads the member's unit and travel over /api/project"
   participantsModule -> participantsService "Reads the list of participants over /api/project"
+  participantsModule -> openFreeMap "Draws unit maps over tiles from"
 }

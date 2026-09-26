@@ -20,6 +20,7 @@ export const complete: ParticipantDetail = {
   birthDate: "1987-04-12",
   travel: "rundresa",
   memberGroup: "Mockåsens scoutkår",
+  homeTown: "Göteborg",
   idCardName: "Anna Maria Björk",
   contact: {
     email: "anna.bjork@example.se",
@@ -125,6 +126,7 @@ export const withoutHealth: ParticipantDetail = {
   role: "deltagare",
   unitNumber: 3,
   birthDate: "2011-09-02",
+  homeTown: "Kungsbacka",
   travel: "direktresa",
   contact: {
     email: "vilgot.ek@example.se",
@@ -136,16 +138,15 @@ export const withoutHealth: ParticipantDetail = {
 }
 
 /**
- * A hole wherever the registration allowed one: no channels, no travel, one contact with
- * no way to reach them, and a health profile that says nothing at all. Every absent state
- * on the screen is visible at once.
+ * A hole wherever the registration allowed one: no kår, home town, or birth date, no
+ * channels, no travel, one contact with no way to reach them, and a health profile that
+ * says nothing at all. Every absent state on the screen is visible at once.
  */
 export const sparse: ParticipantDetail = {
   memberNo: "1400012",
   firstName: "Elsa",
   lastName: "Nyström",
   role: "ist",
-  birthDate: "2003-12-30",
   contact: {
     email: "",
     phone: "",

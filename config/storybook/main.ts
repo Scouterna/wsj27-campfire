@@ -22,6 +22,12 @@ const config: StorybookConfig = {
   // The guidebook's icon set, served to the manager so the sidebar can carry the same
   // app icon the guidebook's nav bar does without a second copy of it.
   staticDirs: [{ from: "../vitepress/assets", to: "/brand" }],
+  // The map's chunk is over Vite's default here too, and the limit is the application's,
+  // in config/vite/vite.config.ts, for the reason given there.
+  viteFinal: (viteConfig) => ({
+    ...viteConfig,
+    build: { ...viteConfig.build, chunkSizeWarningLimit: 1200 },
+  }),
   core: {
     // Storybook phones home with usage data by default. Nothing in this repository
     // reports anywhere it was not asked to.

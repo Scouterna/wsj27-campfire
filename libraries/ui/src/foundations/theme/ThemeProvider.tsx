@@ -94,7 +94,8 @@ export type ThemeScopeProps = {
  * The pure half of theming: the context the few theme-reading components ask with
  * `useTheme`, and the layout-neutral `data-theme` wrapper the tokens key on – nothing
  * else. No document attribute, no meta, no storage, which is what lets Storybook's
- * decorator theme a story without touching the page around it. The application uses
+ * decorator theme a story, and a screen give one part of itself a theme other than its
+ * own, without touching the page around it. The application's own theme is
  * `ThemeProvider`, which adds those effects on top.
  *
  * @param props The theme to wear, and the subtree that wears it.

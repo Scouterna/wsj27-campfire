@@ -2,7 +2,7 @@
 
 Campfire is tested in two layers, each aimed at a different kind of failure. Unit tests prove the logic – the models, the converters that decode what the back-end sends, the session client, the role helpers – in all three languages. Walk-throughs prove the screens, by driving the real web application in a real browser and each shell on a device, because a screen is mostly composition and its failures only show when the whole thing runs ([ADR 024](/decisions/024-walk-through-the-web-application-per-module-with-playwright)).
 
-Underneath both is the mock back-end, a stand-in for the real services that answers as they do. The walk-throughs sign in and read the list of participants through it, so no test reaches a network, needs credentials, or touches a real person's data ([ADR 021](/decisions/021-develop-against-a-mock-back-end)).
+Underneath both is the mock back-end, a stand-in for the real services that answers as they do. The walk-throughs sign in and read the list of participants through it, so no test reaches a back-end, needs credentials, or touches a real person's data ([ADR 021](/decisions/021-develop-against-a-mock-back-end)). The one request that leaves the machine is a unit's map asking OpenFreeMap for its background, which a walk lets through but does not depend on ([ADR 037](/decisions/037-draw-maps-on-the-device-over-openfreemaps-tiles)).
 
 The chapter is in three parts:
 

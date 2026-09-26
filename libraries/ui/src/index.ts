@@ -82,11 +82,12 @@ export { isTheme, themeFromSearch, themes } from "./foundations/theme/Theme"
 export type { Theme } from "./foundations/theme/Theme"
 export {
   ThemeProvider,
+  ThemeScope,
   applyInitialTheme,
   storedTheme,
   useTheme,
 } from "./foundations/theme/ThemeProvider"
-export type { ThemeProviderProps } from "./foundations/theme/ThemeProvider"
+export type { ThemeProviderProps, ThemeScopeProps } from "./foundations/theme/ThemeProvider"
 export { cmtTheme, istTheme, unitTheme } from "./foundations/theme/UnitTheme"
 export { UnitIdentitiesProvider, useUnitIdentities } from "./foundations/units/UnitIdentities"
 export type {

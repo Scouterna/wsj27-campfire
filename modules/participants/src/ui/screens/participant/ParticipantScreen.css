@@ -62,8 +62,8 @@
     display: grid;
     gap: var(--spacing-container);
 
-    /* Two facts per row, and four on a wide card below – never three, which strands
-       a fourth fact on a row of its own. */
+    /* Two facts per row, and three on a wide card below, so the profile's facts fill
+       every row of either. */
     grid-template-columns: 1fr 1fr;
     padding-top: var(--spacing-container);
   }
@@ -335,7 +335,7 @@
     }
 
     .person-profile-grid {
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
     }
 
     /* An odd count's last card takes the whole row rather than half of it – a person

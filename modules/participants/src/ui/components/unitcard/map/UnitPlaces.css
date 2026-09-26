@@ -1,0 +1,70 @@
+/* The controls that open the card up to its map, grow it to fill the screen, and fold it
+   back. */
+
+@layer component {
+  /* The hints ride at the card's trailing top corner in every state, so they stay put
+     while the card grows under them. Lifted over the unit's name, which lets a press
+     through. Full screen, they keep clear of what the device draws over the screen's
+     edge. */
+  .unit-places-controls,
+  .unit-places-controls-folded {
+    display: flex;
+    gap: var(--spacing-stack);
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 1;
+  }
+
+  /* Opened, the space around each pill belongs to its own button, so every one is a
+     target a finger can find, while the pills sit where the folded hint did. */
+  .unit-places-controls {
+    gap: 0;
+    padding: var(--unit-places-safe-top, 0px)
+      calc(var(--spacing-stack) + var(--unit-places-safe-right, 0px)) 0 var(--spacing-stack);
+  }
+
+  /* Folded, the whole card is the button – stretched over it, with the hint in the
+     corner. */
+  .unit-places-controls-folded {
+    inset: 0;
+  }
+
+  .unit-places-open,
+  .unit-places-control {
+    background: none;
+    border: 0;
+    color: var(--color-theme-ink);
+    cursor: pointer;
+    display: flex;
+    font: inherit;
+    padding: 0;
+  }
+
+  .unit-places-open {
+    align-items: flex-start;
+    border-radius: var(--border-radius-surface);
+    flex: 1;
+    justify-content: flex-end;
+    padding: var(--spacing-stack) var(--spacing-group);
+  }
+
+  .unit-places-control {
+    border-radius: var(--border-radius-round);
+    padding: var(--spacing-stack) var(--spacing-inline);
+  }
+
+  .unit-places-hint {
+    background: color-mix(in srgb, var(--color-sheet) 80%, transparent);
+    border-radius: var(--border-radius-round);
+    font-size: var(--font-size-detail);
+    font-weight: var(--font-weight-strong);
+    padding: 2px var(--spacing-stack);
+  }
+
+  .unit-places-open:focus-visible,
+  .unit-places-control:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: -2px;
+  }
+}

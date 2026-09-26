@@ -17,6 +17,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Mockåsens scoutkår",
     memberNo: "1100101",
+    homeTown: "Göteborg",
     firstName: "Lars",
     lastName: "Lindberg",
     role: "ledare",
@@ -25,6 +26,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Seedviks scoutkår",
     memberNo: "1100402",
+    homeTown: "Mölndal",
     firstName: "Hanna",
     lastName: "Hellström",
     role: "ledare",
@@ -33,6 +35,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Mockåsens scoutkår",
     memberNo: "1300035",
+    homeTown: "Kungsbacka",
     firstName: "Ester",
     lastName: "Dahl",
     role: "deltagare",
@@ -42,6 +45,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Mockåsens scoutkår",
     memberNo: "1300049",
+    homeTown: "Partille",
     firstName: "Ivar",
     lastName: "Forsberg",
     role: "deltagare",
@@ -51,6 +55,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Mockåsens scoutkår",
     memberNo: "1300077",
+    homeTown: "Göteborg",
     firstName: "Otto",
     lastName: "Lind",
     role: "deltagare",
@@ -60,6 +65,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Seedviks scoutkår",
     memberNo: "1300084",
+    homeTown: "Lerum",
     firstName: "Leo",
     lastName: "Ström",
     role: "deltagare",
@@ -69,6 +75,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Seedviks scoutkår",
     memberNo: "1300147",
+    homeTown: "Alingsås",
     firstName: "Edvin",
     lastName: "Malm",
     role: "deltagare",
@@ -78,6 +85,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Seedviks scoutkår",
     memberNo: "1300287",
+    homeTown: "Kungälv",
     firstName: "Astrid",
     lastName: "Forsberg",
     role: "deltagare",
@@ -93,6 +101,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Stubbhults scoutkår",
     memberNo: "1100201",
+    homeTown: "Stockholm",
     firstName: "Anders",
     lastName: "Andersson",
     role: "ledare",
@@ -101,6 +110,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Stubbhults scoutkår",
     memberNo: "1300140",
+    homeTown: "Solna",
     firstName: "Molly",
     lastName: "Sundqvist",
     role: "deltagare",
@@ -109,6 +119,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Stubbhults scoutkår",
     memberNo: "1300252",
+    homeTown: "Täby",
     firstName: "Alva",
     lastName: "Lundgren",
     role: "deltagare",
@@ -117,6 +128,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Stubbhults scoutkår",
     memberNo: "1300497",
+    homeTown: "Nacka",
     firstName: "Axel",
     lastName: "Lind",
     role: "deltagare",
@@ -125,6 +137,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Fixturby scoutkår",
     memberNo: "1300210",
+    homeTown: "Stockholm",
     firstName: "Nils",
     lastName: "Söderberg",
     role: "ist",
@@ -132,6 +145,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Mockåsens scoutkår",
     memberNo: "1200401",
+    homeTown: "Umeå",
     firstName: "Karin",
     lastName: "Kron",
     role: "kontingentledning",
@@ -140,6 +154,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Stubbhults scoutkår",
     memberNo: "1200201",
+    homeTown: "Malmö",
     firstName: "Anna",
     lastName: "Almgren",
     role: "kontingentledning",
@@ -149,6 +164,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Seedviks scoutkår",
     memberNo: "1200202",
+    homeTown: "Linköping",
     firstName: "Arvid",
     lastName: "Ask",
     role: "kontingentledning",
@@ -157,6 +173,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Fixturby scoutkår",
     memberNo: "1200101",
+    homeTown: "Östersund",
     firstName: "Pernilla",
     lastName: "Palm",
     role: "kontingentledning",
@@ -165,6 +182,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Mockåsens scoutkår",
     memberNo: "1200001",
+    homeTown: "Karlstad",
     firstName: "Helena",
     lastName: "Hägg",
     role: "kontingentledning",
@@ -172,6 +190,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Seedviks scoutkår",
     memberNo: "1200002",
+    homeTown: "Luleå",
     firstName: "Henrik",
     lastName: "Holm",
     role: "kontingentledning",
@@ -179,6 +198,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Stubbhults scoutkår",
     memberNo: "1200302",
+    homeTown: "Växjö",
     firstName: "Sixten",
     lastName: "Segel",
     role: "kontingentledning",
@@ -186,6 +206,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Fixturby scoutkår",
     memberNo: "1200301",
+    homeTown: "Visby",
     firstName: "Stina",
     lastName: "Strand",
     role: "kontingentledning",
@@ -193,6 +214,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Mockåsens scoutkår",
     memberNo: "1200102",
+    homeTown: "Gävle",
     firstName: "Patrik",
     lastName: "Ply",
     role: "kontingentledning",
@@ -252,6 +274,15 @@ const lastNames = [
   "Hällström",
 ]
 
+// Kårer and towns as long as the real ones run, so a row's one detail line is tried
+// against a name that does not fit as well as the ones that do.
+const memberGroups = [
+  "Mockåsens scoutkår",
+  "Scoutkåren Sankt Görans Seedvikspojkar och -flickor",
+  "Fixturby scoutkår",
+]
+const homeTowns = ["Göteborg", "Upplands Väsby", "Bryssel (Belgien)", "Östra Sönnarslöv", "Umeå"]
+
 /**
  * The units the contingent is divided into – the real number, so the unit browser
  * generated below is the length it will actually be.
@@ -301,14 +332,50 @@ function seatAt(index: number): Pick<Participant, "role" | "unitNumber"> {
  * @returns The whole generated contingent, as one list.
  */
 export function largePeopleList(count = 2600): ParticipantsList {
-  const people: Participant[] = Array.from({ length: count }, (_, index) => ({
-    memberNo: String(1_000_000 + index),
-    // Strides that share no factor with the name lists' lengths, so every first name
-    // meets every last name rather than the pairs repeating early.
-    firstName: firstNames[index % firstNames.length] ?? "Åsa",
-    lastName: lastNames[(index * 7) % lastNames.length] ?? "Berg",
-    ...seatAt(index),
-  }))
+  const people: Participant[] = Array.from({ length: count }, (_, index) => {
+    // Every thirteenth without a kår and every seventeenth without a town, so a row says
+    // one, the other, both, or neither. Stepped a whole name round at a time, and gapped
+    // by primes the name lists share no factor with, so one name meets every kår, every
+    // town, and every gap rather than always the same.
+    const round = Math.floor(index / firstNames.length)
+    const memberGroup = index % 13 === 0 ? undefined : memberGroups[round % memberGroups.length]
+    const homeTown = index % 17 === 0 ? undefined : homeTowns[round % homeTowns.length]
+    return {
+      memberNo: String(1_000_000 + index),
+      // Strides that share no factor with the name lists' lengths, so every first name
+      // meets every last name rather than the pairs repeating early.
+      firstName: firstNames[index % firstNames.length] ?? "Åsa",
+      lastName: lastNames[(index * 7) % lastNames.length] ?? "Berg",
+      ...seatAt(index),
+      ...(memberGroup !== undefined && { memberGroup }),
+      ...(homeTown !== undefined && { homeTown }),
+    }
+  })
 
   return { people, scope: { kind: "all" } }
+}
+
+/**
+ * A unit at its real size – its deltagare and its ledare – living where the towns say,
+ * for the unit's map. The towns go round in order, so one written twice is home to twice
+ * as many.
+ * @param homeTowns The towns to hand out, the same one repeated to weight it. None gives
+ *   a unit nobody's town is known for.
+ * @returns Unit 1, with a town on everybody when any are given.
+ */
+export function unitWithHomeTowns(homeTowns: readonly string[]): ParticipantsList {
+  const people = Array.from({ length: 40 }, (_, index): Participant => {
+    const homeTown = homeTowns[index % homeTowns.length]
+    return {
+      firstName: firstNames[index % firstNames.length] ?? "Ester",
+      lastName: lastNames[(index * 7) % lastNames.length] ?? "Dahl",
+      memberGroup: memberGroups[index % memberGroups.length] ?? "Mockåsens scoutkår",
+      memberNo: String(1_500_000 + index),
+      role: index < 4 ? "ledare" : "deltagare",
+      unitNumber: 1,
+      ...(homeTown !== undefined && { homeTown }),
+      ...(index >= 4 && { birthDate: `2012-0${String((index % 9) + 1)}-15` }),
+    }
+  })
+  return { people, scope: { kind: "unit", unitNumber: 1 } }
 }

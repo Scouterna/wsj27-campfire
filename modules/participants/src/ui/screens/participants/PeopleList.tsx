@@ -10,7 +10,13 @@ import {
   type RefObject,
 } from "react"
 
-import { avatarNumberFor, fullName, type Participant } from "../../../model/Participant"
+import {
+  ageOf,
+  avatarNumberFor,
+  fullName,
+  whereFrom,
+  type Participant,
+} from "../../../model/Participant"
 import { roleName } from "../../../model/ParticipantRole"
 import { funktionName } from "../../../model/Participation"
 import { PersonBadge } from "../../components/badge/PersonBadge"
@@ -30,15 +36,30 @@ const estimatedRowHeight = 72
 const overscan = 8
 
 /**
- * The line under a name: the role first, then what places the person. A deltagare or a
+ * A row's detail line: what always shows, and where the person comes from where it is
+ * shown only on a wide screen.
+ */
+interface RowDetail {
+  /**
+   * The line on every screen.
+   */
+  readonly always: string
+  /**
+   * Where the person comes from, joined on from 768px, where the line has room for it.
+   */
+  readonly wide?: string
+}
+
+/**
+ * The line that places a person: the role first, then what places them. A deltagare or a
  * ledare is placed by their unit – with its name joined on when the identities know it –
  * the management by their funktion where the roster details one, and the IST by the one
  * word alone, since the participants service does not carry their patrols.
  * @param person The row's person.
  * @param nameOf What a unit is called, from the unit identities.
- * @returns The row's detail line.
+ * @returns The line.
  */
-function rowDetail(
+function placingLine(
   person: Participant,
   nameOf: (unitNumber: number) => string | undefined,
 ): string {
@@ -55,9 +76,38 @@ function rowDetail(
 }
 
 /**
- * The person a `PersonRow` opens onto.
+ * The line under a name. In a list whose people all share one unit, the unit says
+ * nothing, so where the person comes from takes its place after the role. Anywhere else
+ * the line places the person as always, and where they come from follows on a screen
+ * wide enough to hold both.
+ * @param person The row's person.
+ * @param nameOf What a unit is called, from the unit identities.
+ * @param isUnitScoped Whether every row in the list shares one unit.
+ * @returns The row's detail line.
+ */
+function rowDetail(
+  person: Participant,
+  nameOf: (unitNumber: number) => string | undefined,
+  isUnitScoped: boolean,
+): RowDetail {
+  const from = whereFrom(person)
+  if (isUnitScoped) {
+    const role = roleName(person.role)
+    return { always: from === undefined ? role : `${role} · ${from}` }
+  }
+  const always = placingLine(person, nameOf)
+  return from === undefined ? { always } : { always, wide: from }
+}
+
+/**
+ * The person a `PersonRow` opens onto, and the list it sits in.
  */
 export interface PersonRowProps {
+  /**
+   * Whether every row in the list shares one unit, so the unit is left out of the detail
+   * line in favor of where the person comes from.
+   */
+  readonly isUnitScoped: boolean
   /**
    * The person the row names and links to. Compared by identity, so a row whose
    * person is unchanged skips rendering.
@@ -66,15 +116,18 @@ export interface PersonRowProps {
 }
 
 /**
- * One row – a doorway into the person. Memoized on the person, because narrowing the
- * list re-renders it with most of its rows unchanged, and a row that stays needs no
- * work.
+ * One row – a doorway into the person, with a deltagare's age at its end. Memoized on
+ * its props, because narrowing the list re-renders it with most of its rows unchanged,
+ * and a row that stays needs no work.
  */
 export const PersonRow = memo(function PersonRow(props: PersonRowProps): ReactElement {
-  const { person } = props
+  const { isUnitScoped, person } = props
   const identities = useUnitIdentities()
-  const detail = rowDetail(person, identities.name)
+  const detail = rowDetail(person, identities.name, isUnitScoped)
   const avatarNumber = avatarNumberFor(person)
+  // A deltagare's age is the fact a leader reaches for, as on the home screen; a grown
+  // member's says nothing the row needs.
+  const age = person.role === "deltagare" ? ageOf(person, new Date()) : undefined
 
   return (
     <Row
@@ -85,13 +138,22 @@ export const PersonRow = memo(function PersonRow(props: PersonRowProps): ReactEl
           <UnitAvatar isLeader={person.role === "ledare"} unitNumber={avatarNumber} />
         )
       }
+      className="person-row"
       link={{ to: "/participants/$memberNo", params: { memberNo: person.memberNo } }}
+      {...(age !== undefined && {
+        trailing: <span className="person-row-age">{age} år</span>,
+      })}
     >
       <strong>
         {fullName(person)}
         {person.isFunktionsansvarig === true && <span className="person-fa">FA</span>}
       </strong>
-      <small>{detail}</small>
+      <small>
+        {detail.always}
+        {detail.wide === undefined ? null : (
+          <span className="person-row-wide"> · {detail.wide}</span>
+        )}
+      </small>
     </Row>
   )
 })
@@ -133,6 +195,7 @@ function offsetWithin(node: HTMLElement, scrollParent: HTMLElement | undefined):
  * virtualizer watching whatever scrolls it.
  */
 interface RowsProps {
+  readonly isUnitScoped: boolean
   readonly listRef: RefObject<HTMLDivElement | null>
   readonly onFirstVisibleChange?: ((index: number) => void) | undefined
   readonly people: readonly Participant[]
@@ -150,8 +213,8 @@ interface RowsProps {
  * @returns The sizing container, and the rows inside it.
  */
 function Rows(props: RowsProps): ReactElement {
-  const { listRef, onFirstVisibleChange, people, registerJump, resetKey, scrollMargin } = props
-  const { virtualizer } = props
+  const { isUnitScoped, listRef, onFirstVisibleChange, people, registerJump, resetKey } = props
+  const { scrollMargin, virtualizer } = props
 
   // The caller's way to a row that has no DOM yet, which works because the virtualizer
   // knows every row's place and the rows follow the scroll. A negative row means the very
@@ -226,7 +289,7 @@ function Rows(props: RowsProps): ReactElement {
             role="listitem"
             style={{ transform: `translateY(${String(item.start - scrollMargin)}px)` }}
           >
-            <PersonRow person={person} />
+            <PersonRow isUnitScoped={isUnitScoped} person={person} />
           </div>
         )
       })}
@@ -238,6 +301,7 @@ function Rows(props: RowsProps): ReactElement {
  * What a variant needs to build its virtualizer and hand the rows on.
  */
 interface VariantProps {
+  readonly isUnitScoped: boolean
   readonly listRef: RefObject<HTMLDivElement | null>
   readonly onFirstVisibleChange?: ((index: number) => void) | undefined
   readonly people: readonly Participant[]
@@ -267,6 +331,7 @@ function ElementScrolledRows(
   })
   return (
     <Rows
+      isUnitScoped={props.isUnitScoped}
       listRef={props.listRef}
       onFirstVisibleChange={props.onFirstVisibleChange}
       people={props.people}
@@ -294,6 +359,11 @@ function WindowScrolledRows(props: VariantProps): ReactElement {
 }
 
 export interface PeopleListProps {
+  /**
+   * Whether every row in the list shares one unit, so the unit is left out of the detail
+   * line in favor of where the person comes from.
+   */
+  readonly isUnitScoped: boolean
   /**
    * Fires with the index of the topmost row in the viewport as the reader scrolls, so
    * the screen can mark where in the list they are.
@@ -328,7 +398,7 @@ export interface PeopleListProps {
  * @returns The list.
  */
 export function PeopleList(props: PeopleListProps): ReactElement {
-  const { onFirstVisibleChange, people, registerJump, resetKey } = props
+  const { isUnitScoped, onFirstVisibleChange, people, registerJump, resetKey } = props
 
   const listRef = useRef<HTMLDivElement>(null)
   const [scroll, setScroll] = useState<
@@ -341,7 +411,31 @@ export function PeopleList(props: PeopleListProps): ReactElement {
       return
     }
     const parent = scrollParentOf(list)
-    setScroll({ margin: offsetWithin(list, parent), parent })
+    // Read through the ref every time, because the placeholder measured first is replaced
+    // by the rows' own list, and a detached element measures as zero.
+    const measure = (): void => {
+      const node = listRef.current
+      if (node === null) {
+        return
+      }
+      const margin = offsetWithin(node, parent)
+      setScroll((current) =>
+        current?.margin === margin && current.parent === parent ? current : { margin, parent },
+      )
+    }
+    measure()
+    // What sits above the list can change height after it is measured – a unit's card
+    // grows when its map arrives and again when it opens – and a stale margin puts every
+    // jump and every row that far off. Whatever grows above the list grows the scrolling
+    // content, so watching that is watching everything that can move the list.
+    const observer = new ResizeObserver(measure)
+    const content = (parent ?? document.body).children
+    for (const child of content) {
+      observer.observe(child)
+    }
+    return () => {
+      observer.disconnect()
+    }
   }, [])
 
   if (scroll === undefined) {
@@ -359,6 +453,7 @@ export function PeopleList(props: PeopleListProps): ReactElement {
   }
 
   const shared = {
+    isUnitScoped,
     listRef,
     onFirstVisibleChange,
     people,

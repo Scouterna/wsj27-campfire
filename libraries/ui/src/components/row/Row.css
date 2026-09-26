@@ -1,4 +1,4 @@
-/* The list row: a tile, a text column, and a trailing chevron. */
+/* The list row: a tile, a text column, and a trailing value, the chevron, or both. */
 
 @layer component {
   .row {
@@ -42,6 +42,13 @@
     display: block;
     font-size: var(--font-size-entry);
     margin-top: 2px;
+  }
+
+  /* A value and the chevron together at a navigating row's end, the value first. */
+  .row-end {
+    align-items: center;
+    display: flex;
+    gap: var(--spacing-stack);
   }
 
   /* The chevron: the back glyph mirrored into "onward", quiet at the row's end. */

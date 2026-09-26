@@ -34,6 +34,16 @@ export interface UnitGroup {
   readonly people: readonly Participant[]
 }
 
+/**
+ * The unit a unit browser key names, or undefined for the IST, the management, or a key
+ * that is no number.
+ * @param key The key an entry carries.
+ * @returns The unit's number, or undefined when the key names no unit.
+ */
+export function unitNumberOf(key: string): number | undefined {
+  return /^\d+$/u.test(key) ? Number(key) : undefined
+}
+
 const istEntry = { key: "ist", label: "IST" }
 const cmtEntry = { key: "cmt", label: "CMT" }
 

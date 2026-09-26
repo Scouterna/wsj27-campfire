@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import type { Participant } from "./Participant"
-import { unitEntries, unitGroup } from "./unit-entries"
+import { unitEntries, unitGroup, unitNumberOf } from "./unit-entries"
 
 /**
  * A person as a listing row converts to, overridable per case.
@@ -56,6 +56,19 @@ describe("the unit browser's entries", () => {
     // The one way the counts can fall short of the whole – the participants service
     // sends a unit for every deltagare and ledare it knows.
     expect(unitEntries([person({ memberNo: "a" })])).toEqual([])
+  })
+})
+
+describe("the unit a key names", () => {
+  it("reads a unit's number", () => {
+    expect(unitNumberOf("3")).toBe(3)
+  })
+
+  it("names no unit for the IST, the management, or a key that is no number", () => {
+    expect(unitNumberOf("ist")).toBeUndefined()
+    expect(unitNumberOf("cmt")).toBeUndefined()
+    expect(unitNumberOf("3a")).toBeUndefined()
+    expect(unitNumberOf("")).toBeUndefined()
   })
 })
 

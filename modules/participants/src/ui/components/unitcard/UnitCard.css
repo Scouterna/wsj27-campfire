@@ -1,0 +1,113 @@
+/* A unit's card: the identity row over the unit's map. */
+
+@layer component {
+  /* The identity and the map behind it bleed to the card's edges, and the map fills
+     whatever the identity takes. Opened, the card grows to the map's height, and the
+     map grows with it. */
+  .unit-card-identity {
+    --unit-card-bleed: var(--card-padding, var(--spacing-section));
+
+    /* Undoes the browser's own popover dress, which applies in its place too, since the
+       element is a popover only to be lifted out of it. */
+    background: none;
+    border: 0;
+    border-radius: var(--border-radius-surface) var(--border-radius-surface) 0 0;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    isolation: isolate;
+    margin: calc(-1 * var(--unit-card-bleed)) calc(-1 * var(--unit-card-bleed)) 0;
+
+    /* Room enough beside the name for the map behind it to read as a place – held with
+       or without one, so the card keeps its size while the map loads rather than
+       growing under the reader. */
+    min-height: calc(104px + var(--unit-card-bleed));
+    overflow: hidden;
+    padding: 0;
+    position: relative;
+    width: auto;
+
+    /* With nothing under it, the identity is the card's whole body, so it bleeds to the
+       bottom edge as well and its text centers between the two. */
+    &:last-child {
+      border-radius: var(--border-radius-surface);
+      margin-bottom: calc(-1 * var(--unit-card-bleed));
+    }
+
+    /* Tall enough to read a region, and never taller than half the screen. */
+    &:has(.unit-map-open) {
+      min-height: min(56vh, 450px);
+    }
+
+    /* Full screen, it covers the viewport edge to edge, and what sits at its edges keeps
+       clear of what the device draws over them. */
+    &:popover-open {
+      --unit-map-safe-bottom: env(safe-area-inset-bottom, 0px);
+      --unit-map-safe-left: env(safe-area-inset-left, 0px);
+      --unit-map-safe-right: env(safe-area-inset-right, 0px);
+      --unit-places-safe-right: env(safe-area-inset-right, 0px);
+      --unit-places-safe-top: env(safe-area-inset-top, 0px);
+
+      border-radius: 0;
+      inset: 0;
+      margin: 0;
+      position: fixed;
+    }
+
+    &:popover-open > .row {
+      padding-left: calc(var(--spacing-container) + env(safe-area-inset-left, 0px));
+      padding-top: calc(var(--spacing-group) + env(safe-area-inset-top, 0px));
+    }
+
+    /* The row is drawn after the map and lifted over it, but lets a press through to
+       the map and the toggle underneath. */
+    & > .row {
+      border-top: none;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      margin: 0;
+      min-height: calc(104px + var(--unit-card-bleed));
+      pointer-events: none;
+      position: relative;
+      z-index: 0;
+    }
+
+    /* The sheet behind the mark and the name, fading out towards the trailing edge and,
+       once the card opens below it, into the map. */
+    & > .row::before {
+      background: linear-gradient(
+        to right,
+        color-mix(in srgb, var(--color-sheet) 90%, transparent) 25%,
+        transparent 70%
+      );
+      content: "";
+      inset: 0 0 -48px;
+      mask-image: linear-gradient(to bottom, #000 calc(100% - 48px), transparent);
+      position: absolute;
+      z-index: -1;
+    }
+
+    /* The unit's name is what a leader knows it by, so it is the large line, dressed as
+       the page's title, and the number the quiet one under it. */
+    & > .row strong {
+      color: var(--color-theme-ink);
+      font-family: var(--typography-display-font_family);
+      font-size: var(--font-size-display-small);
+      font-weight: var(--typography-display-font_weight);
+      line-height: 1;
+      text-transform: uppercase;
+    }
+  }
+
+  /* The card keeps the open map's place while the map fills the screen, so the page
+     under it does not move, and there is a place to shrink back into. */
+  .card:has(> .unit-card-identity:popover-open) {
+    min-height: min(56vh, 450px);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .unit-card-identity {
+      transition: min-height 300ms ease;
+    }
+  }
+}

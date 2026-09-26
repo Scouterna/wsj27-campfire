@@ -62,7 +62,8 @@ export const Linked: Story = {
 }
 
 /**
- * The trailing slot, when the row ends in a fact rather than a way onward.
+ * The trailing slot, when the row ends in a fact – on its own, and before the chevron of
+ * a row that still goes somewhere.
  */
 export const WithTrailing: Story = {
   render: (): ReactElement => (
@@ -71,6 +72,10 @@ export const WithTrailing: Story = {
         <Row leading={tile("KK")} trailing={<small>i går</small>}>
           <strong>Karin Kron</strong>
           <small>Kontingentledare</small>
+        </Row>
+        <Row leading={tile("ED")} link={{ to: "/" }} trailing={<small>14 år</small>}>
+          <strong>Ester Dahl</strong>
+          <small>Deltagare · Mockåsens scoutkår · Kungsbacka</small>
         </Row>
       </Card>
     </div>
