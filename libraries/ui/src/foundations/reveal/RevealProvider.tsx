@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react"
 
-import { isRevealBypassed, type Reveal } from "./reveals"
+import { isRevealBypassed, wakeAt, type Reveal } from "./reveals"
 
 /**
  * The curtains as the subtree sees them: which ids are hung at all, and which of
@@ -35,33 +35,17 @@ function isOpenNow(reveal: Reveal): boolean {
 }
 
 /**
- * Schedules one reveal's opening: a timer that adds its id to the open set at the
- * moment – a beat past it, so a clock read on waking is unambiguously beyond.
- * @param reveal The reveal to wake for.
- * @param setOpen The open set's setter.
- * @returns The timer, for the effect to clear.
+ * An update to the open set that adds one reveal.
+ * @param id The reveal that opened.
+ * @returns The update, for the open set's setter.
  */
-function wakeAt(
-  reveal: Reveal,
-  setOpen: (update: (previous: ReadonlySet<string>) => ReadonlySet<string>) => void,
-): ReturnType<typeof setTimeout> {
-  const wait = Math.max(0, reveal.at.getTime() - Date.now()) + 50
-
-  // setTimeout's delay is a signed 32-bit count of milliseconds: anything past ~24.8
-  // days overflows and fires immediately, which would open the curtain on the spot.
-  // A far-off moment sleeps a day at a time and re-arms until the real wait fits.
-  const day = 24 * 60 * 60 * 1000
-  if (wait > day) {
-    return setTimeout(() => {
-      wakeAt(reveal, setOpen)
-    }, day)
-  }
-
-  return setTimeout(() => {
-    setOpen((previous) => new Set([...previous, reveal.id]))
-  }, wait)
+function withOpened(id: string): (previous: ReadonlySet<string>) => ReadonlySet<string> {
+  return (previous) => new Set([...previous, id])
 }
 
+/**
+ * The curtains a `RevealProvider` hangs, and the subtree that reads them.
+ */
 export interface RevealProviderProps {
   /**
    * The curtains to hang. Give the same array instance across renders – a module
@@ -78,9 +62,7 @@ export interface RevealProviderProps {
  * The product's curtains: each reveal stays closed until its moment, then opens –
  * live, because the provider wakes itself at each moment and re-renders everything
  * that reads it. Several can hang, and count down, at once; each opens on its own
- * clock.
- *
- * Mounted once by the composition root, with every reveal the product currently has.
+ * clock. Mounted once, at the composition root.
  *
  * @param props The curtains, and the subtree under them.
  * @returns The subtree, told which curtains are open.
@@ -91,12 +73,16 @@ export function RevealProvider(props: RevealProviderProps): ReactElement {
   )
 
   useEffect(() => {
-    const timers = props.reveals
+    const cancels = props.reveals
       .filter((reveal) => !open.has(reveal.id))
-      .map((reveal) => wakeAt(reveal, setOpen))
+      .map((reveal) =>
+        wakeAt(reveal, () => {
+          setOpen(withOpened(reveal.id))
+        }),
+      )
     return () => {
-      for (const timer of timers) {
-        clearTimeout(timer)
+      for (const cancel of cancels) {
+        cancel()
       }
     }
   }, [open, props.reveals])
@@ -110,8 +96,8 @@ export function RevealProvider(props: RevealProviderProps): ReactElement {
 }
 
 /**
- * Whether the named curtain is open. An id no provider hung is open – see
- * `RevealProvider` – so a consumer can gate by an id before the application hangs it.
+ * Whether the named curtain is open. An id no provider hung is open, so a consumer can
+ * gate by an id before the application hangs it.
  *
  * @param id The reveal's id.
  * @returns True when open, re-rendering the caller at the moment it opens.
@@ -122,8 +108,8 @@ export function useIsRevealed(id: string): boolean {
 }
 
 /**
- * The same answer as `useIsRevealed`, as a lookup – for the one place that decides
- * for many ids at once, the way the application's section predicates do.
+ * The same answer as `useIsRevealed`, as a lookup for a caller that decides many ids at
+ * once.
  *
  * @returns The lookup, re-rendering the caller whenever any curtain opens.
  */
