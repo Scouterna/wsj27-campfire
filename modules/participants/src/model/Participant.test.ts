@@ -100,16 +100,18 @@ describe("how old a person is", () => {
   it("counts whole years, before and after the birthday", () => {
     const person27 = person({ birthDate: "2013-07-30" })
 
-    expect(ageOf(person27, new Date("2027-07-29T00:00:00Z"))).toBe(13)
-    expect(ageOf(person27, new Date("2027-07-30T00:00:00Z"))).toBe(14)
+    expect(ageOf(person27, new Date(2027, 6, 29, 23, 59))).toBe(13)
+    expect(ageOf(person27, new Date(2027, 6, 30, 0, 1))).toBe(14)
   })
 
   it("answers nothing for an absent or unreadable birth date", () => {
-    expect(ageOf(person({}), new Date("2027-07-30T00:00:00Z"))).toBeUndefined()
+    expect(ageOf(person({}), new Date(2027, 6, 30))).toBeUndefined()
     expect(ageOf(person({ birthDate: "sommaren -95" }), new Date())).toBeUndefined()
+    // A day the month does not have, which the parser would roll into the next month.
+    expect(ageOf(person({ birthDate: "2010-02-30" }), new Date(2027, 6, 30))).toBeUndefined()
   })
 
   it("answers nothing for a birth date in the future", () => {
-    expect(ageOf(person({ birthDate: "2030-01-01" }), new Date("2027-01-01"))).toBeUndefined()
+    expect(ageOf(person({ birthDate: "2030-01-01" }), new Date(2027, 0, 1))).toBeUndefined()
   })
 })

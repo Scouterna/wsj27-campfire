@@ -1,5 +1,10 @@
 import { defineConfig } from "vitest/config"
 
+// Every test runs on Swedish time, as the product does, wherever the machine is – a
+// continuous integration runner's clock is on UTC, where a test of what day it is for
+// the reader passes whether the code reads the reader's day or UTC's.
+process.env["TZ"] = "Europe/Stockholm"
+
 // Vitest's configuration, kept in config/ with every other tool's (ADR 006). One
 // hand-written project per package that has tests, so a package's tests run in the
 // environment that package assumes – and a new package is a new entry here, on purpose,
