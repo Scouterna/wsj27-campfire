@@ -1,5 +1,5 @@
 import type { Role } from "@scouterna/wsj27-campfire-utils"
-import { useId, type ReactElement } from "react"
+import { useId, useState, type ReactElement } from "react"
 
 import { unreadMessages, type Message, type MessageKind } from "../../../model/messages"
 import { useClosedMessages } from "./use-closed-messages"
@@ -49,13 +49,18 @@ function written(date: string): string {
  * rather than a block of data. Every title is an `h2`, which lists the plates in the
  * page outline.
  *
+ * The moment is read once when the widget mounts, so a message whose end passes while
+ * the reader looks at it stays until the start screen next opens rather than vanishing
+ * under them.
+ *
  * @param props The message list, and the reader's roles.
  * @returns The plates, or nothing when no message is unread.
  */
 export function MessagesWidget(props: MessagesWidgetProps): ReactElement | null {
   const prefix = useId()
   const { close, closed } = useClosedMessages()
-  const unread = unreadMessages(props.messages, props.roles, closed)
+  const [openedAt] = useState(() => new Date())
+  const unread = unreadMessages(props.messages, props.roles, closed, openedAt)
   if (unread.length === 0) {
     return null
   }
