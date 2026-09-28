@@ -81,6 +81,10 @@
     overflow-wrap: anywhere;
   }
 
+  .person-profile-grid .gender-mark {
+    margin-inline-start: var(--spacing-stack);
+  }
+
   /* Nothing on record wears the same quiet ink as the icon field's absent state. */
   .person-profile-grid em {
     color: var(--color-ink-tertiary);

@@ -13,7 +13,8 @@ import type { Participant } from "../../src/types.ts"
  * Scoutnet holds Beata Sjögren's father's address as her own, and the address that is
  * hers is the alternative one, which is why a list writes to both. Julia Berggren has a kår
  * but no home town, and Ulrik Månsson's home town is abroad, where the unit's map cannot
- * place it. Every answer is keyed by the form template's question key and carries the label
+ * place it. Edvin Malm registered as Annat, and Scoutnet knows none for Otto
+ * Lind. Every answer is keyed by the form template's question key and carries the label
  * Scoutnet would export – "Ja", "Nej", the diet option texts, "1"–"5" severities, and a list
  * where the question takes several options.
  *
@@ -219,7 +220,7 @@ export const participants: readonly Participant[] = [
     unitNumber: 1,
     memberNo: "1300077",
     birthDate: "2009-09-17",
-    sex: "Man",
+    sex: "Okänt",
     memberGroup: "Mockåsens scoutkår",
     city: "Göteborg",
     email: "otto.lind@example.se",
@@ -304,7 +305,7 @@ export const participants: readonly Participant[] = [
     unitNumber: 1,
     memberNo: "1300147",
     birthDate: "2010-05-14",
-    sex: "Man",
+    sex: "Annat",
     memberGroup: "Seedviks scoutkår",
     city: "Alingsås",
     email: "edvin.malm@example.se",

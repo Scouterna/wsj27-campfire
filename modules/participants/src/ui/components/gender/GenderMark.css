@@ -1,0 +1,15 @@
+/* The sign sits in a line of text at the text's own height, so it scales with Dynamic
+   Type and lines up with the words beside it. It is drawn in a grey lighter than any of
+   the text inks, so it never outweighs the words it sits beside – mixed at the lightest
+   share that still holds a graphic's 3:1 contrast against a white card. */
+
+@layer component {
+  .gender-mark {
+    color: color-mix(in srgb, var(--color-ink) 45%, var(--color-paper));
+    display: inline-flex;
+    flex: none;
+    height: 1.1em;
+    vertical-align: -0.15em;
+    width: 1.1em;
+  }
+}

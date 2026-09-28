@@ -48,6 +48,17 @@
     transition: background 120ms ease;
   }
 
+  /* The gender and the age at the trailing edge, in quiet ink – facts, not a second
+     label. */
+  .unit-widget-person-facts {
+    align-items: center;
+    color: var(--color-ink-secondary);
+    display: flex;
+    flex: none;
+    font-size: var(--font-size-footnote);
+    gap: 6px;
+  }
+
   .unit-widget-person-chevron {
     color: var(--color-ink-tertiary);
     display: flex;
@@ -82,11 +93,7 @@
     overflow-wrap: anywhere;
   }
 
-  /* The age rides quietly at the trailing edge – a fact, not a second label. */
   .unit-widget-person-age {
-    color: var(--color-ink-secondary);
-    flex: none;
-    font-size: var(--font-size-footnote);
     font-variant-numeric: tabular-nums;
   }
 

@@ -1,3 +1,4 @@
+import type { Gender } from "../../model/Gender"
 import type { Participant } from "../../model/Participant"
 import type { ParticipantRole } from "../../model/ParticipantRole"
 import type { CmtFunktion } from "../../model/Participation"
@@ -41,6 +42,15 @@ const rolesByMemberType = new Map<string, ParticipantRole>([
   ["IST", "ist"],
   ["Avdelningsledare", "ledare"],
   ["Kontingentledning", "kontingentledning"],
+])
+
+// Scoutnet's labels for a member's sex, mapped to the domain's genders. A label Scoutnet
+// adds later maps to nothing rather than a guess.
+const gendersBySex: ReadonlyMap<string, Gender> = new Map([
+  ["Annat", "annat"],
+  ["Kvinna", "kvinna"],
+  ["Man", "man"],
+  ["Okänt", "okant"],
 ])
 
 // The funktion segment a `wsj27:cmt:<funktion>:<roll>` role names, mapped to the
@@ -202,6 +212,8 @@ export function toParticipant(dto: ParticipantDto): Participant | undefined {
   const birthDate =
     typeof dto.born === "string" && /^\d{4}-\d{2}-\d{2}$/u.test(dto.born) ? dto.born : undefined
 
+  const gender = typeof dto.sex === "string" ? gendersBySex.get(dto.sex.trim()) : undefined
+
   // The scoutkår and the home town. The service sends the empty string for nobody's kår,
   // and null or no key at all for nobody's town, all of which are absence rather than a
   // kår or a town with no name.
@@ -219,6 +231,7 @@ export function toParticipant(dto: ParticipantDto): Participant | undefined {
     // code to.
     ...(unitNumber !== undefined && { unitNumber }),
     ...(birthDate !== undefined && { birthDate }),
+    ...(gender !== undefined && { gender }),
     ...(memberGroup !== undefined && { memberGroup }),
     ...(homeTown !== undefined && { homeTown }),
     ...toContactInfo(dto),

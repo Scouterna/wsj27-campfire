@@ -7,11 +7,13 @@ import {
 } from "@scouterna/wsj27-campfire-ui"
 import type { ReactElement, ReactNode } from "react"
 
+import { genderName } from "../../../model/Gender"
 import { ageOf, avatarNumberFor, belonging } from "../../../model/Participant"
 import type { ParticipantDetail } from "../../../model/ParticipantDetail"
 import { roleName } from "../../../model/ParticipantRole"
 import { funktionName, travelName } from "../../../model/Participation"
 import { PersonBadge } from "../../components/badge/PersonBadge"
+import { GenderMark } from "../../components/gender/GenderMark"
 
 export interface ProfileSectionProps {
   /**
@@ -25,17 +27,24 @@ export interface ProfileSectionProps {
 const swedishDate = new Intl.DateTimeFormat("sv-SE", { dateStyle: "long", timeZone: "UTC" })
 
 /**
- * The birth date in Swedish. The service sends a plain `YYYY-MM-DD`, and anything else it
- * ever sends is shown exactly as it arrived rather than guessed at.
+ * The birth date in Swedish, with the age it makes today after it – "2 november 2012
+ * · 14 år". The service sends a plain `YYYY-MM-DD`, and anything else it ever sends is
+ * shown exactly as it arrived rather than guessed at, with no age.
  * @param birthDate The date as the participants service spells it.
+ * @param age The age the date makes today, where it makes one.
  * @returns The date to draw.
  */
-function birthDateText(birthDate: string): string {
+function birthDateText(birthDate: string, age: number | undefined): string {
   if (!/^\d{4}-\d{2}-\d{2}$/u.test(birthDate)) {
     return birthDate
   }
   const date = new Date(birthDate)
-  return Number.isNaN(date.getTime()) ? birthDate : swedishDate.format(date)
+  if (Number.isNaN(date.getTime())) {
+    return birthDate
+  }
+  const text = swedishDate.format(date)
+  // A no-break space, so a narrow card wraps the age whole rather than strand "år".
+  return age === undefined ? text : `${text} · ${String(age)}\u{A0}år`
 }
 
 interface FactProps {
@@ -47,19 +56,31 @@ interface FactProps {
    * What was answered, where anything was.
    */
   readonly value?: string
+  /**
+   * A sign drawn after the answer, where the answer has one. Hidden from a screen reader,
+   * which already reads the answer in words.
+   */
+  readonly icon?: ReactNode
 }
 
 /**
  * One fact in the row under the identity: the question in quiet type, and the answer –
  * or the designed absent state where the record holds none.
- * @param props What was asked, and what it was answered with.
+ * @param props What was asked, what it was answered with, and the answer's sign.
  * @returns The fact.
  */
 function Fact(props: FactProps): ReactElement {
   return (
     <div>
       <small>{props.label}</small>
-      {props.value === undefined ? <em>Ej angiven</em> : <strong>{props.value}</strong>}
+      {props.value === undefined ? (
+        <em>Ej angiven</em>
+      ) : (
+        <strong>
+          {props.value}
+          {props.icon === undefined ? null : <span aria-hidden="true">{props.icon}</span>}
+        </strong>
+      )}
     </div>
   )
 }
@@ -146,10 +167,16 @@ export function ProfileSection(props: ProfileSectionProps): ReactElement {
           <Fact
             label="Födelsedatum"
             {...(participant.birthDate !== undefined && {
-              value: birthDateText(participant.birthDate),
+              value: birthDateText(participant.birthDate, age),
             })}
           />
-          <Fact label="Ålder" {...(age !== undefined && { value: `${String(age)} år` })} />
+          <Fact
+            label="Kön"
+            {...(participant.gender !== undefined && {
+              icon: <GenderMark gender={participant.gender} />,
+              value: genderName(participant.gender),
+            })}
+          />
           <Fact
             label="Typ av resa"
             {...(participant.travel !== undefined && { value: travelName(participant.travel) })}

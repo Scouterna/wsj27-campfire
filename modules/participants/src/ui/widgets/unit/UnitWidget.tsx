@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router"
 import type { ReactElement } from "react"
 
 import { ageOf, fullName, whereFrom, type Participant } from "../../../model/Participant"
+import { GenderMark } from "../../components/gender/GenderMark"
 import { UnitCard } from "../../components/unitcard/UnitCard"
 import { useParticipants } from "../../screens/participants/use-participants"
 
@@ -25,7 +26,8 @@ interface PeopleCardProps {
 
 /**
  * One titled card of people as a compact ledger, each row a doorway into the person –
- * the name, where they come from, and the age at the trailing edge where one rides along.
+ * the name, where they come from, and the gender and the age at the trailing edge where
+ * they ride along.
  * @param props The title, the people, and whether their ages ride along.
  * @returns The card, or nothing when it holds nobody.
  */
@@ -52,7 +54,12 @@ function PeopleCard(props: PeopleCardProps): ReactElement | null {
                   <span className="unit-widget-person-from">{from}</span>
                 )}
               </span>
-              {age === undefined ? null : <span className="unit-widget-person-age">{age} år</span>}
+              <span className="unit-widget-person-facts">
+                {person.gender === undefined ? null : <GenderMark gender={person.gender} />}
+                {age === undefined ? null : (
+                  <span className="unit-widget-person-age">{age} år</span>
+                )}
+              </span>
               <span aria-hidden="true" className="unit-widget-person-chevron">
                 <BackIcon size={14} strokeWidth={2.1} />
               </span>
