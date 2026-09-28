@@ -22,11 +22,17 @@ function ColumnDecorator(Story: () => ReactElement): ReactElement {
 
 // One message of each kind, written for the catalog rather than taken from the list the
 // application ships. The stories are about how a kind is drawn, so they stay true as the
-// contingent's own messages come and go.
+// contingent's own messages come and go. They show from long before any day the catalog
+// is opened until long after, because the widget reads the clock itself.
 const reader = [{ kind: "leader", unitNumber: 1 }] as const
 const everyone: Message["audience"] = ["cmt", "leader"]
+const always = {
+  end: new Date("2100-01-01T00:00:00+01:00"),
+  start: new Date("2000-01-01T00:00:00+01:00"),
+}
 
 const welcome: Message = {
+  ...always,
   audience: everyone,
   id: "story-welcome",
   kind: "welcome",
@@ -38,6 +44,7 @@ const welcome: Message = {
 }
 
 const important: Message = {
+  ...always,
   audience: everyone,
   date: "2026-09-20",
   id: "story-important",
@@ -51,6 +58,7 @@ const important: Message = {
 }
 
 const news: Message = {
+  ...always,
   audience: everyone,
   date: "2026-09-22",
   id: "story-news",

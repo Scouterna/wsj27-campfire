@@ -4,11 +4,47 @@ import { expect, test, type Locator, type Page } from "@playwright/test"
 // package surface pulls component stylesheets along, which the test runner cannot swallow.
 // eslint-disable-next-line import-x/no-relative-packages -- see above
 import { unitsReveal } from "../../../libraries/ui/src/foundations/reveal/reveals"
-import { closedMessagesKey, messages, type Message } from "../src/model/messages"
+import {
+  closedMessagesKey,
+  defaultMessageDuration,
+  messages,
+  unreadMessages,
+  type Message,
+} from "../src/model/messages"
 
 // A fresh browser context has closed nothing, so every walk here opens on the welcome
 // unless it says otherwise. Nothing here may clear the stored value from an init
 // script, which would run again on the reload the remembering is proved by.
+
+/**
+ * The moment a message stops showing, as the start screen reckons it.
+ * @param message The message to read.
+ * @returns Its end, in milliseconds since the epoch.
+ */
+function endOf(message: Message): number {
+  return message.end === undefined
+    ? message.start.getTime() + defaultMessageDuration
+    : message.end.getTime()
+}
+
+// The moment the walks stand at, which is when the latest welcome began to show, so the
+// walks hold as messages are added and the real clock leaves them behind.
+const shown = new Date(
+  Math.max(
+    ...messages
+      .filter((message) => message.kind === "welcome")
+      .map((message) => message.start.getTime()),
+  ),
+)
+
+/**
+ * The messages that show to a role at the moment the walks stand at, in list order.
+ * @param role The role kind to read for.
+ * @returns The messages, oldest first.
+ */
+function showingFor(role: Message["audience"][number]): readonly Message[] {
+  return unreadMessages(messages, [{ kind: role }], new Set(), shown)
+}
 
 /**
  * The welcome written for one role.
@@ -16,11 +52,11 @@ import { closedMessagesKey, messages, type Message } from "../src/model/messages
  * @returns That welcome.
  */
 function welcomeFor(role: Message["audience"][number]): Message {
-  const found = messages.find((message) => message.audience.includes(role))
+  const found = showingFor(role).find((message) => message.kind === "welcome")
   if (found === undefined) {
     // Every walk below reads the welcome's words; an undefined name would match any
     // heading at all and pass against a screen that showed something else.
-    throw new Error(`the message list holds no welcome for ${role}`)
+    throw new Error(`the message list holds no welcome for ${role} at ${shown.toISOString()}`)
   }
   return found
 }
@@ -46,6 +82,9 @@ const managementWelcome = welcomeFor("cmt")
 const welcomeTitle = leaderWelcome.title
 
 test.beforeEach(async ({ page }) => {
+  // Every message shows only for a while, so the page's clock stands where the list
+  // says the welcomes show.
+  await page.clock.setFixedTime(shown)
   // The messages wait behind the units reveal like every other widget, so each page
   // opens with the development bypass set, as in the home walk.
   await page.addInitScript(() => {
@@ -116,13 +155,13 @@ function closeControls(page: Page): Locator {
 }
 
 /**
- * The titles of the messages written for a role, in list order – what the plates put
+ * The titles of the messages showing to a role, in list order – what the plates put
  * into the page outline, read from the list so the walk holds as messages are added.
  * @param role The role kind to read for.
  * @returns The titles, oldest first.
  */
 function titlesFor(role: Message["audience"][number]): string[] {
-  return messages.filter((message) => message.audience.includes(role)).map((one) => one.title)
+  return showingFor(role).map((one) => one.title)
 }
 
 test("shows the welcome to a leader, over the journey and their unit", async ({ page }) => {
@@ -184,6 +223,48 @@ test("leaves no trace once every message is closed", async ({ page }) => {
   // second section at all.
   await expect(closeControls(page)).toHaveCount(0)
   await expect(page.locator("main .content h2")).toHaveText(["Resan"])
+})
+
+test("leaves no trace once every message has ended, whatever the device closed", async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(Math.max(...messages.map((message) => endOf(message))))
+  await page.goto("/")
+  await signInAs(page, "Anna Almgren")
+
+  await expect(closeControls(page)).toHaveCount(0)
+  await expect(page.locator("main .content h2")).toHaveText(["Resan"])
+})
+
+test("keeps a message whose end passes on screen until the start screen opens again", async ({
+  page,
+}) => {
+  // A clock that runs, unlike the pinned one, so the end can pass under the reader.
+  const end = endOf(leaderWelcome)
+  await page.clock.install({ time: end - 60_000 })
+  await page.goto("/")
+  await signInAs(page, "Lars Lindberg")
+  await expect(welcomeHeading(page)).toBeVisible()
+
+  // Closing another plate draws the widget again past the end, which is what a widget
+  // reading the clock on every draw would drop the welcome on.
+  const other = unreadMessages(
+    messages,
+    [{ kind: "leader" }],
+    new Set(),
+    new Date(end - 60_000),
+  ).find((message) => message !== leaderWelcome && endOf(message) > end + 120_000)
+  if (other === undefined) {
+    throw new Error("no other leader message outlasts the welcome to close meanwhile")
+  }
+  await page.clock.fastForward("02:00")
+  await closeControl(page, other).click()
+  await expect(plate(page, other)).toHaveCount(0)
+  await expect(page.getByText(opening(leaderWelcome))).toBeVisible()
+
+  await page.reload()
+  await expect(page.getByRole("heading", { level: 2, name: "Min avdelning" })).toBeVisible()
+  await expect(page.getByText(opening(leaderWelcome))).toHaveCount(0)
 })
 
 test("closes from the keyboard", async ({ page }) => {

@@ -25,6 +25,11 @@ export interface Message {
    */
   readonly date?: string
   /**
+   * The moment it stops showing, written with Sweden's offset on that day. Absent means
+   * five days after the start.
+   */
+  readonly end?: Date
+  /**
    * The message's identity, carrying the month it shipped so a reissue has an obvious
    * next name.
    */
@@ -39,10 +44,21 @@ export interface Message {
    */
   readonly paragraphs: readonly string[]
   /**
+   * The moment it starts showing, written with Sweden's offset on that day – +01:00 in
+   * winter, +02:00 in summer – so the moment is the same wherever the device stands.
+   */
+  readonly start: Date
+  /**
    * The message's heading.
    */
   readonly title: string
 }
+
+/**
+ * How long a message shows when it sets no end – five days of 24 hours, so a change to
+ * or from summer time in between moves the end on the wall clock rather than the length.
+ */
+export const defaultMessageDuration = 5 * 24 * 60 * 60 * 1000
 
 /**
  * Where the closed ids live between visits – per device rather than per person, so a
@@ -76,6 +92,7 @@ export const messages: readonly Message[] = [
         "Du kan mejla hela avdelningen på en gång och följa nedräkningen till avresan. " +
         "Mer är på väg och när det kommer något nytt säger vi till på Discord.",
     ],
+    start: new Date("2026-09-19T19:30:00+02:00"),
     title: "Det här är Campfire!",
   },
   {
@@ -88,6 +105,7 @@ export const messages: readonly Message[] = [
         "med. Du kan mejla dem du har i listan och följa nedräkningen till avresan. Mer " +
         "är på väg och när det kommer något nytt säger vi till på Teams.",
     ],
+    start: new Date("2026-09-19T19:30:00+02:00"),
     title: "Det här är Campfire!",
   },
   {
@@ -102,24 +120,48 @@ export const messages: readonly Message[] = [
       "Det som hette närstående i listan heter nu kontaktpersoner – när du mejlar eller " +
         "kopierar adresserna tar vi med både närstående och nödkontakter.",
     ],
+    start: new Date("2026-09-20T21:00:00+02:00"),
     title: "Vi har rättat kontaktuppgifterna",
   },
 ]
 
 /**
- * The messages a reader should see now – those for a role they hold that this device
- * has not closed. A closed id the list does not hold changes nothing.
+ * The messages a reader should see at a moment – those for a role they hold, showing at
+ * that moment, and not closed on this device. A message shows from its start up to but
+ * not including its end, and one with an invalid date never shows. A closed id the
+ * list does not hold changes nothing.
  * @param list The messages to choose from.
  * @param roles The roles the reader holds.
  * @param closed The ids this device has closed.
+ * @param at The moment to choose for, passed in rather than read so a test can place it.
  * @returns The unread messages for the reader, in list order.
  */
 export function unreadMessages(
   list: readonly Message[],
   roles: readonly Role[],
   closed: ReadonlySet<string>,
+  at: Date,
 ): readonly Message[] {
-  return list.filter((message) => hasAnyRole(roles, ...message.audience) && !closed.has(message.id))
+  const moment = at.getTime()
+  return list.filter(
+    (message) =>
+      hasAnyRole(roles, ...message.audience) &&
+      isShowing(message, moment) &&
+      !closed.has(message.id),
+  )
+}
+
+/**
+ * Whether a message shows at a moment. An invalid date's time is NaN, which every
+ * comparison refuses.
+ * @param message The message to test.
+ * @param moment The moment, in milliseconds since the epoch.
+ * @returns True from the start up to but not including the end.
+ */
+function isShowing(message: Message, moment: number): boolean {
+  const start = message.start.getTime()
+  const end = message.end === undefined ? start + defaultMessageDuration : message.end.getTime()
+  return start <= moment && moment < end
 }
 
 /**
