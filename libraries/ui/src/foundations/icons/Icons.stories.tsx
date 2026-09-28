@@ -6,6 +6,9 @@ import { BackIcon } from "./set/BackIcon"
 import { ChatIcon } from "./set/ChatIcon"
 import { CheckIcon } from "./set/CheckIcon"
 import { CopyIcon } from "./set/CopyIcon"
+import { GenderFemaleIcon } from "./set/GenderFemaleIcon"
+import { GenderMaleIcon } from "./set/GenderMaleIcon"
+import { GenderOtherIcon } from "./set/GenderOtherIcon"
 import { HomeIcon } from "./set/HomeIcon"
 import { IdCardIcon } from "./set/IdCardIcon"
 import { MailIcon } from "./set/MailIcon"
@@ -25,6 +28,9 @@ const icons: readonly (readonly [string, (props: IconProps) => ReactElement])[] 
   ["Chat", ChatIcon],
   ["Check", CheckIcon],
   ["Copy", CopyIcon],
+  ["Gender female", GenderFemaleIcon],
+  ["Gender male", GenderMaleIcon],
+  ["Gender other", GenderOtherIcon],
   ["Home", HomeIcon],
   ["Id card", IdCardIcon],
   ["Mail", MailIcon],

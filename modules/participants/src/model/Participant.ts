@@ -1,3 +1,4 @@
+import type { Gender } from "./Gender"
 import { type ParticipantRole } from "./ParticipantRole"
 import type { CmtFunktion } from "./Participation"
 
@@ -58,6 +59,11 @@ export interface Participant {
    * it out.
    */
   readonly birthDate?: string
+  /**
+   * Their gender, as Scoutnet holds it. Absent when the service sent none, or a label
+   * this module does not know – never a guess.
+   */
+  readonly gender?: Gender
   /**
    * The scoutkår the person belongs to at home. Absent when Scoutnet holds none.
    */

@@ -17,6 +17,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Mockåsens scoutkår",
     memberNo: "1100101",
+    gender: "man",
     homeTown: "Göteborg",
     firstName: "Lars",
     lastName: "Lindberg",
@@ -26,6 +27,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Seedviks scoutkår",
     memberNo: "1100402",
+    gender: "kvinna",
     homeTown: "Mölndal",
     firstName: "Hanna",
     lastName: "Hellström",
@@ -35,6 +37,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Mockåsens scoutkår",
     memberNo: "1300035",
+    gender: "kvinna",
     homeTown: "Kungsbacka",
     firstName: "Ester",
     lastName: "Dahl",
@@ -45,6 +48,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Mockåsens scoutkår",
     memberNo: "1300049",
+    gender: "man",
     homeTown: "Partille",
     firstName: "Ivar",
     lastName: "Forsberg",
@@ -55,6 +59,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Mockåsens scoutkår",
     memberNo: "1300077",
+    gender: "okant",
     homeTown: "Göteborg",
     firstName: "Otto",
     lastName: "Lind",
@@ -65,6 +70,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Seedviks scoutkår",
     memberNo: "1300084",
+    gender: "man",
     homeTown: "Lerum",
     firstName: "Leo",
     lastName: "Ström",
@@ -75,6 +81,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Seedviks scoutkår",
     memberNo: "1300147",
+    gender: "annat",
     homeTown: "Alingsås",
     firstName: "Edvin",
     lastName: "Malm",
@@ -85,6 +92,7 @@ export const cast: readonly Participant[] = [
   {
     memberGroup: "Seedviks scoutkår",
     memberNo: "1300287",
+    gender: "kvinna",
     homeTown: "Kungälv",
     firstName: "Astrid",
     lastName: "Forsberg",

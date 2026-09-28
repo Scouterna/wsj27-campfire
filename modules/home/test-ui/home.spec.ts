@@ -259,14 +259,17 @@ test("places a leader's unit on the start screen, and nobody else's", async ({ p
   await signInAs(page, "Lars Lindberg")
   await expect(page.getByRole("heading", { level: 1, name: "Välkommen" })).toBeVisible()
 
-  // The widget: the unit's identity, then the scouts and the leaders as pills – the
-  // scouts' pills carrying ages, the leaders' none.
+  // The widget: the unit's identity, then the scouts and the leaders as pills – every
+  // pill carrying a gender, and the scouts' ages too, the leaders' none.
   await expect(page.getByRole("heading", { level: 2, name: "Min avdelning" })).toBeVisible()
   await expect(page.getByText("Avdelning 1", { exact: true })).toBeVisible()
   const scout = page.getByRole("link", { name: /Ester Dahl/ })
   await expect(scout).toContainText(/\d år/)
+  await expect(scout.getByRole("img", { name: "Kvinna" })).toBeVisible()
+  const leader = page.getByRole("link", { name: /Hanna Hellström/ })
   // The pattern, not the word: the kår under every name ends in "år" too.
-  await expect(page.getByRole("link", { name: /Hanna Hellström/ })).not.toContainText(/\d år/)
+  await expect(leader).not.toContainText(/\d år/)
+  await expect(leader.getByRole("img", { name: "Kvinna" })).toBeVisible()
 
   // A pill is a doorway into the person.
   await scout.click()

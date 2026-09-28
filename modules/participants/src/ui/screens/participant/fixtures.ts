@@ -18,6 +18,7 @@ export const complete: ParticipantDetail = {
   role: "ledare",
   unitNumber: 3,
   birthDate: "1987-04-12",
+  gender: "kvinna",
   travel: "rundresa",
   memberGroup: "Mockåsens scoutkår",
   homeTown: "Göteborg",
@@ -126,6 +127,7 @@ export const withoutHealth: ParticipantDetail = {
   role: "deltagare",
   unitNumber: 3,
   birthDate: "2011-09-02",
+  gender: "man",
   homeTown: "Kungsbacka",
   travel: "direktresa",
   contact: {

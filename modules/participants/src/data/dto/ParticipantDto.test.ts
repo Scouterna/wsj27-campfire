@@ -31,6 +31,7 @@ describe("reading one listing row", () => {
       birthDate: "1995-07-16",
       email: "lars.lindberg@example.se",
       firstName: "Lars",
+      gender: "man",
       lastName: "Lindberg",
       memberGroup: "Mockåsens scoutkår",
       phone: "070-719 56 23",
@@ -38,6 +39,22 @@ describe("reading one listing row", () => {
       unitNumber: 1,
     })
   })
+
+  it.each([
+    ["Annat", "annat"],
+    ["Kvinna", "kvinna"],
+    ["Man", "man"],
+    ["Okänt", "okant"],
+  ])("reads Scoutnet's %s as a gender", (sex, gender) => {
+    expect(toParticipant(row({ sex }))?.gender).toBe(gender)
+  })
+
+  it.each([undefined, "", "man", "Vet ej", 1])(
+    "leaves the gender out rather than guess at %s",
+    (sex) => {
+      expect(toParticipant(row({ sex }))).not.toHaveProperty("gender")
+    },
+  )
 
   it("prefers Scoutnet's own address to the registration's copy of it", () => {
     const contact = { "Information redan i Scoutnet": { email: "lars@example.org" } }

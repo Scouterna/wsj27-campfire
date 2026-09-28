@@ -83,7 +83,7 @@ test("shows a leader their own unit, with the unit's own filter", async ({ page 
   await expect(page.getByRole("link", { name: "Avdelningar" })).toHaveCount(0)
 })
 
-test("says where a leader's own people come from, and how old the deltagare are", async ({
+test("says where a leader's own people come from, their gender, and how old the deltagare are", async ({
   page,
 }) => {
   await page.goto("/participants")
@@ -91,14 +91,25 @@ test("says where a leader's own people come from, and how old the deltagare are"
   await expect(page.getByRole("status")).toHaveText("8 personer i avdelningen")
 
   // Every row in the unit shares its unit, so where the person comes from takes the
-  // unit's place, at every width – and a deltagare's age rides at the row's end.
+  // unit's place, at every width – and the gender and a deltagare's age ride at the
+  // row's end, the gender first.
   const rows = page.getByRole("listitem")
   const ester = rows.getByRole("link", { name: /^Ester Dahl/u })
   await expect(ester).toContainText("Deltagare · Mockåsens scoutkår · Kungsbacka")
+  await expect(ester.locator(".person-row-facts > :first-child")).toHaveAccessibleName("Kvinna")
   await expect(ester.locator(".person-row-age")).toHaveText(/^\d{1,3} år$/u)
   const lars = rows.getByRole("link", { name: /^Lars Lindberg/u })
   await expect(lars).toContainText("Ledare · Mockåsens scoutkår · Göteborg")
+  await expect(lars.getByRole("img", { name: "Man" })).toBeVisible()
   await expect(lars.locator(".person-row-age")).toHaveCount(0)
+
+  // Annat has a sign of its own. Okänt has none, because a dash before the age would
+  // read as a minus.
+  const edvin = rows.getByRole("link", { name: /^Edvin Malm/u })
+  await expect(edvin.getByRole("img", { name: "Annat" })).toBeVisible()
+  const otto = rows.getByRole("link", { name: /^Otto Lind/u })
+  await expect(otto.locator(".person-row-age")).toHaveText(/^\d{1,3} år$/u)
+  await expect(otto.locator(".gender-mark")).toHaveCount(0)
 
   await page.setViewportSize({ height: 844, width: 390 })
   await expect(ester).toContainText("Deltagare · Mockåsens scoutkår · Kungsbacka")
@@ -128,7 +139,7 @@ test("says where the management's rows come from only where the line has room", 
   await expect(from).toBeHidden()
 })
 
-test("names a person's home town and age on their own page", async ({ page }) => {
+test("names a person's home town, age, and gender on their own page", async ({ page }) => {
   await page.goto("/")
   await signInAs(page, "Lars Lindberg")
 
@@ -137,8 +148,20 @@ test("names a person's home town and age on their own page", async ({ page }) =>
   const profile = page.locator(".person-profile-grid")
   await expect(profile.getByText("Hemort")).toBeVisible()
   await expect(profile.getByText("Kungsbacka")).toBeVisible()
-  await expect(profile.getByText("Ålder")).toBeVisible()
-  await expect(profile.getByText(/^\d+ år$/u)).toBeVisible()
+  // The age rides after the birth date, and the gender has the slot beside it.
+  await expect(profile.getByText(/^10 augusti 2009 · \d+\sår$/u)).toBeVisible()
+  await expect(profile.getByText("Ålder")).toHaveCount(0)
+  await expect(profile.getByText("Kön")).toBeVisible()
+  // The word is written out beside the sign, so the sign is not read a second time.
+  await expect(profile.getByText("Kvinna", { exact: true })).toBeVisible()
+  await expect(profile.locator(".gender-mark")).toBeVisible()
+  await expect(profile.getByRole("img", { name: "Kvinna" })).toHaveCount(0)
+
+  // Okänt is said in words alone, with no sign.
+  await page.goto("/participants/1300077")
+  await expect(page).toHaveTitle("Otto Lind – Campfire")
+  await expect(profile.getByText("Okänt", { exact: true })).toBeVisible()
+  await expect(profile.locator(".gender-mark")).toHaveCount(0)
 })
 
 test("opens a unit's card up to the map of where it lives, and folds it back", async ({ page }) => {

@@ -48,10 +48,16 @@
     }
   }
 
-  /* The age rides quietly at the trailing edge, as on the home screen. */
-  .person-row-age {
+  /* The gender and the age ride quietly at the trailing edge, as on the home screen. */
+  .person-row-facts {
+    align-items: center;
     color: var(--color-ink-secondary);
+    display: flex;
     font-size: var(--font-size-footnote);
+    gap: 6px;
+  }
+
+  .person-row-age {
     font-variant-numeric: tabular-nums;
   }
 

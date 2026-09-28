@@ -20,6 +20,7 @@ import {
 import { roleName } from "../../../model/ParticipantRole"
 import { funktionName } from "../../../model/Participation"
 import { PersonBadge } from "../../components/badge/PersonBadge"
+import { GenderMark } from "../../components/gender/GenderMark"
 
 import "./PeopleList.css"
 
@@ -116,9 +117,9 @@ export interface PersonRowProps {
 }
 
 /**
- * One row – a doorway into the person, with a deltagare's age at its end. Memoized on
- * its props, because narrowing the list re-renders it with most of its rows unchanged,
- * and a row that stays needs no work.
+ * One row – a doorway into the person, with their gender and a deltagare's age at its
+ * end. Memoized on its props, because narrowing the list re-renders it with most of its
+ * rows unchanged, and a row that stays needs no work.
  */
 export const PersonRow = memo(function PersonRow(props: PersonRowProps): ReactElement {
   const { isUnitScoped, person } = props
@@ -140,8 +141,13 @@ export const PersonRow = memo(function PersonRow(props: PersonRowProps): ReactEl
       }
       className="person-row"
       link={{ to: "/participants/$memberNo", params: { memberNo: person.memberNo } }}
-      {...(age !== undefined && {
-        trailing: <span className="person-row-age">{age} år</span>,
+      {...((person.gender !== undefined || age !== undefined) && {
+        trailing: (
+          <span className="person-row-facts">
+            {person.gender === undefined ? null : <GenderMark gender={person.gender} />}
+            {age === undefined ? null : <span className="person-row-age">{age} år</span>}
+          </span>
+        ),
       })}
     >
       <strong>
