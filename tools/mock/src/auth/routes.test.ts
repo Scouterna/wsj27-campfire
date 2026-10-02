@@ -200,7 +200,7 @@ describe("the round trip", () => {
     expect(response.status).toBe(200)
     expect(await response.text()).toBe(
       // eslint-disable-next-line no-secrets/no-secrets -- the service's exact body, not a secret
-      '{"user":{"name":"Henrik Holm","preferredUsername":"scoutnet|1200002","givenName":"Henrik","familyName":"Holm","email":"health-grant@wsj.se","picture":null,"memberNo":"1200002","roles":["wsj27:access:Hälsa plus intern information","wsj27:cmt:support"]}}',
+      '{"user":{"name":"Henrik Holm","preferredUsername":"scoutnet|1200002","givenName":"Henrik","familyName":"Holm","email":"health-grant@wsj.se","picture":null,"memberNo":"1200002","roles":["wsj27:cmt:support","wsj27:legacy-access:Hälsa plus intern information"]}}',
     )
   })
 
@@ -241,7 +241,7 @@ describe("the round trip", () => {
       member_no: "1200002",
       realm_access: { roles: [] },
       resource_access: {
-        wsj27: { roles: ["cmt:support", "access:Hälsa plus intern information"] },
+        wsj27: { roles: ["cmt:support", "legacy-access:Hälsa plus intern information"] },
       },
     })
   })

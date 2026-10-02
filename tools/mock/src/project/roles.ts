@@ -1,7 +1,7 @@
 /**
  * The single definition of a WSJ27 role, as `roles.py` mints them from a participant's fields
  * and the CMT roster: `wsj27:al:<troop>` for a leader, `wsj27:cmt:<funktion>:<roll>` for the
- * contingent management, and `wsj27:access:<level>` for a personal grant.
+ * contingent management, and `wsj27:legacy-access:<level>` for a personal grant from the form.
  */
 
 /**
@@ -109,7 +109,7 @@ export function rolesForParticipant(inputs: RoleInputs, cmtDetails: CmtDetails):
   }
   const accessLevel = inputs.accessLevel.trim()
   if (!["", "ingen"].includes(accessLevel.toLowerCase())) {
-    roles.push(`wsj27:access:${accessLevel}`)
+    roles.push(`wsj27:legacy-access:${accessLevel}`)
   }
   return roles
 }

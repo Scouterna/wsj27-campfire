@@ -1,0 +1,98 @@
+/* The timeline: a history down a rail of avatars, each entry's moment, heading,
+   and body beside its avatar. */
+
+@layer component {
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    margin: 0;
+    padding: var(--spacing-stack) 0 0;
+  }
+
+  .timeline-entry {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: 34px minmax(0, 1fr);
+    position: relative;
+  }
+
+  /* The rail runs from under one avatar to the next, and stops at the last entry so the
+     line never trails past the history. */
+  .timeline-entry:not(:last-child)::before {
+    background: var(--color-divider);
+    border-radius: var(--border-radius-round);
+    bottom: 8px;
+    content: "";
+    left: 15.5px;
+    position: absolute;
+    top: 42px;
+    width: 3px;
+  }
+
+  .timeline-avatar {
+    align-items: center;
+    background: var(--color-theme-wash);
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    display: flex;
+    height: 34px;
+    justify-content: center;
+    width: 34px;
+  }
+
+  .timeline-avatar svg {
+    height: 16px;
+    width: 16px;
+  }
+
+  .timeline-body {
+    min-width: 0;
+    padding-bottom: 26px;
+  }
+
+  .timeline-entry:last-child .timeline-body {
+    padding-bottom: 0;
+  }
+
+  .timeline-when {
+    color: var(--color-ink-tertiary);
+    display: block;
+    font-size: var(--font-size-detail);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.16em;
+    margin-bottom: var(--spacing-inline);
+    text-transform: uppercase;
+  }
+
+  .timeline-title {
+    font-size: var(--font-size-heading);
+    font-weight: var(--font-weight-strong);
+    margin: 0 0 6px;
+  }
+
+  .timeline-card {
+    background: var(--color-sheet);
+    border-radius: var(--border-radius-default);
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-body);
+    line-height: 1.55;
+    padding: 14px 18px;
+
+    /* A note keeps the line breaks it was written with. */
+    white-space: pre-line;
+  }
+
+  /* An entry's own heading, on a line of its own over the text. */
+  .timeline-card strong {
+    color: var(--color-ink);
+    display: block;
+    font-weight: var(--font-weight-strong);
+  }
+
+  .timeline-event {
+    color: var(--color-ink-tertiary);
+    font-size: var(--font-size-body);
+    line-height: 1.55;
+  }
+}

@@ -1,0 +1,14 @@
+/* One person's cases: who they are, then their open cases and their closed ones. */
+
+@layer screen {
+  .person-cases-status {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+  }
+
+  .person-cases-empty {
+    color: var(--color-ink-secondary);
+    margin: 0;
+  }
+}

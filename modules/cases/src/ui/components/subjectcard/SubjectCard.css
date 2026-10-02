@@ -1,0 +1,26 @@
+/* The subject card: the person's mark, then their name over where they belong. */
+
+@layer component {
+  .subject-card {
+    align-items: flex-start;
+    display: flex;
+    gap: 14px;
+  }
+
+  .subject-card-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .subject-card-text strong {
+    font-size: var(--font-size-heading);
+    font-weight: var(--font-weight-strong);
+  }
+
+  .subject-card-text small {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-value);
+  }
+}

@@ -1,0 +1,23 @@
+/* A case's row, three lines tall where most rows are two. */
+
+@layer component {
+  /* The mark leads at the top of a tall row, as every leading squircle does. */
+  .case-row > :first-child {
+    align-self: start;
+  }
+
+  /* Who the case is about, at the title's size and only lighter, because a reader scans
+     for the person as much as for what happened – the quiet small line is for who
+     opened it. */
+  .case-row-about {
+    display: block;
+    margin-top: 2px;
+  }
+
+  .case-row-time {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+}

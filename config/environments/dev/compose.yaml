@@ -83,7 +83,15 @@ services:
       # file is gitignored – real people – and the service logs a warning and keeps
       # the plain role when the mount holds nothing.
       CMT_ROLES_FILE: /app/cmt-roles.csv
-      # Without POSTGRES_DSN the cases feature stays off, and everything else works.
+      # The cases service is only mounted when a database is named, so the dev
+      # environment brings its own below. Reached by its service name, because this
+      # container shares the ingress's namespace and so the default network's DNS.
+      POSTGRES_DSN: postgresql://wsj27:wsj27@db:5432/wsj27
+    # Healthy rather than started, because the service opens its connection pool as it
+    # starts and a database still initializing would take the cases routes down with it.
+    depends_on:
+      db:
+        condition: service_healthy
     volumes:
       # The fetched Scoutnet data survives a restart, so the service can start from
       # its disk cache when Scoutnet is slow or unreachable.
@@ -91,6 +99,24 @@ services:
       # On a machine without the roster Docker mounts an empty directory in its
       # place, which the service reads as the file being absent.
       - ./cmt-roles.csv:/app/cmt-roles.csv:ro
+
+  # The database the cases service keeps its cases and notes in, as the project API's
+  # own compose file runs it. The service creates its tables on start. No port is
+  # published, because nothing outside the stack needs it, and 5432 is often taken.
+  db:
+    image: docker.io/library/postgres:17-alpine
+    environment:
+      POSTGRES_USER: wsj27
+      POSTGRES_PASSWORD: wsj27
+      POSTGRES_DB: wsj27
+    volumes:
+      # Cases survive a restart of the stack, as they would on the dev site.
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wsj27"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
 
   # The web application's dev server, hot reload included: the repository is
   # bind-mounted, so an edit on the host reaches Vite in the container and HMR flows
@@ -118,12 +144,14 @@ services:
       - web_ui_modules:/campfire/libraries/ui/node_modules
       - web_utils_modules:/campfire/libraries/utils/node_modules
       - web_authentication_modules:/campfire/modules/authentication/node_modules
+      - web_cases_modules:/campfire/modules/cases/node_modules
       - web_home_modules:/campfire/modules/home/node_modules
       - web_journey_modules:/campfire/modules/journey/node_modules
       - web_participants_modules:/campfire/modules/participants/node_modules
       - web_mock_modules:/campfire/tools/mock/node_modules
 
 volumes:
+  db_data:
   project_persist:
   web_root_modules:
   web_app_modules:
@@ -131,6 +159,7 @@ volumes:
   web_ui_modules:
   web_utils_modules:
   web_authentication_modules:
+  web_cases_modules:
   web_home_modules:
   web_journey_modules:
   web_participants_modules:

@@ -100,3 +100,71 @@ describe("asking a service for JSON", () => {
     )
   })
 })
+
+/**
+ * Stands in for the platform's `fetch`, answering with an empty object, and returns
+ * the arguments of every call so a test can read what was sent.
+ */
+function recordRequests(): readonly (readonly unknown[])[] {
+  const calls: (readonly unknown[])[] = []
+  vi.stubGlobal("fetch", (...args: readonly unknown[]): Promise<Response> => {
+    calls.push(args)
+    return Promise.resolve(Response.json({}))
+  })
+  return calls
+}
+
+describe("sending a service JSON", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it("asks with the address alone when there is nothing to send", async () => {
+    const calls = recordRequests()
+
+    await fetch("/api/project/cases")
+
+    expect(calls).toEqual([["/api/project/cases"]])
+  })
+
+  it("sends a body as JSON, labeled as JSON, with the method asked for", async () => {
+    const calls = recordRequests()
+
+    await fetch("/api/project/cases/7", { body: { title: "Feber" }, method: "PUT" })
+
+    expect(calls).toEqual([
+      [
+        "/api/project/cases/7",
+        {
+          body: '{"title":"Feber"}',
+          headers: { "content-type": "application/json" },
+          method: "PUT",
+        },
+      ],
+    ])
+  })
+
+  it("sends a method without a body, and without claiming JSON", async () => {
+    const calls = recordRequests()
+
+    await fetch("/api/project/cases/7/close", { method: "POST" })
+
+    expect(calls).toEqual([["/api/project/cases/7/close", { method: "POST" }]])
+  })
+
+  it("returns the answer to what it sent", async () => {
+    vi.stubGlobal("fetch", () => Promise.resolve(Response.json({ id: 7 }, { status: 201 })))
+
+    const body = await fetch<{ id: number }>("/api/project/cases", { body: {}, method: "POST" })
+
+    expect(body.id).toBe(7)
+  })
+
+  it("names the address and the status when the service refused what was sent", async () => {
+    vi.stubGlobal("fetch", () => Promise.resolve(new Response("{}", { status: 409 })))
+
+    await expect(fetch("/api/project/cases/7/close", { method: "POST" })).rejects.toThrow(
+      /\/api\/project\/cases\/7\/close answered 409$/u,
+    )
+  })
+})

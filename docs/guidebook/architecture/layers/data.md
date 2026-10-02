@@ -2,7 +2,7 @@
 
 The data layer is where the outside world is dealt with – the back-end services, the shapes they send, and the cache that keeps their answers – and turned into the types [the domain](./domain) declares.
 
-Only a module that owns a capability has one. Authentication asks the auth service who is signed in, and reads the signed-in person's own registration – their unit and how they travel – from the participants service. Participants reads the list of participants. No other module talks to a service.
+Only a module that owns a capability has one. Authentication asks the auth service who is signed in, and reads the signed-in person's own registration – their unit and how they travel – from the participants service. Participants reads the list of participants. Cases reads and writes the health team's cases, and reads the contingent's names to show them with. No other module talks to a service.
 
 ## Query factories
 
@@ -11,6 +11,12 @@ Every data read is a factory returning TanStack Query options – a stable key, 
 The factories live in `data/` and are the only thing in a module that knows a URL. A screen calls a hook, the hook reads the options, and the options know the address – so the factory knows the address and the hook, which lives in `ui/`, knows React. Every URL is origin-relative, and the mock and the real services answer the same paths, so the application never learns which environment it runs in ([ADR 012](/decisions/012-run-campfire-in-three-environments-on-one-origin)).
 
 Every read goes through the application's one query client, so one cache holds every answer. The `fetch` wrapper in `libraries/utils` is only the transport inside a query function; a read that called it directly would be neither cached, deduplicated, nor owned. The wrapper keeps three outcomes apart – the request never arrived, the service refused, or the answer was not JSON – and a refusal carries its status, because the status means something. A person's full record refused with 403 means the caller may see them but not in full, so the read steps down to the basic level; a 404 means there is nobody to show.
+
+## Writes
+
+A write is a plain function in `data/` beside the factories – it builds the request, sends it through the same `fetch` wrapper, and converts the answer with the converter the reads use, so what a write hands back is validated at the boundary like anything read. It is not a query, because nothing caches a write; what it changes is the cache's business afterward. A screen runs it through a mutation hook in `ui/`, and however the write settles, the module marks its own queries stale so the screens on them read again – after a refusal too, because a case refused as already closed has changed under the reader, and what it is now is worth showing. A query a write cannot change, such as the contingent's names, is spared, because it costs a request per unit.
+
+Nothing is written optimistically. On the island a write may take a while to answer, and a screen showing a note the service never stored would be worse than one that waits, so a screen holds its controls still until the answer is in, and shows what the service stored.
 
 ## DTOs and converters
 
@@ -26,7 +32,7 @@ The participants service lists one unit or one member type at a time and refuses
 
 The composition root distills that once from the session – the member number, the unit a leader leads, and whether the whole contingent and the health answers are theirs – and mounts it above every screen as the viewer the factories take. A leader asks for their own unit. The contingent management team walks the leaders' listing to learn every unit, then fetches each unit, the IST, and the management, and merges them by member number.
 
-A unit's listing that fails is asked once more, and if it still fails the whole list fails, because a partial contingent looks complete to whoever reads it. The list carries its scope – everyone, one unit, or nobody – so a screen can say what it shows rather than guess from a row count.
+A unit's listing that fails is asked once more, and if it still fails the whole list fails, because a partial contingent looks complete to whoever reads it. The cases module walks the same listings for the names it shows, at the basic level, because no module can read another's list. The list carries its scope – everyone, one unit, or nobody – so a screen can say what it shows rather than guess from a row count.
 
 ## An ended session
 

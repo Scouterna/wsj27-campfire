@@ -36,7 +36,7 @@ Registration is invisible machinery: an address exists only because a module dec
 
 ## Sections decide who opens what
 
-A section is a top-level destination in the menus – home for everyone, and the participants section for leaders and the contingent management team once the units reveal has opened. Sections are the application's, derived from the session's roles and the reveals, so a screen names the section it belongs to and never decides who may see it.
+A section is a top-level destination in the menus – home for everyone, the participants section for leaders and the contingent management team once the units reveal has opened, and the cases section for the health team. Sections are the application's, derived from the session's roles and the reveals, so a screen names the section it belongs to and never decides who may see it.
 
 One predicate grants a section, and everything that needs the answer asks it, so they cannot drift apart:
 

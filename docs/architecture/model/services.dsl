@@ -10,3 +10,8 @@ participantsService = softwareSystem "Participants service" {
   description "The service that serves the list of participants, deciding who reads what."
   tags "service"
 }
+
+casesService = softwareSystem "Cases service" {
+  description "The service that keeps the follow-ups written about a person or a unit."
+  tags "service"
+}

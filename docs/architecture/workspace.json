@@ -5,16 +5,16 @@
   "description" : "The digital companion for the leaders and the contingent management team of Scouterna's Swedish contingent to the World Scout Jamboree 2027.",
   "documentation" : { },
   "id" : 1,
-  "lastModifiedAgent" : "structurizr/diagrams/dd677af7-6fdd-45bb-82ea-1387bbe69b6f",
-  "lastModifiedDate" : "2026-09-26T15:29:38Z",
-  "lastModifiedUser" : "580729542",
+  "lastModifiedAgent" : "structurizr/diagrams/b2182c3e-2a72-4417-9ab1-26fbacfd9b49",
+  "lastModifiedDate" : "2026-10-02T15:52:46Z",
+  "lastModifiedUser" : "174644668",
   "model" : {
     "deploymentNodes" : [ {
       "children" : [ {
         "containerInstances" : [ {
-          "containerId" : "18",
+          "containerId" : "19",
           "environment" : "Local",
-          "id" : "88",
+          "id" : "97",
           "instanceId" : 1,
           "properties" : {
             "structurizr.dsl.identifier" : "localWeb"
@@ -23,19 +23,19 @@
         } ],
         "description" : "The web application's dev server, on port 3000.",
         "environment" : "Local",
-        "id" : "87",
+        "id" : "96",
         "instances" : "1",
         "name" : "Vite",
         "properties" : {
-          "structurizr.dsl.identifier" : "a4e867db-8813-4fa2-9823-ab933815ebf6"
+          "structurizr.dsl.identifier" : "46be3df0-dc3a-4428-8f32-5e4874a7a1a0"
         },
         "tags" : "Element,Deployment Node",
         "technology" : "Node.js 24, Vite"
       }, {
         "containerInstances" : [ {
-          "containerId" : "28",
+          "containerId" : "30",
           "environment" : "Local",
-          "id" : "90",
+          "id" : "99",
           "instanceId" : 1,
           "properties" : {
             "structurizr.dsl.identifier" : "localMock"
@@ -44,105 +44,105 @@
         } ],
         "description" : "The mock's own process, on port 8003.",
         "environment" : "Local",
-        "id" : "89",
+        "id" : "98",
         "instances" : "1",
         "name" : "Node.js",
         "properties" : {
-          "structurizr.dsl.identifier" : "f6910a2d-49c3-4b79-9c3d-c0d5f3aefe35"
+          "structurizr.dsl.identifier" : "b1b7cc92-a563-43a0-9315-afb2fc562a52"
         },
         "tags" : "Element,Deployment Node",
         "technology" : "Node.js 24"
       }, {
         "containerInstances" : [ {
-          "containerId" : "19",
+          "containerId" : "20",
           "environment" : "Local",
-          "id" : "92",
+          "id" : "101",
           "instanceId" : 1,
           "properties" : {
             "structurizr.dsl.identifier" : "localApple"
           },
           "relationships" : [ {
             "description" : "Hosts in one webview per tab",
-            "destinationId" : "88",
-            "id" : "93",
-            "linkedRelationshipId" : "59",
-            "sourceId" : "92"
+            "destinationId" : "97",
+            "id" : "102",
+            "linkedRelationshipId" : "63",
+            "sourceId" : "101"
           }, {
             "description" : "Loads the application from",
-            "destinationId" : "86",
-            "id" : "99",
-            "sourceId" : "92",
+            "destinationId" : "95",
+            "id" : "108",
+            "sourceId" : "101",
             "tags" : "Relationship"
           } ],
           "tags" : "Container Instance"
         } ],
         "description" : "The simulator that runs the Apple shell against localhost.",
         "environment" : "Local",
-        "id" : "91",
+        "id" : "100",
         "instances" : "1",
         "name" : "iOS Simulator",
         "properties" : {
-          "structurizr.dsl.identifier" : "b57e000a-6009-45e8-8abe-36e0bc912869"
+          "structurizr.dsl.identifier" : "80aa5abb-c707-42a4-b5ca-0fbcebb75bf8"
         },
         "tags" : "Element,Deployment Node",
         "technology" : "Xcode"
       }, {
         "containerInstances" : [ {
-          "containerId" : "20",
+          "containerId" : "21",
           "environment" : "Local",
-          "id" : "95",
+          "id" : "104",
           "instanceId" : 1,
           "properties" : {
             "structurizr.dsl.identifier" : "localAndroid"
           },
           "relationships" : [ {
             "description" : "Hosts in one webview per tab",
-            "destinationId" : "88",
-            "id" : "96",
-            "linkedRelationshipId" : "60",
-            "sourceId" : "95"
+            "destinationId" : "97",
+            "id" : "105",
+            "linkedRelationshipId" : "64",
+            "sourceId" : "104"
           }, {
             "description" : "Loads the application from",
-            "destinationId" : "86",
-            "id" : "100",
-            "sourceId" : "95",
+            "destinationId" : "95",
+            "id" : "109",
+            "sourceId" : "104",
             "tags" : "Relationship"
           } ],
           "tags" : "Container Instance"
         } ],
         "description" : "The emulator that reaches the host's port 8000 through adb reverse.",
         "environment" : "Local",
-        "id" : "94",
+        "id" : "103",
         "instances" : "1",
         "name" : "Android emulator",
         "properties" : {
-          "structurizr.dsl.identifier" : "cb42df82-0de8-443b-a135-f07348c8ad24"
+          "structurizr.dsl.identifier" : "1d4789ec-0896-4989-a256-a8fc0f265549"
         },
         "tags" : "Element,Deployment Node",
         "technology" : "Android SDK"
       } ],
       "description" : "The machine that runs the whole local environment.",
       "environment" : "Local",
-      "id" : "85",
+      "id" : "94",
       "infrastructureNodes" : [ {
         "description" : "The front door and the one origin, on port 8000.",
         "environment" : "Local",
-        "id" : "86",
+        "id" : "95",
         "name" : "Caddy",
         "properties" : {
           "structurizr.dsl.identifier" : "localCaddy"
         },
         "relationships" : [ {
           "description" : "Proxies every other path to",
-          "destinationId" : "88",
-          "id" : "97",
-          "sourceId" : "86",
+          "destinationId" : "97",
+          "id" : "106",
+          "sourceId" : "95",
           "tags" : "Relationship"
         }, {
           "description" : "Proxies /api/auth and /api/project to",
-          "destinationId" : "90",
-          "id" : "98",
-          "sourceId" : "86",
+          "destinationId" : "99",
+          "id" : "107",
+          "sourceId" : "95",
           "tags" : "Relationship"
         } ],
         "tags" : "Element,Infrastructure Node",
@@ -151,7 +151,7 @@
       "instances" : "1",
       "name" : "Developer's machine",
       "properties" : {
-        "structurizr.dsl.identifier" : "69a3a145-4273-4f50-b0a7-2f88ea544f8b"
+        "structurizr.dsl.identifier" : "eed39f44-2174-4dde-8795-747242dab2bd"
       },
       "tags" : "Element,Deployment Node",
       "technology" : "macOS"
@@ -159,9 +159,9 @@
       "children" : [ {
         "children" : [ {
           "containerInstances" : [ {
-            "containerId" : "18",
+            "containerId" : "19",
             "environment" : "Dev",
-            "id" : "105",
+            "id" : "114",
             "instanceId" : 1,
             "properties" : {
               "structurizr.dsl.identifier" : "devWeb"
@@ -170,36 +170,36 @@
           } ],
           "description" : "The published web image, serving the built application.",
           "environment" : "Dev",
-          "id" : "104",
+          "id" : "113",
           "instances" : "1",
           "name" : "Web",
           "properties" : {
-            "structurizr.dsl.identifier" : "4c83e169-4b4b-4d51-98cd-ee3ece489cb8"
+            "structurizr.dsl.identifier" : "12c82edd-4ed6-4a0a-9757-05b6b6435d16"
           },
           "tags" : "Element,Deployment Node",
           "technology" : "Caddy 2, container"
         }, {
           "description" : "The auth service's own container, built from its repository.",
           "environment" : "Dev",
-          "id" : "106",
+          "id" : "115",
           "instances" : "1",
           "name" : "Auth service",
           "properties" : {
-            "structurizr.dsl.identifier" : "78ee1576-2f10-4153-8b42-8092fbf8fd91"
+            "structurizr.dsl.identifier" : "60fd964f-e1cd-4861-ac51-33447e73e4e8"
           },
           "softwareSystemInstances" : [ {
             "environment" : "Dev",
-            "id" : "107",
+            "id" : "116",
             "instanceId" : 1,
             "properties" : {
               "structurizr.dsl.identifier" : "devAuth"
             },
             "relationships" : [ {
               "description" : "Runs the OpenID round trip with",
-              "destinationId" : "119",
-              "id" : "120",
-              "linkedRelationshipId" : "52",
-              "sourceId" : "107"
+              "destinationId" : "133",
+              "id" : "134",
+              "linkedRelationshipId" : "55",
+              "sourceId" : "116"
             } ],
             "softwareSystemId" : "14",
             "tags" : "Software System Instance"
@@ -209,27 +209,55 @@
         }, {
           "description" : "The participants service's own container, built from its repository.",
           "environment" : "Dev",
-          "id" : "108",
+          "id" : "117",
           "instances" : "1",
           "name" : "Participants service",
           "properties" : {
-            "structurizr.dsl.identifier" : "b25a72bb-dc04-457f-9298-1d0511daf0e1"
+            "structurizr.dsl.identifier" : "b979791f-d90c-4891-9e67-33ff010602bb"
           },
           "softwareSystemInstances" : [ {
             "environment" : "Dev",
-            "id" : "109",
+            "id" : "118",
             "instanceId" : 1,
             "properties" : {
               "structurizr.dsl.identifier" : "devProject"
             },
             "relationships" : [ {
               "description" : "Reads the contingent's member data from",
-              "destinationId" : "123",
-              "id" : "124",
-              "linkedRelationshipId" : "54",
-              "sourceId" : "109"
+              "destinationId" : "137",
+              "id" : "138",
+              "linkedRelationshipId" : "57",
+              "sourceId" : "118"
             } ],
             "softwareSystemId" : "15",
+            "tags" : "Software System Instance"
+          } ],
+          "tags" : "Element,Deployment Node",
+          "technology" : "Python, container"
+        }, {
+          "description" : "The cases service's own container, built from its repository.",
+          "environment" : "Dev",
+          "id" : "119",
+          "instances" : "1",
+          "name" : "Cases service",
+          "properties" : {
+            "structurizr.dsl.identifier" : "7fea2206-7152-4a9a-9c35-83102d33afd4"
+          },
+          "softwareSystemInstances" : [ {
+            "environment" : "Dev",
+            "id" : "120",
+            "instanceId" : 1,
+            "properties" : {
+              "structurizr.dsl.identifier" : "devCases"
+            },
+            "relationships" : [ {
+              "description" : "Keeps cases and notes in",
+              "destinationId" : "121",
+              "id" : "126",
+              "sourceId" : "120",
+              "tags" : "Relationship"
+            } ],
+            "softwareSystemId" : "16",
             "tags" : "Software System Instance"
           } ],
           "tags" : "Element,Deployment Node",
@@ -237,154 +265,170 @@
         } ],
         "description" : "Scouterna's cluster, running the web image beside the back-end services.",
         "environment" : "Dev",
-        "id" : "102",
+        "id" : "111",
         "infrastructureNodes" : [ {
           "description" : "The one origin over HTTPS, the deployed form of the front door.",
           "environment" : "Dev",
-          "id" : "103",
+          "id" : "112",
           "name" : "Ingress",
           "properties" : {
             "structurizr.dsl.identifier" : "devIngress"
           },
           "relationships" : [ {
             "description" : "Routes every other path to",
-            "destinationId" : "105",
-            "id" : "110",
-            "sourceId" : "103",
+            "destinationId" : "114",
+            "id" : "122",
+            "sourceId" : "112",
             "tags" : "Relationship"
           }, {
             "description" : "Routes /api/auth to",
-            "destinationId" : "107",
-            "id" : "111",
-            "sourceId" : "103",
+            "destinationId" : "116",
+            "id" : "123",
+            "sourceId" : "112",
             "tags" : "Relationship"
           }, {
             "description" : "Routes /api/project to",
-            "destinationId" : "109",
-            "id" : "112",
-            "sourceId" : "103",
+            "destinationId" : "118",
+            "id" : "124",
+            "sourceId" : "112",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Routes /api/project/cases to",
+            "destinationId" : "120",
+            "id" : "125",
+            "sourceId" : "112",
             "tags" : "Relationship"
           } ],
           "tags" : "Element,Infrastructure Node",
           "technology" : "Kubernetes ingress"
+        }, {
+          "description" : "The database the cases service keeps its cases and notes in.",
+          "environment" : "Dev",
+          "id" : "121",
+          "name" : "Postgres",
+          "properties" : {
+            "structurizr.dsl.identifier" : "devDatabase"
+          },
+          "tags" : "Element,Infrastructure Node",
+          "technology" : "PostgreSQL"
         } ],
         "instances" : "1",
         "name" : "Kubernetes cluster",
         "properties" : {
-          "structurizr.dsl.identifier" : "b701e9e3-55db-4728-9105-f691d6751d2d"
+          "structurizr.dsl.identifier" : "31968565-b2ca-4caa-9090-ade46bb88361"
         },
         "tags" : "Element,Deployment Node",
         "technology" : "Kubernetes"
       } ],
       "description" : "The cloud that hosts the dev site at campfire.wsj27.scouterna.net.",
       "environment" : "Dev",
-      "id" : "101",
+      "id" : "110",
       "instances" : "1",
       "name" : "Azure",
       "properties" : {
-        "structurizr.dsl.identifier" : "7b043d0d-a890-48b6-bf8e-ccf80be499cc"
+        "structurizr.dsl.identifier" : "82c733e4-dc54-451f-ba1e-09fda24d97cc"
       },
       "tags" : "Element,Deployment Node",
       "technology" : "Microsoft Azure"
     }, {
       "containerInstances" : [ {
-        "containerId" : "19",
+        "containerId" : "20",
         "environment" : "Dev",
-        "id" : "114",
+        "id" : "128",
         "instanceId" : 1,
         "properties" : {
           "structurizr.dsl.identifier" : "devApple"
         },
         "relationships" : [ {
           "description" : "Hosts in one webview per tab",
-          "destinationId" : "105",
-          "id" : "115",
-          "linkedRelationshipId" : "59",
-          "sourceId" : "114"
+          "destinationId" : "114",
+          "id" : "129",
+          "linkedRelationshipId" : "63",
+          "sourceId" : "128"
         }, {
           "description" : "Opens sign-in in a modal webview",
-          "destinationId" : "119",
-          "id" : "121",
-          "linkedRelationshipId" : "63",
-          "sourceId" : "114"
+          "destinationId" : "133",
+          "id" : "135",
+          "linkedRelationshipId" : "67",
+          "sourceId" : "128"
         }, {
           "description" : "Loads the application from",
-          "destinationId" : "103",
-          "id" : "126",
-          "sourceId" : "114",
+          "destinationId" : "112",
+          "id" : "140",
+          "sourceId" : "128",
           "tags" : "Relationship"
         } ],
         "tags" : "Container Instance"
       }, {
-        "containerId" : "20",
+        "containerId" : "21",
         "environment" : "Dev",
-        "id" : "116",
+        "id" : "130",
         "instanceId" : 1,
         "properties" : {
           "structurizr.dsl.identifier" : "devAndroid"
         },
         "relationships" : [ {
           "description" : "Hosts in one webview per tab",
-          "destinationId" : "105",
-          "id" : "117",
-          "linkedRelationshipId" : "60",
-          "sourceId" : "116"
+          "destinationId" : "114",
+          "id" : "131",
+          "linkedRelationshipId" : "64",
+          "sourceId" : "130"
         }, {
           "description" : "Opens sign-in in a modal sheet",
-          "destinationId" : "119",
-          "id" : "122",
-          "linkedRelationshipId" : "64",
-          "sourceId" : "116"
+          "destinationId" : "133",
+          "id" : "136",
+          "linkedRelationshipId" : "68",
+          "sourceId" : "130"
         }, {
           "description" : "Loads the application from",
-          "destinationId" : "103",
-          "id" : "127",
-          "sourceId" : "116",
+          "destinationId" : "112",
+          "id" : "141",
+          "sourceId" : "130",
           "tags" : "Relationship"
         } ],
         "tags" : "Container Instance"
       } ],
       "description" : "A leader's or a CMT member's own phone.",
       "environment" : "Dev",
-      "id" : "113",
+      "id" : "127",
       "instances" : "1",
       "name" : "Member's phone",
       "properties" : {
-        "structurizr.dsl.identifier" : "58fdb178-c2b3-40b2-8081-2d6325e87982"
+        "structurizr.dsl.identifier" : "6e486f3d-31c9-43dc-9add-b389b167d701"
       },
       "tags" : "Element,Deployment Node",
       "technology" : "iOS 26 or Android"
     }, {
       "description" : "Scouterna's own systems, with ScoutID's dev realm.",
       "environment" : "Dev",
-      "id" : "118",
+      "id" : "132",
       "instances" : "1",
       "name" : "Scouterna",
       "properties" : {
-        "structurizr.dsl.identifier" : "56e7db04-2363-48e1-acdf-ec405fe168fb"
+        "structurizr.dsl.identifier" : "788d3620-8787-43f5-a650-fc9039a3861d"
       },
       "softwareSystemInstances" : [ {
         "environment" : "Dev",
-        "id" : "119",
+        "id" : "133",
         "instanceId" : 1,
         "properties" : {
-          "structurizr.dsl.identifier" : "95ca8641-3c0d-426d-9237-1182bf813f8d"
+          "structurizr.dsl.identifier" : "a9308183-4206-4d83-96bb-3a6f7d2463db"
         },
         "relationships" : [ {
           "description" : "Verifies sign-ins against",
-          "destinationId" : "123",
-          "id" : "125",
-          "linkedRelationshipId" : "53",
-          "sourceId" : "119"
+          "destinationId" : "137",
+          "id" : "139",
+          "linkedRelationshipId" : "56",
+          "sourceId" : "133"
         } ],
         "softwareSystemId" : "10",
         "tags" : "Software System Instance"
       }, {
         "environment" : "Dev",
-        "id" : "123",
+        "id" : "137",
         "instanceId" : 1,
         "properties" : {
-          "structurizr.dsl.identifier" : "b1ce6374-5e79-49ca-b30f-ba2d7f0a74d9"
+          "structurizr.dsl.identifier" : "8e51623e-d985-47cf-9468-ec3b6260c232"
         },
         "softwareSystemId" : "11",
         "tags" : "Software System Instance"
@@ -395,9 +439,9 @@
       "children" : [ {
         "children" : [ {
           "containerInstances" : [ {
-            "containerId" : "18",
+            "containerId" : "19",
             "environment" : "Prod",
-            "id" : "132",
+            "id" : "146",
             "instanceId" : 1,
             "properties" : {
               "structurizr.dsl.identifier" : "prodWeb"
@@ -406,36 +450,36 @@
           } ],
           "description" : "The published web image, serving the built application.",
           "environment" : "Prod",
-          "id" : "131",
+          "id" : "145",
           "instances" : "1",
           "name" : "Web",
           "properties" : {
-            "structurizr.dsl.identifier" : "b687d1c3-e5b8-4acc-ba85-34ca045fb5a2"
+            "structurizr.dsl.identifier" : "425befc1-d4a4-4f78-8f55-bcd7a5617526"
           },
           "tags" : "Element,Deployment Node",
           "technology" : "Caddy 2, container"
         }, {
           "description" : "The auth service's own container, built from its repository.",
           "environment" : "Prod",
-          "id" : "133",
+          "id" : "147",
           "instances" : "1",
           "name" : "Auth service",
           "properties" : {
-            "structurizr.dsl.identifier" : "8303b981-df95-487a-a7b9-b0aaf89d2f94"
+            "structurizr.dsl.identifier" : "93205f95-5ed2-46be-b54f-4e281776b5cb"
           },
           "softwareSystemInstances" : [ {
             "environment" : "Prod",
-            "id" : "134",
+            "id" : "148",
             "instanceId" : 1,
             "properties" : {
               "structurizr.dsl.identifier" : "prodAuth"
             },
             "relationships" : [ {
               "description" : "Runs the OpenID round trip with",
-              "destinationId" : "146",
-              "id" : "147",
-              "linkedRelationshipId" : "52",
-              "sourceId" : "134"
+              "destinationId" : "165",
+              "id" : "166",
+              "linkedRelationshipId" : "55",
+              "sourceId" : "148"
             } ],
             "softwareSystemId" : "14",
             "tags" : "Software System Instance"
@@ -445,27 +489,55 @@
         }, {
           "description" : "The participants service's own container, built from its repository.",
           "environment" : "Prod",
-          "id" : "135",
+          "id" : "149",
           "instances" : "1",
           "name" : "Participants service",
           "properties" : {
-            "structurizr.dsl.identifier" : "c3e9d13a-e029-4e38-8814-bf537c6c5421"
+            "structurizr.dsl.identifier" : "29ba3564-52d1-482c-9e2f-970abe3b82bf"
           },
           "softwareSystemInstances" : [ {
             "environment" : "Prod",
-            "id" : "136",
+            "id" : "150",
             "instanceId" : 1,
             "properties" : {
               "structurizr.dsl.identifier" : "prodProject"
             },
             "relationships" : [ {
               "description" : "Reads the contingent's member data from",
-              "destinationId" : "150",
-              "id" : "151",
-              "linkedRelationshipId" : "54",
-              "sourceId" : "136"
+              "destinationId" : "169",
+              "id" : "170",
+              "linkedRelationshipId" : "57",
+              "sourceId" : "150"
             } ],
             "softwareSystemId" : "15",
+            "tags" : "Software System Instance"
+          } ],
+          "tags" : "Element,Deployment Node",
+          "technology" : "Python, container"
+        }, {
+          "description" : "The cases service's own container, built from its repository.",
+          "environment" : "Prod",
+          "id" : "151",
+          "instances" : "1",
+          "name" : "Cases service",
+          "properties" : {
+            "structurizr.dsl.identifier" : "4e5aa9ea-7815-495d-b6f5-c0ce84dd4b64"
+          },
+          "softwareSystemInstances" : [ {
+            "environment" : "Prod",
+            "id" : "152",
+            "instanceId" : 1,
+            "properties" : {
+              "structurizr.dsl.identifier" : "prodCases"
+            },
+            "relationships" : [ {
+              "description" : "Keeps cases and notes in",
+              "destinationId" : "153",
+              "id" : "158",
+              "sourceId" : "152",
+              "tags" : "Relationship"
+            } ],
+            "softwareSystemId" : "16",
             "tags" : "Software System Instance"
           } ],
           "tags" : "Element,Deployment Node",
@@ -473,154 +545,170 @@
         } ],
         "description" : "Scouterna's cluster, running the web image beside the back-end services.",
         "environment" : "Prod",
-        "id" : "129",
+        "id" : "143",
         "infrastructureNodes" : [ {
           "description" : "The one origin over HTTPS, the deployed form of the front door.",
           "environment" : "Prod",
-          "id" : "130",
+          "id" : "144",
           "name" : "Ingress",
           "properties" : {
             "structurizr.dsl.identifier" : "prodIngress"
           },
           "relationships" : [ {
             "description" : "Routes every other path to",
-            "destinationId" : "132",
-            "id" : "137",
-            "sourceId" : "130",
+            "destinationId" : "146",
+            "id" : "154",
+            "sourceId" : "144",
             "tags" : "Relationship"
           }, {
             "description" : "Routes /api/auth to",
-            "destinationId" : "134",
-            "id" : "138",
-            "sourceId" : "130",
+            "destinationId" : "148",
+            "id" : "155",
+            "sourceId" : "144",
             "tags" : "Relationship"
           }, {
             "description" : "Routes /api/project to",
-            "destinationId" : "136",
-            "id" : "139",
-            "sourceId" : "130",
+            "destinationId" : "150",
+            "id" : "156",
+            "sourceId" : "144",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Routes /api/project/cases to",
+            "destinationId" : "152",
+            "id" : "157",
+            "sourceId" : "144",
             "tags" : "Relationship"
           } ],
           "tags" : "Element,Infrastructure Node",
           "technology" : "Kubernetes ingress"
+        }, {
+          "description" : "The database the cases service keeps its cases and notes in.",
+          "environment" : "Prod",
+          "id" : "153",
+          "name" : "Postgres",
+          "properties" : {
+            "structurizr.dsl.identifier" : "prodDatabase"
+          },
+          "tags" : "Element,Infrastructure Node",
+          "technology" : "PostgreSQL"
         } ],
         "instances" : "1",
         "name" : "Kubernetes cluster",
         "properties" : {
-          "structurizr.dsl.identifier" : "aa4635a5-b8f5-47aa-b596-a796578f5f65"
+          "structurizr.dsl.identifier" : "ce710fc2-c2e0-4e48-af07-e61a0da555bb"
         },
         "tags" : "Element,Deployment Node",
         "technology" : "Kubernetes"
       } ],
       "description" : "The cloud that hosts the prod site at campfire.wsj27.se.",
       "environment" : "Prod",
-      "id" : "128",
+      "id" : "142",
       "instances" : "1",
       "name" : "Azure",
       "properties" : {
-        "structurizr.dsl.identifier" : "73e34d78-f62f-48b7-be3e-bcb5a6f82986"
+        "structurizr.dsl.identifier" : "8e77a77d-6edc-4d6a-8ad6-a45f8ec53b13"
       },
       "tags" : "Element,Deployment Node",
       "technology" : "Microsoft Azure"
     }, {
       "containerInstances" : [ {
-        "containerId" : "19",
+        "containerId" : "20",
         "environment" : "Prod",
-        "id" : "141",
+        "id" : "160",
         "instanceId" : 1,
         "properties" : {
           "structurizr.dsl.identifier" : "prodApple"
         },
         "relationships" : [ {
           "description" : "Hosts in one webview per tab",
-          "destinationId" : "132",
-          "id" : "142",
-          "linkedRelationshipId" : "59",
-          "sourceId" : "141"
+          "destinationId" : "146",
+          "id" : "161",
+          "linkedRelationshipId" : "63",
+          "sourceId" : "160"
         }, {
           "description" : "Opens sign-in in a modal webview",
-          "destinationId" : "146",
-          "id" : "148",
-          "linkedRelationshipId" : "63",
-          "sourceId" : "141"
+          "destinationId" : "165",
+          "id" : "167",
+          "linkedRelationshipId" : "67",
+          "sourceId" : "160"
         }, {
           "description" : "Loads the application from",
-          "destinationId" : "130",
-          "id" : "153",
-          "sourceId" : "141",
+          "destinationId" : "144",
+          "id" : "172",
+          "sourceId" : "160",
           "tags" : "Relationship"
         } ],
         "tags" : "Container Instance"
       }, {
-        "containerId" : "20",
+        "containerId" : "21",
         "environment" : "Prod",
-        "id" : "143",
+        "id" : "162",
         "instanceId" : 1,
         "properties" : {
           "structurizr.dsl.identifier" : "prodAndroid"
         },
         "relationships" : [ {
           "description" : "Hosts in one webview per tab",
-          "destinationId" : "132",
-          "id" : "144",
-          "linkedRelationshipId" : "60",
-          "sourceId" : "143"
+          "destinationId" : "146",
+          "id" : "163",
+          "linkedRelationshipId" : "64",
+          "sourceId" : "162"
         }, {
           "description" : "Opens sign-in in a modal sheet",
-          "destinationId" : "146",
-          "id" : "149",
-          "linkedRelationshipId" : "64",
-          "sourceId" : "143"
+          "destinationId" : "165",
+          "id" : "168",
+          "linkedRelationshipId" : "68",
+          "sourceId" : "162"
         }, {
           "description" : "Loads the application from",
-          "destinationId" : "130",
-          "id" : "154",
-          "sourceId" : "143",
+          "destinationId" : "144",
+          "id" : "173",
+          "sourceId" : "162",
           "tags" : "Relationship"
         } ],
         "tags" : "Container Instance"
       } ],
       "description" : "A leader's or a CMT member's own phone.",
       "environment" : "Prod",
-      "id" : "140",
+      "id" : "159",
       "instances" : "1",
       "name" : "Member's phone",
       "properties" : {
-        "structurizr.dsl.identifier" : "cd7db0fa-b16d-4593-8eff-fa3bb4c141b3"
+        "structurizr.dsl.identifier" : "ea1fd667-8018-4ad0-8350-f43f74ad9b02"
       },
       "tags" : "Element,Deployment Node",
       "technology" : "iOS 26 or Android"
     }, {
       "description" : "Scouterna's own systems, with ScoutID's production realm.",
       "environment" : "Prod",
-      "id" : "145",
+      "id" : "164",
       "instances" : "1",
       "name" : "Scouterna",
       "properties" : {
-        "structurizr.dsl.identifier" : "2bbe9296-d701-4dd7-a2e2-fcdc28f1f7ef"
+        "structurizr.dsl.identifier" : "5dc3a1a3-bd97-428c-b5e1-45fe64e0f2c6"
       },
       "softwareSystemInstances" : [ {
         "environment" : "Prod",
-        "id" : "146",
+        "id" : "165",
         "instanceId" : 1,
         "properties" : {
-          "structurizr.dsl.identifier" : "e2c23a50-2896-4fb0-a2f2-7b58f190f2b5"
+          "structurizr.dsl.identifier" : "53142a93-95ab-490a-ab88-5c4f610a6448"
         },
         "relationships" : [ {
           "description" : "Verifies sign-ins against",
-          "destinationId" : "150",
-          "id" : "152",
-          "linkedRelationshipId" : "53",
-          "sourceId" : "146"
+          "destinationId" : "169",
+          "id" : "171",
+          "linkedRelationshipId" : "56",
+          "sourceId" : "165"
         } ],
         "softwareSystemId" : "10",
         "tags" : "Software System Instance"
       }, {
         "environment" : "Prod",
-        "id" : "150",
+        "id" : "169",
         "instanceId" : 1,
         "properties" : {
-          "structurizr.dsl.identifier" : "2aa1d2d3-135a-42af-8dcc-c1b7ce42aa03"
+          "structurizr.dsl.identifier" : "790260b4-0a58-4054-9dd1-34a105b16815"
         },
         "softwareSystemId" : "11",
         "tags" : "Software System Instance"
@@ -637,15 +725,15 @@
       },
       "relationships" : [ {
         "description" : "Know and reach their unit",
-        "destinationId" : "17",
-        "id" : "29",
+        "destinationId" : "18",
+        "id" : "31",
         "sourceId" : "1",
         "tags" : "Relationship"
       }, {
         "description" : "Know and reach their unit",
-        "destinationId" : "16",
-        "id" : "30",
-        "linkedRelationshipId" : "29",
+        "destinationId" : "17",
+        "id" : "32",
+        "linkedRelationshipId" : "31",
         "sourceId" : "1"
       } ],
       "tags" : "Element,Person,user"
@@ -658,15 +746,15 @@
       },
       "relationships" : [ {
         "description" : "Look up and reach anyone",
-        "destinationId" : "17",
-        "id" : "31",
+        "destinationId" : "18",
+        "id" : "33",
         "sourceId" : "2",
         "tags" : "Relationship"
       }, {
         "description" : "Look up and reach anyone",
-        "destinationId" : "16",
-        "id" : "32",
-        "linkedRelationshipId" : "31",
+        "destinationId" : "17",
+        "id" : "34",
+        "linkedRelationshipId" : "33",
         "sourceId" : "2"
       } ],
       "tags" : "Element,Person,user"
@@ -679,15 +767,15 @@
       },
       "relationships" : [ {
         "description" : "Reach the people a message is for",
-        "destinationId" : "17",
-        "id" : "33",
+        "destinationId" : "18",
+        "id" : "35",
         "sourceId" : "3",
         "tags" : "Relationship"
       }, {
         "description" : "Reach the people a message is for",
-        "destinationId" : "16",
-        "id" : "34",
-        "linkedRelationshipId" : "33",
+        "destinationId" : "17",
+        "id" : "36",
+        "linkedRelationshipId" : "35",
         "sourceId" : "3"
       } ],
       "tags" : "Element,Person,user"
@@ -699,16 +787,16 @@
         "structurizr.dsl.identifier" : "cmtHealth"
       },
       "relationships" : [ {
-        "description" : "Read a participant's health answers",
-        "destinationId" : "17",
-        "id" : "35",
+        "description" : "Read health answers and keep cases",
+        "destinationId" : "18",
+        "id" : "37",
         "sourceId" : "4",
         "tags" : "Relationship"
       }, {
-        "description" : "Read a participant's health answers",
-        "destinationId" : "16",
-        "id" : "36",
-        "linkedRelationshipId" : "35",
+        "description" : "Read health answers and keep cases",
+        "destinationId" : "17",
+        "id" : "38",
+        "linkedRelationshipId" : "37",
         "sourceId" : "4"
       } ],
       "tags" : "Element,Person,user"
@@ -721,15 +809,15 @@
       },
       "relationships" : [ {
         "description" : "See and reach the IST",
-        "destinationId" : "17",
-        "id" : "37",
+        "destinationId" : "18",
+        "id" : "39",
         "sourceId" : "5",
         "tags" : "Relationship"
       }, {
         "description" : "See and reach the IST",
-        "destinationId" : "16",
-        "id" : "38",
-        "linkedRelationshipId" : "37",
+        "destinationId" : "17",
+        "id" : "40",
+        "linkedRelationshipId" : "39",
         "sourceId" : "5"
       } ],
       "tags" : "Element,Person,user"
@@ -742,15 +830,15 @@
       },
       "relationships" : [ {
         "description" : "Plan around the units and leaders",
-        "destinationId" : "17",
-        "id" : "39",
+        "destinationId" : "18",
+        "id" : "41",
         "sourceId" : "6",
         "tags" : "Relationship"
       }, {
         "description" : "Plan around the units and leaders",
-        "destinationId" : "16",
-        "id" : "40",
-        "linkedRelationshipId" : "39",
+        "destinationId" : "17",
+        "id" : "42",
+        "linkedRelationshipId" : "41",
         "sourceId" : "6"
       } ],
       "tags" : "Element,Person,user"
@@ -763,15 +851,15 @@
       },
       "relationships" : [ {
         "description" : "Follow the units and answer members",
-        "destinationId" : "17",
-        "id" : "41",
+        "destinationId" : "18",
+        "id" : "43",
         "sourceId" : "7",
         "tags" : "Relationship"
       }, {
         "description" : "Follow the units and answer members",
-        "destinationId" : "16",
-        "id" : "42",
-        "linkedRelationshipId" : "41",
+        "destinationId" : "17",
+        "id" : "44",
+        "linkedRelationshipId" : "43",
         "sourceId" : "7"
       } ],
       "tags" : "Element,Person,user"
@@ -784,15 +872,15 @@
       },
       "relationships" : [ {
         "description" : "See the whole contingent at a glance",
-        "destinationId" : "17",
-        "id" : "43",
+        "destinationId" : "18",
+        "id" : "45",
         "sourceId" : "8",
         "tags" : "Relationship"
       }, {
         "description" : "See the whole contingent at a glance",
-        "destinationId" : "16",
-        "id" : "44",
-        "linkedRelationshipId" : "43",
+        "destinationId" : "17",
+        "id" : "46",
+        "linkedRelationshipId" : "45",
         "sourceId" : "8"
       } ],
       "tags" : "Element,Person,user"
@@ -805,20 +893,20 @@
       },
       "relationships" : [ {
         "description" : "Build and maintain",
-        "destinationId" : "16",
-        "id" : "45",
+        "destinationId" : "17",
+        "id" : "47",
         "sourceId" : "9",
         "tags" : "Relationship"
       }, {
         "description" : "Build, check, and publish through",
         "destinationId" : "13",
-        "id" : "55",
+        "id" : "58",
         "sourceId" : "9",
         "tags" : "Relationship"
       }, {
         "description" : "Run in place of both services, locally",
-        "destinationId" : "28",
-        "id" : "56",
+        "destinationId" : "30",
+        "id" : "59",
         "sourceId" : "9",
         "tags" : "Relationship"
       } ],
@@ -835,7 +923,7 @@
       "relationships" : [ {
         "description" : "Verifies sign-ins against",
         "destinationId" : "11",
-        "id" : "53",
+        "id" : "56",
         "sourceId" : "10",
         "tags" : "Relationship"
       } ],
@@ -878,7 +966,7 @@
       "relationships" : [ {
         "description" : "Runs the OpenID round trip with",
         "destinationId" : "10",
-        "id" : "52",
+        "id" : "55",
         "sourceId" : "14",
         "tags" : "Relationship"
       } ],
@@ -894,38 +982,47 @@
       "relationships" : [ {
         "description" : "Reads the contingent's member data from",
         "destinationId" : "11",
-        "id" : "54",
+        "id" : "57",
         "sourceId" : "15",
         "tags" : "Relationship"
       } ],
+      "tags" : "Element,Software System,service"
+    }, {
+      "description" : "The service that keeps the follow-ups written about a person or a unit.",
+      "documentation" : { },
+      "id" : "16",
+      "name" : "Cases service",
+      "properties" : {
+        "structurizr.dsl.identifier" : "casesService"
+      },
       "tags" : "Element,Software System,service"
     }, {
       "containers" : [ {
         "description" : "The product as a member knows it, on the web or a phone.",
         "documentation" : { },
         "group" : "The apps",
-        "id" : "17",
+        "id" : "18",
         "name" : "Campfire app",
         "properties" : {
           "structurizr.dsl.identifier" : "campfireApp"
         },
         "relationships" : [ {
           "description" : "Ships as, in a browser",
-          "destinationId" : "18",
-          "id" : "46",
-          "sourceId" : "17",
-          "tags" : "Relationship"
-        }, {
-          "description" : "Ships as",
           "destinationId" : "19",
-          "id" : "47",
-          "sourceId" : "17",
+          "id" : "48",
+          "sourceId" : "18",
           "tags" : "Relationship"
         }, {
           "description" : "Ships as",
           "destinationId" : "20",
-          "id" : "48",
-          "sourceId" : "17",
+          "id" : "49",
+          "sourceId" : "18",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Ships as",
+          "destinationId" : "21",
+          "id" : "50",
+          "sourceId" : "18",
           "tags" : "Relationship"
         } ],
         "tags" : "Element,Container,product",
@@ -934,52 +1031,58 @@
         "description" : "The composition root that holds every screen and knows every module.",
         "documentation" : { },
         "group" : "The apps",
-        "id" : "18",
+        "id" : "19",
         "name" : "Web app",
         "properties" : {
           "structurizr.dsl.identifier" : "webApp"
         },
         "relationships" : [ {
           "description" : "Signs the member in through",
-          "destinationId" : "21",
-          "id" : "65",
-          "sourceId" : "18",
+          "destinationId" : "22",
+          "id" : "69",
+          "sourceId" : "19",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Shows the health team's cases through",
+          "destinationId" : "23",
+          "id" : "70",
+          "sourceId" : "19",
           "tags" : "Relationship"
         }, {
           "description" : "Shows the start screen through",
-          "destinationId" : "22",
-          "id" : "66",
-          "sourceId" : "18",
+          "destinationId" : "24",
+          "id" : "71",
+          "sourceId" : "19",
           "tags" : "Relationship"
         }, {
           "description" : "Shows the countdown through",
-          "destinationId" : "23",
-          "id" : "67",
-          "sourceId" : "18",
+          "destinationId" : "25",
+          "id" : "72",
+          "sourceId" : "19",
           "tags" : "Relationship"
         }, {
           "description" : "Shows the list of participants through",
-          "destinationId" : "24",
-          "id" : "68",
-          "sourceId" : "18",
+          "destinationId" : "26",
+          "id" : "73",
+          "sourceId" : "19",
           "tags" : "Relationship"
         }, {
           "description" : "Draws its chrome with",
-          "destinationId" : "26",
-          "id" : "69",
-          "sourceId" : "18",
+          "destinationId" : "28",
+          "id" : "74",
+          "sourceId" : "19",
           "tags" : "Relationship"
         }, {
           "description" : "Reports the screen and the session through",
-          "destinationId" : "25",
-          "id" : "70",
-          "sourceId" : "18",
+          "destinationId" : "27",
+          "id" : "75",
+          "sourceId" : "19",
           "tags" : "Relationship"
         }, {
           "description" : "Mounts the session through",
-          "destinationId" : "27",
-          "id" : "75",
-          "sourceId" : "18",
+          "destinationId" : "29",
+          "id" : "81",
+          "sourceId" : "19",
           "tags" : "Relationship"
         } ],
         "tags" : "Element,Container",
@@ -988,28 +1091,28 @@
         "description" : "The iPhone app that hosts the web application behind native chrome.",
         "documentation" : { },
         "group" : "The apps",
-        "id" : "19",
+        "id" : "20",
         "name" : "Apple shell",
         "properties" : {
           "structurizr.dsl.identifier" : "appleShell"
         },
         "relationships" : [ {
           "description" : "Hosts in one webview per tab",
-          "destinationId" : "18",
-          "id" : "59",
-          "sourceId" : "19",
+          "destinationId" : "19",
+          "id" : "63",
+          "sourceId" : "20",
           "tags" : "Relationship"
         }, {
           "description" : "Exchanges bridge messages with",
-          "destinationId" : "25",
-          "id" : "61",
-          "sourceId" : "19",
+          "destinationId" : "27",
+          "id" : "65",
+          "sourceId" : "20",
           "tags" : "Relationship"
         }, {
           "description" : "Opens sign-in in a modal webview",
           "destinationId" : "10",
-          "id" : "63",
-          "sourceId" : "19",
+          "id" : "67",
+          "sourceId" : "20",
           "tags" : "Relationship"
         } ],
         "tags" : "Element,Container,app",
@@ -1018,28 +1121,28 @@
         "description" : "The Android app that hosts the web application behind native chrome.",
         "documentation" : { },
         "group" : "The apps",
-        "id" : "20",
+        "id" : "21",
         "name" : "Android shell",
         "properties" : {
           "structurizr.dsl.identifier" : "androidShell"
         },
         "relationships" : [ {
           "description" : "Hosts in one webview per tab",
-          "destinationId" : "18",
-          "id" : "60",
-          "sourceId" : "20",
+          "destinationId" : "19",
+          "id" : "64",
+          "sourceId" : "21",
           "tags" : "Relationship"
         }, {
           "description" : "Exchanges bridge messages with",
-          "destinationId" : "25",
-          "id" : "62",
-          "sourceId" : "20",
+          "destinationId" : "27",
+          "id" : "66",
+          "sourceId" : "21",
           "tags" : "Relationship"
         }, {
           "description" : "Opens sign-in in a modal sheet",
           "destinationId" : "10",
-          "id" : "64",
-          "sourceId" : "20",
+          "id" : "68",
+          "sourceId" : "21",
           "tags" : "Relationship"
         } ],
         "tags" : "Element,Container,app",
@@ -1048,58 +1151,94 @@
         "description" : "The client half of the auth service, and the keeper of the session.",
         "documentation" : { },
         "group" : "The modules",
-        "id" : "21",
+        "id" : "22",
         "name" : "Authentication",
         "properties" : {
           "structurizr.dsl.identifier" : "authenticationModule"
         },
         "relationships" : [ {
           "description" : "Builds its screens from",
-          "destinationId" : "26",
-          "id" : "71",
-          "sourceId" : "21",
+          "destinationId" : "28",
+          "id" : "76",
+          "sourceId" : "22",
           "tags" : "Relationship"
         }, {
           "description" : "Calls the service with",
-          "destinationId" : "27",
-          "id" : "76",
-          "sourceId" : "21",
+          "destinationId" : "29",
+          "id" : "82",
+          "sourceId" : "22",
           "tags" : "Relationship"
         }, {
           "description" : "Signs in and reads the session over /api/auth",
           "destinationId" : "14",
-          "id" : "80",
-          "sourceId" : "21",
+          "id" : "87",
+          "sourceId" : "22",
           "tags" : "Relationship"
         }, {
           "description" : "Reads the member's unit and travel over /api/project",
           "destinationId" : "15",
-          "id" : "81",
-          "sourceId" : "21",
+          "id" : "88",
+          "sourceId" : "22",
           "tags" : "Relationship"
         } ],
         "tags" : "Element,Container,module",
         "technology" : "TypeScript, React 19"
       }, {
+        "description" : "The health team's cases about a person, and the notes written on them.",
+        "documentation" : { },
+        "group" : "The modules",
+        "id" : "23",
+        "name" : "Cases",
+        "properties" : {
+          "structurizr.dsl.identifier" : "casesModule"
+        },
+        "relationships" : [ {
+          "description" : "Builds its screens from",
+          "destinationId" : "28",
+          "id" : "77",
+          "sourceId" : "23",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Calls the services with",
+          "destinationId" : "29",
+          "id" : "83",
+          "sourceId" : "23",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Reads and writes cases over /api/project",
+          "destinationId" : "16",
+          "id" : "89",
+          "sourceId" : "23",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Reads the contingent's names over /api/project",
+          "destinationId" : "15",
+          "id" : "90",
+          "sourceId" : "23",
+          "tags" : "Relationship"
+        } ],
+        "tags" : "Element,Container,module",
+        "technology" : "TypeScript, React 19, TanStack Query"
+      }, {
         "description" : "The start screen, and what it shows to whom and from when.",
         "documentation" : { },
         "group" : "The modules",
-        "id" : "22",
+        "id" : "24",
         "name" : "Home",
         "properties" : {
           "structurizr.dsl.identifier" : "homeModule"
         },
         "relationships" : [ {
           "description" : "Builds its screens from",
-          "destinationId" : "26",
-          "id" : "72",
-          "sourceId" : "22",
+          "destinationId" : "28",
+          "id" : "78",
+          "sourceId" : "24",
           "tags" : "Relationship"
         }, {
           "description" : "Reads the session's roles from",
-          "destinationId" : "27",
-          "id" : "77",
-          "sourceId" : "22",
+          "destinationId" : "29",
+          "id" : "84",
+          "sourceId" : "24",
           "tags" : "Relationship"
         } ],
         "tags" : "Element,Container,module",
@@ -1108,22 +1247,22 @@
         "description" : "The trip from departure to the way home, and its countdown.",
         "documentation" : { },
         "group" : "The modules",
-        "id" : "23",
+        "id" : "25",
         "name" : "Journey",
         "properties" : {
           "structurizr.dsl.identifier" : "journeyModule"
         },
         "relationships" : [ {
           "description" : "Builds its widget from",
-          "destinationId" : "26",
-          "id" : "73",
-          "sourceId" : "23",
+          "destinationId" : "28",
+          "id" : "79",
+          "sourceId" : "25",
           "tags" : "Relationship"
         }, {
           "description" : "Reads the signed-in person from",
-          "destinationId" : "27",
-          "id" : "78",
-          "sourceId" : "23",
+          "destinationId" : "29",
+          "id" : "85",
+          "sourceId" : "25",
           "tags" : "Relationship"
         } ],
         "tags" : "Element,Container,module",
@@ -1132,34 +1271,34 @@
         "description" : "The contingent's list of participants and the screens that show it.",
         "documentation" : { },
         "group" : "The modules",
-        "id" : "24",
+        "id" : "26",
         "name" : "Participants",
         "properties" : {
           "structurizr.dsl.identifier" : "participantsModule"
         },
         "relationships" : [ {
           "description" : "Builds its screens from",
-          "destinationId" : "26",
-          "id" : "74",
-          "sourceId" : "24",
+          "destinationId" : "28",
+          "id" : "80",
+          "sourceId" : "26",
           "tags" : "Relationship"
         }, {
           "description" : "Calls the service with",
-          "destinationId" : "27",
-          "id" : "79",
-          "sourceId" : "24",
+          "destinationId" : "29",
+          "id" : "86",
+          "sourceId" : "26",
           "tags" : "Relationship"
         }, {
           "description" : "Reads the list of participants over /api/project",
           "destinationId" : "15",
-          "id" : "82",
-          "sourceId" : "24",
+          "id" : "91",
+          "sourceId" : "26",
           "tags" : "Relationship"
         }, {
           "description" : "Draws unit maps over tiles from",
           "destinationId" : "12",
-          "id" : "83",
-          "sourceId" : "24",
+          "id" : "92",
+          "sourceId" : "26",
           "tags" : "Relationship"
         } ],
         "tags" : "Element,Container,module",
@@ -1168,7 +1307,7 @@
         "description" : "The detection of the hosting tier, and the web half of the bridge.",
         "documentation" : { },
         "group" : "The libraries",
-        "id" : "25",
+        "id" : "27",
         "name" : "Host",
         "properties" : {
           "structurizr.dsl.identifier" : "hostLibrary",
@@ -1180,7 +1319,7 @@
         "description" : "The design system, knowing what a row is but never a participant.",
         "documentation" : { },
         "group" : "The libraries",
-        "id" : "26",
+        "id" : "28",
         "name" : "UI",
         "properties" : {
           "structurizr.dsl.identifier" : "uiLibrary",
@@ -1192,7 +1331,7 @@
         "description" : "Small shared helpers, and the session every module may read.",
         "documentation" : { },
         "group" : "The libraries",
-        "id" : "27",
+        "id" : "29",
         "name" : "Utils",
         "properties" : {
           "structurizr.dsl.identifier" : "utilsLibrary",
@@ -1204,7 +1343,7 @@
         "description" : "The stand-in for the back-end services on a developer's machine.",
         "documentation" : { },
         "group" : "Development",
-        "id" : "28",
+        "id" : "30",
         "name" : "Mock back-end",
         "properties" : {
           "structurizr.dsl.identifier" : "mock",
@@ -1213,14 +1352,20 @@
         "relationships" : [ {
           "description" : "Stands in for, locally",
           "destinationId" : "14",
-          "id" : "57",
-          "sourceId" : "28",
+          "id" : "60",
+          "sourceId" : "30",
           "tags" : "Relationship"
         }, {
           "description" : "Stands in for, locally",
           "destinationId" : "15",
-          "id" : "58",
-          "sourceId" : "28",
+          "id" : "61",
+          "sourceId" : "30",
+          "tags" : "Relationship"
+        }, {
+          "description" : "Stands in for, locally",
+          "destinationId" : "16",
+          "id" : "62",
+          "sourceId" : "30",
           "tags" : "Relationship"
         } ],
         "tags" : "Element,Container,development",
@@ -1228,7 +1373,7 @@
       } ],
       "description" : "The Swedish contingent's digital companion for WSJ27.",
       "documentation" : { },
-      "id" : "16",
+      "id" : "17",
       "name" : "Campfire",
       "properties" : {
         "structurizr.dsl.identifier" : "campfire"
@@ -1236,27 +1381,33 @@
       "relationships" : [ {
         "description" : "Signs members in and out through",
         "destinationId" : "14",
-        "id" : "49",
-        "sourceId" : "16",
+        "id" : "51",
+        "sourceId" : "17",
         "tags" : "Relationship"
       }, {
         "description" : "Reads the contingent's list of participants from",
         "destinationId" : "15",
-        "id" : "50",
-        "sourceId" : "16",
+        "id" : "52",
+        "sourceId" : "17",
+        "tags" : "Relationship"
+      }, {
+        "description" : "Keeps the health team's cases in",
+        "destinationId" : "16",
+        "id" : "53",
+        "sourceId" : "17",
         "tags" : "Relationship"
       }, {
         "description" : "Sends members to sign in at",
         "destinationId" : "10",
-        "id" : "51",
-        "sourceId" : "16",
+        "id" : "54",
+        "sourceId" : "17",
         "tags" : "Relationship"
       }, {
         "description" : "Draws unit maps over tiles from",
         "destinationId" : "12",
-        "id" : "84",
-        "linkedRelationshipId" : "83",
-        "sourceId" : "16"
+        "id" : "93",
+        "linkedRelationshipId" : "92",
+        "sourceId" : "17"
       } ],
       "tags" : "Element,Software System"
     } ]
@@ -1268,12 +1419,12 @@
     "structurizr.inspection.model.softwaresystem.documentation" : "ignore",
     "structurizr.inspection.model.softwaresystem.decisions" : "ignore",
     "structurizr.inspection.info" : "0",
-    "structurizr.inspection.ignore" : "92",
+    "structurizr.inspection.ignore" : "103",
     "structurizr.inspection.warning" : "0"
   },
   "views" : {
     "configuration" : {
-      "lastSavedView" : "containers",
+      "lastSavedView" : "deploymentDev",
       "metadataSymbols" : "SquareBrackets",
       "styles" : {
         "elements" : [ {
@@ -1340,203 +1491,222 @@
     "containerViews" : [ {
       "description" : "The product, the apps it ships as, the modules, and which module talks to which service.",
       "dimensions" : {
-        "height" : 4858,
-        "width" : 3275
+        "height" : 5163,
+        "width" : 3325
       },
       "elements" : [ {
         "id" : "1",
-        "x" : 1781,
+        "x" : 1780,
         "y" : 463
       }, {
         "id" : "2",
-        "x" : 200,
+        "x" : 199,
         "y" : 793
       }, {
         "id" : "3",
-        "x" : 606,
+        "x" : 605,
         "y" : 1108
       }, {
         "id" : "4",
-        "x" : 1781,
+        "x" : 1780,
         "y" : 1108
       }, {
         "id" : "5",
-        "x" : 2175,
+        "x" : 2174,
         "y" : 793
       }, {
         "id" : "6",
-        "x" : 606,
+        "x" : 605,
         "y" : 463
       }, {
         "id" : "7",
-        "x" : 2175,
+        "x" : 2174,
         "y" : 143
       }, {
         "id" : "8",
-        "x" : 200,
+        "x" : 199,
         "y" : 143
       }, {
         "id" : "10",
-        "x" : 1168,
-        "y" : 4301
+        "x" : 1167,
+        "y" : 4606
       }, {
         "id" : "12",
-        "x" : 2625,
-        "y" : 3261
+        "x" : 2624,
+        "y" : 3566
       }, {
         "id" : "14",
-        "x" : 581,
-        "y" : 4011
+        "x" : 580,
+        "y" : 4316
       }, {
         "id" : "15",
-        "x" : 1756,
-        "y" : 4011
+        "x" : 1755,
+        "y" : 4316
       }, {
-        "id" : "17",
-        "x" : 1168,
-        "y" : 1791
+        "id" : "16",
+        "x" : 2624,
+        "y" : 2790
       }, {
         "id" : "18",
-        "x" : 1168,
-        "y" : 2378
+        "x" : 1167,
+        "y" : 1791
       }, {
         "id" : "19",
-        "x" : 1831,
-        "y" : 1716
+        "x" : 1167,
+        "y" : 2378
       }, {
         "id" : "20",
-        "x" : 656,
+        "x" : 1830,
         "y" : 1716
       }, {
         "id" : "21",
-        "x" : 581,
-        "y" : 3261
+        "x" : 655,
+        "y" : 1716
       }, {
         "id" : "22",
-        "x" : 581,
-        "y" : 2876
+        "x" : 580,
+        "y" : 3566
       }, {
         "id" : "23",
-        "x" : 1756,
-        "y" : 2876
+        "x" : 1755,
+        "y" : 2790
       }, {
         "id" : "24",
-        "x" : 1756,
-        "y" : 3261
+        "x" : 580,
+        "y" : 3181
+      }, {
+        "id" : "25",
+        "x" : 1755,
+        "y" : 3181
+      }, {
+        "id" : "26",
+        "x" : 1755,
+        "y" : 3566
       } ],
       "externalSoftwareSystemBoundariesVisible" : false,
       "key" : "containers",
       "name" : "Container View: Campfire",
       "order" : 2,
       "relationships" : [ {
-        "id" : "29",
+        "id" : "31",
         "position" : 15
       }, {
-        "id" : "31",
-        "position" : 35
-      }, {
         "id" : "33",
-        "position" : 20
+        "position" : 35
       }, {
         "id" : "35",
         "position" : 20
       }, {
-        "id" : "37",
-        "position" : 30
+        "id" : "37"
       }, {
         "id" : "39",
-        "position" : 15
+        "position" : 30
       }, {
         "id" : "41",
-        "position" : 20
+        "position" : 15
       }, {
         "id" : "43",
         "position" : 20
       }, {
-        "id" : "46",
+        "id" : "45",
+        "position" : 20
+      }, {
+        "id" : "48",
         "position" : 35
       }, {
-        "id" : "47"
+        "id" : "49"
       }, {
-        "id" : "48"
+        "id" : "50"
       }, {
-        "id" : "52",
+        "id" : "55",
         "position" : 35
-      }, {
-        "id" : "59",
-        "vertices" : [ {
-          "x" : 1750,
-          "y" : 2293
-        } ]
-      }, {
-        "id" : "60",
-        "vertices" : [ {
-          "x" : 910,
-          "y" : 2293
-        } ]
       }, {
         "id" : "63",
-        "position" : 90,
         "vertices" : [ {
-          "x" : 2480,
-          "y" : 2138
+          "x" : 1749,
+          "y" : 2293
         } ]
       }, {
         "id" : "64",
-        "position" : 90,
         "vertices" : [ {
-          "x" : 325,
-          "y" : 2043
-        } ]
-      }, {
-        "id" : "65",
-        "position" : 85,
-        "vertices" : [ {
-          "x" : 1310,
-          "y" : 3411
-        } ]
-      }, {
-        "id" : "66",
-        "position" : 75,
-        "vertices" : [ {
-          "x" : 1310,
-          "y" : 3026
+          "x" : 909,
+          "y" : 2293
         } ]
       }, {
         "id" : "67",
-        "position" : 80,
+        "position" : 90,
         "vertices" : [ {
-          "x" : 1595,
-          "y" : 3026
+          "x" : 2479,
+          "y" : 2138
         } ]
       }, {
         "id" : "68",
+        "position" : 90,
+        "vertices" : [ {
+          "x" : 324,
+          "y" : 2043
+        } ]
+      }, {
+        "id" : "69",
         "position" : 85,
         "vertices" : [ {
-          "x" : 1585,
-          "y" : 3411
+          "x" : 1219,
+          "y" : 3716
         } ]
       }, {
-        "id" : "80",
-        "position" : 75
+        "id" : "70"
       }, {
-        "id" : "81",
+        "id" : "71",
         "position" : 75,
         "vertices" : [ {
-          "x" : 1220,
-          "y" : 3741
-        }, {
-          "x" : 1525,
-          "y" : 3956
+          "x" : 1114,
+          "y" : 3331
         } ]
       }, {
-        "id" : "82",
+        "id" : "72",
+        "position" : 80,
+        "vertices" : [ {
+          "x" : 1649,
+          "y" : 3331
+        } ]
+      }, {
+        "id" : "73",
+        "position" : 85,
+        "vertices" : [ {
+          "x" : 1674,
+          "y" : 3716
+        } ]
+      }, {
+        "id" : "87",
+        "position" : 75
+      }, {
+        "id" : "88",
+        "position" : 75,
+        "vertices" : [ {
+          "x" : 1219,
+          "y" : 4046
+        }, {
+          "x" : 1524,
+          "y" : 4261
+        } ]
+      }, {
+        "id" : "89",
+        "position" : 55
+      }, {
+        "id" : "90",
+        "position" : 85,
+        "vertices" : [ {
+          "x" : 3124,
+          "y" : 3145
+        } ]
+      }, {
+        "id" : "91",
         "position" : 25
       }, {
-        "id" : "83",
+        "id" : "92",
         "position" : 65
       } ],
-      "softwareSystemId" : "16"
+      "softwareSystemId" : "17"
     } ],
     "deploymentViews" : [ {
       "description" : "The local environment, with the mock behind Caddy on a developer's machine.",
@@ -1545,43 +1715,43 @@
         "width" : 1940
       },
       "elements" : [ {
-        "id" : "85",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "86",
-        "x" : 744,
-        "y" : 1292
-      }, {
-        "id" : "87",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "88",
-        "x" : 744,
-        "y" : 712
-      }, {
-        "id" : "89",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "90",
-        "x" : 744,
-        "y" : 1807
-      }, {
-        "id" : "91",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "92",
-        "x" : 299,
-        "y" : 242
-      }, {
         "id" : "94",
         "x" : 0,
         "y" : 0
       }, {
         "id" : "95",
+        "x" : 744,
+        "y" : 1292
+      }, {
+        "id" : "96",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "97",
+        "x" : 744,
+        "y" : 712
+      }, {
+        "id" : "98",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "99",
+        "x" : 744,
+        "y" : 1807
+      }, {
+        "id" : "100",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "101",
+        "x" : 299,
+        "y" : 242
+      }, {
+        "id" : "103",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "104",
         "x" : 1339,
         "y" : 242
       } ],
@@ -1590,91 +1760,103 @@
       "name" : "Deployment View: Campfire - Local",
       "order" : 3,
       "relationships" : [ {
-        "id" : "100",
-        "position" : 60,
-        "vertices" : [ {
-          "x" : 1379,
-          "y" : 1442
-        } ]
-      }, {
-        "id" : "97",
+        "id" : "106",
         "position" : 25
       }, {
-        "id" : "98",
+        "id" : "107",
         "position" : 45
       }, {
-        "id" : "99",
+        "id" : "108",
         "position" : 60,
         "vertices" : [ {
           "x" : 554,
           "y" : 1442
         } ]
+      }, {
+        "id" : "109",
+        "position" : 60,
+        "vertices" : [ {
+          "x" : 1379,
+          "y" : 1442
+        } ]
       } ],
-      "softwareSystemId" : "16"
+      "softwareSystemId" : "17"
     }, {
       "description" : "The dev environment, with the real services behind an ingress in Azure.",
       "dimensions" : {
-        "height" : 3658,
-        "width" : 2571
+        "height" : 3821,
+        "width" : 2971
       },
       "elements" : [ {
-        "id" : "101",
+        "id" : "110",
         "x" : 0,
         "y" : 0
       }, {
-        "id" : "102",
+        "id" : "111",
         "x" : 0,
         "y" : 0
       }, {
-        "id" : "103",
+        "id" : "112",
         "x" : 1077,
         "y" : 937
-      }, {
-        "id" : "104",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "105",
-        "x" : 1077,
-        "y" : 1452
-      }, {
-        "id" : "106",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "107",
-        "x" : 1530,
-        "y" : 2004
-      }, {
-        "id" : "108",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "109",
-        "x" : 625,
-        "y" : 2004
       }, {
         "id" : "113",
         "x" : 0,
         "y" : 0
       }, {
         "id" : "114",
-        "x" : 700,
-        "y" : 192
+        "x" : 1077,
+        "y" : 1452
       }, {
-        "id" : "116",
-        "x" : 1605,
-        "y" : 192
-      }, {
-        "id" : "118",
+        "id" : "115",
         "x" : 0,
         "y" : 0
       }, {
+        "id" : "116",
+        "x" : 1530,
+        "y" : 2004
+      }, {
+        "id" : "117",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "118",
+        "x" : 625,
+        "y" : 2004
+      }, {
         "id" : "119",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "120",
+        "x" : 2245,
+        "y" : 2004
+      }, {
+        "id" : "121",
+        "x" : 2245,
+        "y" : 2910
+      }, {
+        "id" : "127",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "128",
+        "x" : 700,
+        "y" : 192
+      }, {
+        "id" : "130",
+        "x" : 1605,
+        "y" : 192
+      }, {
+        "id" : "132",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "133",
         "x" : 1530,
         "y" : 2910
       }, {
-        "id" : "123",
+        "id" : "137",
         "x" : 625,
         "y" : 2910
       } ],
@@ -1683,17 +1865,22 @@
       "name" : "Deployment View: Campfire - Dev",
       "order" : 4,
       "relationships" : [ {
-        "id" : "110",
+        "id" : "122",
         "position" : 40
       }, {
-        "id" : "111"
+        "id" : "123"
       }, {
-        "id" : "112"
+        "id" : "124"
       }, {
-        "id" : "120",
+        "id" : "125",
+        "position" : 80
+      }, {
+        "id" : "126"
+      }, {
+        "id" : "134",
         "position" : 75
       }, {
-        "id" : "121",
+        "id" : "135",
         "position" : 65,
         "vertices" : [ {
           "x" : 295,
@@ -1703,144 +1890,161 @@
           "y" : 3400
         } ]
       }, {
-        "id" : "122",
+        "id" : "136",
         "position" : 15,
         "vertices" : [ {
-          "x" : 2275,
-          "y" : 550
+          "x" : 2110,
+          "y" : 540
         } ]
       }, {
-        "id" : "124",
+        "id" : "138",
         "position" : 65,
         "vertices" : [ {
           "x" : 415,
           "y" : 2240
         } ]
       }, {
-        "id" : "125"
+        "id" : "139"
       }, {
-        "id" : "126",
+        "id" : "140",
         "position" : 20
       }, {
-        "id" : "127",
+        "id" : "141",
         "position" : 20
       } ],
-      "softwareSystemId" : "16"
+      "softwareSystemId" : "17"
     }, {
       "description" : "The production environment, with the real services behind an ingress in Azure.",
       "dimensions" : {
-        "height" : 3578,
-        "width" : 2511
+        "height" : 3820,
+        "width" : 3380
       },
       "elements" : [ {
-        "id" : "128",
+        "id" : "142",
         "x" : 0,
         "y" : 0
-      }, {
-        "id" : "129",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "130",
-        "x" : 1090,
-        "y" : 912
-      }, {
-        "id" : "131",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "132",
-        "x" : 1090,
-        "y" : 1417
-      }, {
-        "id" : "133",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "134",
-        "x" : 1540,
-        "y" : 1962
-      }, {
-        "id" : "135",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "136",
-        "x" : 640,
-        "y" : 1962
-      }, {
-        "id" : "140",
-        "x" : 0,
-        "y" : 0
-      }, {
-        "id" : "141",
-        "x" : 715,
-        "y" : 192
       }, {
         "id" : "143",
-        "x" : 1615,
-        "y" : 192
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "144",
+        "x" : 1390,
+        "y" : 1155
       }, {
         "id" : "145",
         "x" : 0,
         "y" : 0
       }, {
         "id" : "146",
-        "x" : 1540,
-        "y" : 2829
+        "x" : 1390,
+        "y" : 1660
+      }, {
+        "id" : "147",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "148",
+        "x" : 1840,
+        "y" : 2205
+      }, {
+        "id" : "149",
+        "x" : 0,
+        "y" : 0
       }, {
         "id" : "150",
-        "x" : 640,
-        "y" : 2829
+        "x" : 940,
+        "y" : 2205
+      }, {
+        "id" : "151",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "152",
+        "x" : 2535,
+        "y" : 2205
+      }, {
+        "id" : "153",
+        "x" : 2535,
+        "y" : 3072
+      }, {
+        "id" : "159",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "160",
+        "x" : 1015,
+        "y" : 435
+      }, {
+        "id" : "162",
+        "x" : 1915,
+        "y" : 435
+      }, {
+        "id" : "164",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "165",
+        "x" : 1840,
+        "y" : 3072
+      }, {
+        "id" : "169",
+        "x" : 940,
+        "y" : 3072
       } ],
       "environment" : "Prod",
       "key" : "deploymentProd",
       "name" : "Deployment View: Campfire - Prod",
       "order" : 5,
       "relationships" : [ {
-        "id" : "137",
+        "id" : "154",
         "position" : 40
       }, {
-        "id" : "138"
+        "id" : "155"
       }, {
-        "id" : "139"
+        "id" : "156"
       }, {
-        "id" : "147",
+        "id" : "157",
         "position" : 80
       }, {
-        "id" : "148",
+        "id" : "158"
+      }, {
+        "id" : "166",
+        "position" : 80
+      }, {
+        "id" : "167",
         "position" : 65,
         "vertices" : [ {
-          "x" : 295,
-          "y" : 495
+          "x" : 595,
+          "y" : 738
         }, {
-          "x" : 605,
-          "y" : 3320
+          "x" : 905,
+          "y" : 3563
         } ]
       }, {
-        "id" : "149",
+        "id" : "168",
         "position" : 85,
         "vertices" : [ {
-          "x" : 2215,
-          "y" : 445
+          "x" : 2410,
+          "y" : 698
         } ]
       }, {
-        "id" : "151",
+        "id" : "170",
         "position" : 65,
         "vertices" : [ {
-          "x" : 430,
-          "y" : 2135
+          "x" : 730,
+          "y" : 2378
         } ]
       }, {
-        "id" : "152"
+        "id" : "171"
       }, {
-        "id" : "153",
+        "id" : "172",
         "position" : 20
       }, {
-        "id" : "154",
+        "id" : "173",
         "position" : 15
       } ],
-      "softwareSystemId" : "16"
+      "softwareSystemId" : "17"
     } ],
     "systemContextViews" : [ {
       "description" : "Campfire among the people it is built for, the services behind it, and the systems around them.",
@@ -1891,7 +2095,7 @@
       }, {
         "id" : "11",
         "x" : 2425,
-        "y" : 2300
+        "y" : 2714
       }, {
         "id" : "12",
         "x" : 2425,
@@ -1906,10 +2110,14 @@
         "y" : 2300
       }, {
         "id" : "15",
-        "x" : 1635,
+        "x" : 2035,
         "y" : 2300
       }, {
         "id" : "16",
+        "x" : 1545,
+        "y" : 2300
+      }, {
+        "id" : "17",
         "x" : 1204,
         "y" : 1807
       } ],
@@ -1918,58 +2126,66 @@
       "name" : "System Context View: Campfire",
       "order" : 1,
       "relationships" : [ {
-        "id" : "30",
+        "id" : "32",
         "position" : 34
       }, {
-        "id" : "32",
+        "id" : "34",
         "position" : 15
       }, {
-        "id" : "34",
+        "id" : "36",
         "position" : 37
       }, {
-        "id" : "36",
-        "position" : 40
-      }, {
-        "id" : "38",
-        "position" : 20
+        "id" : "38"
       }, {
         "id" : "40",
-        "position" : 30
+        "position" : 20
       }, {
         "id" : "42",
-        "position" : 12
+        "position" : 30
       }, {
         "id" : "44",
+        "position" : 12
+      }, {
+        "id" : "46",
         "position" : 7
       }, {
-        "id" : "45",
+        "id" : "47",
         "position" : 45
       }, {
-        "id" : "49",
+        "id" : "51",
         "position" : 80
       }, {
-        "id" : "50",
-        "position" : 71
-      }, {
-        "id" : "51"
-      }, {
         "id" : "52",
+        "position" : 86,
+        "vertices" : [ {
+          "x" : 2065,
+          "y" : 2085
+        } ]
+      }, {
+        "id" : "53",
+        "position" : 75
+      }, {
+        "id" : "54",
+        "position" : 15
+      }, {
+        "id" : "55",
         "position" : 74,
         "vertices" : [ {
           "x" : 895,
           "y" : 2680
         } ]
       }, {
-        "id" : "53"
+        "id" : "56"
       }, {
-        "id" : "54"
+        "id" : "57",
+        "position" : 65
       }, {
-        "id" : "55"
+        "id" : "58"
       }, {
-        "id" : "84",
-        "position" : 75
+        "id" : "93",
+        "position" : 70
       } ],
-      "softwareSystemId" : "16"
+      "softwareSystemId" : "17"
     } ]
   }
 }
