@@ -370,6 +370,20 @@ interface MenuEntryProps {
 }
 
 /**
+ * A link entry's press handler, closing the menu a frame after the press rather than
+ * during it. Closing renders, and a render inside the router's navigation shows the
+ * chrome the new address before its history entry exists, so the chrome's bookkeeping
+ * lands on the entry being left and back no longer leads back.
+ * @param close How choosing closes the menu.
+ * @returns The handler.
+ */
+function afterNavigating(close: () => void): () => void {
+  return () => {
+    requestAnimationFrame(close)
+  }
+}
+
+/**
  * One choosable entry: a real link where the entry leads somewhere or opens an address,
  * a button where it does something. All stay out of the document's tab order – the menu
  * itself owns the arrow keys, and Tab means "leave" rather than "next entry".
@@ -457,7 +471,7 @@ function MenuEntry(props: MenuEntryProps): ReactElement {
         tabIndex={-1}
         to={item.link.to}
         params={item.link.params ?? {}}
-        onClick={props.onChoose}
+        onClick={afterNavigating(props.onChoose)}
       >
         {content}
       </Link>
