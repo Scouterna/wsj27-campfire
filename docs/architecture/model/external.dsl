@@ -11,6 +11,11 @@ scoutnet = softwareSystem "Scoutnet" {
   tags "external"
 }
 
+googleDrive = softwareSystem "Google Drive" {
+  description "The shared folders where the contingent keeps its material."
+  tags "external"
+}
+
 openFreeMap = softwareSystem "OpenFreeMap" {
   description "The public map tile service a unit's map is drawn over."
   tags "external"

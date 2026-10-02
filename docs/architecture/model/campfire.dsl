@@ -63,6 +63,12 @@ campfire = softwareSystem "Campfire" {
       tags "module"
     }
 
+    materialModule = container "Material" {
+      description "The contingent's material, browsed and searched from Google Drive."
+      technology "TypeScript, React 19, TanStack Query"
+      tags "module"
+    }
+
     participantsModule = container "Participants" {
       description "The contingent's list of participants and the screens that show it."
       technology "TypeScript, React 19, TanStack Query"
@@ -160,20 +166,24 @@ campfire = softwareSystem "Campfire" {
   webApp -> authenticationModule "Signs the member in through"
   webApp -> homeModule "Shows the start screen through"
   webApp -> journeyModule "Shows the countdown through"
+  webApp -> materialModule "Shows the contingent's material through"
   webApp -> participantsModule "Shows the list of participants through"
   webApp -> uiLibrary "Draws its chrome with"
   webApp -> hostLibrary "Reports the screen and the session through"
   authenticationModule -> uiLibrary "Builds its screens from"
   homeModule -> uiLibrary "Builds its screens from"
   journeyModule -> uiLibrary "Builds its widget from"
+  materialModule -> uiLibrary "Builds its screens from"
   participantsModule -> uiLibrary "Builds its screens from"
   webApp -> utilsLibrary "Mounts the session through"
   authenticationModule -> utilsLibrary "Calls the service with"
   homeModule -> utilsLibrary "Reads the session's roles from"
   journeyModule -> utilsLibrary "Reads the signed-in person from"
+  materialModule -> utilsLibrary "Reads Drive with"
   participantsModule -> utilsLibrary "Calls the service with"
   authenticationModule -> authService "Signs in and reads the session over /api/auth"
   authenticationModule -> participantsService "Reads the member's unit and travel over /api/project"
   participantsModule -> participantsService "Reads the list of participants over /api/project"
   participantsModule -> openFreeMap "Draws unit maps over tiles from"
+  materialModule -> googleDrive "Lists, previews, and downloads the material from"
 }

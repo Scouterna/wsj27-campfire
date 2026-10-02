@@ -37,8 +37,9 @@ export class HttpError extends Error {
  * because the address cannot drift, and keeps the original as `cause`. The messages are
  * for a console or a log; a screen words its own for the person.
  *
- * @param url Where to ask. Origin-relative, so the same call works against the mock, the
- * local back-end, and the deployed one.
+ * @param url Where to ask. Origin-relative for the back-end, so the same call works
+ * against the mock, the local back-end, and the deployed one; absolute only for a public
+ * service that is the same in every environment.
  * @returns The body, parsed as JSON and typed as the caller asked.
  */
 export async function fetch<T>(url: string): Promise<T> {

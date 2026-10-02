@@ -20,7 +20,7 @@ const root = fileURLToPath(new URL("../..", import.meta.url))
  * .github/workflows/test_web.yml. A module added to one and not the other either runs
  * nowhere or fails with "no project named X".
  */
-const modules = ["authentication", "home", "journey", "participants"] as const
+const modules = ["authentication", "home", "journey", "material", "participants"] as const
 
 /**
  * Where the local environment answers: Caddy on the one origin, with the mock behind
