@@ -4,7 +4,7 @@ The repositories behind this skill, when they were last checked, and how to upda
 
 ## Last checked
 
-25 September 2026, for version 1.0.
+1 October 2026, for version 1.1.
 
 ## Sources
 

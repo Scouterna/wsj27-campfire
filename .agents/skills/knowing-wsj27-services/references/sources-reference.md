@@ -4,7 +4,7 @@ The repositories behind this skill, the state of things when it was last checked
 
 ## Last checked
 
-25 September 2026, for version 1.0.
+1 October 2026, for version 1.1 – `wsj27-project-api` at `dev` 733185d and `main` 0c7d061.
 
 ## Sources
 
@@ -25,6 +25,8 @@ Describe a private repository's mechanism only – never its code, names, or int
 These describe a moment, and are the first facts to re-check:
 
 - **The refresh interval** was hourly while registration data still churned, meant to fall to daily.
+- **`dev` and `main` differ.** `dev` names the form's personal grant `wsj27:legacy-access:`, adds hand-assigned `wsj27:access:` roles and the patrol and role routes, and withholds the management team's own answers from everyone. `main` still names the grant `wsj27:access:`.
+- **Cases enforce nothing beyond sign-in.** Type, secrecy level, and extra access are stored on both branches, and no rule reads them yet.
 
 ## Updating the skill
 
