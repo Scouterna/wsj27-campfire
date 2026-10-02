@@ -1,0 +1,130 @@
+/* The tile a piece of material is shown as, and the grid the tiles sit in. */
+
+@layer component {
+  /* As many columns as fit, each wide enough for a symbol to be recognizable – two on a
+     phone, because one tile per row turns a folder into a very long page. */
+  .tile-grid {
+    display: grid;
+    gap: var(--spacing-group);
+    grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+    margin: 0;
+  }
+
+  .tile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0;
+    min-width: 0;
+  }
+
+  /* A square whatever the picture's proportions, so a row of tiles lines up where a
+     logotype is wide and an icon is not. */
+  .tile-frame {
+    align-items: center;
+    aspect-ratio: 1;
+    border: 1px solid var(--color-divider);
+    border-radius: var(--border-radius-default);
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    font: inherit;
+    justify-content: center;
+    overflow: hidden;
+    padding: 0.6rem;
+    width: 100%;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .tile-frame {
+      transition: transform 0.15s ease;
+    }
+
+    .tile-frame:hover {
+      transform: scale(1.03);
+    }
+  }
+
+  /* Contained rather than covering, because a symbol cropped to fill a square is no
+     longer the symbol. */
+  .tile-image {
+    height: 100%;
+    object-fit: contain;
+    width: 100%;
+  }
+
+  .tile-placeholder {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-strong);
+  }
+
+  /* The colored pictures sit on the theme's palest wash, which reads as paper without
+     being the white of the card under it. */
+  .tile-light .tile-frame {
+    background: var(--color-theme-wash);
+  }
+
+  /* The white ones sit on the theme's ink, the kind of background they were drawn for. */
+  .tile-dark .tile-frame {
+    background: var(--color-theme-ink);
+    border-color: var(--color-theme-ink);
+  }
+
+  .tile-dark .tile-placeholder {
+    color: var(--color-theme-on-ink);
+  }
+
+  .tile-caption {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  .tile-label {
+    font-size: var(--font-size-footnote);
+    /* Many names differ only at the end, so they wrap rather than being cut off before
+       the part that tells them apart. Balanced, so a short last word such as a version
+       number never sits alone on a line of its own. */
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+
+  .tile-meta {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-caption);
+    overflow-wrap: anywhere;
+  }
+
+  .tile-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.1rem;
+  }
+
+  .tile-download {
+    background: var(--color-theme-wash);
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-strong);
+    padding: 0.15rem 0.55rem;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .tile-download:hover {
+    background: var(--color-theme-ink);
+    color: var(--color-theme-on-ink);
+  }
+
+  /* The way out to Drive's own viewer, quieter than the downloads beside it. */
+  .tile-viewer {
+    color: var(--color-theme-ink);
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-strong);
+    margin-left: auto;
+  }
+}

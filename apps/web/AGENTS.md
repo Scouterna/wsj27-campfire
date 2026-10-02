@@ -48,7 +48,7 @@ Every module and library is a `workspace:*` dependency, resolved to raw TypeScri
 ## Data and the cache
 
 - **Every service read goes through the one `QueryClient`** in `src/query.ts`. The utils `fetch` is the transport inside a query function, never a path around the cache ([Data layer](../../docs/guidebook/architecture/layers/data.md)).
-- **Fetch origin-relative paths only.** The application never knows its environment ([ADR 012](../../docs/decisions/012-run-campfire-in-three-environments-on-one-origin.md)).
+- **Fetch origin-relative paths only.** The application never knows its environment ([ADR 012](../../docs/decisions/012-run-campfire-in-three-environments-on-one-origin.md)). The material module's reads from Google Drive are the one exception, because Drive is the same in every environment ([ADR 038](../../docs/decisions/038-read-the-contingents-material-straight-from-google-drive.md)).
 - **The query defaults are set for a field in Poland** – a long garbage-collection time, offline first, a refetch on every mount, and none on focus or reconnect. A hook that reads a query hands its screen the cached data rather than an error when a fresh read fails. Override a default per query only with a reason worth writing down.
 - **Persistence is per query, into IndexedDB.** When a cached payload's shape changes, bump the store's buster, because a stale shape read as fresh is worse than a cold cache.
 - **`withSession` runs every network read.** A 401 asks who is signed in, and the same person still signed in gets the read once more, so no screen renders a refusal.

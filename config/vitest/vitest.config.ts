@@ -64,6 +64,14 @@ export default defineConfig({
       },
       {
         test: {
+          name: "material",
+          root: "modules/material",
+          environment: "node",
+          include: ["src/**/*.test.ts"],
+        },
+      },
+      {
+        test: {
           name: "participants",
           root: "modules/participants",
           environment: "node",

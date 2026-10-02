@@ -36,6 +36,12 @@ The list can grow to the contingent's size, so it is virtualized ([ADR 036](/dec
 
 The units' names and marks are not in the module. They are runtime data the application loads at the gate, and every surface shows the unit's number until they arrive.
 
+## Material
+
+The contingent's material – the units' symbols, the logotypes, the templates, and the presentations – read from the shared Google Drive folders the contingent management keeps, so a file added there shows on the next visit with no release ([ADR 038](/decisions/038-read-the-contingents-material-straight-from-google-drive)). The whole tree is read at once and held in the cache, so the folders browse and the search runs on the device.
+
+A leader's own unit's symbols come first, gathered from the folders by the unit's name and grouped by shape and tone, each with every format it exists in. Which animal a unit wears is the surprise, so that card waits for the units' reveal; the symbols stay in the folders either way. A picture opens a larger preview in place, which offers Drive's own viewer only for a document whose picture shows its first page. A download comes from Drive, so the module never holds a file's bytes.
+
 ## The libraries
 
 A library is code that would still make sense in a product that is not Campfire. It depends on no module and no other library.

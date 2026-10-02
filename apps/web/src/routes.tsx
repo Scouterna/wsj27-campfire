@@ -11,6 +11,7 @@ import {
 import { HomeScreen } from "@scouterna/wsj27-campfire-home"
 import { host } from "@scouterna/wsj27-campfire-host"
 import { journeyWidgets } from "@scouterna/wsj27-campfire-journey"
+import { materialRoutes, materialSectionLabel } from "@scouterna/wsj27-campfire-material"
 import {
   participantsRoutes,
   participantsSectionLabel,
@@ -24,6 +25,7 @@ import {
   cmtTheme,
   expectPop,
   Fab,
+  FolderIcon,
   HomeIcon,
   matchScreen,
   mountRoutes,
@@ -114,6 +116,7 @@ const widgets = { ...journeyWidgets, ...participantsWidgets } satisfies Widgets
 const screens = guardScreens({
   "/": { Component: HomeScreen, tab: "home" },
   ...authenticationRoutes,
+  ...materialRoutes,
   ...participantsRoutes,
 } satisfies Routes)
 
@@ -146,8 +149,8 @@ interface AppSection {
 }
 
 /**
- * The sections, in menu order: home for everyone, and the participants section for a
- * leader and for any management function – for nobody else.
+ * The sections, in menu order: home for everyone, and the participants and material
+ * sections for a leader and for any management function – for nobody else.
  */
 const sections: readonly AppSection[] = [
   { icon: <HomeIcon />, id: "home", isGranted: () => true, label: () => "Hem", path: "/" },
@@ -161,6 +164,15 @@ const sections: readonly AppSection[] = [
       hasAnyRole(roles, "leader", "cmt") && isRevealed(unitsReveal.id),
     label: participantsSectionLabel,
     path: "/participants",
+  },
+  {
+    icon: <FolderIcon />,
+    id: "material",
+    // No reveal, because the material is not part of the surprise – only the card naming
+    // a reader's own unit waits for it.
+    isGranted: (roles) => hasAnyRole(roles, "leader", "cmt"),
+    label: materialSectionLabel,
+    path: "/material",
   },
 ]
 

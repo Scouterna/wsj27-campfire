@@ -41,6 +41,7 @@ jobs:
           - authentication
           - home
           - journey
+          - material
           - participants
     steps:
       # A module's walk-through can break from the module itself, from the

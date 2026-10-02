@@ -1,14 +1,14 @@
 # Data layer
 
-The data layer is where the outside world is dealt with – the back-end services, the shapes they send, and the cache that keeps their answers – and turned into the types [the domain](./domain) declares.
+The data layer is where the outside world is dealt with – the back-end services, Google Drive, the shapes they send, and the cache that keeps their answers – and turned into the types [the domain](./domain) declares.
 
-Only a module that owns a capability has one. Authentication asks the auth service who is signed in, and reads the signed-in person's own registration – their unit and how they travel – from the participants service. Participants reads the list of participants. No other module talks to a service.
+Only a module that owns a capability has one. Authentication asks the auth service who is signed in, and reads the signed-in person's own registration – their unit and how they travel – from the participants service. Participants reads the list of participants. Material reads the contingent's material from Google Drive. No other module reads from anywhere.
 
 ## Query factories
 
 Every data read is a factory returning TanStack Query options – a stable key, and the function that would make the request ([ADR 017](/decisions/017-route-and-load-data-with-tanstack-router-and-query)). It describes the request rather than making it, so a screen that reads, a prefetch, and a test that substitutes share one definition, and however many callers there are it is one request and one cache entry. The one read outside this pattern is the question of who is signed in, which the session asks itself ([ADR 033](/decisions/033-recover-an-ended-session-at-the-query-client-and-the-gate)).
 
-The factories live in `data/` and are the only thing in a module that knows a URL. A screen calls a hook, the hook reads the options, and the options know the address – so the factory knows the address and the hook, which lives in `ui/`, knows React. Every URL is origin-relative, and the mock and the real services answer the same paths, so the application never learns which environment it runs in ([ADR 012](/decisions/012-run-campfire-in-three-environments-on-one-origin)).
+The factories live in `data/` and are the only thing in a module that knows a URL. A screen calls a hook, the hook reads the options, and the options know the address – so the factory knows the address and the hook, which lives in `ui/`, knows React. Every URL to the back-end is origin-relative, and the mock and the real services answer the same paths, so the application never learns which environment it runs in ([ADR 012](/decisions/012-run-campfire-in-three-environments-on-one-origin)). The material is the one read that leaves the origin, because it is Google Drive's, the same in every environment ([ADR 038](/decisions/038-read-the-contingents-material-straight-from-google-drive)).
 
 Every read goes through the application's one query client, so one cache holds every answer. The `fetch` wrapper in `libraries/utils` is only the transport inside a query function; a read that called it directly would be neither cached, deduplicated, nor owned. The wrapper keeps three outcomes apart – the request never arrived, the service refused, or the answer was not JSON – and a refusal carries its status, because the status means something. A person's full record refused with 403 means the caller may see them but not in full, so the read steps down to the basic level; a 404 means there is nobody to show.
 
