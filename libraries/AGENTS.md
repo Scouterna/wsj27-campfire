@@ -63,7 +63,7 @@ libraries/ui/
 - **A `style` prop carries only a value the runtime alone knows**, such as a virtualized row's offset. Everything a rule could say goes in the cascade layers `apps/web/index.html` declares.
 - **Font sizes come from the `--font-size-*` tokens**, in rem against the 17-point base, never a bare `px`, so Dynamic Type carries the reader's text size. Weights are tokens too.
 - **One display face.** Bravely Script is drawn in one weight, so asking for bold makes the browser synthesize a smear. Body text is `system-ui` on purpose.
-- **Storybook's files sit in `src/storybook/`** and never ship. The theme and router decorators are registered once in `config/storybook/preview.tsx`; `ScreenDecorator` is on the public surface because the modules' screen stories apply it.
+- **Storybook's files sit in `src/storybook/`** and never ship. The theme and router decorators are registered once in `config/storybook/preview.tsx`; `ScreenDecorator` and `queryDecorator` are on the public surface because the modules' stories apply them – the second builds each module's decorator from the queries it seeds, which is why `ui` carries React Query as a dev dependency.
 - **Declare a new asset type in `src/assets.d.ts`** rather than relying on another package's. The repository type-checks as one program, so a missing declaration stays hidden until that package moves.
 - **Preserve the registries' generics.** `RouteRegistry` keeps a literal type per path, which is what checks every link in the product; widening one to a catch-all turns all routing into `any`. A registry is augmented by the module that owns the address, never here.
 

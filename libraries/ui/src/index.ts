@@ -62,6 +62,8 @@ export { TabBar } from "./components/tabbar/TabBar"
 export type { TabBarItem, TabBarProps } from "./components/tabbar/TabBar"
 export { UnitAvatar, cmtAvatarNumber, istAvatarNumber } from "./components/unitavatar/UnitAvatar"
 export type { UnitAvatarProps } from "./components/unitavatar/UnitAvatar"
+export { VirtualList } from "./components/virtuallist/VirtualList"
+export type { VirtualListProps } from "./components/virtuallist/VirtualList"
 export type { IconProps } from "./foundations/icons/IconProps"
 export { BackIcon } from "./foundations/icons/set/BackIcon"
 export { ChatIcon } from "./foundations/icons/set/ChatIcon"
@@ -108,6 +110,8 @@ export type {
   Routes,
   ScreenSpec,
 } from "./routing/routes"
+export { queryDecorator } from "./storybook/query-decorator"
+export type { NetworkParameters, QueryDecoratorOptions } from "./storybook/query-decorator"
 export { ScreenDecorator } from "./storybook/ScreenDecorator"
 export { Widget, WidgetsProvider } from "./widgets/Widget"
 export type { WidgetProps, WidgetsProviderProps } from "./widgets/Widget"

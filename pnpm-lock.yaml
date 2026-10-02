@@ -206,6 +206,9 @@ importers:
       '@tanstack/react-router':
         specifier: 1.170.32
         version: 1.170.32(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@tanstack/react-virtual':
+        specifier: 3.14.10
+        version: 3.14.10(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react:
         specifier: 19.2.8
         version: 19.2.8
@@ -213,6 +216,9 @@ importers:
         specifier: 19.2.8
         version: 19.2.8(react@19.2.8)
     devDependencies:
+      '@tanstack/react-query':
+        specifier: 5.102.8
+        version: 5.102.8(react@19.2.8)
       '@types/react':
         specifier: 19.2.18
         version: 19.2.18
@@ -295,9 +301,6 @@ importers:
       '@tanstack/react-router':
         specifier: 1.170.32
         version: 1.170.32(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@tanstack/react-virtual':
-        specifier: 3.14.10
-        version: 3.14.10(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       maplibre-gl:
         specifier: 6.10.0
         version: 6.10.0
