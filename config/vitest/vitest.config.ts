@@ -120,10 +120,10 @@ export default defineConfig({
       // a change that stops covering something fails, and a change that covers more is
       // followed by raising the bar to just under the new figure.
       thresholds: {
-        statements: 97,
-        branches: 91,
+        statements: 98,
+        branches: 93,
         functions: 99,
-        lines: 97,
+        lines: 98,
       },
     },
   },
