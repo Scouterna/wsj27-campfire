@@ -1,6 +1,4 @@
-import type { Decorator } from "@storybook/react-vite"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { useEffect, useState, type ReactElement } from "react"
+import { queryDecorator, type NetworkParameters } from "@scouterna/wsj27-campfire-ui"
 
 import { fetchParticipantQuery } from "../../data/fetch-participant"
 import { fetchParticipantsQuery } from "../../data/fetch-participants"
@@ -17,7 +15,7 @@ const storyViewer: Viewer = { memberNo: "1", readsEveryone: true, readsHealth: t
 /**
  * What a story says about the participants service behind it, under `parameters.api`.
  */
-export interface ApiParameters {
+export interface ApiParameters extends NetworkParameters {
   /**
    * What one person's record answers with, each seeded under its own member number.
    */
@@ -27,114 +25,27 @@ export interface ApiParameters {
    */
   readonly list?: ParticipantsList
   /**
-   * The state of the network instead of an answer: a request that never returns, or one
-   * the service refuses. Whatever is seeded above is still served from the cache.
-   */
-  readonly state?: "error" | "pending"
-  /**
    * Who is reading. The widest viewer when unsaid.
    */
   readonly viewer?: Viewer
 }
 
 /**
- * A cache with the story's answers already in it. Nothing is stale and nothing is
- * retried, so what the story seeds is what the screen reads, and a refusal shows the
- * first time rather than after the query client's retries.
- * @param api What the story said about the service.
- * @returns The client to put under the story.
+ * Puts a cache seeded with the story's list and records under a story, read as the
+ * story's viewer, and the participants service in the state it asked for. Say what the
+ * list holds, or the story sits pending.
  */
-function makeClient(api: ApiParameters): QueryClient {
-  const viewer = api.viewer ?? storyViewer
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false, staleTime: Infinity } },
-  })
-
-  if (api.list !== undefined) {
-    client.setQueryData(fetchParticipantsQuery(viewer).queryKey, api.list)
-  }
-  const details = api.details ?? []
-  for (const detail of details) {
-    client.setQueryData(fetchParticipantQuery(detail.memberNo, viewer).queryKey, detail)
-  }
-
-  return client
-}
-
-const realFetch = fetch
-
-/**
- * The address a request was made to, whichever shape it arrived in.
- * @param input What the caller passed as the request.
- * @returns The address, as a string.
- */
-function addressOf(input: RequestInfo | URL): string {
-  if (typeof input === "string") {
-    return input
-  }
-  return input instanceof URL ? input.href : input.url
-}
-
-/**
- * The network as the story asked for it. Nothing off the catalog's own origin is reached
- * – the map's tile service included – so a story draws what it would draw offline. Of
- * the catalog's own addresses, only the participants service's are answered here, and
- * only when the story asked for a state; anything else goes to the real network, so the
- * stub cannot take a font or an image down with it.
- * @param state The state the story asked for, or undefined to serve the seeded cache.
- * @returns The stub to install.
- */
-function stubFetch(state: ApiParameters["state"]): typeof fetch {
-  return async (input, init) => {
-    const url = addressOf(input)
-    if (new URL(url, location.href).origin !== location.origin) {
-      // What the browser answers when a request reaches nothing.
-      throw new TypeError("Failed to fetch")
+export const ApiDecorator = queryDecorator<ApiParameters>({
+  seed: (client, api) => {
+    const viewer = api.viewer ?? storyViewer
+    if (api.list !== undefined) {
+      client.setQueryData(fetchParticipantsQuery(viewer).queryKey, api.list)
     }
-    if (state === undefined || !url.includes("/api/project/participants")) {
-      return realFetch(input, init)
+    const details = api.details ?? []
+    for (const detail of details) {
+      client.setQueryData(fetchParticipantQuery(detail.memberNo, viewer).queryKey, detail)
     }
-    if (state === "pending") {
-      return new Promise<Response>(() => {
-        // Never settles – the screen stays in its pending state for as long as it is
-        // looked at.
-      })
-    }
-    return new Response("", { status: 503, statusText: "Service Unavailable" })
-  }
-}
-
-/**
- * Puts a seeded query cache under a story that reads the list of participants, and a
- * network in the state the story asked for, with nothing beyond the catalog's origin.
- *
- * A story without `parameters.api` gets an empty cache and the real network – which in
- * the catalog answers nothing, so the story would sit pending forever. Say what the list
- * holds instead.
- * @param Story The story being rendered.
- * @param context The story's own parameters.
- * @returns The story, with a viewer and a cache around it.
- */
-export const ApiDecorator: Decorator = (Story, context): ReactElement => {
-  const api = (context.parameters["api"] ?? {}) as ApiParameters
-  const [client] = useState(() => makeClient(api))
-
-  // Installed before the first query can fire, and put back when the story leaves.
-  // eslint-disable-next-line unicorn/no-global-object-property-assignment -- the story's network is a test double, installed and removed again below
-  globalThis.fetch = stubFetch(api.state)
-  useEffect(
-    () => () => {
-      // eslint-disable-next-line unicorn/no-global-object-property-assignment -- the real network, put back
-      globalThis.fetch = realFetch
-    },
-    [],
-  )
-
-  return (
-    <ViewerProvider viewer={api.viewer ?? storyViewer}>
-      <QueryClientProvider client={client}>
-        <Story />
-      </QueryClientProvider>
-    </ViewerProvider>
-  )
-}
+  },
+  service: "/api/project/participants",
+  wrap: (story, api) => <ViewerProvider viewer={api.viewer ?? storyViewer}>{story}</ViewerProvider>,
+})
