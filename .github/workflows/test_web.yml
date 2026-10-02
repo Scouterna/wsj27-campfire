@@ -39,6 +39,7 @@ jobs:
         # the other either runs nowhere or fails with "no project named X".
         module:
           - authentication
+          - cases
           - home
           - journey
           - participants

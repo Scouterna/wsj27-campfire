@@ -28,3 +28,15 @@ export const Default: Story = {
 export const Disabled: Story = {
   args: { disabled: true, label: "Signing in…" },
 }
+
+export const Secondary: Story = {
+  args: { label: "Avsluta", variant: "secondary" },
+}
+
+export const SecondaryDisabled: Story = {
+  args: { disabled: true, label: "Avsluta", variant: "secondary" },
+}
+
+export const Plain: Story = {
+  args: { label: "Avbryt", variant: "plain" },
+}

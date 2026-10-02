@@ -1,0 +1,17 @@
+/* The section root: the search, the filters, and the cases as rows on a card per
+   section – the open ones, then the closed ones. */
+
+@layer screen {
+  /* What the screen has to say while the list is on its way or could not be read.
+     Quiet, because it stands in for the list rather than competing with it. */
+  .cases-status {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+  }
+
+  .cases-empty {
+    color: var(--color-ink-secondary);
+    margin: 0;
+  }
+}

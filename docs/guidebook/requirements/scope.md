@@ -6,15 +6,16 @@ Campfire is for the people running Scouterna's contingent to WSJ27 – the leade
 
 The first feature is that **leaders see the participants in their unit**. A leader signs in with ScoutID and gets their own unit's people – who they are, how to reach them, and what a leader needs to know about each of them, from diet to health. It comes first because everything after it reads from it: a status report is about a unit, and an issue is usually about a person.
 
-Version 1 is made of three areas:
+Version 1 is made of these areas:
 
 | Area         | What a person can do                                                                                                                                                                  |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Sign-in      | Sign in with ScoutID, see their own profile, and sign out                                                                                                                             |
 | Home         | Read the contingent's messages meant for their role, count down to the start of their own journey to Gdansk, and – for a leader – see their unit at a glance                          |
 | Participants | Search the people they may read, open one person in full – contact details, diet, health, and readiness – and browse by unit, the International Service Team, and the management team |
+| Cases        | Keep the health team's follow-ups about a person – open a case, write notes on it, close and reopen it, and find the cases about one person from their page                           |
 
-The participants section is offered only to leaders and the management team. What each may read is decided by the participants service from their WSJ27 roles: a leader reads their own unit, the management team reads the whole contingent, and only a health grant opens the health answers beyond a leader's own unit. A person outside the reader's scope answers exactly like a person who does not exist.
+The participants section is offered only to leaders and the management team. What each may read is decided by the participants service from their WSJ27 roles: a leader reads their own unit, the management team reads the whole contingent, and only a health grant opens the health answers beyond a leader's own unit. A person outside the reader's scope answers exactly like a person who does not exist. The cases section is offered only to the health team – the Support function's health role, or a personal health grant – and a case can be about anyone in the contingent.
 
 The home screen's content and the participants section wait behind a reveal – a set moment when the units are announced – and until then the home screen shows only a countdown to it. The areas are built from feature modules that the web application composes, and none of them imports another ([Modules](../architecture/modules)).
 
@@ -23,7 +24,7 @@ The home screen's content and the participants section wait behind a reveal – 
 Two directions follow version 1. Neither is specified: each gets its requirements from an issue when it is picked up ([Process](../process/)).
 
 - **Status reporting.** During camp the management team needs to know how each unit is doing without walking the camp or chasing every leader in a chat. A leader answers for their unit from their phone, the answers land in one place, and the picture is current instead of reconstructed at the evening meeting.
-- **Lightweight issue tracking.** Something comes up – a scout with a fever, a bag on the wrong bus, a leader who needs relief – and it needs an owner and a state, not a chat thread that scrolls away. The health team is the clearest user.
+- **Cases beyond the health team.** A bag on the wrong bus or a leader who needs relief is a case too, with an owner and a state rather than a chat thread that scrolls away – so cases grow to a case about a unit, to leaders and the rest of the management team, to an assignee, and to attachments.
 
 What Campfire grows into beyond those is decided the same way, one issue at a time.
 

@@ -72,6 +72,6 @@ libraries/ui/
 The bar for adding something is that a second package already wants it. A helper with one caller belongs beside that caller.
 
 - `stringOrFallback` reads a string from untyped input, so a missing key and a wrong type reach the caller as the same harmless answer.
-- The `fetch` wrapper tells apart a request that reached nothing, a refusal, and an answer that was not JSON, names the URL, keeps `cause`, and carries a refusal's status. It is the transport inside a query function, never a way around the query cache ([Data layer](../docs/guidebook/architecture/layers/data.md)).
+- The `fetch` wrapper reads JSON, or sends JSON with a method and reads the answer. It tells apart a request that reached nothing, a refusal, and an answer that was not JSON, names the URL, keeps `cause`, and carries a refusal's status. It is the transport inside a query function, never a way around the query cache ([Data layer](../docs/guidebook/architecture/layers/data.md)).
 - The roles and the signed-in `User` live here with their providers. Translating a provider's spellings into them is the authentication module's job, and a fact a second module needs is a new field on `User`, not a new provider.
 - React is here only for those providers. A helper that needs React or the DOM is not a utility.
