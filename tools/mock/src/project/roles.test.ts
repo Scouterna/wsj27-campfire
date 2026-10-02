@@ -88,7 +88,7 @@ describe("minting a participant's roles", () => {
 
     expect(rolesForParticipant(member, roster)).toEqual([
       "wsj27:cmt",
-      "wsj27:access:Hälsa plus intern information",
+      "wsj27:legacy-access:Hälsa plus intern information",
     ])
     expect(rolesForParticipant({ ...member, accessLevel: "ingen" }, roster)).toEqual(["wsj27:cmt"])
     expect(rolesForParticipant({ ...member, memberType: "Deltagare" }, roster)).toEqual([])
