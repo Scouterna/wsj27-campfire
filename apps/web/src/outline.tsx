@@ -14,8 +14,9 @@ export interface OutlineProps {
   readonly title: string
 }
 
-// A page's sections are the headings it renders into the content column.
-const sections = "main h2"
+// A page's sections are the headings it renders into the content column. A dialog is
+// over the page rather than part of it, so its title is no section.
+const sections = "main h2:not(dialog h2)"
 
 /**
  * What the desktop outline is about on this page, read from the page as rendered, so a
