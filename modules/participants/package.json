@@ -11,7 +11,6 @@
     "@scouterna/wsj27-campfire-utils": "workspace:*",
     "@tanstack/react-query": "5.102.8",
     "@tanstack/react-router": "1.170.32",
-    "@tanstack/react-virtual": "3.14.10",
     "maplibre-gl": "6.10.0",
     "react": "19.2.8"
   },
