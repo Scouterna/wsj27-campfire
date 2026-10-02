@@ -5,7 +5,9 @@ import type { IconProps } from "./IconProps"
 import { BackIcon } from "./set/BackIcon"
 import { ChatIcon } from "./set/ChatIcon"
 import { CheckIcon } from "./set/CheckIcon"
+import { CloseIcon } from "./set/CloseIcon"
 import { CopyIcon } from "./set/CopyIcon"
+import { FolderIcon } from "./set/FolderIcon"
 import { GenderFemaleIcon } from "./set/GenderFemaleIcon"
 import { GenderMaleIcon } from "./set/GenderMaleIcon"
 import { GenderOtherIcon } from "./set/GenderOtherIcon"
@@ -27,7 +29,9 @@ const icons: readonly (readonly [string, (props: IconProps) => ReactElement])[] 
   ["Back", BackIcon],
   ["Chat", ChatIcon],
   ["Check", CheckIcon],
+  ["Close", CloseIcon],
   ["Copy", CopyIcon],
+  ["Folder", FolderIcon],
   ["Gender female", GenderFemaleIcon],
   ["Gender male", GenderMaleIcon],
   ["Gender other", GenderOtherIcon],

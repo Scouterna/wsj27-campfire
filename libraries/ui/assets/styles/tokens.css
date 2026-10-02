@@ -26,6 +26,9 @@
        the overflow trigger – always over a backdrop blur. */
     --color-glass: rgb(255 255 255 / 62%);
 
+    /* The dimming over the page behind a modal, the ink at a little over half. */
+    --color-scrim: rgb(26 26 26 / 55%);
+
     /* The unit colors – the exact outer-ring values from the badge marks, which are the
        authoritative artwork for the color identities. */
     --color-theme-blue: #2a778a;
