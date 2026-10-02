@@ -195,7 +195,7 @@
    forward slides in like a native push, back slides out like a pop, and fade (siblings,
    like a tab switch) keeps the browser's default cross-fade.
 
-   Only `main`'s column slides. The chrome around it carries its own
+   Only the page slides. The chrome around it carries its own
    view-transition-name, which snapshots each piece separately, so an unchanged piece sits
    still through the navigation, and the top bar's title cross-fades in place, the way a
    native bar would.
@@ -204,8 +204,25 @@
    outside the layers. */
 
 @layer component {
-  .page {
+  /* A named element is captured whole, while the root's capture is clipped to the
+     viewport. At phone width the window scrolls rather than the column, so the column is
+     as tall as its content – a long list is hundreds of thousands of pixels, gigabytes as
+     a capture, which is enough for Safari on a phone to end the page. There the root wears
+     the page's name instead, and only from the breakpoint, where the column scrolls
+     itself and is one viewport tall, does the column. Only under the browser chrome,
+     because the shells' pages have no column and keep the root's own cross-fade. */
+  :root:has(.shell) {
     view-transition-name: page;
+  }
+
+  @media (min-width: 768px) {
+    :root:has(.shell) {
+      view-transition-name: root;
+    }
+
+    .page {
+      view-transition-name: page;
+    }
   }
 
   .topbar {
