@@ -11,7 +11,7 @@ In the local environment, Caddy serves everything on `http://localhost:8000`, se
 | Under               | Stands in for                                                                      |
 | ------------------- | ---------------------------------------------------------------------------------- |
 | `/api/auth`         | The auth service – sign-in, the session cookies, and a real signed access token    |
-| `/api/project`      | The participants service – the list of participants, scoped by the caller's roles  |
+| `/api/project`      | The participants service, scoped by the caller's roles, and the cases service      |
 | `/__mock__/scoutid` | ScoutID, with a persona picker where the password form would be                    |
 | `/__mock__`         | The mock's own controls – forgetting every session, and reporting who is signed in |
 
@@ -21,7 +21,7 @@ ScoutID is the one part that is not a copy, because it is not ours to run. The a
 
 Access follows the real rules. A unit leader reads their own unit and nobody else's. The contingent management team reads everyone, and sees health answers only through a health role or a personal grant – a request without one is refused, never quietly answered with less. Someone with no access gets the same 404 as a person who does not exist, so a refusal never reveals who is on the list.
 
-Nothing reaches disk, and the signing key is made at start, so restarting the mock signs everyone out. The access token lasts the real service's five minutes rather than something longer and kinder, so the refresh path runs during an ordinary afternoon of local work rather than only in production.
+Nothing reaches disk, and the signing key is made at start, so restarting the mock signs everyone out and forgets every case written since. The access token lasts the real service's five minutes rather than something longer and kinder, so the refresh path runs during an ordinary afternoon of local work rather than only in production.
 
 ## The personas
 
