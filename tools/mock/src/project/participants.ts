@@ -52,7 +52,7 @@ const fullAccess = 2
 
 // Either one unlocks health answers: the Support function's health people, and the per-person
 // grant from the Scoutnet form.
-const healthRoles = ["wsj27:access:Hälsa plus intern information", "wsj27:cmt:support:halsa"]
+const healthRoles = ["wsj27:legacy-access:Hälsa plus intern information", "wsj27:cmt:support:halsa"]
 
 /**
  * How much of a troop's participants a caller may see. A leader sees their own troop in full;
