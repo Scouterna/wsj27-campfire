@@ -9,12 +9,12 @@ import { stroke } from "../stroke"
  * @returns The icon.
  */
 export function MoreIcon(props: IconProps): ReactElement {
+  // Filled rather than stroked, because a stroked dot is only as wide as the line, which
+  // is too small to read as a dot.
   return stroke(
-    [
-      <path key="left" d="M5.2 12h.01" />,
-      <path key="middle" d="M12 12h.01" />,
-      <path key="right" d="M18.8 12h.01" />,
-    ],
+    [5.2, 12, 18.8].map((cx) => (
+      <circle cx={cx} cy={12} fill="currentColor" key={cx} r={1.8} stroke="none" />
+    )),
     props,
   )
 }
