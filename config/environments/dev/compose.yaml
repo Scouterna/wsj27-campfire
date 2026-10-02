@@ -120,6 +120,7 @@ services:
       - web_authentication_modules:/campfire/modules/authentication/node_modules
       - web_home_modules:/campfire/modules/home/node_modules
       - web_journey_modules:/campfire/modules/journey/node_modules
+      - web_material_modules:/campfire/modules/material/node_modules
       - web_participants_modules:/campfire/modules/participants/node_modules
       - web_mock_modules:/campfire/tools/mock/node_modules
 
@@ -133,5 +134,6 @@ volumes:
   web_authentication_modules:
   web_home_modules:
   web_journey_modules:
+  web_material_modules:
   web_participants_modules:
   web_mock_modules:

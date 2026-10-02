@@ -1,0 +1,9 @@
+/* The material start screen. */
+
+@layer screen {
+  /* The same air above the cards as a card has under it, so the search belongs to the
+     page rather than to the first card. */
+  .material-search {
+    margin-bottom: var(--spacing-section);
+  }
+}
