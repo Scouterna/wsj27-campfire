@@ -28,6 +28,12 @@ export interface PageHeadingProps {
    * chrome places the same menu in the bar instead, so this one is hidden there.
    */
   readonly menu?: readonly OverflowMenuItem[] | undefined
+  /**
+   * The page's less-used action, as a quiet button before the menu on the title row. On
+   * a phone the chrome places it in the bar beside the menu instead, so this one is
+   * hidden there.
+   */
+  readonly secondary?: PageActionsProps["secondary"]
 }
 
 /**
@@ -50,6 +56,7 @@ export function PageHeading(props: PageHeadingProps): ReactElement {
       <div className="pageheading-row">
         <h1>{props.title}</h1>
         {props.action ? <Button {...props.action} /> : null}
+        {props.secondary ? <Button {...props.secondary} variant="secondary" /> : null}
         {props.menu ? <OverflowMenu items={props.menu} /> : null}
       </div>
     </div>

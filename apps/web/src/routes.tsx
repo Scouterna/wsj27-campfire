@@ -8,6 +8,7 @@ import {
   subscribeToSession,
   watchExpiry,
 } from "@scouterna/wsj27-campfire-authentication"
+import { casesPersonMenu, casesRoutes, casesSectionLabel } from "@scouterna/wsj27-campfire-cases"
 import { HomeScreen } from "@scouterna/wsj27-campfire-home"
 import { host } from "@scouterna/wsj27-campfire-host"
 import { journeyWidgets } from "@scouterna/wsj27-campfire-journey"
@@ -16,11 +17,14 @@ import {
   participantsRoutes,
   participantsSectionLabel,
   participantsWidgets,
+  PersonActionsProvider,
   ViewerProvider,
   type Viewer,
 } from "@scouterna/wsj27-campfire-participants"
 import {
+  Button,
   Card,
+  ChatIcon,
   cmtAvatarNumber,
   cmtTheme,
   expectPop,
@@ -60,6 +64,7 @@ import {
   type Widgets,
 } from "@scouterna/wsj27-campfire-ui"
 import {
+  hasAllRoles,
   hasAnyRole,
   leaderUnit,
   RolesProvider,
@@ -70,7 +75,7 @@ import {
 } from "@scouterna/wsj27-campfire-utils"
 import { QueryClientProvider } from "@tanstack/react-query"
 import { createRouter, Link, useRouterState, type RouteComponent } from "@tanstack/react-router"
-import { useEffect, useState, type ReactElement, type ReactNode } from "react"
+import { useCallback, useEffect, useState, type ReactElement, type ReactNode } from "react"
 
 import {
   historyIndex,
@@ -113,6 +118,7 @@ const widgets = { ...journeyWidgets, ...participantsWidgets } satisfies Widgets
 const screens = guardScreens({
   "/": { Component: HomeScreen, tab: "home" },
   ...authenticationRoutes,
+  ...casesRoutes,
   ...materialRoutes,
   ...participantsRoutes,
 } satisfies Routes)
@@ -146,8 +152,9 @@ interface AppSection {
 }
 
 /**
- * The sections, in menu order: home for everyone, and the participants and material
- * sections for a leader and for any management function – for nobody else.
+ * The sections, in menu order: home for everyone, the participants and material sections
+ * for a leader and for any management function, and the cases section for the health
+ * team – for nobody else.
  */
 const sections: readonly AppSection[] = [
   { icon: <HomeIcon />, id: "home", isGranted: () => true, label: () => "Hem", path: "/" },
@@ -170,6 +177,15 @@ const sections: readonly AppSection[] = [
     isGranted: (roles) => hasAnyRole(roles, "leader", "cmt"),
     label: materialSectionLabel,
     path: "/material",
+  },
+  {
+    icon: <ChatIcon />,
+    id: "cases",
+    // Both, because a personal health grant also reads as health, and a leader holding
+    // one may not read the contingent the section names people from.
+    isGranted: (roles) => hasAllRoles(roles, "cmt", "health"),
+    label: () => casesSectionLabel,
+    path: "/cases",
   },
 ]
 
@@ -243,6 +259,34 @@ type SignedInProps = {
    * The routed screens.
    */
   readonly children: ReactNode
+}
+
+type PersonMenuProps = {
+  /**
+   * The signed-in person's roles, which decide what they may be offered.
+   */
+  readonly roles: readonly Role[]
+  /**
+   * The subtree whose person screens carry the entries.
+   */
+  readonly children: ReactNode
+}
+
+/**
+ * What other sections offer on a person's own screen, each only where the section itself
+ * is granted – the cases about them, and a new one, for the health team. Composed here,
+ * because the person screen and the cases belong to different modules.
+ * @param props The roles, and the subtree that shows the entries.
+ * @returns The subtree, with the entries in scope.
+ */
+function PersonMenu(props: PersonMenuProps): ReactElement {
+  const isRevealed = useRevealLookup()
+  const { roles } = props
+  const actions = useCallback(
+    (memberNo: string) => (isGranted("cases", roles, isRevealed) ? casesPersonMenu(memberNo) : []),
+    [isRevealed, roles],
+  )
+  return <PersonActionsProvider actions={actions}>{props.children}</PersonActionsProvider>
 }
 
 /**
@@ -396,13 +440,15 @@ function SignedInChrome(props: SignedInProps): ReactElement {
                 everything under it. A new reveal is another catalog entry, not
                 another mechanism. */}
                 <RevealProvider reveals={reveals}>
-                  <WidgetsProvider widgets={widgets}>
-                    {host.tier === "shell" ? (
-                      <ShellChrome user={props.user}>{props.children}</ShellChrome>
-                    ) : (
-                      <BrowserChrome user={props.user}>{props.children}</BrowserChrome>
-                    )}
-                  </WidgetsProvider>
+                  <PersonMenu roles={props.user.roles}>
+                    <WidgetsProvider widgets={widgets}>
+                      {host.tier === "shell" ? (
+                        <ShellChrome user={props.user}>{props.children}</ShellChrome>
+                      ) : (
+                        <BrowserChrome user={props.user}>{props.children}</BrowserChrome>
+                      )}
+                    </WidgetsProvider>
+                  </PersonMenu>
                 </RevealProvider>
               </ViewerProvider>
             </QueryClientProvider>
@@ -585,12 +631,21 @@ function BrowserChrome(props: SignedInProps): ReactElement {
             title={title}
             trailing={
               <>
+                {declared?.secondary === undefined ? null : (
+                  <Button {...declared.secondary} variant="secondary" />
+                )}
                 {declared?.menu === undefined ? null : <OverflowMenu items={declared.menu} />}
                 {pill(true)}
               </>
             }
           />
-          <PageHeading title={title} back={back} action={declared?.action} menu={declared?.menu} />
+          <PageHeading
+            title={title}
+            back={back}
+            action={declared?.action}
+            menu={declared?.menu}
+            secondary={declared?.secondary}
+          />
           <div className="content">{props.children}</div>
         </main>
       </div>

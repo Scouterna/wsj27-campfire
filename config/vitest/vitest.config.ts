@@ -48,6 +48,14 @@ export default defineConfig({
       },
       {
         test: {
+          name: "cases",
+          root: "modules/cases",
+          environment: "node",
+          include: ["src/**/*.test.ts"],
+        },
+      },
+      {
+        test: {
           name: "home",
           root: "modules/home",
           environment: "node",

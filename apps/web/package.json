@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@scouterna/wsj27-campfire-authentication": "workspace:*",
+    "@scouterna/wsj27-campfire-cases": "workspace:*",
     "@scouterna/wsj27-campfire-home": "workspace:*",
     "@scouterna/wsj27-campfire-host": "workspace:*",
     "@scouterna/wsj27-campfire-journey": "workspace:*",

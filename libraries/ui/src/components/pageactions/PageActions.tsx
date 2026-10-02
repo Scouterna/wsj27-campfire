@@ -78,6 +78,24 @@ export type PageActionsProps = {
    * desktop, in the bar on a phone.
    */
   readonly menu?: readonly OverflowMenuItem[] | undefined
+  /**
+   * The page's less-used action, drawn as a quiet button just before the overflow menu,
+   * wherever the menu is – for something a reader does now and then rather than every
+   * time.
+   */
+  readonly secondary?:
+    | ({
+        /**
+         * Whether the action is unavailable, while an earlier press is still being
+         * carried out.
+         */
+        readonly disabled?: boolean
+        /**
+         * What the action says.
+         */
+        readonly label: string
+      } & PageActionBehavior)
+    | undefined
 }
 
 /**
@@ -85,17 +103,17 @@ export type PageActionsProps = {
  * width. The declaration is withdrawn on unmount, and a page without one gets a bar
  * with no actions.
  *
- * @param props The primary action and the overflow entries to declare.
+ * @param props The primary action, the less-used one, and the overflow entries to declare.
  * @returns Always null, because the chrome draws the actions.
  */
 export function PageActions(props: PageActionsProps): null {
-  const { action, menu } = props
+  const { action, menu, secondary } = props
   useLayoutEffect(() => {
-    setPageActions({ action, menu })
+    setPageActions({ action, menu, secondary })
     return () => {
       setPageActions(undefined)
     }
-  }, [action, menu])
+  }, [action, menu, secondary])
 
   return null
 }

@@ -1,0 +1,244 @@
+/* The new-case form on one card: who the case is about – a search over the contingent,
+   or the chosen person – then the title, and the form's actions under a rule. */
+
+@layer screen {
+  .newcase-form {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .newcase-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-stack);
+  }
+
+  /* The eyebrow over each part of the form. */
+  .newcase-label {
+    color: var(--color-ink-tertiary);
+    font-size: var(--font-size-detail);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.16em;
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  /* A white field inside the white card, told apart by its outline alone – a tinted
+     fill reads as a field that cannot be written in. */
+  .newcase-input {
+    background: var(--color-sheet);
+    border: 1px solid color-mix(in srgb, var(--color-ink) 18%, transparent);
+    border-radius: var(--border-radius-control);
+    color: var(--color-ink);
+    font-family: inherit;
+    font-size: var(--font-size-body);
+    padding: 14px 16px;
+    width: 100%;
+  }
+
+  .newcase-input::placeholder,
+  .newcase-search-field::placeholder {
+    color: var(--color-ink-tertiary);
+  }
+
+  /* The ring the design system's search field wears, so every field in the product
+     answers focus alike – and on the search's whole box while its field is typed in, so
+     the box and its matches read as one shape. */
+  .newcase-input:focus-visible,
+  .newcase-results:has(.newcase-search-field:focus-visible) {
+    outline: 2px solid var(--color-theme-bright);
+    outline-offset: 2px;
+  }
+
+  /* The search and its matches in one box, so the matches read as belonging to what was
+     typed – outlined as the title field is, since at rest it is a field like any other. */
+  .newcase-results {
+    background: var(--color-sheet);
+    border: 1px solid color-mix(in srgb, var(--color-ink) 18%, transparent);
+    border-radius: var(--border-radius-control);
+    overflow: clip;
+  }
+
+  /* The field carries the vertical padding, as the title field does, so at rest the
+     two boxes stand the same height. */
+  .newcase-search {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+    padding: 0 16px;
+  }
+
+  .newcase-search-field {
+    appearance: none;
+    background: transparent;
+    border: none;
+    color: var(--color-ink);
+    flex: 1;
+    font-family: inherit;
+    font-size: var(--font-size-body);
+    min-width: 90px;
+    outline: none;
+    padding: 14px 0;
+  }
+
+  .newcase-count {
+    color: var(--color-ink-tertiary);
+    font-size: var(--font-size-entry);
+    white-space: nowrap;
+  }
+
+  .newcase-none {
+    border-top: 1px solid var(--color-divider);
+    color: var(--color-ink-secondary);
+    margin: 0;
+    padding: var(--spacing-container);
+  }
+
+  /* The contingent could not be read, so there is nobody to find – said in the box, with
+     the way to ask again at its end. */
+  .newcase-failed {
+    align-items: center;
+    border-top: 1px solid var(--color-divider);
+    color: var(--color-ink-secondary);
+    display: flex;
+    gap: var(--spacing-stack);
+    justify-content: space-between;
+    margin: 0;
+    padding: 6px 6px 6px var(--spacing-container);
+  }
+
+  .newcase-failed .button {
+    width: auto;
+  }
+
+  .newcase-options {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* A match is drawn as a list row – the mark, then the name over where they belong –
+     but is a button, because choosing a person is not a navigation. */
+  .newcase-option {
+    align-items: start;
+    background: none;
+    border: none;
+    border-top: 1px solid var(--color-divider);
+    color: inherit;
+    cursor: pointer;
+    display: grid;
+    font-family: inherit;
+    font-size: inherit;
+    gap: 14px;
+    grid-template-columns: 44px minmax(0, 1fr);
+    padding: 11px var(--spacing-container);
+    text-align: start;
+    transition: background 120ms ease;
+    width: 100%;
+  }
+
+  @media (hover: hover) {
+    .newcase-option:hover {
+      background: color-mix(in srgb, var(--color-theme-ink) 5%, transparent);
+    }
+  }
+
+  .newcase-option:active {
+    background: color-mix(in srgb, var(--color-theme-ink) 11%, transparent);
+  }
+
+  /* Inside the option, because the box clips anything drawn outside it. */
+  .newcase-option:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: -2px;
+  }
+
+  .newcase-person {
+    min-width: 0;
+  }
+
+  .newcase-person strong {
+    display: block;
+    font-weight: var(--font-weight-strong);
+  }
+
+  .newcase-person small {
+    color: var(--color-ink-secondary);
+    display: block;
+    font-size: var(--font-size-entry);
+    margin-top: 2px;
+  }
+
+  /* The chosen person, in a quiet outlined box with the way back to the search at its
+     end. */
+  .newcase-picked {
+    align-items: center;
+    border: 1px solid color-mix(in srgb, var(--color-ink) 18%, transparent);
+    border-radius: var(--border-radius-control);
+    display: grid;
+    gap: 14px;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    padding: 11px var(--spacing-container);
+  }
+
+  .newcase-change {
+    background: var(--color-paper);
+    border: none;
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--font-size-entry);
+    font-weight: var(--font-weight-strong);
+    height: 36px;
+    padding: 0 var(--spacing-container);
+  }
+
+  .newcase-change:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: 2px;
+  }
+
+  .newcase-failure {
+    color: var(--color-tone-danger-ink);
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-strong);
+    margin: 0;
+  }
+
+  /* The form's actions under a rule: the quiet way out, then the one that opens the
+     case, each at its own width. */
+  .newcase-actions {
+    align-items: center;
+    border-top: 1px solid var(--color-divider);
+    display: flex;
+    gap: var(--spacing-stack);
+    justify-content: flex-end;
+    padding-top: 20px;
+  }
+
+  .newcase-actions .button {
+    width: auto;
+  }
+
+  /* The quiet way out: a pill's padding without its fill, so its focus ring is round
+     like every other control's. */
+  .newcase-cancel {
+    background: none;
+    border: none;
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--font-size-entry);
+    font-weight: var(--font-weight-strong);
+    height: 44px;
+    padding: 0 var(--spacing-container);
+  }
+
+  .newcase-cancel:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: 2px;
+  }
+}
