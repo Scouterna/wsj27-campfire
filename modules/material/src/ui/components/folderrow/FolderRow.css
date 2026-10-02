@@ -1,0 +1,16 @@
+/* A folder row's mark. */
+
+@layer component {
+  /* Sized like the avatars other rows carry, so the two kinds of list line up. */
+  .folder-row-mark {
+    align-items: center;
+    background: var(--color-theme-wash);
+    border-radius: var(--border-radius-default);
+    color: var(--color-theme-ink);
+    display: flex;
+    flex: 0 0 auto;
+    height: 2.25rem;
+    justify-content: center;
+    width: 2.25rem;
+  }
+}

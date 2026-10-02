@@ -13,6 +13,7 @@
     "@scouterna/wsj27-campfire-home": "workspace:*",
     "@scouterna/wsj27-campfire-host": "workspace:*",
     "@scouterna/wsj27-campfire-journey": "workspace:*",
+    "@scouterna/wsj27-campfire-material": "workspace:*",
     "@scouterna/wsj27-campfire-participants": "workspace:*",
     "@scouterna/wsj27-campfire-ui": "workspace:*",
     "@scouterna/wsj27-campfire-utils": "workspace:*",
