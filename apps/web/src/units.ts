@@ -29,6 +29,10 @@ export async function loadUnitIdentities(): Promise<UnitIdentities> {
       glyphSrc: (unitNumber) =>
         names.has(unitNumber) ? `/units/${String(unitNumber)}.svg` : undefined,
       name: (unitNumber) => names.get(unitNumber),
+      numbers: names
+        .keys()
+        .toArray()
+        .toSorted((left, right) => left - right),
     }
   } catch {
     return unknownIdentities
@@ -40,6 +44,7 @@ export async function loadUnitIdentities(): Promise<UnitIdentities> {
  * the avatars wear their numbers.
  */
 const unknownIdentities: UnitIdentities = {
+  numbers: [],
   glyphSrc: () => {
     // Nothing is known.
   },

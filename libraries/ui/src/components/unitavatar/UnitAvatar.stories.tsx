@@ -12,7 +12,9 @@ const starGlyph = `data:image/svg+xml,${encodeURIComponent(
 )}`
 
 const withGlyphs: Decorator = (Story) => (
-  <UnitIdentitiesProvider identities={{ glyphSrc: () => starGlyph, name: () => "Stjärnan" }}>
+  <UnitIdentitiesProvider
+    identities={{ glyphSrc: () => starGlyph, name: () => "Stjärnan", numbers: [1] }}
+  >
     <Story />
   </UnitIdentitiesProvider>
 )

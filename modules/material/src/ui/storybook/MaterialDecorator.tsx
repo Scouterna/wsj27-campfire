@@ -36,6 +36,7 @@ const identities: UnitIdentities = {
     // No glyphs in the catalog, so the avatar wears its number.
   },
   name: (unitNumber) => (unitNumber === 1 ? "Björnen" : undefined),
+  numbers: [1],
 }
 
 /**

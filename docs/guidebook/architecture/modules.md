@@ -14,7 +14,7 @@ A fact about the signed-in person is not a doorway. It is a field on the `User` 
 
 ## Authentication
 
-The client half of the auth service. It asks who is signed in, tries one refresh on a refusal, and decodes the answer into the one `User` the application has – the name, the roles, the line that says what they are in the contingent, and the mark they wear, with the unit and how they travel read from the participants service. The session is httpOnly cookies, so the module never holds a token ([ADR 019](/decisions/019-authenticate-on-the-app-origin-through-scoutid)).
+The client half of the auth service. It asks who is signed in, tries one refresh on a refusal, and decodes the answer into the one `User` the application has, completed with the unit and how they travel, read from the participants service. The session is httpOnly cookies, so the module never holds a token ([ADR 019](/decisions/019-authenticate-on-the-app-origin-through-scoutid)).
 
 It also keeps the session after boot: every read runs under it, and it tells the gate when the session ends or changes owner ([ADR 033](/decisions/033-recover-an-ended-session-at-the-query-client-and-the-gate)). It owns the sign-in screen and the profile page, which carries the way out. Signing out is shared work – the application forgets its query cache, and this module starts the round trip. [Sign in](./example-flows/sign-in) walks it.
 
@@ -22,25 +22,25 @@ It also keeps the session after boot: every read runs under it, and it tells the
 
 The start screen. It decides what the screen shows, to whom, and from when, and places other modules' widgets – the countdown, a leader's unit – by id without knowing which module draws them. Until a part of the product is revealed at its moment, the screen counts down to it instead.
 
-Its own content is the contingent's messages to the reader, addressed by role – news, important notices, and a welcome for each role saying what they can do in Campfire. The messages ship with a release rather than being fetched, and a reader can close one, which the device remembers.
+Its own content is the contingent's messages to the reader, addressed by role. The messages ship with a release rather than being fetched.
 
 ## Journey
 
-The trip: departure, the camp, and the way home. The dates are fixed and public, so they are written into the module rather than fetched, and the phase and the countdown are pure functions over them. It offers the countdown as a widget for the start screen, counting to the start of the reader's own journey: the departure of the trip they booked, which it reads from the signed-in person, or the camp itself for everyone else.
+The trip: departure, the camp, and the way home. The dates are fixed and public, so they are written into the module rather than fetched. It offers the countdown to the reader's own journey as a widget for the start screen.
 
 ## Participants
 
-The contingent's list of participants: the list, a person's details, the unit browser, and the unit widget on the start screen. It is the only module that reads the list from the participants service. The application tells it who is reading – a leader's unit, or everyone for the contingent management, and whether health answers are theirs to read – and the module composes the list one unit at a time within that scope. It validates every field it receives, because the service's shape will change during the build ([Data layer](./layers/data)).
+The contingent's list of participants: the list, a person's details, the unit browser, and the unit widget on the start screen. It is the only module that reads the list from the participants service. The application tells it who is reading – a leader's unit, or everyone for the contingent management, and whether health answers are theirs to read – and the module composes the list one unit at a time within that scope.
 
-The list can grow to the contingent's size, so it is virtualized ([ADR 036](/decisions/036-virtualize-a-list-that-can-grow-to-the-contingents-size)). It is also how someone chooses who to write to: the people shown, or their relatives, can be mailed or have their addresses copied, straight from the list as it is searched and narrowed. [Show participants](./example-flows/show-participants) walks a leader's view of their unit.
+The list can grow to the contingent's size, so it is virtualized ([ADR 036](/decisions/036-virtualize-a-list-that-can-grow-to-the-contingents-size)). It is also where someone picks who to write to. [Show participants](./example-flows/show-participants) walks a leader's view of their unit.
 
 The units' names and marks are not in the module. They are runtime data the application loads at the gate, and every surface shows the unit's number until they arrive.
 
 ## Material
 
-The contingent's material – the units' symbols, the logotypes, the templates, and the presentations – read from the shared Google Drive folders the contingent management keeps, so a file added there shows on the next visit with no release ([ADR 038](/decisions/038-read-the-contingents-material-straight-from-google-drive)). The whole tree is read at once and held in the cache, so the folders browse and the search runs on the device.
+The contingent's material – the units' symbols, the logotypes, the templates, and the presentations – read straight from the shared Google Drive folders the contingent management keeps, so a file added there shows on the next visit with no release ([ADR 038](/decisions/038-read-the-contingents-material-straight-from-google-drive)). The whole tree is read at once and held in the cache, so browsing and search run on the device, and a download comes from Drive, so the module never holds a file's bytes.
 
-A leader's own unit's symbols come first, gathered from the folders by the unit's name and grouped by shape and tone, each with every format it exists in. Which animal a unit wears is the surprise, so that card waits for the units' reveal; the symbols stay in the folders either way. A picture opens a larger preview in place, which offers Drive's own viewer only for a document whose picture shows its first page. A download comes from Drive, so the module never holds a file's bytes.
+It also makes material: a photo with text on it, in one of the contingent's frames or none, ready for social media. Nothing leaves the device, because the photos are mostly of other people's children, so there is no service behind it and there is not meant to be one. The frames are the module's own artwork, built into the release rather than read from Drive, so a deleted frame is a build error instead of a broken picture. A leader's frames take their unit's color and mark from the units the application loads at the gate.
 
 ## The libraries
 

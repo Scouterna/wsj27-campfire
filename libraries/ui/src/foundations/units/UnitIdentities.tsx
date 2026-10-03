@@ -15,6 +15,11 @@ export interface UnitIdentities {
    * The unit's name – "Björnen" – or undefined while none is known.
    */
   readonly name: (unitNumber: number) => string | undefined
+  /**
+   * Every unit the identities know, by number, in order. Empty until they are loaded.
+   * For the one caller that has to offer a choice of units rather than look one up.
+   */
+  readonly numbers: readonly number[]
 }
 
 function unknown(): undefined {
@@ -28,6 +33,7 @@ function unknown(): undefined {
 const nothingKnown: UnitIdentities = {
   glyphSrc: unknown,
   name: unknown,
+  numbers: [],
 }
 
 const UnitIdentitiesContext = createContext(nothingKnown)
