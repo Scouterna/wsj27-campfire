@@ -5,3 +5,8 @@
 // `localhost` rather than the loopback address, because a session's cookies do not cross
 // between spellings of one machine and ScoutID returns only to this host name.
 CAMPFIRE_WEB_ORIGIN = http:/$()/localhost:8000
+
+// This machine's network address in its place, while `pnpm start:local --lan` serves a
+// phone – the stack writes the file when it starts and removes it when it stops, so the
+// Local scheme follows whichever stack is running.
+#include? "config/Lan.xcconfig"

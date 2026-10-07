@@ -48,7 +48,7 @@ A screen sits directly in `src/` while the module has only one.
 The whole design is [Data layer](../docs/guidebook/architecture/layers/data.md). The rules a change here is held to:
 
 - **Every service read goes through the application's one query client** ([ADR 017](../docs/decisions/017-route-and-load-data-with-tanstack-router-and-query.md)). A factory in `data/` returns `queryOptions` with a stable key; the utils `fetch` is the transport inside it. A read that calls `fetch` directly is wrong even when it works, because nothing caches, deduplicates, or owns it.
-- **The factories are the only thing that knows a URL**, and every URL is origin-relative ([ADR 012](../docs/decisions/012-run-campfire-in-three-environments-on-one-origin.md)).
+- **The factories are the only thing that knows a URL**, and every URL is origin-relative ([ADR 012](../docs/decisions/012-run-campfire-in-three-environments-on-one-origin.md)). The material's Google Drive addresses are the one exception – the listing's in its factory, and each file's pictures and download in its converter ([ADR 038](../docs/decisions/038-read-the-contingents-material-straight-from-google-drive.md)).
 - **One model type per thing, and it is ours.** The converter fills it whole, derivations included. Two types for one thing means a converter stopped halfway.
 - **Every DTO field is typed `unknown`**, and a converter beside it validates the payload. A DTO never leaves `data/`, so an upstream rename stops at the converter.
 - **A bad row in a list is dropped, not thrown**, because one broken record must not empty a leader's list. A detail that does not convert is a screen saying the person could not be loaded.

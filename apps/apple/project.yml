@@ -90,6 +90,13 @@ targets:
         Campfire:
           WebOrigin: $(CAMPFIRE_WEB_ORIGIN)
 
+        # The contingent's display face, for the navigation bar's large title.
+        UIAppFonts:
+          - BravelyScript.otf
+
+        # The web application draws no dark theme, so the chrome around it stays light.
+        UIUserInterfaceStyle: Light
+
         # The development server speaks cleartext, which App Transport Security refuses
         # by default, so it is permitted for local addresses and nothing else.
         NSAppTransportSecurity:
@@ -99,8 +106,11 @@ targets:
         # blue.
         UILaunchScreen:
           UIColorName: LaunchScreenBackground
+        # Upside down is left out, as on every iPhone app without a reason for it.
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
         ITSAppUsesNonExemptEncryption: false
 
     scheme:

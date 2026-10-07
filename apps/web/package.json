@@ -10,9 +10,12 @@
   },
   "dependencies": {
     "@scouterna/wsj27-campfire-authentication": "workspace:*",
+    "@scouterna/wsj27-campfire-cases": "workspace:*",
+    "@scouterna/wsj27-campfire-handbook": "workspace:*",
     "@scouterna/wsj27-campfire-home": "workspace:*",
     "@scouterna/wsj27-campfire-host": "workspace:*",
     "@scouterna/wsj27-campfire-journey": "workspace:*",
+    "@scouterna/wsj27-campfire-material": "workspace:*",
     "@scouterna/wsj27-campfire-participants": "workspace:*",
     "@scouterna/wsj27-campfire-ui": "workspace:*",
     "@scouterna/wsj27-campfire-utils": "workspace:*",

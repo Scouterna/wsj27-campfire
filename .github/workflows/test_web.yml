@@ -39,8 +39,11 @@ jobs:
         # the other either runs nowhere or fails with "no project named X".
         module:
           - authentication
+          - cases
+          - handbook
           - home
           - journey
+          - material
           - participants
     steps:
       # A module's walk-through can break from the module itself, from the

@@ -37,6 +37,13 @@ const supportRolls = new Map<string, Role>([
 const healthAccessLevel = "Hälsa plus intern information"
 
 /**
+ * The namespaces a personal grant arrives under. The project API mints the grant from the
+ * registration form as `legacy-access` on the branches where hand-assigned grants hold
+ * `access`, and as `access` on those where they do not, so either spelling carries it.
+ */
+const accessNamespaces: ReadonlySet<string | undefined> = new Set(["access", "legacy-access"])
+
+/**
  * The roles a `wsj27:al…` spelling grants – always a leader, of the unit its third
  * segment names when that segment reads as digits.
  * @param segments The spelling, already split on `:`.
@@ -95,7 +102,11 @@ export function toRoles(spelling: string): readonly Role[] {
     return cmtRoles(segments)
   }
 
-  if (segments[1] === "access" && segments.length === 3 && segments[2] === healthAccessLevel) {
+  if (
+    accessNamespaces.has(segments[1]) &&
+    segments.length === 3 &&
+    segments[2] === healthAccessLevel
+  ) {
     return [{ kind: "health" }]
   }
 

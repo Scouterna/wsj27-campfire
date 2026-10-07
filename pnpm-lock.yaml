@@ -155,6 +155,12 @@ importers:
       '@scouterna/wsj27-campfire-authentication':
         specifier: workspace:*
         version: link:../../modules/authentication
+      '@scouterna/wsj27-campfire-cases':
+        specifier: workspace:*
+        version: link:../../modules/cases
+      '@scouterna/wsj27-campfire-handbook':
+        specifier: workspace:*
+        version: link:../../modules/handbook
       '@scouterna/wsj27-campfire-home':
         specifier: workspace:*
         version: link:../../modules/home
@@ -164,6 +170,9 @@ importers:
       '@scouterna/wsj27-campfire-journey':
         specifier: workspace:*
         version: link:../../modules/journey
+      '@scouterna/wsj27-campfire-material':
+        specifier: workspace:*
+        version: link:../../modules/material
       '@scouterna/wsj27-campfire-participants':
         specifier: workspace:*
         version: link:../../modules/participants
@@ -206,6 +215,9 @@ importers:
       '@tanstack/react-router':
         specifier: 1.170.32
         version: 1.170.32(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@tanstack/react-virtual':
+        specifier: 3.14.10
+        version: 3.14.10(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react:
         specifier: 19.2.8
         version: 19.2.8
@@ -213,6 +225,9 @@ importers:
         specifier: 19.2.8
         version: 19.2.8(react@19.2.8)
     devDependencies:
+      '@tanstack/react-query':
+        specifier: 5.102.8
+        version: 5.102.8(react@19.2.8)
       '@types/react':
         specifier: 19.2.18
         version: 19.2.18
@@ -241,6 +256,53 @@ importers:
       '@tanstack/react-query':
         specifier: 5.102.8
         version: 5.102.8(react@19.2.8)
+      react:
+        specifier: 19.2.8
+        version: 19.2.8
+    devDependencies:
+      '@types/react':
+        specifier: 19.2.18
+        version: 19.2.18
+
+  modules/cases:
+    dependencies:
+      '@scouterna/wsj27-campfire-ui':
+        specifier: workspace:*
+        version: link:../../libraries/ui
+      '@scouterna/wsj27-campfire-utils':
+        specifier: workspace:*
+        version: link:../../libraries/utils
+      '@tanstack/react-query':
+        specifier: 5.102.8
+        version: 5.102.8(react@19.2.8)
+      '@tanstack/react-router':
+        specifier: 1.170.32
+        version: 1.170.32(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react:
+        specifier: 19.2.8
+        version: 19.2.8
+    devDependencies:
+      '@types/react':
+        specifier: 19.2.18
+        version: 19.2.18
+
+  modules/handbook:
+    dependencies:
+      '@scouterna/wsj27-campfire-host':
+        specifier: workspace:*
+        version: link:../../libraries/host
+      '@scouterna/wsj27-campfire-ui':
+        specifier: workspace:*
+        version: link:../../libraries/ui
+      '@scouterna/wsj27-campfire-utils':
+        specifier: workspace:*
+        version: link:../../libraries/utils
+      '@tanstack/react-query':
+        specifier: 5.102.8
+        version: 5.102.8(react@19.2.8)
+      '@tanstack/react-router':
+        specifier: 1.170.32
+        version: 1.170.32(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react:
         specifier: 19.2.8
         version: 19.2.8
@@ -281,6 +343,28 @@ importers:
         specifier: 19.2.18
         version: 19.2.18
 
+  modules/material:
+    dependencies:
+      '@scouterna/wsj27-campfire-ui':
+        specifier: workspace:*
+        version: link:../../libraries/ui
+      '@scouterna/wsj27-campfire-utils':
+        specifier: workspace:*
+        version: link:../../libraries/utils
+      '@tanstack/react-query':
+        specifier: 5.102.8
+        version: 5.102.8(react@19.2.8)
+      '@tanstack/react-router':
+        specifier: 1.170.32
+        version: 1.170.32(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react:
+        specifier: 19.2.8
+        version: 19.2.8
+    devDependencies:
+      '@types/react':
+        specifier: 19.2.18
+        version: 19.2.18
+
   modules/participants:
     dependencies:
       '@scouterna/wsj27-campfire-ui':
@@ -295,9 +379,6 @@ importers:
       '@tanstack/react-router':
         specifier: 1.170.32
         version: 1.170.32(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@tanstack/react-virtual':
-        specifier: 3.14.10
-        version: 3.14.10(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       maplibre-gl:
         specifier: 6.10.0
         version: 6.10.0

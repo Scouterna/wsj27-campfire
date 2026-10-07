@@ -3,4 +3,14 @@
      translation – every device gets these values, whatever its language. -->
 <resources>
   <string name="app_name">Campfire</string>
+  <!-- The spoken names of the top bar's controls, which draw no words of their own. -->
+  <string name="shell_back">Tillbaka</string>
+  <string name="shell_more">Fler åtgärder</string>
+  <string name="shell_profile">Profil</string>
+  <!-- Shown when the shell cannot reach or talk to the web application. -->
+  <string name="shell_unreachable_title">Campfire går inte att nå</string>
+  <string name="shell_unreachable_retry">Försök igen</string>
+  <string name="shell_bridgeless">Den här enhetens webbvy kan inte prata med Campfire.</string>
+  <string name="shell_gone">Sidan slutade svara och stängdes.</string>
+  <string name="shell_identity_unreachable">Inloggningen går inte att nå</string>
 </resources>

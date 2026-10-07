@@ -3,19 +3,32 @@ import type { ReactElement } from "react"
 
 import type { IconProps } from "./IconProps"
 import { BackIcon } from "./set/BackIcon"
+import { BookIcon } from "./set/BookIcon"
 import { ChatIcon } from "./set/ChatIcon"
 import { CheckIcon } from "./set/CheckIcon"
+import { CloseIcon } from "./set/CloseIcon"
 import { CopyIcon } from "./set/CopyIcon"
+import { DownloadIcon } from "./set/DownloadIcon"
+import { FolderIcon } from "./set/FolderIcon"
 import { GenderFemaleIcon } from "./set/GenderFemaleIcon"
 import { GenderMaleIcon } from "./set/GenderMaleIcon"
 import { GenderOtherIcon } from "./set/GenderOtherIcon"
+import { HealthIcon } from "./set/HealthIcon"
 import { HomeIcon } from "./set/HomeIcon"
 import { IdCardIcon } from "./set/IdCardIcon"
+import { ImageIcon } from "./set/ImageIcon"
+import { LeafIcon } from "./set/LeafIcon"
 import { MailIcon } from "./set/MailIcon"
 import { MoreIcon } from "./set/MoreIcon"
 import { ParticipantsIcon } from "./set/ParticipantsIcon"
+import { PersonIcon } from "./set/PersonIcon"
 import { PhoneIcon } from "./set/PhoneIcon"
+import { PlusIcon } from "./set/PlusIcon"
+import { RotateLeftIcon } from "./set/RotateLeftIcon"
+import { RotateRightIcon } from "./set/RotateRightIcon"
 import { SearchIcon } from "./set/SearchIcon"
+import { TextLargerIcon } from "./set/TextLargerIcon"
+import { TextSmallerIcon } from "./set/TextSmallerIcon"
 
 const meta: Meta = {
   title: "Foundations/Icons",
@@ -25,19 +38,32 @@ export default meta
 
 const icons: readonly (readonly [string, (props: IconProps) => ReactElement])[] = [
   ["Back", BackIcon],
+  ["Book", BookIcon],
   ["Chat", ChatIcon],
   ["Check", CheckIcon],
+  ["Close", CloseIcon],
   ["Copy", CopyIcon],
+  ["Download", DownloadIcon],
+  ["Folder", FolderIcon],
   ["Gender female", GenderFemaleIcon],
   ["Gender male", GenderMaleIcon],
   ["Gender other", GenderOtherIcon],
+  ["Health", HealthIcon],
   ["Home", HomeIcon],
   ["Id card", IdCardIcon],
+  ["Image", ImageIcon],
+  ["Leaf", LeafIcon],
   ["Mail", MailIcon],
   ["More", MoreIcon],
   ["Participants", ParticipantsIcon],
+  ["Person", PersonIcon],
   ["Phone", PhoneIcon],
+  ["Plus", PlusIcon],
+  ["Rotate left", RotateLeftIcon],
+  ["Rotate right", RotateRightIcon],
   ["Search", SearchIcon],
+  ["Text larger", TextLargerIcon],
+  ["Text smaller", TextSmallerIcon],
 ]
 
 /**

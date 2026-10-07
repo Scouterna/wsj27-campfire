@@ -8,4 +8,11 @@
        rather than a Compose color, because the system draws it before any of this
        app's code runs. -->
   <color name="launch_background">#2A778A</color>
+
+  <!-- The other units' bright colors, the palette's in theme/Theme.kt, which the
+       starting window wears once a person of that unit has signed in. -->
+  <color name="launch_brown">#985B15</color>
+  <color name="launch_green">#768B33</color>
+  <color name="launch_red">#CD4B17</color>
+  <color name="launch_yellow">#F4C125</color>
 </resources>

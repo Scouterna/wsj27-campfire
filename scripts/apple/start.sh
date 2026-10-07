@@ -32,7 +32,8 @@ echo "Simulator: $device"
 
 # Already booted is not a failure, it is the common case.
 xcrun simctl boot "$device" 2>/dev/null || true
-open -a Simulator
+# Xcode 27 shows simulators in DeviceHub, and earlier versions in Simulator.
+open -a Simulator 2>/dev/null || open -a DeviceHub
 
 sh "$here/build.sh" local
 

@@ -6,9 +6,9 @@
 # unit-test run also compiles the walk-through, which keeps that suite from rotting
 # between the occasions anybody runs it.
 #
-# Always the Local environment. The unit tests expect its origin, http on localhost, and
-# the walk-through needs no stack, so the other environments have nothing of their own
-# to prove here.
+# Always the Local environment, on its committed origin – `pnpm start:local --lan` points
+# the scheme at this machine's network address while it runs, and the unit tests expect
+# http on localhost. The other environments have nothing of their own to prove here.
 set -eu
 
 target="${1:?usage: test.sh <CampfireTests|CampfireUITests>}"
@@ -30,4 +30,5 @@ exec xcodebuild test \
   -derivedDataPath .build \
   -skipMacroValidation \
   -skipPackagePluginValidation \
-  -only-testing:"$target"
+  -only-testing:"$target" \
+  'CAMPFIRE_WEB_ORIGIN=http:/$()/localhost:8000'

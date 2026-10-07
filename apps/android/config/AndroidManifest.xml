@@ -12,8 +12,12 @@
     android:supportsRtl="true"
     android:theme="@style/Theme.Campfire"
   >
+    <!-- configChanges keeps the activity alive across a rotation, a new text size, a
+         keyboard, or a new language, so the webviews it holds are not torn down and
+         every tab reloaded. Each webview takes a new text size in place. -->
     <activity
       android:name=".MainActivity"
+      android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|density|uiMode|fontScale|fontWeightAdjustment|keyboard|keyboardHidden|navigation|locale|layoutDirection"
       android:exported="true"
       android:theme="@style/Theme.Campfire"
     >

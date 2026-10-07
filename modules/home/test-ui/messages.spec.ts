@@ -207,6 +207,10 @@ test("closes one message without closing the others", async ({ page }) => {
   await expect(welcomeHeading(page)).toHaveCount(0)
   await expect(page.getByText(opening(managementWelcome))).toHaveCount(0)
   await expect(closeControls(page)).toHaveCount(titles.length - 1)
+  // The focus goes on to what follows the plate rather than back to the page's start.
+  await expect
+    .poll(async () => page.evaluate(() => document.activeElement?.tagName))
+    .not.toMatch(/^(BODY|HTML)$/u)
 })
 
 test("leaves no trace once every message is closed", async ({ page }) => {

@@ -55,6 +55,11 @@ export interface Participant {
    */
   readonly unitNumber?: number
   /**
+   * The patrol within their unit, by the name the unit's leaders gave it. Absent for
+   * anybody not yet placed in one.
+   */
+  readonly patrol?: string
+  /**
    * The birth date as the service sent it, an ISO date. Absent when the service left
    * it out.
    */
@@ -224,6 +229,6 @@ export function belonging(person: Participant): string {
  * @param people The people to order. Left untouched.
  * @returns A new list, in reading order.
  */
-export function inReadingOrder(people: readonly Participant[]): readonly Participant[] {
+export function inReadingOrder<T extends Participant>(people: readonly T[]): readonly T[] {
   return people.toSorted((left, right) => swedish.compare(fullName(left), fullName(right)))
 }

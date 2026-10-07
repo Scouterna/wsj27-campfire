@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- the screens, the sections, and the chrome that reads them compose the application in one place, and splitting them is a change of its own. */
 import {
   authenticationRoutes,
   currentUser,
@@ -8,23 +9,32 @@ import {
   subscribeToSession,
   watchExpiry,
 } from "@scouterna/wsj27-campfire-authentication"
+import { casesPersonMenu, casesRoutes, casesSectionLabel } from "@scouterna/wsj27-campfire-cases"
+import { handbookRoutes } from "@scouterna/wsj27-campfire-handbook"
 import { HomeScreen } from "@scouterna/wsj27-campfire-home"
-import { host } from "@scouterna/wsj27-campfire-host"
+import { host, sendToShell } from "@scouterna/wsj27-campfire-host"
 import { journeyWidgets } from "@scouterna/wsj27-campfire-journey"
+import { materialRoutes, materialSectionLabel } from "@scouterna/wsj27-campfire-material"
 import {
   participantsRoutes,
   participantsSectionLabel,
   participantsWidgets,
+  PersonActionsProvider,
   ViewerProvider,
   type Viewer,
 } from "@scouterna/wsj27-campfire-participants"
 import {
+  BookIcon,
+  Button,
   Card,
+  ChatIcon,
   cmtAvatarNumber,
   cmtTheme,
   expectPop,
   Fab,
+  FolderIcon,
   HomeIcon,
+  LeafIcon,
   matchScreen,
   mountRoutes,
   NavigationBar,
@@ -48,9 +58,11 @@ import {
   usePageActions,
   usePageTitle,
   useRevealLookup,
+  useUnitAvatarPicture,
   WidgetsProvider,
   type Address,
   type AppPath,
+  type NavDirection,
   type PageActionsProps,
   type Routes,
   type ScreenSpec,
@@ -60,6 +72,7 @@ import {
   type Widgets,
 } from "@scouterna/wsj27-campfire-ui"
 import {
+  hasAllRoles,
   hasAnyRole,
   leaderUnit,
   RolesProvider,
@@ -69,20 +82,30 @@ import {
   type User,
 } from "@scouterna/wsj27-campfire-utils"
 import { QueryClientProvider } from "@tanstack/react-query"
-import { createRouter, Link, useRouterState, type RouteComponent } from "@tanstack/react-router"
-import { useEffect, useState, type ReactElement, type ReactNode } from "react"
+import { createRouter, Link, type RouteComponent } from "@tanstack/react-router"
+import { useCallback, useEffect, useState, type ReactElement, type ReactNode } from "react"
 
 import {
+  afterTransition,
   historyIndex,
   markPush,
+  reassertPoppedScroll,
   rootTrail,
   scrollToTop,
   sectionSwitch,
   titleTrail,
   useNavigationBookkeeping,
+  useRenderedPathname,
 } from "./navigation"
 import { Outline } from "./outline"
 import { adoptCacheOwner, forgetCache, queryClient } from "./query"
+import {
+  historyBack,
+  initialsOf,
+  useShellBridge,
+  type BackControl,
+  type ShellRouter,
+} from "./shell"
 import { loadUnitIdentities } from "./units"
 
 /**
@@ -114,6 +137,9 @@ const widgets = { ...journeyWidgets, ...participantsWidgets } satisfies Widgets
 const screens = guardScreens({
   "/": { Component: HomeScreen, tab: "home" },
   ...authenticationRoutes,
+  ...casesRoutes,
+  ...handbookRoutes,
+  ...materialRoutes,
   ...participantsRoutes,
 } satisfies Routes)
 
@@ -125,6 +151,10 @@ interface AppSection {
    * The icon beside or above the label.
    */
   readonly icon: ReactElement
+  /**
+   * The semantic name the icon crosses the bridge as, for a shell's tab bar.
+   */
+  readonly iconName: string
   /**
    * The id the screens' `tab` fields name.
    */
@@ -146,13 +176,23 @@ interface AppSection {
 }
 
 /**
- * The sections, in menu order: home for everyone, and the participants section for a
- * leader and for any management function – for nobody else.
+ * The sections, in menu order: home for everyone, the participants and material sections
+ * and the handbook for a leader and for any management function, the food section for a
+ * leader and the health team, and the cases section for the health team – for nobody
+ * else.
  */
 const sections: readonly AppSection[] = [
-  { icon: <HomeIcon />, id: "home", isGranted: () => true, label: () => "Hem", path: "/" },
+  {
+    icon: <HomeIcon />,
+    iconName: "home",
+    id: "home",
+    isGranted: () => true,
+    label: () => "Hem",
+    path: "/",
+  },
   {
     icon: <ParticipantsIcon />,
+    iconName: "participants",
     id: "participants",
     // The reveal gates the section for everyone, so until the moment the contingent's
     // people are offered to nobody and the address answers as not found. A curtain,
@@ -161,6 +201,47 @@ const sections: readonly AppSection[] = [
       hasAnyRole(roles, "leader", "cmt") && isRevealed(unitsReveal.id),
     label: participantsSectionLabel,
     path: "/participants",
+  },
+  {
+    icon: <LeafIcon />,
+    iconName: "leaf",
+    id: "food",
+    // A leader reads their own unit's health answers, and the health team every unit's,
+    // which is the management with a health grant, as for the cases. Behind the units'
+    // reveal, as the participants are.
+    isGranted: (roles, isRevealed) =>
+      (hasAnyRole(roles, "leader") || hasAllRoles(roles, "cmt", "health")) &&
+      isRevealed(unitsReveal.id),
+    label: () => "Kost",
+    path: "/food",
+  },
+  {
+    icon: <FolderIcon />,
+    iconName: "folder",
+    id: "material",
+    // No reveal, because the material is not part of the surprise – only the card naming
+    // a reader's own unit waits for it.
+    isGranted: (roles) => hasAnyRole(roles, "leader", "cmt"),
+    label: materialSectionLabel,
+    path: "/material",
+  },
+  {
+    icon: <BookIcon />,
+    iconName: "book",
+    id: "handbook",
+    isGranted: (roles) => hasAnyRole(roles, "leader", "cmt"),
+    label: () => "Handbok",
+    path: "/handbook",
+  },
+  {
+    icon: <ChatIcon />,
+    iconName: "chat",
+    id: "cases",
+    // Both, because a personal health grant also reads as health, and a leader holding
+    // one may not read the contingent the section names people from.
+    isGranted: (roles) => hasAllRoles(roles, "cmt", "health"),
+    label: () => casesSectionLabel,
+    path: "/cases",
   },
 ]
 
@@ -236,6 +317,34 @@ type SignedInProps = {
   readonly children: ReactNode
 }
 
+type PersonMenuProps = {
+  /**
+   * The signed-in person's roles, which decide what they may be offered.
+   */
+  readonly roles: readonly Role[]
+  /**
+   * The subtree whose person screens carry the entries.
+   */
+  readonly children: ReactNode
+}
+
+/**
+ * What other sections offer on a person's own screen, each only where the section itself
+ * is granted – the cases about them, and a new one, for the health team. Composed here,
+ * because the person screen and the cases belong to different modules.
+ * @param props The roles, and the subtree that shows the entries.
+ * @returns The subtree, with the entries in scope.
+ */
+function PersonMenu(props: PersonMenuProps): ReactElement {
+  const isRevealed = useRevealLookup()
+  const { roles } = props
+  const actions = useCallback(
+    (memberNo: string) => (isGranted("cases", roles, isRevealed) ? casesPersonMenu(memberNo) : []),
+    [isRevealed, roles],
+  )
+  return <PersonActionsProvider actions={actions}>{props.children}</PersonActionsProvider>
+}
+
 /**
  * Where the gate stands: asking at boot, signed in, signed out, or ending a session that
  * the service refused – the one stretch where the cache is being forgotten and nothing of
@@ -286,6 +395,16 @@ function AppChrome(props: AppChromeProps): ReactElement {
     })
   }, [gate.kind])
 
+  // A shell holds one sign-in webview while nobody is signed in, and drops its tabs the
+  // moment a session ends, so it hears of signing out from whichever page saw it.
+  useEffect(() => {
+    if (gate.kind !== "signed-out") {
+      return
+    }
+    sendToShell({ signedIn: false, type: "session" })
+    sendToShell({ name: storedTheme() ?? "blue", type: "theme" })
+  }, [gate.kind])
+
   // An empty fragment rather than null, because the router's inner wrap must return an
   // element, and the gate renders nothing while it waits.
   if (gate.kind === "asking" || gate.kind === "ending") {
@@ -295,7 +414,7 @@ function AppChrome(props: AppChromeProps): ReactElement {
   if (gate.kind === "signed-out") {
     return (
       <ThemeProvider theme={storedTheme() ?? "blue"}>
-        <SignInScreen />
+        <SignInScreen isHosted={host.tier === "shell"} />
       </ThemeProvider>
     )
   }
@@ -392,13 +511,15 @@ function SignedInChrome(props: SignedInProps): ReactElement {
                   everything under it. A new reveal is another catalog entry, not
                   another mechanism. */}
                   <RevealProvider reveals={reveals}>
-                    <WidgetsProvider widgets={widgets}>
-                      {host.tier === "shell" ? (
-                        <ShellChrome user={props.user}>{props.children}</ShellChrome>
-                      ) : (
-                        <BrowserChrome user={props.user}>{props.children}</BrowserChrome>
-                      )}
-                    </WidgetsProvider>
+                    <PersonMenu roles={props.user.roles}>
+                      <WidgetsProvider widgets={widgets}>
+                        {host.tier === "shell" ? (
+                          <ShellChrome user={props.user}>{props.children}</ShellChrome>
+                        ) : (
+                          <BrowserChrome user={props.user}>{props.children}</BrowserChrome>
+                        )}
+                      </WidgetsProvider>
+                    </PersonMenu>
                   </RevealProvider>
                 </UnitIdentitiesProvider>
               </ViewerProvider>
@@ -411,21 +532,65 @@ function SignedInChrome(props: SignedInProps): ReactElement {
 }
 
 /**
- * The shell tier's chrome, which draws none, because the shell draws its own. It is the
- * seam the bridge conversation fills (ADR 018), so no screen can grow a native-only path
- * by accident.
+ * The shell tier's chrome, which draws none, because the shell draws its own. It reports
+ * over the bridge what the browser chrome would have drawn – the title, back, the bar's
+ * actions, the sections, and the theme – and does what the shell reports was tapped
+ * (ADR 018), so no screen can grow a native-only path by accident.
  * @param props The signed-in user, and the routed screens.
  * @returns The bare content column.
  */
 function ShellChrome(props: SignedInProps): ReactElement {
+  const user = props.user
+  const isRevealed = useRevealLookup()
+  const pathname = useRenderedPathname()
+  const found = matchScreen(pathname, screens)
+  const isGrantedScreen = found !== undefined && isGranted(found.spec.tab, user.roles, isRevealed)
   const title = usePageTitle() ?? ""
+  // A screen with no parent can still be pushed inside a tab – the profile, from the
+  // avatar on any screen – and a tab is a stack of its own with no section switches, so
+  // such a screen above the tab's first entry pops back to where it was opened from.
+  const back =
+    (isGrantedScreen ? backControlFor(found.spec.parent, user.roles) : undefined) ??
+    historyBack(shellRouter)
 
   useEffect(() => {
     document.title = title === "" ? "Campfire" : `${title} – Campfire`
   }, [title])
 
+  useNavigationBookkeeping(pathname, title)
+
+  // The mark waits for the units reveal, as the browser's profile pill does, and the
+  // initials stand until it is drawn.
+  const avatar = useUnitAvatarPicture(
+    isRevealed(unitsReveal.id) && user.mark !== undefined
+      ? (user.mark.unitNumber ?? cmtAvatarNumber)
+      : undefined,
+  )
+
+  const hasAction = usePageActions()?.action !== undefined
+
+  useShellBridge({
+    back,
+    profile: {
+      ...(avatar !== undefined && { avatar }),
+      initials: initialsOf(user.name),
+      path: "/profile",
+    },
+    router: shellRouter,
+    sections: sections
+      .filter((section) => section.isGranted(user.roles, isRevealed))
+      .map((section) => ({
+        icon: section.iconName,
+        id: section.id,
+        label: section.label(user.roles),
+        path: section.path,
+      })),
+    theme: themeFor(user),
+    title,
+  })
+
   return (
-    <main>
+    <main className="shell-page" data-action={hasAction ? "" : undefined}>
       <div className="content">{props.children}</div>
     </main>
   )
@@ -444,7 +609,7 @@ function ShellChrome(props: SignedInProps): ReactElement {
 function backControlFor(
   parent: AppPath | undefined,
   roles: readonly Role[],
-): { readonly label: string; readonly onBack: () => void } | undefined {
+): BackControl | undefined {
   if (parent === undefined) {
     return undefined
   }
@@ -459,8 +624,8 @@ function backControlFor(
 
   const isCold = index === 0 || index === undefined
 
-  const onBack = (): void => {
-    setNavDirection("back")
+  const go = (direction: NavDirection): void => {
+    setNavDirection(direction)
     if (isCold) {
       // No click for the capture-phase listener to see, so the push is declared here.
       markPush()
@@ -469,6 +634,18 @@ function backControlFor(
     }
     expectPop()
     router.history.back()
+  }
+
+  // A pop the platform animated cannot wait, because its gesture has already shown the
+  // page beneath.
+  const onBack = (direction: NavDirection = "back"): void => {
+    if (direction === "none") {
+      go(direction)
+    } else {
+      void afterTransition(() => {
+        go(direction)
+      })
+    }
   }
 
   // The trail knows what the previous entry called itself. Cold – or where the trail
@@ -511,7 +688,7 @@ function BrowserChrome(props: SignedInProps): ReactElement {
   // Live, so the menus, the marked section, and the pill's unit line all switch the
   // moment a reveal opens – the whole chrome changes as one, with no reload.
   const isRevealed = useRevealLookup()
-  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const pathname = useRenderedPathname()
   const found = matchScreen(pathname, screens)
   const isGrantedScreen = found !== undefined && isGranted(found.spec.tab, user.roles, isRevealed)
 
@@ -582,12 +759,21 @@ function BrowserChrome(props: SignedInProps): ReactElement {
             title={title}
             trailing={
               <>
+                {declared?.secondary === undefined ? null : (
+                  <Button {...declared.secondary} variant="secondary" />
+                )}
                 {declared?.menu === undefined ? null : <OverflowMenu items={declared.menu} />}
                 {pill(true)}
               </>
             }
           />
-          <PageHeading title={title} back={back} action={declared?.action} menu={declared?.menu} />
+          <PageHeading
+            title={title}
+            back={back}
+            action={declared?.action}
+            menu={declared?.menu}
+            secondary={declared?.secondary}
+          />
           <div className="content">{props.children}</div>
         </main>
       </div>
@@ -673,6 +859,27 @@ export const router = createRouter({
   defaultViewTransition: true,
   defaultNotFoundComponent: NotFoundRoute,
 })
+
+// Subscribed after the router's own scroll reset, which the router installs as it is
+// created, so a popped page's restored position is written back in the same task.
+// eslint-disable-next-line unicorn/no-top-level-side-effects -- the router exists only here, and the subscription lives as long as it
+router.subscribe("onRendered", reassertPoppedScroll)
+
+/**
+ * The router as the shell's taps drive it.
+ */
+const shellRouter: ShellRouter = {
+  go: (delta) => {
+    router.history.go(delta)
+  },
+  navigate: (target) => {
+    void router.navigate(
+      typeof target === "string"
+        ? { href: target }
+        : ({ params: target.params, to: target.to } as never),
+    )
+  },
+}
 
 declare module "@tanstack/react-router" {
   interface Register {

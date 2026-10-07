@@ -1,6 +1,6 @@
 # OpenFreeMap
 
-OpenFreeMap is a free public service that serves vector map tiles drawn from OpenStreetMap, with no account and no key. Nobody in this project runs it, and it is the one system Campfire reaches past its own origin ([ADR 037](/decisions/037-draw-maps-on-the-device-over-openfreemaps-tiles)).
+OpenFreeMap is a free public service that serves vector map tiles drawn from OpenStreetMap, with no account and no key. Nobody in this project runs it, and Campfire reaches it past its own origin ([ADR 037](/decisions/037-draw-maps-on-the-device-over-openfreemaps-tiles)).
 
 ## What Campfire uses it for
 

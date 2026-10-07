@@ -133,6 +133,19 @@ function addCount(map: MapLibreMap, spot: Spot): void {
 function addOverlays(map: MapLibreMap, spots: readonly Spot[]): void {
   map.addControl(new NavigationControl({ showCompass: false }), "bottom-right")
   map.addControl(new AttributionControl({ compact: true }), "bottom-left")
+  // MapLibre unfolds the compact credits over the map's foot the first time it fills them,
+  // until the reader drags. A native map shows the ⓘ alone until it is tapped, so they
+  // are folded as soon as they unfold, once, leaving every tap after that to the reader.
+  const foldCredits = (): void => {
+    const credits = map.getContainer().querySelector(".maplibregl-compact-show")
+    if (credits !== null) {
+      credits.classList.remove("maplibregl-compact-show")
+      map.off("styledata", foldCredits)
+      map.off("sourcedata", foldCredits)
+    }
+  }
+  map.on("styledata", foldCredits)
+  map.on("sourcedata", foldCredits)
   for (const spot of spots) {
     if (spot.count > 1) {
       addCount(map, spot)

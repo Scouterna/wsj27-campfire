@@ -32,6 +32,14 @@
 
 	# The image runs its own Caddy on 8080 (prod/image.Caddyfile), which is what
 	# serves the built files and falls back to index.html for a deep link.
+	# The handbook's CMS runs nowhere locally, so it is read from the deployed dev
+	# environment, which publishes it openly. Only reading works this way – the CMS signs
+	# its editors in through the deployed auth service, whose cookie this origin never
+	# holds.
+	handle /_services/cms/* {
+		reverse_proxy https://campfire.wsj27.scouterna.net
+	}
+
 	handle {
 		reverse_proxy web:8080
 	}

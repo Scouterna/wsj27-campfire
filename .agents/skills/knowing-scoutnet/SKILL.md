@@ -2,7 +2,7 @@
 name: knowing-scoutnet
 description: Provides reference facts on Scoutnet, Scouterna's membership system, and ScoutID, the single sign-on built on it. Covers Scoutnet's organization tree (kår, distrikt, avdelning, patrull), members and their roles, projects and their registration forms, the per-endpoint API keys and the quirks every integration works around, ScoutID's Keycloak realms, OIDC sign-in, scopes and claims, and how the WSJ27 project's registration forms are shaped, stored, and decoded. Use when integrating with Scoutnet or ScoutID, reading a registration answer, explaining a member number, a claim, or an access level, or when a question involves how a Scouterna service knows who someone is.
 metadata:
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Knowing Scoutnet

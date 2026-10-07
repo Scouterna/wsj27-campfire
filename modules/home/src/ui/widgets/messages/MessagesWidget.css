@@ -118,6 +118,19 @@
     }
   }
 
+  /* A press dims the pill for as long as the finger is down, the feedback a touch gets
+     in place of a hover. */
+  .messages-close:active {
+    background: color-mix(in srgb, var(--color-sheet) 70%, transparent);
+  }
+
+  /* A closed plate folding away clips what it no longer has room for, and takes no more
+     presses while it goes. */
+  .messages-folding {
+    overflow: hidden;
+    pointer-events: none;
+  }
+
   /* The page's ink rather than the theme's or the text's white, because it is the one
      color here that clears a focus indicator's 3:1 against every bright fill – white
      disappears into the yellow, and a theme's ink into its own bright. */

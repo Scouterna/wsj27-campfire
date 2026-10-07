@@ -64,7 +64,7 @@ A new style takes a hue from this table rather than a new color. Relationships r
 ## Where new elements go
 
 - A **person** goes in `model/people.dsl`, named as the audience list in `.github/ISSUE_TEMPLATE/feature.yml` names them, tagged `user` or `internal`. The participants in the list are data, not people here.
-- A **back-end service** goes in `model/services.dsl`, tagged `service` – one software system per service, however its repository builds and deploys it, because that is the repository's business. It goes in once something in the model relates to it. An **external system** goes in `model/external.dsl`, tagged `external`.
+- A **back-end service** goes in `model/services.dsl`, tagged `service` – one software system per service, however its repository builds and deploys it, because that is the repository's business, and one deployment node per service in `model/deployment.dsl` for the same reason. It goes in once something in the model relates to it. An **external system** goes in `model/external.dsl`, tagged `external`.
 - A **container** goes inside the `campfire` system in `model/campfire.dsl`, in its group, with a `technology`, tagged `product`, `app`, `module`, or `development`.
 - A **deployment node** goes in its environment in `model/deployment.dsl`, with a `technology`. An environment's one origin is an `infrastructureNode`, never a container.
 - A **new view** goes in its level's file under `views/`, with a hand-authored key. The key names the exported file and every guidebook reference to it, so it never changes.

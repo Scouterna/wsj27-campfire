@@ -7,13 +7,36 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0DF08910C9E205FADE05C0A4 /* WebTabTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 794C94847504701EEAC25341 /* WebTabTests.swift */; };
+		1B1D49C16DC119312E31AF9F /* PaletteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF69A98A6518BF0C56933CB6 /* PaletteTests.swift */; };
+		2E027E12BCF4C96CBC096ACA /* AppModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDFFF2D4DB70E9765523F92 /* AppModelTests.swift */; };
 		3EEFF99FFCD2D4C5FF5065B6 /* WalkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 560DF3601BB52C89C61C3815 /* WalkTests.swift */; };
+		3F749B1C5E0EE746CD643F1F /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1DDBCF6F08406F8518437AB /* MainView.swift */; };
+		433297ACC667CC3B7E1BF157 /* Bridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 089A5BD4F0078B1E3DACC10A /* Bridge.swift */; };
+		47F5906BB4A61559A5EBAF8A /* WebStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3D5EDA03C55A31BAB1C20AF /* WebStack.swift */; };
 		52D8DE4102C0768DC2ABF8D0 /* ConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC938E5605D45A093EA8DB13 /* ConfigTests.swift */; };
+		570D527CA91E1EB6336F0D0F /* WebPageController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5BDD2C21C9439595682B6A3 /* WebPageController.swift */; };
+		65A8B2EFE1A5ED183FB55170 /* WebTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FAAED577CF216389814C73D /* WebTab.swift */; };
 		66617BB3A744B71E1AFCEF29 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32320E4E6FE868E9549E71BB /* App.swift */; };
+		6766BAA458D6AC1D6E62960D /* SectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 676F12136AA22DA174C91F4F /* SectionTests.swift */; };
+		6B8A3E007401EB7DD95AD43C /* BridgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EC6FECFA3A88162027B8876 /* BridgeTests.swift */; };
 		797C717FAC57DFD23AE6B176 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EF19F35DF03B5B7DDBD5C70 /* Config.swift */; };
+		8642E44D4ED273BB36A6B4A2 /* Section.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC0BA19FD4CD3E2DDB30D335 /* Section.swift */; };
+		86E1A35180F1B0775C6FE9E8 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EFE1094ABD0466DB854B173 /* AppModel.swift */; };
+		8F4590058F3B6952E04C4570 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D44CCFBF1590A63188A505 /* Theme.swift */; };
 		986797445F3AD2A28AFD95A9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4E55602CB5F04AADC04F01C7 /* Assets.xcassets */; };
+		9F388AF62B13450328FD03D3 /* BravelyScript.otf in Resources */ = {isa = PBXBuildFile; fileRef = F7D4D77086710A828298B47C /* BravelyScript.otf */; };
 		A16F30A94C91C04FFAC6F6AB /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 1443AA6D46677F6298D702AB /* Localizable.xcstrings */; };
 		A2029A4441C2EBFC4A73E1B1 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = D0B5868EDFEFFA7EB876EF11 /* AppIcon.icon */; };
+		B0C5C4FB2DA5D5642F832F42 /* WebPageFullScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372B8A0DAE90499630FADC2C /* WebPageFullScreen.swift */; };
+		B973D9A3CCC8B43D38C02A20 /* WebPageFullScreenTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE39EF59051BEABEC1A88BF0 /* WebPageFullScreenTests.swift */; };
+		C98621FA924E47457C6E1082 /* WebPageBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAD95D1A7945B739BFEE2BFB /* WebPageBar.swift */; };
+		D21F2279E93CAD00B5D6795D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A7C84F886A39DB1DD0ED04 /* ContentView.swift */; };
+		D5280305F503CC2A97C15C8A /* Skeleton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BC0B8FB7D10EDFEEAC2AB5B /* Skeleton.swift */; };
+		DD780336AC1DF248A08EC7E9 /* BackSwipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7952FBBB7AB8BBA87E387DB2 /* BackSwipe.swift */; };
+		E2306F073FAE494187823B88 /* WebViewHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE51C24D0EF2E51D0AF0AD68 /* WebViewHost.swift */; };
+		E634450A28288C23932FEAD0 /* IdentitySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5A715B4C6B43DECA2794310 /* IdentitySheet.swift */; };
+		FDE4A855807B7B6C0F59D8ED /* WebStackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D41EFFFA1A5AE0A91D4652 /* WebStackTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,30 +57,55 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		089A5BD4F0078B1E3DACC10A /* Bridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bridge.swift; sourceTree = "<group>"; };
 		0EF19F35DF03B5B7DDBD5C70 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
+		0EFE1094ABD0466DB854B173 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		1443AA6D46677F6298D702AB /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		260290DBAEB5189642641782 /* Campfire-uitest.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Campfire-uitest.plist"; sourceTree = "<group>"; };
 		26A24DF9CD14E45FDA391BFB /* Campfire.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Campfire.plist; sourceTree = "<group>"; };
 		32320E4E6FE868E9549E71BB /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
+		372B8A0DAE90499630FADC2C /* WebPageFullScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebPageFullScreen.swift; sourceTree = "<group>"; };
 		385330E42EB6817FC4F71A6C /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
 		4E55602CB5F04AADC04F01C7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		50A7C84F886A39DB1DD0ED04 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		560DF3601BB52C89C61C3815 /* WalkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalkTests.swift; sourceTree = "<group>"; };
+		5DDFFF2D4DB70E9765523F92 /* AppModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModelTests.swift; sourceTree = "<group>"; };
+		676F12136AA22DA174C91F4F /* SectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionTests.swift; sourceTree = "<group>"; };
+		6FAAED577CF216389814C73D /* WebTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebTab.swift; sourceTree = "<group>"; };
+		72D44CCFBF1590A63188A505 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		794C94847504701EEAC25341 /* WebTabTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebTabTests.swift; sourceTree = "<group>"; };
+		7952FBBB7AB8BBA87E387DB2 /* BackSwipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackSwipe.swift; sourceTree = "<group>"; };
+		8EC6FECFA3A88162027B8876 /* BridgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeTests.swift; sourceTree = "<group>"; };
 		981586AC6054589865EA061A /* Dev.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Dev.xcconfig; sourceTree = "<group>"; };
+		9BC0B8FB7D10EDFEEAC2AB5B /* Skeleton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Skeleton.swift; sourceTree = "<group>"; };
 		9E566F8C20DDF35CCBDBFAB5 /* CampfireTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CampfireTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A3D5EDA03C55A31BAB1C20AF /* WebStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebStack.swift; sourceTree = "<group>"; };
 		AC938E5605D45A093EA8DB13 /* ConfigTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigTests.swift; sourceTree = "<group>"; };
 		ACC4D629B032AFD7C665B153 /* Campfire-test.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Campfire-test.plist"; sourceTree = "<group>"; };
+		AF69A98A6518BF0C56933CB6 /* PaletteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaletteTests.swift; sourceTree = "<group>"; };
+		B9D41EFFFA1A5AE0A91D4652 /* WebStackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebStackTests.swift; sourceTree = "<group>"; };
+		BC0BA19FD4CD3E2DDB30D335 /* Section.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Section.swift; sourceTree = "<group>"; };
+		C5A715B4C6B43DECA2794310 /* IdentitySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentitySheet.swift; sourceTree = "<group>"; };
+		C89E8D97D6D06AE3ADEEA9DE /* Lan.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Lan.xcconfig; sourceTree = "<group>"; };
+		CE39EF59051BEABEC1A88BF0 /* WebPageFullScreenTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebPageFullScreenTests.swift; sourceTree = "<group>"; };
 		D0B5868EDFEFFA7EB876EF11 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		DCCB65045B963E522D0858DE /* Prod.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Prod.xcconfig; sourceTree = "<group>"; };
+		E5BDD2C21C9439595682B6A3 /* WebPageController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebPageController.swift; sourceTree = "<group>"; };
 		E978712C4B5B642C44883D6E /* CampfireUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CampfireUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F1AE1AD7BB5B1B647B42EC9A /* project.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = project.yml; sourceTree = "<group>"; };
+		F1DDBCF6F08406F8518437AB /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		F7D4D77086710A828298B47C /* BravelyScript.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = BravelyScript.otf; sourceTree = "<group>"; };
 		F807A56F85E9DCAE6C55F396 /* Campfire.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Campfire.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FAD95D1A7945B739BFEE2BFB /* WebPageBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebPageBar.swift; sourceTree = "<group>"; };
 		FE1C6ABED4F23C3DF00D51A9 /* Shared.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Shared.xcconfig; sourceTree = "<group>"; };
+		FE51C24D0EF2E51D0AF0AD68 /* WebViewHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewHost.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		00E9983B6237CCD2EFEBDE0A /* assets */ = {
 			isa = PBXGroup;
 			children = (
+				762CEA7DBB427A88C65169B8 /* fonts */,
 				D0B5868EDFEFFA7EB876EF11 /* AppIcon.icon */,
 				4E55602CB5F04AADC04F01C7 /* Assets.xcassets */,
 				1443AA6D46677F6298D702AB /* Localizable.xcstrings */,
@@ -68,18 +116,69 @@
 		062C87291073C2CA2D3650DD /* test */ = {
 			isa = PBXGroup;
 			children = (
+				66447CF7E2D47F236485DA02 /* theme */,
+				956FBEC4E0DEFD4CB3EDD6E7 /* web */,
+				5DDFFF2D4DB70E9765523F92 /* AppModelTests.swift */,
 				AC938E5605D45A093EA8DB13 /* ConfigTests.swift */,
+				676F12136AA22DA174C91F4F /* SectionTests.swift */,
 			);
 			path = test;
+			sourceTree = "<group>";
+		};
+		3EFAD786BF50B02BD2B5EABE /* web */ = {
+			isa = PBXGroup;
+			children = (
+				7952FBBB7AB8BBA87E387DB2 /* BackSwipe.swift */,
+				089A5BD4F0078B1E3DACC10A /* Bridge.swift */,
+				C5A715B4C6B43DECA2794310 /* IdentitySheet.swift */,
+				FAD95D1A7945B739BFEE2BFB /* WebPageBar.swift */,
+				E5BDD2C21C9439595682B6A3 /* WebPageController.swift */,
+				372B8A0DAE90499630FADC2C /* WebPageFullScreen.swift */,
+				A3D5EDA03C55A31BAB1C20AF /* WebStack.swift */,
+				6FAAED577CF216389814C73D /* WebTab.swift */,
+				FE51C24D0EF2E51D0AF0AD68 /* WebViewHost.swift */,
+			);
+			path = web;
 			sourceTree = "<group>";
 		};
 		5D09905DC789B32013B4D7AC /* src */ = {
 			isa = PBXGroup;
 			children = (
+				6E8FC944D660277FAD8A1D44 /* routes */,
+				CC1C9F3F8333BE3C7B5EBC19 /* theme */,
+				3EFAD786BF50B02BD2B5EABE /* web */,
 				32320E4E6FE868E9549E71BB /* App.swift */,
+				0EFE1094ABD0466DB854B173 /* AppModel.swift */,
 				0EF19F35DF03B5B7DDBD5C70 /* Config.swift */,
+				BC0BA19FD4CD3E2DDB30D335 /* Section.swift */,
 			);
 			path = src;
+			sourceTree = "<group>";
+		};
+		66447CF7E2D47F236485DA02 /* theme */ = {
+			isa = PBXGroup;
+			children = (
+				AF69A98A6518BF0C56933CB6 /* PaletteTests.swift */,
+			);
+			path = theme;
+			sourceTree = "<group>";
+		};
+		6E8FC944D660277FAD8A1D44 /* routes */ = {
+			isa = PBXGroup;
+			children = (
+				50A7C84F886A39DB1DD0ED04 /* ContentView.swift */,
+				F1DDBCF6F08406F8518437AB /* MainView.swift */,
+				9BC0B8FB7D10EDFEEAC2AB5B /* Skeleton.swift */,
+			);
+			path = routes;
+			sourceTree = "<group>";
+		};
+		762CEA7DBB427A88C65169B8 /* fonts */ = {
+			isa = PBXGroup;
+			children = (
+				F7D4D77086710A828298B47C /* BravelyScript.otf */,
+			);
+			path = fonts;
 			sourceTree = "<group>";
 		};
 		78BC02D2DC331FD2C8734BF8 /* Products */ = {
@@ -90,6 +189,17 @@
 				E978712C4B5B642C44883D6E /* CampfireUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		956FBEC4E0DEFD4CB3EDD6E7 /* web */ = {
+			isa = PBXGroup;
+			children = (
+				8EC6FECFA3A88162027B8876 /* BridgeTests.swift */,
+				CE39EF59051BEABEC1A88BF0 /* WebPageFullScreenTests.swift */,
+				B9D41EFFFA1A5AE0A91D4652 /* WebStackTests.swift */,
+				794C94847504701EEAC25341 /* WebTabTests.swift */,
+			);
+			path = web;
 			sourceTree = "<group>";
 		};
 		ABDBDA3FBFF19B4E739AD7FD /* test-ui */ = {
@@ -108,6 +218,14 @@
 				26A24DF9CD14E45FDA391BFB /* Campfire.plist */,
 			);
 			path = generated;
+			sourceTree = "<group>";
+		};
+		CC1C9F3F8333BE3C7B5EBC19 /* theme */ = {
+			isa = PBXGroup;
+			children = (
+				72D44CCFBF1590A63188A505 /* Theme.swift */,
+			);
+			path = theme;
 			sourceTree = "<group>";
 		};
 		DF1F8CEE45479ED9CEE6AF61 = {
@@ -130,6 +248,7 @@
 			children = (
 				ABF5F3EDE55EEA07D7B2CD10 /* generated */,
 				981586AC6054589865EA061A /* Dev.xcconfig */,
+				C89E8D97D6D06AE3ADEEA9DE /* Lan.xcconfig */,
 				385330E42EB6817FC4F71A6C /* Local.xcconfig */,
 				DCCB65045B963E522D0858DE /* Prod.xcconfig */,
 				FE1C6ABED4F23C3DF00D51A9 /* Shared.xcconfig */,
@@ -241,6 +360,7 @@
 			files = (
 				A2029A4441C2EBFC4A73E1B1 /* AppIcon.icon in Resources */,
 				986797445F3AD2A28AFD95A9 /* Assets.xcassets in Resources */,
+				9F388AF62B13450328FD03D3 /* BravelyScript.otf in Resources */,
 				A16F30A94C91C04FFAC6F6AB /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -253,7 +373,22 @@
 			buildActionMask = 2147483647;
 			files = (
 				66617BB3A744B71E1AFCEF29 /* App.swift in Sources */,
+				86E1A35180F1B0775C6FE9E8 /* AppModel.swift in Sources */,
+				DD780336AC1DF248A08EC7E9 /* BackSwipe.swift in Sources */,
+				433297ACC667CC3B7E1BF157 /* Bridge.swift in Sources */,
 				797C717FAC57DFD23AE6B176 /* Config.swift in Sources */,
+				D21F2279E93CAD00B5D6795D /* ContentView.swift in Sources */,
+				E634450A28288C23932FEAD0 /* IdentitySheet.swift in Sources */,
+				3F749B1C5E0EE746CD643F1F /* MainView.swift in Sources */,
+				8642E44D4ED273BB36A6B4A2 /* Section.swift in Sources */,
+				D5280305F503CC2A97C15C8A /* Skeleton.swift in Sources */,
+				8F4590058F3B6952E04C4570 /* Theme.swift in Sources */,
+				C98621FA924E47457C6E1082 /* WebPageBar.swift in Sources */,
+				570D527CA91E1EB6336F0D0F /* WebPageController.swift in Sources */,
+				B0C5C4FB2DA5D5642F832F42 /* WebPageFullScreen.swift in Sources */,
+				47F5906BB4A61559A5EBAF8A /* WebStack.swift in Sources */,
+				65A8B2EFE1A5ED183FB55170 /* WebTab.swift in Sources */,
+				E2306F073FAE494187823B88 /* WebViewHost.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -261,7 +396,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2E027E12BCF4C96CBC096ACA /* AppModelTests.swift in Sources */,
+				6B8A3E007401EB7DD95AD43C /* BridgeTests.swift in Sources */,
 				52D8DE4102C0768DC2ABF8D0 /* ConfigTests.swift in Sources */,
+				1B1D49C16DC119312E31AF9F /* PaletteTests.swift in Sources */,
+				6766BAA458D6AC1D6E62960D /* SectionTests.swift in Sources */,
+				B973D9A3CCC8B43D38C02A20 /* WebPageFullScreenTests.swift in Sources */,
+				FDE4A855807B7B6C0F59D8ED /* WebStackTests.swift in Sources */,
+				0DF08910C9E205FADE05C0A4 /* WebTabTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,0 +1,10 @@
+/* What a material screen says when it has nothing to show. */
+
+@layer component {
+  /* Quiet, because it labels the content rather than competing with it. */
+  .material-status {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0 0 var(--spacing-group);
+  }
+}

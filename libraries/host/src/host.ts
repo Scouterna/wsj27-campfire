@@ -14,23 +14,48 @@
 export type Tier = "browser" | "shell"
 
 /**
- * What the shells append to the webview's User-Agent to announce themselves.
+ * Which shell hosts the web application, because the two carry the bridge differently.
  */
-const shellToken = "CampfireShell"
+export type ShellPlatform = "android" | "ios"
 
 /**
- * Reads the tier off the User-Agent. Node and a worker may have no `navigator`, so an
- * absent one is the browser tier rather than a crash at import time.
- *
- * @returns The tier this document is running in.
+ * The host as the User-Agent describes it.
  */
-function detectTier(): Tier {
-  const userAgent = typeof navigator === "undefined" ? "" : navigator.userAgent
-  return userAgent.includes(shellToken) ? "shell" : "browser"
+export interface Host {
+  /**
+   * The shell's platform, or undefined in a browser and in a shell that did not name one.
+   */
+  readonly platform: ShellPlatform | undefined
+  readonly tier: Tier
 }
 
 /**
- * The host, frozen at module evaluation so every reader sees the same tier and no two
+ * What the shells append to the webview's User-Agent to announce themselves, followed by
+ * the bridge version and the platform – `CampfireShell/1 (ios)`.
+ */
+const shellToken = "CampfireShell"
+const platformToken = /\bCampfireShell\/\d+ \((android|ios)\)/u
+
+/**
+ * Reads the host off the User-Agent. Node and a worker may have no `navigator`, so an
+ * absent one is the browser tier rather than a crash at import time.
+ *
+ * @returns The host this document is running in.
+ */
+function detectHost(): Host {
+  const userAgent = typeof navigator === "undefined" ? "" : navigator.userAgent
+  if (!userAgent.includes(shellToken)) {
+    return { platform: undefined, tier: "browser" }
+  }
+  const platform = platformToken.exec(userAgent)?.[1]
+  return {
+    platform: platform === "android" || platform === "ios" ? platform : undefined,
+    tier: "shell",
+  }
+}
+
+/**
+ * The host, frozen at module evaluation so every reader sees the same answer and no two
  * components can disagree about it.
  */
-export const host: { readonly tier: Tier } = Object.freeze({ tier: detectTier() })
+export const host: Host = Object.freeze(detectHost())

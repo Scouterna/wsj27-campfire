@@ -47,10 +47,23 @@ export function SearchField(props: SearchFieldProps): ReactElement {
       <span className="searchfield-mark" aria-hidden="true">
         <SearchIcon size={17} strokeWidth={2.2} />
       </span>
+      {/* Names and numbers, which a keyboard's corrections only get wrong. The Search
+          key puts the keyboard away, as a native search bar's does, since the results
+          already follow every keystroke. */}
       <input
+        autoCapitalize="off"
+        autoComplete="off"
+        autoCorrect="off"
         className="searchfield-input"
+        enterKeyHint="search"
         onChange={props.onChange}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            event.currentTarget.blur()
+          }
+        }}
         placeholder={props.placeholder}
+        spellCheck={false}
         type="search"
         value={props.value}
       />

@@ -1,4 +1,5 @@
 import { setNavDirection, wasPopExpected, type NavDirection } from "@scouterna/wsj27-campfire-ui"
+import { rootRouteId, useRouterState } from "@tanstack/react-router"
 import { useLayoutEffect } from "react"
 
 /**
@@ -8,30 +9,13 @@ import { useLayoutEffect } from "react"
  */
 
 /**
- * The history index of the current entry. TanStack Router keys its entries with a
- * state object; the index is stamped here instead, on the first visit, so the trails
- * below can be keyed by position in the stack.
- * @returns The stamped index, or undefined on an entry no navigation has stamped yet.
+ * The history index of the current entry, as the router's history keeps it in the
+ * entry's state – one more on a push, the same on a replace, counting from wherever the
+ * session started.
+ * @returns The index, or undefined on an entry the router's history has not written.
  */
 export function historyIndex(): number | undefined {
-  return (history.state as { key?: string; __index?: number } | null)?.__index
-}
-
-/**
- * Stamp the current entry with its position, counting from wherever the session
- * started.
- * @param previous The index the last navigation left.
- * @param type How the entry was arrived at.
- * @returns The entry's index, stamped now or already there.
- */
-function stampIndex(previous: number | undefined, type: "push" | "pop" | "replace"): number {
-  const existing = historyIndex()
-  if (existing !== undefined) {
-    return existing
-  }
-  const index = type === "push" ? (previous ?? -1) + 1 : (previous ?? 0)
-  history.replaceState({ ...(history.state as object), __index: index }, "")
-  return index
+  return (history.state as { __TSR_index?: number } | null)?.__TSR_index
 }
 
 /**
@@ -141,18 +125,221 @@ const lastNavigation: { type: "push" | "pop" | "replace"; index: number | undefi
 const restoreWindowMs = 800
 
 /**
- * Put both scrollers back where the entry left them, retrying frame by frame until
- * the position sticks or the window closes – the arriving screen's content mounts a
- * beat after the location changes, and until it does the position has nowhere to go.
- * A newer navigation ends the retry at once, so a quick second pop is never fought.
+ * How often a restore tries again, about once a frame.
+ */
+const retryMs = 16
+
+/**
+ * How long a view transition holds the arriving page for its restore. Past this the
+ * slide starts wherever the page is and the restore carries on unheld, because a back
+ * that waits visibly for its content reads as a hang rather than as a pop.
+ */
+const holdWithinMs = 200
+
+/**
+ * How many retries in a row a position may stand still at the farthest the page lets
+ * it scroll before the restore accepts it. Content that came back shorter than it was
+ * left can never reach the old position, and waiting for it only freezes the page.
+ */
+const stillAtEndRetries = 3
+
+/**
+ * The arriving page's restore. While a view transition's update is held, a restore
+ * waits for the update to end rather than writing the scroll position into it, because
+ * WebKit on iOS moves its scroll view the moment the position is written, under the
+ * leaving page's frozen image, and past that page's end it shows bare paper until the
+ * slide starts. Written last, the move lands in the frame the arriving page is
+ * captured in. `restore` is the one under way, which the transition waits for before
+ * it captures – undefined once it has settled, and on a push.
+ */
+const arrival: {
+  deferred: (() => Promise<undefined>) | undefined
+  isUpdating: boolean
+  restore: Promise<undefined> | undefined
+} = { deferred: undefined, isUpdating: false, restore: undefined }
+
+/**
+ * Restore a popped page now, or once the view transition's update is over when one is
+ * being held.
  * @param index The history entry being restored.
  * @param windowTop Where the window had scrolled.
  * @param columnTop Where the content column had scrolled.
+ * @returns The restore when it started now, settling once it ends, or undefined when it
+ * waits for the update.
  */
-function restoreScroll(index: number, windowTop: number, columnTop: number): void {
+function scheduleRestore(
+  index: number,
+  windowTop: number,
+  columnTop: number,
+): Promise<undefined> | undefined {
+  if (arrival.isUpdating) {
+    arrival.deferred = () => restoreScroll(index, windowTop, columnTop)
+    return undefined
+  }
+  return restoreScroll(index, windowTop, columnTop)
+}
+
+/**
+ * Where the latest pop put the page back, until the router has finished rendering it.
+ * The router resets the scroll to the top once it has rendered any navigation, a pop
+ * included, and that lands after a restore that has already settled.
+ */
+const poppedTo: {
+  target: { columnTop: number; index: number; until: number; windowTop: number } | undefined
+} = { target: undefined }
+
+/**
+ * Put a popped page back where it was left once the router has rendered it, undoing the
+ * router's own reset to the top. Called from the router's rendered event, after the
+ * router's own handler, in the same task, so the reset is never painted. Only the pop's
+ * own render is answered, because a later one – a search narrowed in place – is the
+ * reader's, and starts at the top as the router has it.
+ */
+export function reassertPoppedScroll(): void {
+  const target = poppedTo.target
+  poppedTo.target = undefined
+  if (
+    target === undefined ||
+    performance.now() > target.until ||
+    lastNavigation.index !== target.index ||
+    historyIndex() !== target.index
+  ) {
+    return
+  }
+  void scheduleRestore(target.index, target.windowTop, target.columnTop)
+}
+
+/**
+ * The view transition under way, from the moment it starts until it has finished, and
+ * whether its animation has started yet.
+ */
+const transitions: { current: ViewTransition | undefined; isStarting: boolean } = {
+  current: undefined,
+  isStarting: false,
+}
+
+/**
+ * Whether scroll events are kept out of the trails. Set when a navigation starts and
+ * cleared once the arriving page has committed and its transition has finished, because
+ * in between the window scrolls for reasons that are not the reader's – the arriving
+ * page's restore, a shell moving its bars – while the history index already names
+ * another entry or still names the leaving one.
+ */
+const trailFreeze = { isFrozen: false, thawAt: 0 }
+
+/**
+ * How long a freeze can last with no navigation landing to end it – a click on a link
+ * to the page already showing navigates nowhere.
+ */
+const freezeWithinMs = 2000
+
+/**
+ * Whether scroll events are being kept out of the trails now.
+ * @returns True between a navigation's start and the end of its arrival.
+ */
+function isTrailFrozen(): boolean {
+  return trailFreeze.isFrozen && performance.now() < trailFreeze.thawAt
+}
+
+/**
+ * Remember where the leaving entry rests, keep scroll events out of the trails until the
+ * arrival is over, and decide whether the title can morph. Called the moment a
+ * navigation is decided, before anything moves.
+ * @param leaving The leaving entry, or undefined before the first navigation has landed.
+ * @param arriving The entry a pop returns to, or undefined for a push, which arrives at
+ * the top.
+ */
+function startNavigation(leaving: number | undefined, arriving?: number): void {
+  const column = document.querySelector(".page")
+  // A page still arriving is where its restore has put it so far, not where it was
+  // left, so its trail keeps the target instead.
+  if (leaving !== undefined && !isTrailFrozen()) {
+    windowScrollTrail.set(leaving, scrollY)
+    if (column instanceof HTMLElement) {
+      scrollTrail.set(leaving, column.scrollTop)
+    }
+  }
+  trailFreeze.isFrozen = true
+  trailFreeze.thawAt = performance.now() + freezeWithinMs
+  poppedTo.target = undefined
+
+  // The crumb morph moves the title between the leaving page and the arriving one, so
+  // it runs only where the title is in view on both, as a native large title folds into
+  // the back button only while it shows. Otherwise the text would fly in from behind
+  // the bar, or off the top of the screen.
+  const isColumnScroller =
+    column instanceof HTMLElement && getComputedStyle(column).overflowY !== "visible"
+  const arrivingTrail = isColumnScroller ? scrollTrail : windowScrollTrail
+  const arrivingTop = arriving === undefined ? 0 : (arrivingTrail.get(arriving) ?? 0)
+  const scrolled = isColumnScroller ? column.scrollTop : scrollY
+  const isCrumbShown = isTitleInView(scrolled, scrolled) && isTitleInView(scrolled, arrivingTop)
+  if (isCrumbShown) {
+    delete document.documentElement.dataset["crumbOff"]
+  } else {
+    document.documentElement.dataset["crumbOff"] = ""
+  }
+}
+
+/**
+ * Whether the page's title would still show below the bar with its scroller at a given
+ * position, estimated from the heading showing now – every page's heading sits at the
+ * same place in the chrome.
+ * @param scrolled Where the page's scroller stands now.
+ * @param top The position to test.
+ * @returns True when some of the title would be below the bar.
+ */
+function isTitleInView(scrolled: number, top: number): boolean {
+  const title = document.querySelector(".pageheading h1")
+  if (!(title instanceof HTMLElement)) {
+    return false
+  }
+  const bar = document.querySelector(".topbar")?.getBoundingClientRect()
+  const column = document.querySelector(".page")
+  const ceiling =
+    bar !== undefined && bar.height > 0 ? bar.bottom : (column?.getBoundingClientRect().top ?? 0)
+  return title.getBoundingClientRect().bottom + scrolled - top > ceiling
+}
+
+/**
+ * The nearest the window can scroll to a position, given how tall the document is now.
+ * @param top The position asked for.
+ * @returns The position, held within the document's scroll range.
+ */
+function reachableWindowTop(top: number): number {
+  const end = Math.max(0, document.documentElement.scrollHeight - innerHeight)
+  return Math.min(top, end)
+}
+
+/**
+ * Put both scrollers back where the entry left them, retrying frame by frame until
+ * the position sticks or the window closes – the arriving screen's content mounts a
+ * beat after the location changes, and until it does the position has nowhere to go.
+ * A position the content no longer reaches is accepted at the content's end once the
+ * end stops moving. A newer navigation ends the retry at once, so a quick second pop is
+ * never fought.
+ * @param index The history entry being restored.
+ * @param windowTop Where the window had scrolled.
+ * @param columnTop Where the content column had scrolled.
+ * @returns A promise settling once the retry ends, however it ends.
+ */
+function restoreScroll(index: number, windowTop: number, columnTop: number): Promise<undefined> {
+  const { promise, resolve } = Promise.withResolvers<undefined>()
   const startedAt = performance.now()
+  // Closed by a timer as well as by the retry, so nothing waiting on the restore waits
+  // longer than the window.
+  const timeout = setTimeout(() => {
+    resolve(undefined)
+  }, restoreWindowMs)
+  const finish = (): void => {
+    clearTimeout(timeout)
+    resolve(undefined)
+  }
+  let lastEnd = ""
+  let stillAtEnd = 0
+  const announced = { columnTop: -1, windowTop: -1 }
   const apply = (): void => {
     if (lastNavigation.index !== undefined && lastNavigation.index !== index) {
+      finish()
       return
     }
     scrollTo(0, windowTop)
@@ -160,15 +347,47 @@ function restoreScroll(index: number, windowTop: number, columnTop: number): voi
     if (column instanceof HTMLElement) {
       column.scrollTop = columnTop
     }
-    const isColumnSettled =
-      !(column instanceof HTMLElement) || Math.abs(column.scrollTop - columnTop) < 1
-    const isWindowSettled = Math.abs(scrollY - windowTop) < 1
-    if ((isColumnSettled && isWindowSettled) || performance.now() - startedAt > restoreWindowMs) {
+    // A scroll event waits for the next frame, and no frame runs while a transition's
+    // update is held, so a virtual list would be captured with its rows still where it
+    // mounted and bare paper at the restored position. Announced now, it renders the
+    // rows there before anything is captured or shown.
+    if (scrollY !== announced.windowTop) {
+      announced.windowTop = scrollY
+      document.dispatchEvent(new Event("scroll", { bubbles: true }))
+    }
+    if (column instanceof HTMLElement && column.scrollTop !== announced.columnTop) {
+      announced.columnTop = column.scrollTop
+      column.dispatchEvent(new Event("scroll"))
+    }
+    const columnEnd =
+      column instanceof HTMLElement
+        ? Math.min(columnTop, Math.max(0, column.scrollHeight - column.clientHeight))
+        : columnTop
+    const isColumnAt = (top: number): boolean =>
+      !(column instanceof HTMLElement) || Math.abs(column.scrollTop - top) < 1
+    const windowEnd = reachableWindowTop(windowTop)
+    const isReached = Math.abs(scrollY - windowTop) < 1 && isColumnAt(columnTop)
+    // Short of the target only because the content ends there, and the end has stood
+    // still for a few tries – the content is as long as it is going to get.
+    const end = `${String(windowEnd)}:${String(columnEnd)}`
+    const isShort = windowEnd < windowTop || columnEnd < columnTop
+    if (isShort && Math.abs(scrollY - windowEnd) < 1 && isColumnAt(columnEnd) && end === lastEnd) {
+      stillAtEnd += 1
+    } else {
+      stillAtEnd = 0
+    }
+    lastEnd = end
+    const isAtEnd = stillAtEnd >= stillAtEndRetries
+    if (isReached || isAtEnd || performance.now() - startedAt > restoreWindowMs) {
+      finish()
       return
     }
-    requestAnimationFrame(apply)
+    // A timer rather than a frame, because no frame runs while a transition's update is
+    // pending, and that is exactly where the restore has to land.
+    setTimeout(apply, retryMs)
   }
   apply()
+  return promise
 }
 
 /**
@@ -179,37 +398,80 @@ function restoreScroll(index: number, windowTop: number, columnTop: number): voi
  * programmatic navigation is the one nothing sees, and without this it is stamped with
  * whatever the *previous* navigation was. After a pop that reuses the entry's own
  * index, and the new entry overwrites the title, root, and scroll trails of the one it
- * was pushed on top of.
+ * was pushed on top of. It also remembers where the leaving page rests, before anything
+ * moves it.
  */
 export function markPush(): void {
+  startNavigation(historyIndex())
   lastNavigation.type = "push"
+}
+
+/**
+ * The path of the screen the router has rendered, which is what the chrome describes.
+ *
+ * The router publishes the address it is heading for before it starts the view
+ * transition, renders the screen there inside the transition's update, and marks the
+ * navigation resolved only once the update is over. Read from the address, a push's
+ * bookkeeping – the scroll to the top among it – runs before the leaving page is
+ * captured, so the page jumps to its top as it slides away; read from the resolved
+ * location, a pop's restored scroll lands after the arriving page is captured. The
+ * committed screen is the one moment in between.
+ *
+ * @returns The committed screen's path, or the address while the screen is the root's
+ * not-found page.
+ */
+export function useRenderedPathname(): string {
+  return useRouterState({
+    select: (state) => {
+      const leaf = state.matches.at(-1)
+      return leaf === undefined || leaf.routeId === rootRouteId
+        ? state.location.pathname
+        : leaf.pathname
+    },
+  })
 }
 
 /**
  * Everything the chrome has to remember about a navigation – the title of each history
  * entry, which entries are section roots, the phase mark the crumb morph reads, and
- * the scroll positions. Runs on every location change.
+ * the scroll positions. Runs once the router has rendered each navigation's screen.
  *
- * @param pathname Where the navigation landed.
+ * @param pathname Where the navigation landed, as `useRenderedPathname` reads it.
  * @param title What the screen showing now is called.
  */
 export function useNavigationBookkeeping(pathname: string, title: string | undefined): void {
-  // Before paint, so the scroll position is what the view transition snapshots. The
-  // index is stamped first, because everything else is keyed by it.
+  // Before paint, so the scroll position is what the view transition snapshots as the
+  // arriving page. Nothing here writes history: the router's history hears every write
+  // and would answer one with a second navigation, and a second transition with it.
   useLayoutEffect(() => {
-    const index = stampIndex(lastNavigation.index, lastNavigation.type)
+    // The router's history writes an index into every entry it makes, the first one
+    // included, so a missing one means the first entry.
+    const index = historyIndex() ?? 0
     const isPop = lastNavigation.type === "pop"
     lastNavigation.index = index
 
     // A pop returns to where the scroller was left; a push or replace starts at the top.
+    // The top is written into the trails too, because an entry pushed after a pop
+    // reuses the popped one's index, and a page already at the top fires no scroll
+    // event to overwrite what the popped one left there.
     if (isPop) {
-      restoreScroll(index, windowScrollTrail.get(index) ?? 0, scrollTrail.get(index) ?? 0)
+      const windowTop = windowScrollTrail.get(index) ?? 0
+      const columnTop = scrollTrail.get(index) ?? 0
+      arrival.restore = scheduleRestore(index, windowTop, columnTop)
+      poppedTo.target = { columnTop, index, until: performance.now() + restoreWindowMs, windowTop }
     } else {
       scrollTo(0, 0)
       const column = document.querySelector(".page")
       if (column instanceof HTMLElement) {
         column.scrollTop = 0
       }
+      windowScrollTrail.set(index, 0)
+      scrollTrail.set(index, 0)
+    }
+
+    // Without a view transition the arrival is over once the screen has committed.
+    if (transitions.current === undefined) {
+      trailFreeze.isFrozen = false
     }
 
     // The root trail: a pending section switch is resolved to the entry it landed on.
@@ -266,9 +528,7 @@ const onClick = (event: MouseEvent): void => {
   const isSection = anchor.closest(".sidemenu-items, .tabstrip") !== null
   const fallback: NavDirection = isSection ? "fade" : "forward"
   setNavDirection(declared ?? fallback)
-  delete document.documentElement.dataset["vtNew"]
-
-  lastNavigation.type = "push"
+  markPush()
 
   // A section switch lands on a start screen, wherever it was clicked from – noted
   // now, resolved to a history entry when the navigation lands.
@@ -277,14 +537,15 @@ const onClick = (event: MouseEvent): void => {
   }
 }
 
-// On a pop we did not ask for, disarm the transition before the router snapshots.
-// Asked for or not, the phase mark comes off before the old page is snapshotted.
+// On a pop we did not ask for, disarm the transition before the router snapshots. The
+// history already stands at the arriving entry, so the leaving one is the last that
+// landed.
 const onPop = (): void => {
   if (!wasPopExpected()) {
     setNavDirection("none")
   }
+  startNavigation(lastNavigation.index, historyIndex())
   lastNavigation.type = "pop"
-  delete document.documentElement.dataset["vtNew"]
 }
 
 // Registered at module evaluation rather than at wiring, because popstate listeners run
@@ -301,6 +562,9 @@ addEventListener("popstate", onPop)
 // signed-in screen renders – and scroll events do not bubble, so only capture sees
 // every scroller's events from above.
 const onScroll = (event: Event): void => {
+  if (isTrailFrozen()) {
+    return
+  }
   const index = historyIndex()
   if (index === undefined) {
     return
@@ -313,14 +577,150 @@ const onScroll = (event: Event): void => {
   }
 }
 
-// Whether a replacement state is one the current entry's stamp has to be carried into.
-// Anything that is not an object is passed on as it came – the trails simply have no key
-// on such an entry, which is what a state nobody here wrote already means.
-function requiresIndex(data: unknown): data is Record<string, unknown> {
-  if (typeof data !== "object" || data === null) {
-    return false
+/**
+ * How long a waiter looks for the first animated frame after a transition is ready,
+ * before it accepts the transition as started anyway.
+ */
+const firstFrameWithinMs = 300
+
+/**
+ * A promise settling once the view transition under way has started to animate – the
+ * moment the leaving page starts to slide – or at once when none is starting. A shell
+ * changes its bar when this settles, so the native title moves with the page rather
+ * than ahead of it while the update is held for a restore.
+ * @returns The promise, which never rejects.
+ */
+export async function transitionStarted(): Promise<void> {
+  const transition = transitions.isStarting ? transitions.current : undefined
+  if (transition === undefined) {
+    return
   }
-  return !("__index" in data) || data.__index === undefined
+  // A skipped transition rejects its ready, and has started as far as a waiter cares.
+  const [ready] = await Promise.allSettled([transition.ready])
+  if (ready.status === "fulfilled") {
+    await firstAnimatedFrame()
+  }
+}
+
+/**
+ * A promise settling once a view transition's animation has drawn a frame. WebKit
+ * resolves a transition's ready before it composites the first animated frame – a
+ * tenth of a second and more before the page visibly moves – and an animation's clock
+ * starts only once its first frame is on screen, so that clock is the signal.
+ * @returns The promise, settling at the latest after a bounded wait, never rejecting.
+ */
+async function firstAnimatedFrame(): Promise<void> {
+  const startedAt = performance.now()
+  const { promise, resolve } = Promise.withResolvers<undefined>()
+  const look = (): void => {
+    const animations = document
+      .getAnimations()
+      .filter((animation) =>
+        (animation.effect as KeyframeEffect | null)?.pseudoElement?.startsWith("::view-transition"),
+      )
+    const isMoving = animations.some((animation) => Number(animation.currentTime ?? 0) > 0)
+    if (animations.length === 0 || isMoving || performance.now() - startedAt > firstFrameWithinMs) {
+      resolve(undefined)
+      return
+    }
+    requestAnimationFrame(look)
+  }
+  look()
+  await promise
+}
+
+/**
+ * Run something once the view transition under way has finished, or as soon as possible
+ * when none is. A navigation started during another one skips it, and the skipped page
+ * snaps to its end before the next one moves, so a back pressed mid-push waits for the
+ * push to land, as a native stack does.
+ * @param run What to run.
+ * @returns A promise settling once it has run.
+ */
+export async function afterTransition(run: () => void): Promise<void> {
+  const transition = transitions.current
+  if (transition !== undefined) {
+    await Promise.allSettled([transition.finished])
+  }
+  run()
+}
+
+/**
+ * Wraps every view transition the router starts. A pop's scroll restore starts once the
+ * update has rendered the arriving screen, and the update is held until it has settled,
+ * so the arriving page is captured where it was left: its content – a list sized by its
+ * data – can arrive a frame or two after the screen commits, and until then the
+ * position has nowhere to go. Captured then, the page would slide in at its top and jump
+ * down once the slide had finished. The hold is bounded, and a push restores nothing and
+ * waits for nothing.
+ *
+ * A navigation declared `none` skips its transition, so the arriving page paints at
+ * once under whatever the platform already animated, and nothing of ours fades on top.
+ * The phase mark for the crumb morph comes off here too, before the leaving page is
+ * captured, whoever started the navigation.
+ */
+function wrapViewTransitions(): void {
+  if (typeof document.startViewTransition !== "function") {
+    return
+  }
+  const start = document.startViewTransition.bind(document)
+  document.startViewTransition = (options) => {
+    const update = typeof options === "function" ? options : options?.update
+    const isDisarmed = document.documentElement.dataset["nav"] === "none"
+    const held = async (): Promise<void> => {
+      // A disarmed transition is skipped and shows nothing, so its restore runs at once.
+      arrival.isUpdating = !isDisarmed
+      try {
+        await update?.()
+      } finally {
+        arrival.isUpdating = false
+      }
+      const deferred = arrival.deferred
+      arrival.deferred = undefined
+      if (deferred !== undefined) {
+        arrival.restore = deferred()
+      }
+      const restore = arrival.restore
+      arrival.restore = undefined
+      if (isDisarmed || restore === undefined) {
+        return
+      }
+      await Promise.race([
+        restore,
+        new Promise((resolve) => {
+          setTimeout(resolve, holdWithinMs)
+        }),
+      ])
+    }
+    delete document.documentElement.dataset["vtNew"]
+    const transition = start(typeof options === "object" ? { ...options, update: held } : held)
+    if (isDisarmed) {
+      transition.skipTransition()
+    }
+    void track(transition)
+    return transition
+  }
+}
+
+/**
+ * Follow a view transition through its start and its end, as the one under way until a
+ * newer one replaces it. Its end is also the end of the arrival, so the trails take
+ * scroll events again.
+ * @param transition The transition just started.
+ */
+async function track(transition: ViewTransition): Promise<void> {
+  transitions.current = transition
+  transitions.isStarting = true
+  await Promise.allSettled([transition.ready])
+  if (transitions.current === transition) {
+    transitions.isStarting = false
+  }
+  await Promise.allSettled([transition.finished])
+  if (transitions.current !== transition) {
+    return
+  }
+  transitions.current = undefined
+  trailFreeze.isFrozen = false
 }
 
 /**
@@ -332,16 +732,7 @@ export function wireNavigation(): void {
   // page out of step with where taps land.
   history.scrollRestoration = "manual"
 
-  // A replace navigation – a screen writing its state into the address – hands the
-  // router's own state object to `replaceState`, and that object carries no `__index`.
-  // Without carrying the stamp across, the entry loses the key its scroll and title
-  // trails are kept under, so back lands nameless at the top of the page.
-  const replaceState = history.replaceState.bind(history)
-  history.replaceState = (data: unknown, unused: string, url?: string | URL | null): void => {
-    const index = historyIndex()
-    const carried = index !== undefined && requiresIndex(data) ? { ...data, __index: index } : data
-    replaceState(carried, unused, url)
-  }
+  wrapViewTransitions()
 
   document.addEventListener("click", onClick, { capture: true })
   document.addEventListener("scroll", onScroll, { capture: true, passive: true })

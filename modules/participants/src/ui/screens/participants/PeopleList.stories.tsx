@@ -3,12 +3,15 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import type { ReactElement } from "react"
 
 import { inReadingOrder } from "../../../model/Participant"
+import { ApiDecorator } from "../../storybook/ApiDecorator"
 import { cast, largePeopleList } from "../../storybook/cast"
 import { PeopleList } from "./PeopleList"
 
 const meta: Meta<typeof PeopleList> = {
   title: "Modules/Participants/Components/PeopleList",
   component: PeopleList,
+  // A row starts reading the person it opens as it is pressed, through the query client.
+  decorators: [ApiDecorator],
   args: { isUnitScoped: false, people: inReadingOrder(cast), resetKey: "" },
   render: (args): ReactElement => (
     <div className="story-screen-content">

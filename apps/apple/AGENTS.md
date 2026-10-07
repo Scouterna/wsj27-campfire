@@ -70,6 +70,6 @@ Differences chosen on each platform's own terms:
 - Unit tests are Swift Testing – a `@Suite` per type and a `@Test` named as a sentence in backticks. The unit target is hosted by the app, so `Config` reads the shell's own `Info.plist`.
 - UI tests are XCUITest and stay incurious about which words are on screen – those belong to the web application.
 - `pnpm start:apple` needs something answering on `http://localhost:8000` – start a stack first. Both test scripts run the Local scheme, and `pnpm test:apple` compiles the UI tests too, which keeps them from rotting.
-- `CAMPFIRE_DEVICE=1 sh scripts/apple/build.sh local` builds for a real iPhone against this machine's LAN address. Sign-in cannot complete there, because ScoutID returns only to `localhost`.
+- On a real iPhone, start the stack with `pnpm start:local --lan` and run the Local scheme from Xcode. The stack writes the gitignored `config/Lan.xcconfig`, which `Local.xcconfig` includes when it exists, so the scheme loads from this machine's network address while the stack runs and the mock signs in there. `CAMPFIRE_DEVICE=1 sh scripts/apple/build.sh local` builds the same from the command line. Against `start:dev`, sign-in cannot complete on a phone, because ScoutID returns only to `localhost`.
 - Continuous integration runs no Apple workflow, on purpose, so no macOS runner is spent. The `pre-push` hook is the gate, and only where the toolchain is installed – run the checks yourself.
 - Read the [architecture chapter](../../docs/guidebook/architecture/index.md) before a change that moves a boundary.

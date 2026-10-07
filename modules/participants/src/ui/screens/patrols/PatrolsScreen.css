@@ -1,0 +1,598 @@
+/* The patrol editor: the people in no patrol, the four patrol boards, and the chip a
+   leader carries between them. */
+
+@layer screen {
+  .patrols {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-section);
+  }
+
+  .patrols-status {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+  }
+
+  .patrols-warning {
+    background: var(--color-tone-caution-wash);
+    border-radius: var(--border-radius-control);
+    color: var(--color-tone-caution-ink);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+    padding: var(--spacing-group) var(--spacing-container);
+  }
+
+  /* One column on a phone, two where the patrols fit side by side – four in a row
+     would leave each too narrow for a name. */
+  .patrols-boards {
+    display: grid;
+    gap: var(--spacing-container);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 1024px) {
+    .patrols-boards {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+  }
+
+  /* A board is a card's sheet with its own heading inside, because the heading is a
+     field the leader types the name into. It lifts toward the reader under a carried
+     person, which is how it says it will take them. */
+  .patrol-board {
+    background: var(--color-sheet);
+    border: 2px solid transparent;
+    border-radius: var(--border-radius-surface);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-group);
+    padding: var(--spacing-container);
+    transition:
+      border-color 120ms ease,
+      background 120ms ease,
+      transform 160ms ease;
+  }
+
+  .patrol-board-over,
+  .patrols-tray-over {
+    background: color-mix(in srgb, var(--color-theme-wash) 60%, var(--color-sheet));
+    border-color: var(--color-theme-bright);
+  }
+
+  .patrol-board-over {
+    transform: scale(1.01);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .patrol-board-over {
+      transform: none;
+    }
+  }
+
+  .patrol-board-heading {
+    align-items: center;
+    display: flex;
+    gap: var(--spacing-group);
+  }
+
+  /* The name reads as the board's title until it is pressed, when it shows it is a
+     field. */
+  .patrol-board-name {
+    background: transparent;
+    border: none;
+    border-radius: var(--border-radius-control);
+    color: var(--color-ink);
+    flex: 1;
+    font: inherit;
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-strong);
+    margin: calc(var(--spacing-stack) * -1) 0 calc(var(--spacing-stack) * -1)
+      calc(var(--spacing-stack) * -1);
+    min-width: 0;
+    padding: var(--spacing-stack);
+  }
+
+  .patrol-board-name::placeholder {
+    color: var(--color-ink);
+  }
+
+  .patrol-board-name:hover,
+  .patrol-board-name:focus {
+    background: color-mix(in srgb, var(--color-theme-wash) 45%, transparent);
+    outline: none;
+  }
+
+  .patrol-board-name:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+  }
+
+  .patrol-board-size {
+    align-items: center;
+    color: var(--color-ink-secondary);
+    display: flex;
+    flex: none;
+    font-size: var(--font-size-footnote);
+    font-variant-numeric: tabular-nums;
+    gap: var(--spacing-stack);
+  }
+
+  /* Who leads the patrol, as a quiet picker – and in the caution tone while nobody does,
+     so a patrol without a leader cannot be missed. */
+  .patrol-leader {
+    align-items: center;
+    border-radius: var(--border-radius-control);
+    display: flex;
+    font-size: var(--font-size-footnote);
+    gap: var(--spacing-group);
+  }
+
+  .patrol-leader label {
+    color: var(--color-ink-secondary);
+    flex: none;
+  }
+
+  .patrol-leader-missing {
+    background: var(--color-tone-caution-wash);
+    padding: var(--spacing-stack) var(--spacing-group);
+  }
+
+  .patrol-leader-missing label {
+    color: var(--color-tone-caution-ink);
+    font-weight: var(--font-weight-strong);
+  }
+
+  .patrol-leader-select {
+    background: transparent;
+    border: 1px solid var(--color-divider);
+    border-radius: var(--border-radius-control);
+    color: var(--color-ink);
+    flex: 1;
+    font: inherit;
+    font-weight: var(--font-weight-strong);
+    min-height: 36px;
+    min-width: 0;
+    padding: 0 var(--spacing-stack);
+  }
+
+  .patrol-board-overfull {
+    color: var(--color-tone-danger-ink);
+    font-weight: var(--font-weight-strong);
+  }
+
+  /* The gender mix as one bar split in proportion, with the counts beside it. */
+  .patrol-genders {
+    align-items: center;
+    display: flex;
+    gap: var(--spacing-group);
+  }
+
+  .patrol-genders-bar {
+    border-radius: var(--border-radius-round);
+    display: flex;
+    flex: 1;
+    gap: 2px;
+    height: 8px;
+    overflow: hidden;
+  }
+
+  .patrol-genders-bar > span {
+    flex-basis: 0;
+    transition: flex-grow 240ms ease;
+  }
+
+  .patrol-genders-kvinna {
+    background: var(--color-theme-bright);
+  }
+
+  .patrol-genders-man {
+    background: var(--color-theme-ink);
+  }
+
+  .patrol-genders-annat {
+    background: var(--color-tone-caution-mark);
+  }
+
+  .patrol-genders-okant {
+    background: var(--color-tone-empty);
+  }
+
+  .patrol-genders-legend {
+    color: var(--color-ink-secondary);
+    display: flex;
+    flex: none;
+    font-size: var(--font-size-footnote);
+    font-variant-numeric: tabular-nums;
+    gap: var(--spacing-group);
+  }
+
+  .patrol-genders-legend > span {
+    align-items: center;
+    display: inline-flex;
+    gap: 3px;
+  }
+
+  /* The figures as a two-column ledger of quiet labels and their values. */
+  .patrol-facts {
+    display: grid;
+    font-size: var(--font-size-footnote);
+    gap: var(--spacing-inline) var(--spacing-group);
+    grid-template-columns: max-content minmax(0, 1fr);
+    margin: 0;
+  }
+
+  .patrol-facts > div {
+    display: contents;
+  }
+
+  .patrol-facts dt {
+    color: var(--color-ink-secondary);
+  }
+
+  .patrol-facts dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .patrol-facts-quiet {
+    color: var(--color-ink-secondary);
+  }
+
+  /* The scouts as a grid of chips all one width, so every row lines up with the next
+     whatever the names – as many columns as fit, and one on a phone. */
+  .patrol-members {
+    display: grid;
+    gap: var(--spacing-stack);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .patrol-board-empty {
+    border: 2px dashed var(--color-divider);
+    border-radius: var(--border-radius-control);
+    color: var(--color-ink-tertiary);
+    display: none;
+    font-size: var(--font-size-footnote);
+    margin: 0;
+    padding: var(--spacing-container);
+    text-align: center;
+  }
+
+  .patrol-members:empty + .patrol-board-empty {
+    display: block;
+  }
+
+  .patrols-tray {
+    border: 2px solid transparent;
+    border-radius: var(--border-radius-control);
+    margin: -6px;
+    padding: 4px;
+    transition:
+      border-color 120ms ease,
+      background 120ms ease;
+  }
+
+  /* A chip is picked up where it is pressed, so it refuses the text selection and the
+     callout a long press would otherwise open, and says it can be grabbed. */
+  .patrol-member {
+    -webkit-touch-callout: none;
+    align-items: center;
+    background: color-mix(in srgb, var(--color-theme-wash) 45%, transparent);
+    border-radius: var(--border-radius-control);
+    cursor: grab;
+    display: flex;
+    gap: var(--spacing-inline);
+    min-height: 44px;
+    min-width: 0;
+    padding: 0;
+    touch-action: manipulation;
+    transition:
+      opacity 120ms ease,
+      background 120ms ease;
+    user-select: none;
+  }
+
+  @media (hover: hover) {
+    .patrol-member:hover {
+      background: var(--color-theme-wash);
+    }
+  }
+
+  /* The chip's body picks the person, so it is a button drawn as nothing but its
+     contents. */
+  .patrol-member-body {
+    align-items: center;
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: inherit;
+    display: flex;
+    flex: 1;
+    font: inherit;
+    gap: var(--spacing-stack);
+    min-width: 0;
+    padding: 0 0 0 var(--spacing-stack);
+    text-align: start;
+  }
+
+  .patrol-member-body:focus-visible {
+    border-radius: var(--border-radius-control);
+    outline: 2px solid var(--color-theme-ink);
+  }
+
+  /* A picked chip turns to the theme's ink, so the people about to move together stand
+     out from the rest at a glance. */
+  /* Doubled, so a picked chip under the pointer keeps its ink over the hover's wash. */
+  .patrol-member.patrol-member-selected {
+    background: var(--color-theme-ink);
+    color: var(--color-theme-on-ink);
+  }
+
+  .patrol-member-selected .patrol-member-text small,
+  .patrol-member-selected .gender-mark,
+  .patrol-member-selected .overflow-trigger,
+  .patrol-member-selected .patrol-care-glyph {
+    color: var(--color-theme-on-ink);
+  }
+
+  /* The chip left behind while its person is carried, so the reader sees where they
+     came from. */
+  .patrol-member-carried {
+    opacity: 0.35;
+  }
+
+  .patrol-member-landed {
+    animation: patrol-land 320ms ease-out;
+  }
+
+  @keyframes patrol-land {
+    from {
+      background: var(--color-theme-bright);
+      transform: scale(1.06);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .patrol-member-landed {
+      animation: none;
+    }
+  }
+
+  .patrol-member-text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    padding-block: var(--spacing-stack);
+  }
+
+  .patrol-member-name {
+    align-items: center;
+    display: flex;
+    font-size: var(--font-size-value);
+    font-weight: var(--font-weight-strong);
+    gap: var(--spacing-inline);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .patrol-member-text small {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-detail);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* The care marker: a cross in quiet ink, red where an allergy is serious. */
+  .patrol-care {
+    display: flex;
+    flex: none;
+  }
+
+  .patrol-care-button {
+    align-items: center;
+    background: none;
+    border: none;
+    border-radius: var(--border-radius-control);
+    cursor: pointer;
+    display: flex;
+    gap: 2px;
+    min-height: 36px;
+    padding: 0 var(--spacing-inline);
+  }
+
+  @media (hover: hover) {
+    .patrol-care-button:hover {
+      background: color-mix(in srgb, var(--color-ink) 8%, transparent);
+    }
+  }
+
+  /* The heart and a diet's leaf in the theme's ink, an allergy's leaf in caution, and a
+     serious allergy's in red, so the one that can hurt somebody is the one that stands
+     out. */
+  .patrol-care-glyph {
+    color: var(--color-theme-ink);
+    display: flex;
+  }
+
+  .patrol-care-allergy {
+    color: var(--color-tone-caution-ink);
+  }
+
+  .patrol-care-serious {
+    color: var(--color-tone-danger-ink);
+  }
+
+  /* The popover sits in the top layer, centered, as a sheet over the patrols – wide
+     enough for the person page's own sections, and scrolled when they run long. */
+  .patrol-care-popover {
+    background: var(--color-paper);
+    border: none;
+    border-radius: var(--border-radius-surface);
+    box-shadow: 0 24px 60px rgb(0 0 0 / 30%);
+    color: var(--color-ink);
+    cursor: auto;
+    max-height: min(80dvh, 720px);
+    overflow-y: auto;
+    padding: var(--spacing-container);
+    width: min(440px, calc(100vw - 2 * var(--spacing-container)));
+  }
+
+  .patrol-care-popover[popover]:popover-open {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-container);
+  }
+
+  .patrol-care-popover::backdrop {
+    background: rgb(0 0 0 / 25%);
+  }
+
+  .patrol-care-heading {
+    align-items: center;
+    display: flex;
+    font-size: var(--font-size-body);
+    justify-content: space-between;
+  }
+
+  .patrol-care-close,
+  .patrol-care-link {
+    background: none;
+    border: none;
+    color: var(--color-theme-ink);
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--font-size-value);
+    font-weight: var(--font-weight-strong);
+    padding: var(--spacing-stack);
+    text-decoration: none;
+  }
+
+  .patrol-care-link {
+    align-self: flex-start;
+  }
+
+  /* The bar that follows the reader while people are picked, above the phone's tab
+     strip, and at the column's foot on a desktop. The count and the way out share the
+     top row, and the moves run along one row under them, scrolled sideways where they
+     do not fit. */
+  .patrols-selection {
+    align-items: center;
+    background: var(--color-theme-ink);
+    border-radius: var(--border-radius-surface);
+    bottom: 80px;
+    box-shadow: 0 12px 28px rgb(0 0 0 / 25%);
+    color: var(--color-theme-on-ink);
+    display: grid;
+    gap: var(--spacing-stack);
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: var(--spacing-group);
+    position: sticky;
+    z-index: 5;
+  }
+
+  /* Clear of the floating save button while there is one to press. */
+  body:has(.fab) .patrols-selection {
+    margin-right: 72px;
+  }
+
+  @media (min-width: 768px) {
+    .patrols-selection {
+      bottom: var(--spacing-container);
+    }
+
+    body:has(.fab) .patrols-selection {
+      margin-right: 0;
+    }
+  }
+
+  .patrols-selection-count {
+    font-size: var(--font-size-value);
+    padding-inline: var(--spacing-stack);
+  }
+
+  .patrols-selection-moves {
+    display: flex;
+    gap: var(--spacing-stack);
+    grid-column: 1 / -1;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .patrols-selection-move {
+    flex: none;
+    white-space: nowrap;
+  }
+
+  .patrols-selection-move,
+  .patrols-selection-clear {
+    background: color-mix(in srgb, var(--color-theme-on-ink) 16%, transparent);
+    border: none;
+    border-radius: var(--border-radius-round);
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-strong);
+    min-height: 36px;
+    padding: 0 var(--spacing-group);
+  }
+
+  .patrols-selection-clear {
+    background: none;
+    text-decoration: underline;
+  }
+
+  /* Out of a patrol is not one more patrol, so it is drawn apart from them – an outline
+     rather than a fill, after a gap. */
+  .patrols-selection-out {
+    background: none;
+    box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--color-theme-on-ink) 55%, transparent);
+    margin-inline-start: var(--spacing-group);
+  }
+
+  .patrols-carried-more {
+    background: var(--color-theme-on-ink);
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    font-size: var(--font-size-footnote);
+    margin-inline-start: var(--spacing-stack);
+    padding: 1px 8px;
+  }
+
+  /* The menu trigger sits flush in the chip rather than floating over it. */
+  .patrol-member .overflow-trigger {
+    backdrop-filter: none;
+    background: transparent;
+  }
+
+  /* The copy that follows the pointer, placed by a transform set on every move. */
+  .patrols-carried {
+    background: var(--color-theme-ink);
+    border-radius: var(--border-radius-control);
+    box-shadow: 0 12px 28px rgb(0 0 0 / 25%);
+    color: var(--color-theme-on-ink);
+    font-size: var(--font-size-value);
+    font-weight: var(--font-weight-strong);
+    left: 0;
+    overflow: hidden;
+    padding: var(--spacing-group);
+    pointer-events: none;
+    position: fixed;
+    rotate: -2deg;
+    text-overflow: ellipsis;
+    top: 0;
+    white-space: nowrap;
+    z-index: 20;
+  }
+
+  .patrols-dragging,
+  .patrols-dragging * {
+    cursor: grabbing;
+  }
+}

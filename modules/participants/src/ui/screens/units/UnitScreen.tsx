@@ -2,6 +2,7 @@ import { Button, Card, cmtTheme, PageJumps, PageTitle } from "@scouterna/wsj27-c
 import type { ReactElement } from "react"
 
 import type { Participant } from "../../../model/Participant"
+import { patrolSections } from "../../../model/Patrol"
 import { cmtSections, unitNumberOf } from "../../../model/unit-entries"
 import { UnitCard } from "../../components/unitcard/UnitCard"
 import { counted, personCount } from "../../counted"
@@ -59,6 +60,38 @@ function GroupedManagement(props: GroupedManagementProps): ReactElement {
   )
 }
 
+interface GroupedPatrolsProps {
+  /**
+   * The unit's patrols, each with its people.
+   */
+  readonly sections: ReturnType<typeof patrolSections>
+}
+
+/**
+ * A unit grouped by patrol: a heading per patrol with its leader first, and the people in
+ * none closing as "Utan patrull". Plain sections rather than the virtual list, as the
+ * management's are – a patrol is ten people, and the headings are what the outline reads.
+ * @param props The sections to draw.
+ * @returns The grouped sections.
+ */
+function GroupedPatrols(props: GroupedPatrolsProps): ReactElement {
+  return (
+    <>
+      {props.sections.map((section) => (
+        <Card
+          aside={<span aria-hidden="true">{counted(section.people.length)}</span>}
+          key={section.label}
+          title={section.label}
+        >
+          {section.people.map((person) => (
+            <PersonRow isPatrolShown={false} isUnitScoped key={person.memberNo} person={person} />
+          ))}
+        </Card>
+      ))}
+    </>
+  )
+}
+
 export interface UnitScreenProps {
   /**
    * Which entry of the unit browser to show – a unit number, `"ist"`, or `"cmt"`, as the
@@ -68,7 +101,8 @@ export interface UnitScreenProps {
 }
 
 /**
- * One unit, the IST, or the contingent management: the people that entry holds.
+ * One unit, the IST, or the contingent management: the people that entry holds – a unit
+ * grouped by patrol once anybody in it is in one, and the management by funktion.
  *
  * Read out of the list the section already fetched, so arriving here from the browser
  * costs no request – and a key no entry holds is not an error, only an entry with nobody
@@ -117,6 +151,7 @@ export function UnitScreen(props: UnitScreenProps): ReactElement {
   }
 
   const unitNumber = unitNumberOf(props.entryKey)
+  const patrols = unitNumber === undefined ? [] : patrolSections(group.people)
 
   return (
     <>
@@ -140,21 +175,27 @@ export function UnitScreen(props: UnitScreenProps): ReactElement {
               viewerTheme={cmtTheme}
             />
           )}
-          {/* The outline's stops over the name-sorted rows – declared, because the
-              virtualized rows are not in the document for the outline to scan. */}
-          <PageJumps current={jumps.current} entries={jumps.entries} onJump={jumps.onJump} />
-          <Card
-            aside={<span aria-hidden="true">{counted(group.people.length)}</span>}
-            title="Personer"
-          >
-            <PeopleList
-              isUnitScoped={unitNumber !== undefined}
-              onFirstVisibleChange={jumps.onFirstVisible}
-              people={group.people}
-              registerJump={jumps.registerJump}
-              resetKey={props.entryKey}
-            />
-          </Card>
+          {patrols.length > 0 ? (
+            <GroupedPatrols sections={patrols} />
+          ) : (
+            <>
+              {/* The outline's stops over the name-sorted rows – declared, because the
+                  virtualized rows are not in the document for the outline to scan. */}
+              <PageJumps current={jumps.current} entries={jumps.entries} onJump={jumps.onJump} />
+              <Card
+                aside={<span aria-hidden="true">{counted(group.people.length)}</span>}
+                title="Personer"
+              >
+                <PeopleList
+                  isUnitScoped={unitNumber !== undefined}
+                  onFirstVisibleChange={jumps.onFirstVisible}
+                  people={group.people}
+                  registerJump={jumps.registerJump}
+                  resetKey={props.entryKey}
+                />
+              </Card>
+            </>
+          )}
         </>
       )}
     </>

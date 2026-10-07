@@ -1,14 +1,86 @@
 {
   "sourceLanguage" : "sv",
   "strings" : {
-    "app.name" : {
-      "comment" : "The name of the app, shown on the shell's one screen.",
+    "shell.back" : {
+      "comment" : "The spoken name of the navigation bar's back button.",
       "extractionState" : "manual",
       "localizations" : {
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Campfire"
+            "value" : "Tillbaka"
+          }
+        }
+      }
+    },
+    "shell.gone" : {
+      "comment" : "Shown when the system ended the page's content process.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sidan slutade svara och stängdes."
+          }
+        }
+      }
+    },
+    "shell.identity.unreachable" : {
+      "comment" : "Shown in the sign-in sheet when the identity provider's page cannot be reached.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inloggningen går inte att nå"
+          }
+        }
+      }
+    },
+    "shell.more" : {
+      "comment" : "The spoken name of the navigation bar's overflow menu.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fler åtgärder"
+          }
+        }
+      }
+    },
+    "shell.profile" : {
+      "comment" : "The spoken name of the avatar that opens the profile.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profil"
+          }
+        }
+      }
+    },
+    "shell.unreachable.retry" : {
+      "comment" : "The button that loads the page again after it could not be reached.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Försök igen"
+          }
+        }
+      }
+    },
+    "shell.unreachable.title" : {
+      "comment" : "Shown when the shell cannot reach the web application.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Campfire går inte att nå"
           }
         }
       }

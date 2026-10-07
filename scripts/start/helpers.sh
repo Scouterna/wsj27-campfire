@@ -219,12 +219,23 @@ supervise() {
   done
 }
 
+# Files a script writes for as long as it runs, removed by the EXIT handler.
+temporary_files=""
+
+# Marks a file the script wrote to be removed when it stops, however it stops.
+remove_on_exit() {
+  temporary_files="$temporary_files $1"
+}
+
 # The EXIT handler. INT and TERM exit through it, so stopping happens once whichever
 # way the script ends – Ctrl+C, a `die`, or the end of the script.
 on_exit() {
   status=$?
   trap - INT TERM EXIT
   stop_processes
+  for file in $temporary_files; do
+    rm -f "$file"
+  done
   echo "Stopped."
   exit "$status"
 }

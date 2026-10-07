@@ -8,7 +8,7 @@ import {
 import type { ReactElement, ReactNode } from "react"
 
 import { genderName } from "../../../model/Gender"
-import { ageOf, avatarNumberFor, belonging } from "../../../model/Participant"
+import { ageOf, avatarNumberFor, belonging, type Participant } from "../../../model/Participant"
 import type { ParticipantDetail } from "../../../model/ParticipantDetail"
 import { roleName } from "../../../model/ParticipantRole"
 import { funktionName, travelName } from "../../../model/Participation"
@@ -17,10 +17,23 @@ import { GenderMark } from "../../components/gender/GenderMark"
 
 export interface ProfileSectionProps {
   /**
-   * Whose profile to draw.
+   * Whether the person is their row in the list of participants, standing in while their
+   * record is on its way, so what only the record carries is left out rather than drawn
+   * as unanswered.
    */
-  readonly participant: ParticipantDetail
+  readonly isSummary?: boolean
+  /**
+   * Whose profile to draw – their record, or their row in the list while the record is
+   * on its way.
+   */
+  readonly participant: Profile
 }
+
+/**
+ * What the profile draws of a person: everything their row in the list of participants
+ * carries, and what only their record adds.
+ */
+type Profile = Pick<ParticipantDetail, keyof Participant | "idCardName" | "travel">
 
 // Read in UTC, because the service sends a plain date, which parses as UTC midnight, and
 // formatting that in a timezone behind it would report the day before.
@@ -94,7 +107,7 @@ function Fact(props: FactProps): ReactElement {
  * @returns The label and the value of the placing line.
  */
 function placing(
-  participant: ParticipantDetail,
+  participant: Profile,
   unitName: string | undefined,
 ): { label: string; value: string } {
   if (participant.funktion !== undefined) {
@@ -151,6 +164,16 @@ export function ProfileSection(props: ProfileSectionProps): ReactElement {
             <p>
               <span>{where.label}:</span> <strong>{where.value}</strong>
             </p>
+            {participant.unitNumber !== undefined && (
+              <p>
+                <span>Patrull:</span>{" "}
+                {participant.patrol === undefined ? (
+                  <em>Ingen än</em>
+                ) : (
+                  <strong>{participant.patrol}</strong>
+                )}
+              </p>
+            )}
           </div>
         </div>
 
@@ -177,10 +200,12 @@ export function ProfileSection(props: ProfileSectionProps): ReactElement {
               value: genderName(participant.gender),
             })}
           />
-          <Fact
-            label="Typ av resa"
-            {...(participant.travel !== undefined && { value: travelName(participant.travel) })}
-          />
+          {props.isSummary !== true && (
+            <Fact
+              label="Typ av resa"
+              {...(participant.travel !== undefined && { value: travelName(participant.travel) })}
+            />
+          )}
         </div>
 
         {idCardCallout(participant.idCardName)}

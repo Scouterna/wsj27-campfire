@@ -11,17 +11,17 @@ In the local environment, Caddy serves everything on `http://localhost:8000`, se
 | Under               | Stands in for                                                                      |
 | ------------------- | ---------------------------------------------------------------------------------- |
 | `/api/auth`         | The auth service – sign-in, the session cookies, and a real signed access token    |
-| `/api/project`      | The participants service – the list of participants, scoped by the caller's roles  |
+| `/api/project`      | The participants service, scoped by the caller's roles, and the cases service      |
 | `/__mock__/scoutid` | ScoutID, with a persona picker where the password form would be                    |
 | `/__mock__`         | The mock's own controls – forgetting every session, and reporting who is signed in |
 
-A unit's map is the one request the mock does not answer. Its tiles come from OpenFreeMap in every environment, the walk-throughs included, and only Storybook refuses them ([ADR 037](/decisions/037-draw-maps-on-the-device-over-openfreemaps-tiles)).
+A unit's map and the material are the two reads the mock does not answer. The map's tiles come from OpenFreeMap in every environment, the walk-throughs included, and only Storybook refuses them ([ADR 037](/decisions/037-draw-maps-on-the-device-over-openfreemaps-tiles)). The material comes from Google Drive locally, while its walk-throughs answer the Drive API themselves and Storybook seeds its own ([ADR 038](/decisions/038-read-the-contingents-material-straight-from-google-drive)).
 
 ScoutID is the one part that is not a copy, because it is not ours to run. The auth service sends the browser there as it would to the real ScoutID, and the page that answers lists invented people instead of asking for a password. Tap a name and the browser returns through the auth service with a code, exactly as it does from the real sign-in.
 
 Access follows the real rules. A unit leader reads their own unit and nobody else's. The contingent management team reads everyone, and sees health answers only through a health role or a personal grant – a request without one is refused, never quietly answered with less. Someone with no access gets the same 404 as a person who does not exist, so a refusal never reveals who is on the list.
 
-Nothing reaches disk, and the signing key is made at start, so restarting the mock signs everyone out. The access token lasts the real service's five minutes rather than something longer and kinder, so the refresh path runs during an ordinary afternoon of local work rather than only in production.
+Nothing reaches disk, and the signing key is made at start, so restarting the mock signs everyone out and forgets every case written since. The access token lasts the real service's five minutes rather than something longer and kinder, so the refresh path runs during an ordinary afternoon of local work rather than only in production.
 
 ## The personas
 
@@ -42,7 +42,7 @@ pnpm start:local   # the whole local environment, mock included, on http://local
 pnpm start:mock    # the mock alone, on port 8003, when the mock is what you are changing
 ```
 
-Sign-in works only through `http://localhost:8000`, the address the auth service's settings name, so the mock alone is for working on the mock rather than on the application. The mock ScoutID keeps a session of its own, as the real one does, so signing in again goes straight through without the picker – sign out to switch persona.
+Sign-in works only through `http://localhost:8000`, the address the auth service's settings name, so the mock alone is for working on the mock rather than on the application. `pnpm start:local --lan` moves that address to this machine's network address, so a phone on the same network can sign in, and the Apple shell's Local scheme follows it while the stack runs. The mock ScoutID keeps a session of its own, as the real one does, so signing in again goes straight through without the picker – sign out to switch persona.
 
 ## Its own tests
 

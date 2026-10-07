@@ -6,18 +6,31 @@ import { signInUrl } from "../../../data/auth"
 import "./SignInScreen.css"
 
 /**
+ * The props of the sign-in screen.
+ */
+export interface SignInScreenProps {
+  /**
+   * Whether a native shell hosts the page. A shell runs the round trip through ScoutID in
+   * a sheet over the page rather than leaving it, so the button never waits, and is ready
+   * again the moment the sheet is closed.
+   */
+  readonly isHosted: boolean
+}
+
+/**
  * The sign-in screen. The hero, the title, and the action read the theme's tokens, so the
  * screen greets a returning visitor in their own unit's color before anyone has signed
- * in. Pressing the button leaves the page entirely, because ScoutID owns the
- * credentials, so the pending state only has to survive until the navigation takes.
+ * in. In a browser, pressing the button leaves the page entirely, because ScoutID owns
+ * the credentials, so the pending state only has to survive until the navigation takes.
  *
+ * @param props The screen's props.
  * @returns The screen.
  */
-export function SignInScreen(): ReactElement {
+export function SignInScreen(props: SignInScreenProps): ReactElement {
   const [pending, setPending] = useState(false)
 
   function startSignIn(): void {
-    setPending(true)
+    setPending(!props.isHosted)
     // The address it started from, so sign-in returns the visitor to the page they asked
     // for rather than to the front door.
     location.assign(signInUrl(location.href))

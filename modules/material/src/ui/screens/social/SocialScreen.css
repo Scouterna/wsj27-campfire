@@ -1,0 +1,116 @@
+/* The social media image maker. */
+
+@layer screen {
+  /* The real file input, kept out of sight: the design system's buttons are what the
+     reader presses, and they open it from code. It takes no presses of its own, because
+     Safari draws a file input's button outside the input's box, where it would catch
+     presses meant for the toolbar it sits under. Clipped rather than `display: none`,
+     which some browsers refuse to open a picker for. */
+  .social-input {
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    pointer-events: none;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+
+  .social-status {
+    color: var(--color-tone-danger-ink);
+    font-size: var(--font-size-footnote);
+    margin: 0 0 var(--spacing-group);
+  }
+
+  /* Who the image is for. A native select, dressed as the design system's other fields –
+     the platform's own list is what already works with a keyboard, a screen reader, and a
+     thumb. */
+  .mark-picker {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .mark-picker-label,
+  .social-color-label {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+  }
+
+  .mark-picker-select {
+    appearance: none;
+    background: var(--color-paper)
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23595959' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")
+      no-repeat right 0.85rem center / 1.1rem;
+    border: none;
+    border-radius: var(--border-radius-control);
+    color: var(--color-ink);
+    font: inherit;
+    font-size: var(--font-size-body);
+    min-height: 48px;
+    padding: 0 2.6rem 0 var(--spacing-group);
+    width: 100%;
+  }
+
+  .mark-picker-select:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: 2px;
+  }
+
+  /* The color, under the sender it belongs to – a second question that only the
+     contingent has an answer to. */
+  .social-color {
+    display: grid;
+    gap: 0.4rem;
+    margin-top: var(--spacing-group);
+  }
+
+  /* The five colors as discs in a row, each named for assistive technology. */
+  .theme-picker {
+    display: flex;
+    gap: var(--spacing-group);
+  }
+
+  .theme-swatch {
+    background: none;
+    border: none;
+    border-radius: var(--border-radius-round);
+    cursor: pointer;
+    padding: 0;
+  }
+
+  /* The swatch reads its own `data-theme`, so the disc is the color the design system
+     already defines for that name. A ring in the same color, held off it by the sheet,
+     marks the one in force. */
+  .theme-swatch-mark {
+    background: var(--color-theme-bright);
+    border-radius: var(--border-radius-round);
+    box-shadow:
+      0 0 0 3px var(--color-sheet),
+      0 0 0 5px transparent;
+    display: block;
+    height: 2.25rem;
+    width: 2.25rem;
+  }
+
+  .theme-swatch[aria-pressed="true"] .theme-swatch-mark {
+    box-shadow:
+      0 0 0 3px var(--color-sheet),
+      0 0 0 5px var(--color-theme-bright);
+  }
+
+  /* Named for assistive technology alone, by clipping rather than hiding. */
+  .theme-swatch-name {
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+
+  .theme-swatch:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: 6px;
+  }
+}

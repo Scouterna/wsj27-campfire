@@ -1,0 +1,21 @@
+/* The initials tile: two letters on the theme's wash, round, at a list row's tile size. */
+
+@layer component {
+  .initials {
+    align-items: center;
+    background: var(--color-theme-wash);
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    display: flex;
+    flex: none;
+    font-size: var(--font-size-entry);
+    font-weight: var(--font-weight-strong);
+    height: 44px;
+    justify-content: center;
+    /* The two initials sit as a pair rather than as a word, so they are let apart a
+       little; without it a narrow letter beside a wide one reads as one glyph. */
+    letter-spacing: 0.04em;
+    line-height: 1;
+    width: 44px;
+  }
+}

@@ -1,0 +1,108 @@
+/* The handbook's front: the search, the chapters, and the hits. */
+
+@layer screen {
+  /* What the screen says in place of its chapters – fetching, failing, or empty. */
+  .handbook-status {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+  }
+
+  /* Spoken, not shown, where the field's own count already shows it. */
+  .handbook-spoken {
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+
+  .handbook-search {
+    margin-bottom: var(--spacing-group);
+  }
+
+  .handbook-search-count {
+    color: var(--color-ink-tertiary);
+    flex-shrink: 0;
+    font-size: var(--font-size-footnote);
+    white-space: nowrap;
+  }
+
+  /* The chapter's number in a tinted tile, set in figures of one width so the column
+     lines up. */
+  .handbook-number {
+    align-items: center;
+    aspect-ratio: 1;
+    background: var(--color-theme-wash);
+    border-radius: var(--border-radius-control);
+    color: var(--color-theme-ink);
+    display: flex;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: var(--font-size-value);
+    font-weight: var(--font-weight-strong);
+    justify-content: center;
+  }
+
+  /* The pages a chapter holds, two lines at most – a summary, not a list to read. */
+  .handbook-chapter-row small {
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+
+  /* The offline promise, washed in the theme under the chapters. */
+  .handbook-offline {
+    background: var(--color-theme-wash);
+    border-radius: var(--border-radius-default);
+    color: var(--color-theme-ink);
+    font-size: var(--font-size-value);
+    margin: var(--spacing-group) 0 0;
+    padding: var(--spacing-group) var(--spacing-container);
+  }
+
+  .handbook-hits {
+    list-style: none;
+    margin: calc(-1 * var(--card-padding)) calc(-1 * var(--card-padding));
+    padding: 0;
+
+    & li + li {
+      border-top: 1px solid var(--color-divider);
+    }
+  }
+
+  /* A hit: the chapter it is in, over the passage with the match marked. */
+  .handbook-hit {
+    color: var(--color-ink);
+    display: block;
+    font-size: var(--font-size-value);
+    line-height: 1.6;
+    padding: var(--spacing-group) var(--card-padding);
+    text-decoration: none;
+
+    & small {
+      color: var(--color-ink-tertiary);
+      display: block;
+      font-size: var(--font-size-caption);
+      font-weight: var(--font-weight-strong);
+      letter-spacing: 0.14em;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    & mark {
+      background: var(--color-tone-caution-wash);
+      border-radius: 3px;
+      color: var(--color-tone-caution-ink);
+      padding: 0 3px;
+    }
+  }
+
+  @media (hover: hover) {
+    .handbook-hit:hover {
+      background: color-mix(in srgb, var(--color-theme-ink) 5%, transparent);
+    }
+  }
+}

@@ -1,27 +1,9 @@
 import type { ReactElement } from "react"
 
-import blueLogoUrl from "../../../assets/images/logo-blue.svg"
-import brownLogoUrl from "../../../assets/images/logo-brown.svg"
-import greenLogoUrl from "../../../assets/images/logo-green.svg"
-import redLogoUrl from "../../../assets/images/logo-red.svg"
-import yellowLogoUrl from "../../../assets/images/logo-yellow.svg"
-import type { Theme } from "../../foundations/theme/Theme"
 import { useTheme } from "../../foundations/theme/ThemeProvider"
+import { contingentMark } from "./marks"
 
 import "./Logo.css"
-
-/**
- * The contingent's mark in each theme's color: the wordmark on a plate in the theme's
- * ink. One file per theme rather than one file, because the mark loads as an `<img>`
- * and cannot read the ink token from CSS.
- */
-const logos: Readonly<Record<Theme, string>> = {
-  blue: blueLogoUrl,
-  brown: brownLogoUrl,
-  green: greenLogoUrl,
-  red: redLogoUrl,
-  yellow: yellowLogoUrl,
-}
 
 export type LogoProps = {
   /**
@@ -44,8 +26,7 @@ export function Logo(props: LogoProps): ReactElement {
   return (
     <img
       className="logo"
-      // eslint-disable-next-line security/detect-object-injection -- a Theme, never free input
-      src={logos[theme]}
+      src={contingentMark(theme)}
       alt={props.alt ?? "26th World Scout Jamboree Poland 2027 – Swedish Contingent"}
     />
   )

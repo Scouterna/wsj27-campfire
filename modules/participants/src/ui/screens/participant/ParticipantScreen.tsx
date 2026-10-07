@@ -1,9 +1,10 @@
-import { PageTitle } from "@scouterna/wsj27-campfire-ui"
+import { PageActions, PageTitle } from "@scouterna/wsj27-campfire-ui"
 import type { ReactElement } from "react"
 
 import type { Experience } from "../../../model/Experience"
 import { fullName } from "../../../model/Participant"
 import type { Readiness } from "../../../model/Readiness"
+import { usePersonActions } from "../../person-actions"
 import { ContactSection } from "./ContactSection"
 import { DietSection } from "./DietSection"
 import { ExperienceSection } from "./ExperienceSection"
@@ -61,7 +62,21 @@ function hasFacts(experience: Experience): boolean {
  * @returns The screen.
  */
 export function ParticipantScreen(props: ParticipantScreenProps): ReactElement {
-  const { error, isPending, participant } = useParticipant(props.memberNo)
+  const { error, isPending, participant, summary } = useParticipant(props.memberNo)
+  const actions = usePersonActions()
+
+  // Opened from a list, the person's row stands in for the record, so the page slides in
+  // under the person's name and with their profile drawn rather than a waiting line.
+  if (isPending && summary !== undefined) {
+    return (
+      <>
+        <PageTitle title={fullName(summary)} />
+        <div className="person">
+          <ProfileSection isSummary participant={summary} />
+        </div>
+      </>
+    )
+  }
 
   if (isPending) {
     return (
@@ -85,6 +100,7 @@ export function ParticipantScreen(props: ParticipantScreenProps): ReactElement {
     )
   }
 
+  const menu = actions(props.memberNo)
   const health = participant.health
   const readiness =
     participant.readiness !== undefined && hasAnswers(participant.readiness)
@@ -102,6 +118,7 @@ export function ParticipantScreen(props: ParticipantScreenProps): ReactElement {
   return (
     <>
       <PageTitle title={fullName(participant)} />
+      {menu.length > 0 && <PageActions menu={menu} />}
 
       <div className="person">
         <ProfileSection participant={participant} />

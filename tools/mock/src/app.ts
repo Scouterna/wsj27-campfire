@@ -3,6 +3,7 @@ import { Hono } from "hono"
 import { forms, participants, readCmtRoles } from "../seed/participants/index.ts"
 import { RoleCache } from "./auth/roles.ts"
 import { authHealth, authRoutes } from "./auth/routes.ts"
+import { cmsRoutes } from "./cms/routes.ts"
 import { controlRoutes } from "./control/routes.ts"
 import { noCache, notFound } from "./fastapi.ts"
 import { generateSigningKey, type SigningKey } from "./keys.ts"
@@ -29,9 +30,9 @@ export interface MockOptions {
 }
 
 /**
- * Builds the mock – both services answering as the real ones answer, beside the ScoutID stand-in
- * and the control surface. The service prefixes are the ones the deployed ingress serves, so an
- * address that works here works against dev unchanged. Building it starts no server.
+ * Builds the mock – both services answering as the real ones answer, and the CMS's handbook,
+ * beside the ScoutID stand-in and the control surface. The service prefixes are the ones the
+ * deployed ingress serves, so an address that works here works against dev unchanged. Building it starts no server.
  * @param options The key and the clock, when a test supplies its own.
  * @returns The routes, ready to be served or to answer a request in a test.
  */
@@ -50,6 +51,7 @@ export function createApp(options: MockOptions = {}): Hono {
   app.get("/api/project/", (context) => projectHealth(context))
   app.route("/api/auth", authRoutes({ key, now, roles, scoutId }))
   app.route("/api/project", projectRoutes({ key, now, participantsList }))
+  app.route("/_services/cms", cmsRoutes())
   app.route("/__mock__/scoutid", scoutIdRoutes(scoutId, roles))
   app.route("/__mock__", controlRoutes(scoutId, roles))
   app.notFound((context) => notFound(context))

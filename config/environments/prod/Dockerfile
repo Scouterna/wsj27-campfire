@@ -31,8 +31,11 @@ COPY libraries/host/package.json libraries/host/
 COPY libraries/ui/package.json libraries/ui/
 COPY libraries/utils/package.json libraries/utils/
 COPY modules/authentication/package.json modules/authentication/
+COPY modules/cases/package.json modules/cases/
+COPY modules/handbook/package.json modules/handbook/
 COPY modules/home/package.json modules/home/
 COPY modules/journey/package.json modules/journey/
+COPY modules/material/package.json modules/material/
 COPY modules/participants/package.json modules/participants/
 COPY tools/mock/package.json tools/mock/
 RUN pnpm install --frozen-lockfile

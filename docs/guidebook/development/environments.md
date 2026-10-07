@@ -33,7 +33,7 @@ Local is the everyday environment. It needs nothing beyond the machine and start
 
 ## Dev
 
-Dev exists for the one thing the mock cannot do: the real sign-in flow. The auth service is built from its repository's `main` and the project API from its `dev` branch – the one the deployed dev site runs – on every start, beside a container running the same Vite dev server over the repository, so hot reload still works through the front door. The first start is slow while that container installs the workspace.
+Dev exists for the one thing the mock cannot do: the real sign-in flow. The auth service is built from its repository's `main` and the project API from its `dev` branch – the one the deployed dev site runs – on every start, beside a container running the same Vite dev server over the repository, so hot reload still works through the front door. The first start is slow while that container installs the workspace. A Postgres container beside them holds the cases, because the project API serves its cases only with a database, and they survive a restart of the stack.
 
 Credentials never enter the repository. The Keycloak client and the Scoutnet keys go in a gitignored `.env` beside the compose file, which you write and nothing overwrites, and the first run on a machine without one prints what to write. The values are the ones the deployed services run with. The contingent management team's roster, which the project API reads to tell the management's functions apart, is a gitignored `cmt-roles.csv` beside it for the same reason – it names real people. Without it the service runs on, and the management's roles carry no function.
 

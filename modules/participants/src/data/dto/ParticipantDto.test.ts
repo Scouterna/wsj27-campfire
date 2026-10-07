@@ -227,6 +227,17 @@ describe("reading one listing row", () => {
     expect(toParticipant(row())).not.toHaveProperty("homeTown")
   })
 
+  it("reads the patrol Campfire stored on the record, trimmed", () => {
+    expect(toParticipant(row({ scout_db: { patrol: " Falken " } }))?.patrol).toBe("Falken")
+  })
+
+  it("reads an empty stored object, a blank patrol, or no object at all as no patrol", () => {
+    // eslint-disable-next-line unicorn/no-null -- the service's own absence
+    for (const stored of [{}, { patrol: "  " }, { patrol: 4 }, null, "Falken", undefined]) {
+      expect(toParticipant(row({ scout_db: stored }))).not.toHaveProperty("patrol")
+    }
+  })
+
   it("carries the current phone number, unformatted, for the export", () => {
     expect(toParticipant(row({ mobile: "+46708277486" }))?.phone).toBe("+46708277486")
   })

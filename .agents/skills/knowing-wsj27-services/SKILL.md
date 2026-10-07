@@ -2,7 +2,7 @@
 name: knowing-wsj27-services
 description: Provides reference facts on the WSJ27 project's back-end services and the platform they run on – wsj27-auth-api (sign-in through ScoutID and the project's own signed tokens), the participants service (the list of participants from Scoutnet, WSJ27 roles, and who may read what) and the cases service (follow-ups about a person or a unit), both part of wsj27-project-api, the wsj27-cms handbook, and the contingent's Discord. Covers routes, cookies and tokens, role strings such as wsj27:al:<unit> and wsj27:cmt:<function>:<role>, the 404-versus-403 access rules, the /api/auth and /api/project paths on one origin, and the Kubernetes cluster in Azure. Use when calling, debugging, or writing about these services, or when a question involves WSJ27 roles, access levels, or sign-in.
 metadata:
-  version: "1.0"
+  version: "1.1"
 ---
 
 # Knowing WSJ27 Services
@@ -19,11 +19,11 @@ The back-end the WSJ27 project runs beside Campfire, at the level a client devel
 
 ## Key Context
 
-- **Three services.** `wsj27-auth-api` signs people in through ScoutID and issues its own RS256 tokens. The WSJ27 project's back-end, `wsj27-project-api`, runs the other two. The participants service holds the list of participants read from Scoutnet, mints every WSJ27 role, and decides who may read what. The cases service keeps follow-ups about a person or a unit, written as notes by the health, safety, and management teams, only where its database is configured.
+- **Three services.** `wsj27-auth-api` signs people in through ScoutID and issues its own RS256 tokens. The WSJ27 project's back-end, `wsj27-project-api`, runs the other two. The participants service holds the list of participants read from Scoutnet, mints every WSJ27 role, and decides who may read what. The cases service keeps follow-ups about a person or a unit, written as notes by the health, safety, and management teams, only where its database is configured – and lets any caller holding a `wsj27:` role read and write every case.
 - **One direction of trust.** The auth service asks the participants service for the role map; nothing calls the other way.
 - **One origin.** Behind the ingress, `/api/auth` reaches the auth service and `/api/project` the project's back-end – the participants service, and the cases service under `/api/project/cases` – each with the prefix stripped. The CMS lives under `/_services/cms`.
 - **Trust only the auth service's token**, discovered from its own `/.well-known/openid-configuration`, never ScoutID's tokens directly. A user token and a service-account token have the same shape.
-- **Roles are minted, never assigned.** `wsj27:al:<unit>` for a unit leader, `wsj27:cmt:<function>:<role>` for the contingent management team, and `wsj27:access:<level>` for a personal access grant. Deltagare and IST get no role.
+- **Roles are minted from Scoutnet, and on `dev` some are assigned by hand.** `wsj27:al:<unit>` for a unit leader, `wsj27:cmt:<function>:<role>` for the contingent management team, and the registration form's personal grant – `wsj27:legacy-access:<level>` on `dev`, still `wsj27:access:<level>` on `main`. On `dev`, `wsj27:access:` holds grants the management team assigns by hand, which no access rule reads yet. Deltagare and IST get no role.
 - **Match roles segment by segment.** `wsj27:cmt:admin:it` satisfies `wsj27:cmt`; `wsj27:cmtx` does not, although `startsWith` would say it does.
 - **404 means you may not know it exists; 403 means you may know, but not see this much.** No access answers exactly like a record that does not exist. Access at too low a level is 403, never a quietly reduced 200.
 - **The access token lives five minutes.** The refresh window lasts as long as ScoutID's session, and the page refreshes shortly before expiry. Roles are recomputed on every refresh.

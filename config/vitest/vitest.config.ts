@@ -48,6 +48,22 @@ export default defineConfig({
       },
       {
         test: {
+          name: "cases",
+          root: "modules/cases",
+          environment: "node",
+          include: ["src/**/*.test.ts"],
+        },
+      },
+      {
+        test: {
+          name: "handbook",
+          root: "modules/handbook",
+          environment: "node",
+          include: ["src/**/*.test.ts"],
+        },
+      },
+      {
+        test: {
           name: "home",
           root: "modules/home",
           environment: "node",
@@ -58,6 +74,14 @@ export default defineConfig({
         test: {
           name: "journey",
           root: "modules/journey",
+          environment: "node",
+          include: ["src/**/*.test.ts"],
+        },
+      },
+      {
+        test: {
+          name: "material",
+          root: "modules/material",
           environment: "node",
           include: ["src/**/*.test.ts"],
         },
@@ -120,10 +144,10 @@ export default defineConfig({
       // a change that stops covering something fails, and a change that covers more is
       // followed by raising the bar to just under the new figure.
       thresholds: {
-        statements: 97,
-        branches: 91,
+        statements: 98,
+        branches: 93,
         functions: 99,
-        lines: 97,
+        lines: 98,
       },
     },
   },

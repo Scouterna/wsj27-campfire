@@ -43,6 +43,74 @@ function written(date: string): string {
 }
 
 /**
+ * How long a closed plate takes to fold away.
+ */
+const foldDuration = 250
+
+/**
+ * What takes the focus when a plate that held it goes away: the next thing a keyboard
+ * reaches after the plate, or the last one before it at the end of the page.
+ * @param plate The plate going away.
+ * @returns The element to focus, or undefined when the page has nothing else to reach.
+ */
+function focusAfter(plate: HTMLElement): HTMLElement | undefined {
+  const reachable = [
+    ...document.querySelectorAll<HTMLElement>(
+      "a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex='-1'])",
+    ),
+  ].filter((element) => !plate.contains(element) && element.closest("[inert]") === null)
+  const next = reachable.find(
+    (element) => (plate.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0,
+  )
+  return (
+    next ??
+    reachable.findLast(
+      (element) =>
+        (plate.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_PRECEDING) !== 0,
+    )
+  )
+}
+
+/**
+ * Folds a closed plate away – its height, its padding, and the gap after it closing
+ * together while it fades – and only then forgets it, so what is below glides up into its
+ * place rather than jumping, as a deleted row does in a native list. The focus, where the
+ * plate held it, goes on to what follows.
+ * @param plate The plate closed.
+ * @param forget What removes the plate for good, once it has folded away.
+ */
+function fold(plate: HTMLElement, forget: () => void): void {
+  if (plate.contains(document.activeElement)) {
+    focusAfter(plate)?.focus({ preventScroll: true })
+  }
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    forget()
+    return
+  }
+  const style = getComputedStyle(plate)
+  // The column the plates stand in spaces them with a gap, which has to close with the
+  // plate or the plates below land a gap short and jump the rest of the way.
+  const parent = plate.parentElement
+  // A computed gap carries its unit, which `Number` refuses.
+  // eslint-disable-next-line unicorn/prefer-number-coercion -- see above
+  const gap = parent === null ? 0 : Number.parseFloat(getComputedStyle(parent).rowGap) || 0
+  plate.classList.add("messages-folding")
+  const animation = plate.animate(
+    [
+      {
+        height: `${String(plate.offsetHeight)}px`,
+        marginBottom: "0px",
+        opacity: 1,
+        paddingBlock: style.paddingBlock,
+      },
+      { height: "0px", marginBottom: `${String(-gap)}px`, opacity: 0, paddingBlock: "0px" },
+    ],
+    { duration: foldDuration, easing: "ease", fill: "forwards" },
+  )
+  animation.addEventListener("finish", forget)
+}
+
+/**
  * The contingent's unread messages on the start screen, a plate each, because the kinds
  * do not belong under one heading or behind one close control. The welcome wears the
  * theme's bright fill, as the sign-in hero does, because it is the contingent speaking
@@ -98,8 +166,15 @@ export function MessagesWidget(props: MessagesWidgetProps): ReactElement | null 
                 // The name opens with the visible word, which is what speech control matches.
                 aria-label="Stäng meddelandet"
                 className="messages-close"
-                onClick={() => {
-                  close(message.id)
+                onClick={(event) => {
+                  const plate = event.currentTarget.closest("section")
+                  if (plate === null) {
+                    close(message.id)
+                    return
+                  }
+                  fold(plate, () => {
+                    close(message.id)
+                  })
                 }}
                 type="button"
               >

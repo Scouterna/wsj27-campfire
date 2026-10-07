@@ -1,0 +1,247 @@
+/* The preview dialog: the dimmed screen, one picture on a sheet in the middle of it, its
+   title and the owner's actions under it, and a close button in the corner. */
+
+@layer component {
+  /* The page under a modal does not scroll, or a swipe on the dim moves it. */
+  :root:has(.preview-dialog[open]) {
+    overflow: hidden;
+  }
+
+  /* The dialog is the dim itself rather than its ::backdrop, because a backdrop cannot
+     take part in a view transition and would arrive only once the picture had landed. */
+  .preview-dialog {
+    background: var(--color-scrim);
+    border: none;
+    height: 100dvh;
+    margin: 0;
+    max-height: none;
+    max-width: none;
+    padding: var(--spacing-container);
+    width: 100vw;
+  }
+
+  .preview-dialog[open] {
+    display: grid;
+    place-items: center;
+    view-transition-name: preview-scrim;
+  }
+
+  .preview-dialog::backdrop {
+    background: transparent;
+  }
+
+  .preview-dialog-sheet {
+    background: var(--color-sheet);
+    border-radius: var(--border-radius-surface);
+    color: var(--color-ink);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-group);
+    max-height: 100%;
+    max-width: 36rem;
+    overflow: auto;
+    padding: var(--spacing-container);
+    position: relative;
+    view-transition-name: preview;
+    width: 100%;
+  }
+
+  /* As tall as a square at most, and never so tall that the caption leaves the screen.
+     The full width is set rather than left to the ratio, because with only a ratio and a
+     height cap the browser narrows the frame to keep it square – Safari always, Chrome
+     while the picture is still loading. */
+  .preview-dialog-frame {
+    align-items: center;
+    aspect-ratio: 1;
+    border-radius: var(--border-radius-default);
+    display: grid;
+    justify-items: center;
+    max-height: 60dvh;
+    overflow: hidden;
+    padding: var(--spacing-container);
+    position: relative;
+    width: 100%;
+  }
+
+  .preview-dialog-light .preview-dialog-frame {
+    background: var(--color-theme-wash);
+  }
+
+  .preview-dialog-dark .preview-dialog-frame {
+    background: var(--color-theme-ink);
+  }
+
+  /* Pinned inside the frame's padding rather than sized in its grid, because a percentage
+     height there has nothing definite to resolve against once the height cap applies, and
+     the picture spills out at its own size. The thumbnail and the picture loading over it
+     share the one place. */
+  .preview-dialog-image {
+    height: calc(100% - 2 * var(--spacing-container));
+    inset: var(--spacing-container);
+    object-fit: contain;
+    position: absolute;
+    width: calc(100% - 2 * var(--spacing-container));
+  }
+
+  .preview-dialog-image-loading {
+    opacity: 0;
+  }
+
+  .preview-dialog-placeholder {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-strong);
+  }
+
+  .preview-dialog-dark .preview-dialog-placeholder {
+    color: var(--color-theme-on-ink);
+  }
+
+  .preview-dialog-caption {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-inline);
+    min-width: 0;
+  }
+
+  .preview-dialog-title {
+    font-size: var(--font-size-name);
+    margin: 0;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+
+  .preview-dialog-description {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .preview-dialog-actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-inline);
+    margin-top: var(--spacing-inline);
+  }
+
+  /* Glass over the picture's corner, the same treatment as every control that floats
+     over content, set in far enough to clear the frame's rounded corner. */
+  .preview-dialog-close {
+    align-items: center;
+    backdrop-filter: blur(22px) saturate(1.7);
+    background: var(--color-glass);
+    border: none;
+    border-radius: var(--border-radius-round);
+    color: var(--color-ink);
+    cursor: pointer;
+    display: flex;
+    height: 44px;
+    justify-content: center;
+    padding: 0;
+    position: absolute;
+    right: calc(var(--spacing-container) + var(--spacing-group));
+    top: calc(var(--spacing-container) + var(--spacing-group));
+    width: 44px;
+  }
+}
+
+/* The transition between a thumbnail and its preview. The pseudo-elements hang off the
+   root, outside any class scope, and paint above the page and the chrome, whose groups
+   sit at lower indexes.
+
+   The sheet is one piece that grows out of the thumbnail and shrinks back into it – the
+   picture, its title, and the actions together – so nothing reaches its size before the
+   rest. Its box is clipped while it grows, so the caption under the picture is revealed
+   rather than hanging below the thumbnail. The dim fades on the same clock, quicker
+   than a page slide because the reader is only looking closer, on the slide's curve. */
+::view-transition-group(preview-scrim),
+::view-transition-group(preview) {
+  animation-duration: 250ms;
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0.35, 1);
+}
+
+::view-transition-group(preview-scrim) {
+  z-index: 10;
+}
+
+::view-transition-group(preview) {
+  border-radius: var(--border-radius-surface);
+  overflow: clip;
+  z-index: 11;
+}
+
+::view-transition-old(preview-scrim),
+::view-transition-new(preview-scrim) {
+  animation-duration: inherit;
+  animation-timing-function: inherit;
+}
+
+/* The thumbnail and the sheet are drawn at different scales, so they swap at the small
+   end – early while opening, late while closing – and the box spends the rest of its
+   travel as the sheet alone rather than as two pictures sliding over each other. */
+::view-transition-old(preview),
+::view-transition-new(preview) {
+  animation-duration: inherit;
+  animation-timing-function: linear;
+  height: auto;
+  mix-blend-mode: normal;
+  width: 100%;
+}
+
+html[data-preview="opening"]::view-transition-old(preview) {
+  animation-name: preview-swap-out-early;
+}
+
+html[data-preview="opening"]::view-transition-new(preview) {
+  animation-name: preview-swap-in-early;
+}
+
+html[data-preview="closing"]::view-transition-old(preview) {
+  animation-name: preview-swap-out-late;
+}
+
+html[data-preview="closing"]::view-transition-new(preview) {
+  animation-name: preview-swap-in-late;
+}
+
+@keyframes preview-swap-out-early {
+  15%,
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes preview-swap-in-early {
+  from {
+    opacity: 0;
+  }
+
+  15%,
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes preview-swap-out-late {
+  from,
+  85% {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes preview-swap-in-late {
+  from,
+  85% {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

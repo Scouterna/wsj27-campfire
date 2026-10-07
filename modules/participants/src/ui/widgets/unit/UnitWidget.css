@@ -103,6 +103,11 @@
     }
   }
 
+  /* A press tints the row for as long as the finger is down, as a list row's does. */
+  .unit-widget-person:active {
+    background: color-mix(in srgb, var(--color-theme-ink) 11%, var(--color-theme-wash));
+  }
+
   .unit-widget-person:focus-visible {
     outline: 2px solid var(--color-theme-ink);
     outline-offset: -2px;

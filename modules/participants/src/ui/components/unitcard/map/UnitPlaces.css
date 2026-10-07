@@ -62,6 +62,28 @@
     padding: 2px var(--spacing-stack);
   }
 
+  /* A press dims the pill for as long as the finger is down, the feedback a touch gets
+     in place of a hover. */
+  .unit-places-open:active .unit-places-hint,
+  .unit-places-control:active .unit-places-hint {
+    background: color-mix(in srgb, var(--color-theme-ink) 14%, var(--color-sheet));
+    transform: scale(0.96);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* As long as the map's grow and shrink, so the hints move clear of the screen's
+       edges with the edges. */
+    .unit-places-controls {
+      transition: padding 300ms ease;
+    }
+
+    .unit-places-hint {
+      transition:
+        background 120ms ease,
+        transform 120ms ease;
+    }
+  }
+
   .unit-places-open:focus-visible,
   .unit-places-control:focus-visible {
     outline: 2px solid var(--color-theme-ink);
