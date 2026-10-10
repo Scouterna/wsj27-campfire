@@ -30,13 +30,13 @@ apps/apple/
 
 - **Never hand-edit the project file.** Edit `project.yml` and run `pnpm generate:apple`; the next generation throws a hand edit away.
 - A new file under `src/`, `test/`, or `test-ui/` needs no regeneration, because the project lists directories. A new target, scheme, configuration, or build setting does.
-- Each environment is a configuration crossed with Debug and Release, and XcodeGen turns them into the **Campfire Local**, **Campfire Dev**, and **Campfire Prod** schemes. The scripts name the scheme they want rather than relying on the selection.
+- Each environment is a configuration crossed with Debug and Release, and XcodeGen turns them into the **Campfire Local**, **Campfire Dev**, **Campfire Staging**, and **Campfire Prod** schemes. The scripts name the scheme they want rather than relying on the selection.
 
 ## Schemes are origins
 
-The schemes set one thing, `CAMPFIRE_WEB_ORIGIN`, in `Local.xcconfig`, `Dev.xcconfig`, and `Prod.xcconfig`, each including `Shared.xcconfig`. It reaches the app through the generated `Info.plist` and is read once by `Config.swift`. Nothing else in the app carries an address, and the shell never knows which environment runs behind it ([ADR 012](../../docs/decisions/012-run-campfire-in-three-environments-on-one-origin.md)).
+The schemes set one thing, `CAMPFIRE_WEB_ORIGIN`, in `Local.xcconfig`, `Dev.xcconfig`, `Staging.xcconfig`, and `Prod.xcconfig`, each including `Shared.xcconfig`. It reaches the app through the generated `Info.plist` and is read once by `Config.swift`. Nothing else in the app carries an address, and the shell never knows which environment runs behind it ([ADR 012](../../docs/decisions/012-run-campfire-in-three-environments-on-one-origin.md)).
 
-- One bundle identifier across all three, so they replace each other on a device – the accepted cost of one identity.
+- One bundle identifier across all of them, so they replace each other on a device – the accepted cost of one identity.
 - `//` starts a comment in an xcconfig, so a URL's `//` is written `/$()/`.
 - The local origin is spelled `localhost` – not `127.0.0.1` or a LAN address – because cookies do not cross between spellings of one machine, and ScoutID returns only to the registered host name.
 - The version is the shell's own, from the commits that touch `apps/apple/` ([ADR 034](../../docs/decisions/034-version-each-artifact-from-its-own-commits.md)). `Shared.xcconfig` holds `0.0.0` and build `1` as placeholders no release edits; a release passes `CAMPFIRE_VERSION_NUMBER` and `CAMPFIRE_BUILD_NUMBER` to `xcodebuild`.

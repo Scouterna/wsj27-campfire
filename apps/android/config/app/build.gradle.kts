@@ -54,6 +54,12 @@ android {
       buildConfigField("String", "CAMPFIRE_WEB_ORIGIN", "\"https://campfire.wsj27.scouterna.net\"")
     }
 
+    create("staging") {
+      dimension = "stage"
+      // The deployed staging build of the web application.
+      buildConfigField("String", "CAMPFIRE_WEB_ORIGIN", "\"https://staging.campfire.wsj27.se\"")
+    }
+
     create("prod") {
       dimension = "stage"
       // The deployed production build of the web application. The shell itself stays a

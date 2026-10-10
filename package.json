@@ -10,8 +10,10 @@
   "scripts": {
     "build:android:dev": "apps/android/gradlew -p apps/android assembleDevDebug",
     "build:android:prod": "apps/android/gradlew -p apps/android assembleProdDebug",
+    "build:android:staging": "apps/android/gradlew -p apps/android assembleStagingDebug",
     "build:apple:dev": "sh scripts/apple/build.sh dev",
     "build:apple:prod": "sh scripts/apple/build.sh prod",
+    "build:apple:staging": "sh scripts/apple/build.sh staging",
     "build:arch": "node scripts/structurizr/run.ts export",
     "build:guidebook": "vitepress build docs",
     "build:image": "docker build --platform linux/amd64 --file config/environments/prod/Dockerfile --tag wsj27-campfire .",
