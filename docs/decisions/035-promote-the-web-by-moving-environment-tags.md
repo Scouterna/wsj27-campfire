@@ -4,6 +4,10 @@
 <p><Badge type="tip" text="Accepted" /> <Badge type="info" text="2026-09-25" /></p>
 :::
 
+::: warning A later record moved part of this
+[ADR 038](038-run-the-dev-branch-on-dev-and-every-release-on-staging.md) moves `:staging` after a release instead of `:dev`, which now follows the `dev` branch, so a promotion takes an image staging ran. Promotion, the `prod` environment, and the absence of `:latest` all stand.
+:::
+
 ## Context
 
 [ADR 026](026-publish-the-web-application-as-a-container-image.md) publishes the web image and stops, and the cluster that runs it is operated outside this repository ([ADR 027](027-run-the-web-beside-the-back-end-on-scouternas-cluster.md)). Dev should take every web release, so the contingent management tests what could ship. Prod should change only when someone decides, only to an image dev already ran, and visibly – who, what, when, and what it replaced.

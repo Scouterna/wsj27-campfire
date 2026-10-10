@@ -55,7 +55,7 @@ The shells' dev and prod builds – `pnpm build:android:dev` and its siblings �
 
 ## The deployed sites
 
-The web image runs on Scouterna's Kubernetes cluster in Azure, behind the same ingress as the back-end services – dev at `campfire.wsj27.scouterna.net` and prod at `campfire.wsj27.se`. The ingress is the deployed form of the local front door, routing the same prefixes the same way ([ADR 027](/decisions/027-run-the-web-beside-the-back-end-on-scouternas-cluster)). Which image each site runs is decided by moving a tag ([Release](../maintenance/release)).
+The web image runs on Scouterna's Kubernetes cluster in Azure, behind the same ingress as the back-end services – dev at `campfire.wsj27.scouterna.net`, staging at `staging.campfire.wsj27.se`, and prod at `campfire.wsj27.se`. The ingress is the deployed form of the local front door, routing the same prefixes the same way ([ADR 027](/decisions/027-run-the-web-beside-the-back-end-on-scouternas-cluster)). Dev runs the `dev` branch, staging every release, and prod a promoted release, each decided by moving a tag ([Release](../maintenance/release)).
 
 ![Deployment diagram of the deployed dev environment. In Azure, a Kubernetes cluster runs an ingress as the one origin over HTTPS, routing /api/auth to the auth service, /api/project to the participants service, and every other path to the web app. The auth service runs the OpenID round trip with ScoutID, and the participants service reads member data from Scoutnet. The Apple and Android shells on a member's phone load the application from the ingress.](../../architecture/diagrams/deploymentDev.svg)
 

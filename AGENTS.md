@@ -332,4 +332,6 @@ The web image, the Android shell, and the Apple shell each have their own CalVer
 - **The patch segment** – otherwise, any `fix` or `revert`.
 - **Nothing** – every other type.
 
-`pnpm version:next <android|apple|web>` prints an artifact's next version. [Release](docs/guidebook/maintenance/release.md) has the rest, including how the web reaches dev and prod ([ADR 035](docs/decisions/035-promote-the-web-by-moving-environment-tags.md)).
+A push to the `dev` branch earns no version. It builds the web image dev runs and nothing else, because that branch never merges into `main`.
+
+`pnpm version:next <android|apple|web>` prints an artifact's next version. [Release](docs/guidebook/maintenance/release.md) has the rest, including how the web reaches dev, staging, and prod ([ADR 035](docs/decisions/035-promote-the-web-by-moving-environment-tags.md), [ADR 038](docs/decisions/038-run-the-dev-branch-on-dev-and-every-release-on-staging.md)).

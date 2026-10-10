@@ -9,10 +9,11 @@ The workflows in `.github/workflows/` are small and single-purpose, and the pref
 | `check_*`   | Pull requests                | Validate without building – the shared checks and `pnpm test`, the Android checks and JVM tests, the architecture model, and the agent skills                         |
 | `test_*`    | Pull requests                | Walk each module's screens in a browser, one job per module ([ADR 024](/decisions/024-walk-through-the-web-application-per-module-with-playwright))                   |
 | `build_*`   | Pull requests                | Build the web application and Storybook, the container image when its files changed, the guidebook, and the Android shell – proof that each builds, published nowhere |
-| `release_*` | Merges to `main`, or by hand | Publish the web image and move `:dev` to it, publish each agent skill whose version is new, and deploy the guidebook to GitHub Pages                                  |
+| `preview_*` | Pushes to `dev`              | Publish the web image from the `dev` branch as `:dev`, with no version                                                                                                |
+| `release_*` | Merges to `main`, or by hand | Publish the web image and move `:staging` to it, publish each agent skill whose version is new, and deploy the guidebook to GitHub Pages                              |
 | `promote_*` | By hand, naming a version    | Move `:prod` to an image that is already released                                                                                                                     |
 
-Only releases and promotions write anywhere.
+Only previews, releases, and promotions write anywhere.
 
 ## How a check decides to run
 
@@ -54,11 +55,13 @@ The rules that hold across the workflows:
 
 ## Releasing the web
 
-A merge is a release when its commits earn one, so nobody has to remember to cut it. On a merge that touches the web, `release_web.yml` works out the next version from the commits since the last `web-v` tag ([ADR 034](/decisions/034-version-each-artifact-from-its-own-commits)), publishes the image, tags the version once the image exists, and moves `:dev` to it. `promote_web.yml` is started by hand and moves `:prod` to a version that is already released, without rebuilding it ([ADR 035](/decisions/035-promote-the-web-by-moving-environment-tags)). [Release](../maintenance/release) describes the versions, the image tags, and promotion in full.
+A merge is a release when its commits earn one, so nobody has to remember to cut it. On a merge that touches the web, `release_web.yml` works out the next version from the commits since the last `web-v` tag ([ADR 034](/decisions/034-version-each-artifact-from-its-own-commits)), publishes the image, tags the version once the image exists, and moves `:staging` to it. `promote_web.yml` is started by hand and moves `:prod` to a version that is already released, without rebuilding it ([ADR 035](/decisions/035-promote-the-web-by-moving-environment-tags)). [Release](../maintenance/release) describes the versions, the image tags, and promotion in full.
 
-Moving `:dev` and moving `:prod` are recorded as GitHub deployments in the `dev` and `prod` environments, each linked to the site it serves, so the repository's Deployments page is the history of what ran where.
+A push to the `dev` branch runs `preview_web.yml` instead, which builds the image with no version and publishes it as `:dev`, whatever the push touched. A newer push cancels the build in flight, because only the newest is worth publishing ([ADR 038](/decisions/038-run-the-dev-branch-on-dev-and-every-release-on-staging)).
 
-The pipeline ends at the tag. Neither workflow touches the cluster or holds credentials for it – the cluster takes what a tag points at, by a step its operators own ([ADR 027](/decisions/027-run-the-web-beside-the-back-end-on-scouternas-cluster)). The image is built for `linux/amd64` only, the cluster's platform, while the build stage runs on the builder's own platform, so the install and the Vite build never run under emulation ([ADR 026](/decisions/026-publish-the-web-application-as-a-container-image)).
+Every move of `:dev`, `:staging`, and `:prod` is recorded as a GitHub deployment in the environment of the same name, linked to the site it serves, so the repository's Deployments page is the history of what ran where.
+
+The pipeline ends at the tag. No workflow touches the cluster or holds credentials for it – the cluster takes what a tag points at, by a step its operators own ([ADR 027](/decisions/027-run-the-web-beside-the-back-end-on-scouternas-cluster)). The image is built for `linux/amd64` only, the cluster's platform, while the build stage runs on the builder's own platform, so the install and the Vite build never run under emulation ([ADR 026](/decisions/026-publish-the-web-application-as-a-container-image)).
 
 The skills and the guidebook release the same way, on a merge that touches them. A skill is released when its `metadata.version` has no tag, because a skill's version tracks its content rather than the commits ([ADR 025](/decisions/025-publish-agent-skills-as-versioned-releases)). The guidebook is built and then deployed to GitHub Pages in a separate job, so only the deploy holds the permission to publish ([ADR 029](/decisions/029-render-the-guidebook-with-vitepress)).
 
@@ -67,5 +70,5 @@ The skills and the guidebook release the same way, on a merge that touches them.
 - **No Apple continuous integration.** A macOS runner bills far above a Linux one, and the shell is thin, so the `pre-push` hook is the Swift gate. A Swift change is checked only on the machine that made it ([ADR 008](/decisions/008-check-commits-with-git-hooks)).
 - **No emulator.** The Android instrumented tests are compiled but not run, because emulators on hosted runners are slow and flaky. `pnpm test:android:ui` runs them locally.
 - **No diagram check.** `check:arch` validates the model, but nothing compares the committed SVGs with it, so re-export after a model change and read the diff.
-- **No check that dev ran a version before it is promoted.** Promoting a version dev never had is visible on the Deployments page, but not refused.
+- **No check that staging ran a version before it is promoted.** Promoting a version staging never had is visible on the Deployments page, but not refused.
 - **No re-validation on `main`.** Releases trust the pull request gate. That holds while one change at a time is merged onto an up-to-date branch, and stops holding when two changes pass alone and break together.

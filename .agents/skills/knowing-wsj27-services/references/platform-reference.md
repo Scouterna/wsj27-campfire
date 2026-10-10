@@ -30,14 +30,14 @@ Campfire's environments all answer on one origin, and the back-end paths are the
 | `/_services/cms`     | `wsj27-cms`, with the base path built into its image         |
 | `/_services/handbok` | The public handbook, rewritten by the CMS onto its own pages |
 
-The dev origin is `campfire.wsj27.scouterna.net` and the prod origin `campfire.wsj27.se`. Locally, Caddy stands in for the ingress with the same rules.
+The dev origin is `campfire.wsj27.scouterna.net`, the staging origin `staging.campfire.wsj27.se`, and the prod origin `campfire.wsj27.se`. Locally, Caddy stands in for the ingress with the same rules.
 
 ## Deploying
 
 - **Images** are built and published by each repository's workflow on a push. The workflows build images and do not run tests.
 - **The services** follow a branch model: work merges into `dev`, which publishes a `:dev` image, then `dev` into `main`. Rolling a new image out to the cluster is a manual step.
 - **The CMS and the Discord bot** keep their Kubernetes manifests in their own repositories and pin images by commit SHA, never `latest`, so a rollback is unambiguous.
-- **The web image** moves through `:dev` and `:prod` tags (Campfire's ADR 035).
+- **The web image** moves through three tags: `:dev` is built from Campfire's `dev` branch, `:staging` follows every release, and `:prod` moves by promotion (Campfire's ADRs 035 and 038).
 
 ## The CMS
 

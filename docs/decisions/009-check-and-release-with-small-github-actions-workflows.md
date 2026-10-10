@@ -4,6 +4,10 @@
 <p><Badge type="tip" text="Accepted" /> <Badge type="info" text="2026-09-15" /></p>
 :::
 
+::: warning Later records added to this
+[ADR 035](035-promote-the-web-by-moving-environment-tags.md) added `promote_*` and [ADR 038](038-run-the-dev-branch-on-dev-and-every-release-on-staging.md) added `preview_*`, and the list of kinds below includes both.
+:::
+
 ## Context
 
 Campfire's outputs have almost nothing in common at build time – the agent skills as releases, the guidebook as a static site, and the web, Android, and iOS apps, with their own toolchains, credentials, and, for iOS, a runner that bills far above the rest. What they share is the repository-wide check. Gating a pull request and shipping what lands want different triggers, permissions, and failure behavior: a failed check blocks a merge, while a failed release must not leave a half-published artifact. And a workflow skipped by an `on: paths:` filter reports no status at all, so a required check behind one can block a merge forever.
@@ -12,11 +16,11 @@ Campfire's outputs have almost nothing in common at build time – the agent ski
 
 We automate checks and releases with GitHub Actions, where the code, the issues, and the releases already are, in small single-purpose workflows:
 
-- **Workflows are named for what they do.** `check_*` validates without building, `test_*` drives an output, `build_*` compiles one output, `release_*` ships one, and `promote_*` moves a pointer to something already released. Only the last two write anywhere. Releases run on a push to `main` and can be retried by hand; a promotion runs only by hand.
+- **Workflows are named for what they do.** `check_*` validates without building, `test_*` drives an output, `build_*` compiles one output, `preview_*` publishes a build that is not a release, `release_*` ships one, and `promote_*` moves a pointer to something already released. Only the last three write anywhere. Releases run on a push to `main` and can be retried by hand, a preview runs on a push to its branch, and a promotion runs only by hand.
 - **A check filters inside the job, never with `on: paths:`**, because a job skipped by an `if:` still reports as passing. A release, which nothing waits on, filters at the trigger.
 - **Every check reports separately.** `check.yml` runs one step per check script, each running after a sibling failed.
 - **Least privilege, declared.** Read-only workflows say so, and a release scopes its write permission to the job that needs it.
-- **Pull request runs cancel when superseded; releases and promotions queue and never cancel**, because a canceled one can leave a tag without its release or a site half-deployed.
+- **Pull request and preview runs cancel when superseded; releases and promotions queue and never cancel**, because a canceled one can leave a tag without its release or a site half-deployed.
 - **Releases trust the pull request gate** rather than checking again on `main`.
 
 ## Consequences
