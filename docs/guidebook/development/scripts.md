@@ -59,18 +59,20 @@ The flavor belongs to `build:`, not to `start:`, and the difference is deliberat
 
 ## Build and release
 
-| Script               | What it does                                                                                |
-| -------------------- | ------------------------------------------------------------------------------------------- |
-| `build:web`          | The web application                                                                         |
-| `build:image`        | The deployable web image, for linux/amd64                                                   |
-| `build:guidebook`    | This guidebook                                                                              |
-| `build:storybook`    | Storybook                                                                                   |
-| `build:arch`         | Renders the architecture diagrams as SVGs                                                   |
-| `build:android:dev`  | The Android shell against the dev site                                                      |
-| `build:android:prod` | The Android shell against the prod site                                                     |
-| `build:apple:dev`    | The Apple shell against the dev site                                                        |
-| `build:apple:prod`   | The Apple shell against the prod site                                                       |
-| `version:next`       | Prints the next version of `android`, `apple`, or `web` ([Release](../maintenance/release)) |
+| Script                  | What it does                                                                                |
+| ----------------------- | ------------------------------------------------------------------------------------------- |
+| `build:web`             | The web application                                                                         |
+| `build:image`           | The deployable web image, for linux/amd64                                                   |
+| `build:guidebook`       | This guidebook                                                                              |
+| `build:storybook`       | Storybook                                                                                   |
+| `build:arch`            | Renders the architecture diagrams as SVGs                                                   |
+| `build:android:dev`     | The Android shell against the dev site                                                      |
+| `build:android:prod`    | The Android shell against the prod site                                                     |
+| `build:android:staging` | The Android shell against the staging site                                                  |
+| `build:apple:dev`       | The Apple shell against the dev site                                                        |
+| `build:apple:prod`      | The Apple shell against the prod site                                                       |
+| `build:apple:staging`   | The Apple shell against the staging site                                                    |
+| `version:next`          | Prints the next version of `android`, `apple`, or `web` ([Release](../maintenance/release)) |
 
 ## Housekeeping
 

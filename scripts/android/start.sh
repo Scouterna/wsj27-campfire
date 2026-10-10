@@ -4,8 +4,8 @@
 # `start:dev`, or `start:prod`.
 #
 # The shell always points at this machine, so the environment is a property of the
-# stack rather than of the build: the Local flavor is what start uses, and the dev and
-# prod flavors exist for `pnpm build:android:dev` and `:prod`.
+# stack rather than of the build: the Local flavor is what start uses, and the other
+# flavors exist for the `pnpm build:android:<environment>` scripts.
 
 set -eu
 

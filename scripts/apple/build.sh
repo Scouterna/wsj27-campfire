@@ -3,7 +3,7 @@
 # when CAMPFIRE_DEVICE is set.
 #
 # Usage:
-#   build.sh [local|dev|prod]
+#   build.sh [local|dev|staging|prod]
 #
 # The environment defaults to local. A script rather than a line in package.json
 # because xcodebuild needs the project directory as its working directory, and because

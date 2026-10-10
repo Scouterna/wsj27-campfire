@@ -4,8 +4,8 @@
 # `start:dev`, or `start:prod`.
 #
 # The shell always points at this machine, so the environment is a property of the
-# stack rather than of the build: the Local configuration is what start uses, and Dev
-# and Prod exist for `pnpm build:apple:dev` and `:prod`.
+# stack rather than of the build: the Local configuration is what start uses, and the
+# others exist for the `pnpm build:apple:<environment>` scripts.
 #
 # The simulator is resolved rather than named – see simulator.sh – so this works on a
 # machine with a different set of runtimes installed.

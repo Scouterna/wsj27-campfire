@@ -26,6 +26,8 @@ configs:
   Local (Release): release
   Dev (Debug): debug
   Dev (Release): release
+  Staging (Debug): debug
+  Staging (Release): release
   Prod (Debug): debug
   Prod (Release): release
 
@@ -34,6 +36,8 @@ configFiles:
   Local (Release): config/Local.xcconfig
   Dev (Debug): config/Dev.xcconfig
   Dev (Release): config/Dev.xcconfig
+  Staging (Debug): config/Staging.xcconfig
+  Staging (Release): config/Staging.xcconfig
   Prod (Debug): config/Prod.xcconfig
   Prod (Release): config/Prod.xcconfig
 
@@ -110,6 +114,7 @@ targets:
       # selection.
       configVariants:
         - Prod
+        - Staging
         - Dev
         - Local
       testTargets:

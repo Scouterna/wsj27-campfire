@@ -28,9 +28,9 @@ apps/android/
 
 ## Flavors are origins
 
-The `local`, `dev`, and `prod` flavors set one thing, `CAMPFIRE_WEB_ORIGIN`, read once by `Config.kt`. Nothing else in the app carries an address, and the shell never knows which environment runs behind it ([ADR 012](../../docs/decisions/012-run-campfire-in-three-environments-on-one-origin.md)).
+The `local`, `dev`, `staging`, and `prod` flavors set one thing, `CAMPFIRE_WEB_ORIGIN`, read once by `Config.kt`. Nothing else in the app carries an address, and the shell never knows which environment runs behind it ([ADR 012](../../docs/decisions/012-run-campfire-in-three-environments-on-one-origin.md)).
 
-- One `applicationId` across all three, so they replace each other on a device – the accepted cost of one identity.
+- One `applicationId` across all of them, so they replace each other on a device – the accepted cost of one identity.
 - `local` is the default, so `assemble` and the IDE's run button mean what `pnpm start:android` means.
 - The local flavor reaches the host through the `adb reverse` tunnel `scripts/android/start.sh` opens, never the emulator's `10.0.2.2` alias. Cookies do not cross between spellings of one machine, and ScoutID returns only to the registered host name.
 - `assets/xml/network_security_config.xml` permits cleartext for `localhost` and `10.0.2.2` alone, because the development server speaks it.

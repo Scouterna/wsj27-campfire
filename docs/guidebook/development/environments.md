@@ -51,7 +51,7 @@ The image is `linux/amd64`, the cluster's platform, so an Apple-silicon machine 
 
 `pnpm start:android` and `pnpm start:apple` boot an emulator or a simulator, build the shell, and launch it against `http://localhost:8000`. They take no environment – whichever stack is running is the environment – and refuse to start when nothing answers there. The Android emulator reaches the host's port 8000 through `adb reverse`, so `localhost` means the same machine on both sides and sign-in keeps its one host name.
 
-The shells' dev and prod builds – `pnpm build:android:dev` and its siblings – bake in the deployed sites' origin instead, for a build meant to leave the machine.
+The shells' dev, staging, and prod builds – `pnpm build:android:dev` and its siblings – bake in the deployed sites' origin instead, for a build meant to leave the machine.
 
 ## The deployed sites
 
