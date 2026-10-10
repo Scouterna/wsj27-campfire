@@ -4,6 +4,10 @@
 <p><Badge type="tip" text="Accepted" /> <Badge type="info" text="2026-09-15" /></p>
 :::
 
+::: warning A later record added to this
+[ADR 038](038-run-the-dev-branch-on-dev-and-every-release-on-staging.md) adds a staging site at `staging.campfire.wsj27.se`, on the same cluster behind the same ingress.
+:::
+
 ## Context
 
 Campfire serves the web and the back-end paths from one origin ([ADR 012](012-run-campfire-in-three-environments-on-one-origin.md)), and the web ships as a container image ([ADR 026](026-publish-the-web-application-as-a-container-image.md)). Scouterna runs the WSJ27 back-end services on its Kubernetes cluster in Azure, and people outside this repository operate it.

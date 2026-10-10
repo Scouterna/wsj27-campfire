@@ -44,12 +44,13 @@ Each release is a small GitHub Actions workflow that runs on a merge to `main` t
 
 **The guidebook.** A merge that touches the docs builds the site and deploys it to GitHub Pages, under the repository's project path.
 
-## Dev and prod
+## Dev, staging, and prod
 
-Two tags on the web image say what each environment runs, and nothing else moves ([ADR 035](/decisions/035-promote-the-web-by-moving-environment-tags)):
+Three tags on the web image say what each environment runs, and nothing else moves ([ADR 035](/decisions/035-promote-the-web-by-moving-environment-tags), [ADR 038](/decisions/038-run-the-dev-branch-on-dev-and-every-release-on-staging)):
 
-- **`:dev` follows every release.** Once a version is tagged, `:dev` moves to that image, so what the contingent management team tests at `campfire.wsj27.scouterna.net` is exactly what could be promoted. A merge that earns no version moves nothing.
-- **`:prod` moves only by promotion.** A maintainer names a released version, and the promotion points `:prod` at that version's image. Nothing is rebuilt, so prod runs byte for byte the image dev ran.
+- **`:dev` follows the `dev` branch.** Anyone pushes whatever they want to show to `dev`, and every push, force-pushes included, builds the image as `:dev` for `campfire.wsj27.scouterna.net`. The branch never merges into `main` and is recreated from it whenever it has drifted too far. A dev build is not a release – it earns no version, creates no tag, says `0.0.0`, and never touches `:staging` or `:prod`.
+- **`:staging` follows every release.** Once a version is tagged, `:staging` moves to that image, so what is tried at `staging.campfire.wsj27.se` is exactly what could be promoted. A merge that earns no version moves nothing.
+- **`:prod` moves only by promotion.** A maintainer names a released version, and the promotion points `:prod` at that version's image. Nothing is rebuilt, so prod runs byte for byte the image staging ran.
 
 Promotion is started from the Actions tab or the command line:
 
@@ -59,7 +60,7 @@ gh workflow run promote_web.yml -f version=2026.9.0
 
 A version that is not CalVer-shaped, has no tag, or has no image is refused, and prod stays where it was. Rolling back is promoting an earlier version – there is no other way to move `:prod`. There is no `:latest`, because nothing should run whatever happened to be published last.
 
-Every move of `:dev` and every promotion, refused ones included, is a deployment on the repository's Deployments page, linking to the site it changed: who started it, which version, and how it ended. That page, not the git history, is the record of what each environment has run. A promotion's run summary also names the version it replaced and the command that goes back to it.
+Every move of `:dev` and `:staging` and every promotion, refused ones included, is a deployment on the repository's Deployments page, linking to the site it changed: who started it, which version, and how it ended. That page, not the git history, is the record of what each environment has run. A promotion's run summary also names the version it replaced and the command that goes back to it.
 
 Moving a tag restarts nothing. The web runs on Scouterna's Kubernetes cluster in Azure, behind the same ingress as the back-end services, and the people who operate the cluster pick up what a tag points at through a step on their side – for prod, a step taken by hand. GitHub therefore holds no credentials for the cluster ([ADR 027](/decisions/027-run-the-web-beside-the-back-end-on-scouternas-cluster)). `pnpm start:prod` is the same shape on one machine: the built image behind one origin with the real back-end ([Environments](../development/environments)).
 

@@ -5,17 +5,18 @@ name: Release web
 #
 # The version is worked out from the commits since the last web-v<version> tag, by the
 # rule in the Versioning section of AGENTS.md (ADR 034). A merge that earns a version
-# publishes :<version>, creates the tag web-v<version>, and then moves :dev to that
-# image, so dev follows every version and only ever a version that finished releasing
-# (ADR 035).
+# publishes :<version>, creates the tag web-v<version>, and then moves :staging to that
+# image, so staging follows every version and only ever a version that finished
+# releasing (ADR 038).
 #
-# Moving :dev is a job of its own in the dev environment, so every move is a deployment
-# linking to the site dev serves, and a merge that earns no version records none.
+# Moving :staging is a job of its own in the staging environment, so every move is a
+# deployment linking to the site staging serves, and a merge that earns no version
+# records none.
 #
 # Every merge also publishes :main and :sha-<short>, whether or not it earned a version.
-# Those are for rollback and for pointing a staging deployment at a specific commit;
-# the version tags are what a real deployment pins. :prod moves only through
-# promote_web.yml.
+# Those are for rollback and for running a specific commit by hand; the version tags are
+# what a real deployment pins. :dev is built from the dev branch by preview_web.yml, and
+# :prod moves only through promote_web.yml.
 #
 # Nothing here deploys. Moving a tag restarts nothing, and how the cluster notices a
 # moved tag is settled with the people who run it.
@@ -63,7 +64,7 @@ jobs:
     permissions:
       contents: write
       packages: write
-    # What the dev job needs to move :dev, and to say how to move it by hand.
+    # What the staging job needs to move :staging, and to say how to move it by hand.
     outputs:
       digest: ${{ steps.build.outputs.digest }}
       image: ${{ steps.version.outputs.image }}
@@ -192,16 +193,16 @@ jobs:
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
-  # Only after a release that earned a version, which means the tag exists, so :dev only
-  # ever points at a digest that also carries a released :<version>.
-  dev:
+  # Only after a release that earned a version, which means the tag exists, so :staging
+  # only ever points at a digest that also carries a released :<version>.
+  staging:
     needs: release
     if: needs.release.outputs.version != ''
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     environment:
-      name: dev
-      url: https://campfire.wsj27.scouterna.net
+      name: staging
+      url: https://staging.campfire.wsj27.se
     # Scoped to the job that needs it, which moves the image tag.
     permissions:
       packages: write
@@ -218,39 +219,39 @@ jobs:
 
       # It copies the manifest by digest – nothing is built, pulled, or pushed but the
       # tag.
-      - name: Move dev to the released version
-        id: dev
+      - name: Move staging to the released version
+        id: staging
         env:
           DIGEST: ${{ needs.release.outputs.digest }}
           IMAGE: ${{ needs.release.outputs.image }}
         run: |
           set -euo pipefail
-          docker buildx imagetools create --tag "${IMAGE}:dev" "${IMAGE}@${DIGEST}"
-          echo "Moved ${IMAGE}:dev to ${DIGEST}."
+          docker buildx imagetools create --tag "${IMAGE}:staging" "${IMAGE}@${DIGEST}"
+          echo "Moved ${IMAGE}:staging to ${DIGEST}."
 
-      # Always, so a failed move says so. Re-running this failed job moves :dev with the
+      # Always, so a failed move says so. Re-running this failed job moves :staging with the
       # release's outputs, but a new run of the workflow does not – the tag exists, so it
       # earns no version and skips this job – so the summary also gives the command that
       # moves it by hand.
       - name: Summarize the move
         if: always()
         env:
-          DEV_OUTCOME: ${{ steps.dev.outcome }}
           DIGEST: ${{ needs.release.outputs.digest }}
           IMAGE: ${{ needs.release.outputs.image }}
+          STAGING_OUTCOME: ${{ steps.staging.outcome }}
           VERSION: ${{ needs.release.outputs.version }}
         run: |
           set -euo pipefail
           {
-            echo "## Move dev"
+            echo "## Move staging"
             echo
-            echo "- **\`:dev\`:** ${DEV_OUTCOME:-skipped}"
-            if [ "$DEV_OUTCOME" != "success" ]; then
+            echo "- **\`:staging\`:** ${STAGING_OUTCOME:-skipped}"
+            if [ "$STAGING_OUTCOME" != "success" ]; then
               echo
-              echo "\`web-v${VERSION}\` exists but \`:dev\` did not move. Re-run this failed job – a new run of the workflow earns no version and will not move it – or move it by hand:"
+              echo "\`web-v${VERSION}\` exists but \`:staging\` did not move. Re-run this failed job – a new run of the workflow earns no version and will not move it – or move it by hand:"
               echo
               echo "\`\`\`sh"
-              echo "docker buildx imagetools create --tag ${IMAGE}:dev ${IMAGE}@${DIGEST}"
+              echo "docker buildx imagetools create --tag ${IMAGE}:staging ${IMAGE}@${DIGEST}"
               echo "\`\`\`"
             fi
           } >> "$GITHUB_STEP_SUMMARY"

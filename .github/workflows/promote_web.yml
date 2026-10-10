@@ -2,7 +2,8 @@ name: Promote web
 
 # Moves the web image's :prod tag to a version that has already been released, and
 # does nothing else (ADR 035). Nothing is built, pulled, or pushed but the tag – the
-# manifest behind :<version> is copied to :prod as is, so prod runs the digest dev ran.
+# manifest behind :<version> is copied to :prod as is, so prod runs the digest staging
+# ran (ADR 038).
 #
 # Nothing here deploys either. A manual step on the cluster side takes what :prod
 # points at, which is how ADR 035 answers ADR 027's open deploy trigger, so this
@@ -61,7 +62,7 @@ jobs:
           fi
 
       # The tag is what says a version was released, so a version without one was
-      # never offered to dev.
+      # never offered to staging.
       - name: Check the version was released
         id: tag
         env:

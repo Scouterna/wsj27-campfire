@@ -4,6 +4,10 @@
 <p><Badge type="tip" text="Accepted" /> <Badge type="info" text="2026-09-25" /></p>
 :::
 
+::: warning A later record moved part of this
+[ADR 038](038-run-the-dev-branch-on-dev-and-every-release-on-staging.md) has a release move `:staging` rather than `:dev`, so staging, not dev, runs every version before prod. The versioning itself stands.
+:::
+
 ## Context
 
 [ADR 007](007-version-with-calver-on-a-rebased-history.md) gave the repository one CalVer version, moved by hand in `package.json` and copied into `Shared.xcconfig` and the Android `versionName`. The three artifacts do not ship together: the web deploys on every merge, and each shell waits on its own store ([ADR 018](018-bridge-the-web-application-and-the-shells-with-versioned-messages.md)). One number names none of them well.
