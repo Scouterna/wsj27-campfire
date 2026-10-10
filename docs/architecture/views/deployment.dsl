@@ -16,6 +16,13 @@ deployment campfire "Dev" "deploymentDev" {
   description "The dev environment, with the real services behind an ingress in Azure."
 }
 
+deployment campfire "Staging" "deploymentStaging" {
+  include *
+  exclude appleShell->webApp
+  exclude androidShell->webApp
+  description "The staging environment, with prod's services behind an ingress in Azure."
+}
+
 deployment campfire "Prod" "deploymentProd" {
   include *
   exclude appleShell->webApp
