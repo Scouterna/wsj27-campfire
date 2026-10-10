@@ -30,7 +30,7 @@ Campfire's environments all answer on one origin, and the back-end paths are the
 | `/_services/cms`     | `wsj27-cms`, with the base path built into its image         |
 | `/_services/handbok` | The public handbook, rewritten by the CMS onto its own pages |
 
-The dev origin is `campfire.wsj27.scouterna.net`, the staging origin `staging.campfire.wsj27.se`, and the prod origin `campfire.wsj27.se`. Locally, Caddy stands in for the ingress with the same rules.
+The dev origin is `campfire.wsj27.scouterna.net`, the staging origin `staging.campfire.wsj27.se`, and the prod origin `campfire.wsj27.se`. Staging has no back-end of its own – its ingress routes to the prod services and ScoutID's production realm. Locally, Caddy stands in for the ingress with the same rules.
 
 ## Deploying
 

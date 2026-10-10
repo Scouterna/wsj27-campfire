@@ -100,6 +100,65 @@ deploymentEnvironment "Dev" {
   devAndroid -> devIngress "Loads the application from"
 }
 
+# Staging has a web image of its own in front of prod's back-end, so a release is tried
+# against the data and the sign-in it will meet once promoted.
+deploymentEnvironment "Staging" {
+
+  deploymentNode "Azure" {
+    description "The cloud that hosts the staging site at staging.campfire.wsj27.se."
+    technology "Microsoft Azure"
+
+    deploymentNode "Kubernetes cluster" {
+      description "Scouterna's cluster, running the web image beside the back-end services."
+      technology "Kubernetes"
+
+      stagingIngress = infrastructureNode "Ingress" {
+        description "The one origin over HTTPS, the deployed form of the front door."
+        technology "Kubernetes ingress"
+      }
+
+      deploymentNode "Web" {
+        description "The published web image, serving the built application."
+        technology "Caddy 2, container"
+        stagingWeb = containerInstance webApp
+      }
+
+      deploymentNode "Auth service" {
+        description "Prod's auth service, which the staging site shares."
+        technology "Python, container"
+        stagingAuth = softwareSystemInstance authService
+      }
+
+      deploymentNode "Participants service" {
+        description "Prod's participants service, which the staging site shares."
+        technology "Python, container"
+        stagingProject = softwareSystemInstance participantsService
+      }
+
+      stagingIngress -> stagingWeb "Routes every other path to"
+      stagingIngress -> stagingAuth "Routes /api/auth to"
+      stagingIngress -> stagingProject "Routes /api/project to"
+    }
+  }
+
+  deploymentNode "Member's phone" {
+    description "A leader's or a CMT member's own phone."
+    technology "iOS 26 or Android"
+    stagingApple = containerInstance appleShell
+    stagingAndroid = containerInstance androidShell
+  }
+
+  deploymentNode "Scouterna" {
+    description "Scouterna's own systems, with ScoutID's production realm."
+    technology "Keycloak, Scoutnet"
+    softwareSystemInstance scoutid
+    softwareSystemInstance scoutnet
+  }
+
+  stagingApple -> stagingIngress "Loads the application from"
+  stagingAndroid -> stagingIngress "Loads the application from"
+}
+
 deploymentEnvironment "Prod" {
 
   deploymentNode "Azure" {
