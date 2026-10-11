@@ -28,6 +28,11 @@ export interface ParticipantRecord {
    */
   readonly participation_type: string
   /**
+   * The patrol, as plain text – the Patrull answer, or an IST member's Avdelning answer while
+   * their Patrull is unanswered. Empty when there is neither.
+   */
+  readonly patrol: string
+  /**
    * The roles minted for the participant at decode time.
    */
   readonly roles: readonly string[]
@@ -107,6 +112,7 @@ export function decodeParticipantsList(
       ),
       roles: rolesForParticipant({ accessLevel, memberNo, memberType, troop }, cmtDetails),
       troop,
+      patrol: patrolOf(participant),
       contact_info: contactInfo,
       forms_data: formsData,
     })
@@ -114,11 +120,23 @@ export function decodeParticipantsList(
   return participantsList
 }
 
-// The troop the list of participants carries, which is the unit for a leader or a deltagare. The
-// project API does not carry the IST's patrols, and the contingent management has no troop.
+// The troop the list of participants carries, which is the unit for a leader or a deltagare. An
+// IST member's Avdelning answer goes to their patrol instead, and the contingent management has
+// no troop.
 function troopOf(participant: Participant): string {
   const isInUnit = participant.role === "deltagare" || participant.role === "ledare"
   return isInUnit && participant.unitNumber !== undefined ? String(participant.unitNumber) : ""
+}
+
+// The patrol the list of participants carries. IST patrols were first put in Avdelning, so an IST
+// member whose Patrull is still unanswered keeps that answer as their patrol.
+function patrolOf(participant: Participant): string {
+  if (participant.patrol !== undefined) {
+    return participant.patrol
+  }
+  return participant.role === "ist" && participant.unitNumber !== undefined
+    ? String(participant.unitNumber)
+    : ""
 }
 
 function participationTypeOf(memberType: string, answer: Answer | undefined): string {
