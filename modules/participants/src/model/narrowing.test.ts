@@ -17,17 +17,8 @@ function person(overrides: Partial<Participant> = {}): Participant {
   }
 }
 
-/**
- * A lookup that knows one unit: 2 is Myran, and nothing else is named.
- * @param unitNumber The unit asked about.
- * @returns The name, for the one unit that has one.
- */
-function nameOf(unitNumber: number): string | undefined {
-  return unitNumber === 2 ? "Myran" : undefined
-}
-
 describe("matching one person against a query", () => {
-  const asa = person({ unitNumber: 1 })
+  const asa = person({ unit: { number: 1 } })
 
   it("matches the full name, however it is capitalized", () => {
     expect(matches(asa, "åsa")).toBe(true)
@@ -53,17 +44,26 @@ describe("matching one person against a query", () => {
   })
 
   it("matches a digits-only query against the unit number, exactly", () => {
-    expect(matches(person({ unitNumber: 2 }), "2")).toBe(true)
+    expect(matches(person({ unit: { number: 2 } }), "2")).toBe(true)
     // Exactly, so "2" never sweeps in every unit that contains the digit.
-    expect(matches(person({ unitNumber: 28 }), "2")).toBe(false)
+    expect(matches(person({ unit: { number: 28 } }), "2")).toBe(false)
     expect(matches(person({ role: "ist" }), "2")).toBe(false)
   })
 
-  it("matches the unit's name through the handed-in lookup", () => {
-    expect(matches(person({ unitNumber: 2 }), "myran", nameOf)).toBe(true)
-    expect(matches(person({ unitNumber: 3 }), "myran", nameOf)).toBe(false)
-    // Without a lookup no unit has a name, and the query falls through to no match.
-    expect(matches(person({ unitNumber: 2 }), "myran")).toBe(false)
+  it("matches the unit's name", () => {
+    expect(matches(person({ unit: { name: "Myran", number: 2 } }), "myran")).toBe(true)
+    expect(matches(person({ unit: { name: "Ekorren", number: 3 } }), "myran")).toBe(false)
+    // A unit the contingent has not named has no name to match.
+    expect(matches(person({ unit: { number: 2 } }), "myran")).toBe(false)
+  })
+
+  it("matches an IST patrol's name, never the unit's of the same number", () => {
+    const ist = person({ istPatrol: { name: "Läderbagge", number: 2 }, role: "ist" })
+
+    expect(matches(ist, "läderbagge")).toBe(true)
+    expect(matches(ist, "myran")).toBe(false)
+    // A digits-only query is a unit number, so an IST patrol's number finds nobody.
+    expect(matches(ist, "2")).toBe(false)
   })
 
   it("matches a management member's funktion by its label", () => {
@@ -95,12 +95,12 @@ describe("narrowing a list", () => {
       firstName: "Lars",
       lastName: "Lindberg",
       role: "ledare",
-      unitNumber: 1,
+      unit: { number: 1 },
     }),
-    person({ memberNo: "2", firstName: "Ester", lastName: "Dahl", unitNumber: 1 }),
+    person({ memberNo: "2", firstName: "Ester", lastName: "Dahl", unit: { number: 1 } }),
     person({ memberNo: "3", firstName: "Ivar", lastName: "Ek", role: "ist" }),
     person({ memberNo: "4", firstName: "Pernilla", lastName: "Palm", role: "kontingentledning" }),
-    person({ memberNo: "5", firstName: "Lisa", lastName: "Lind", unitNumber: 2 }),
+    person({ memberNo: "5", firstName: "Lisa", lastName: "Lind", unit: { number: 2 } }),
   ]
 
   it("keeps everybody when nothing narrows", () => {

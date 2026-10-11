@@ -57,7 +57,7 @@ const shapes: readonly { readonly label: string; readonly shape: SymbolShape }[]
  * A unit whose symbols have not been drawn gets an empty list, which is an answer rather
  * than a gap.
  * @param nodes The material tree.
- * @param unitName The unit's name, as the units' identities spell it.
+ * @param unitName The unit's name, as the design system spells it.
  * @returns The unit's symbols, in the order they are offered.
  */
 export function unitSymbols(

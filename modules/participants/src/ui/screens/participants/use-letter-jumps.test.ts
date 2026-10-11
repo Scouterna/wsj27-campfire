@@ -4,7 +4,7 @@ import type { Participant } from "../../../model/Participant"
 import { letterStops, stopBudget, stopCount } from "./use-letter-jumps"
 
 function person(firstName: string, memberNo: string): Participant {
-  return { firstName, lastName: "", memberNo, role: "deltagare", unitNumber: 1 }
+  return { firstName, lastName: "", memberNo, role: "deltagare", unit: { number: 1 } }
 }
 
 /**

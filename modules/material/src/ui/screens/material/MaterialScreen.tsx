@@ -3,9 +3,9 @@ import {
   Card,
   PageTitle,
   SearchField,
+  unitName,
   unitsReveal,
   useIsRevealed,
-  useUnitIdentities,
 } from "@scouterna/wsj27-campfire-ui"
 import { useUser } from "@scouterna/wsj27-campfire-utils"
 import { useDeferredValue, useMemo, useState, type ReactElement } from "react"
@@ -102,17 +102,16 @@ export interface UnitSymbolsCardProps {
  */
 function UnitSymbolsCard(props: UnitSymbolsCardProps): ReactElement | null {
   const user = useUser()
-  const identities = useUnitIdentities()
   const isRevealed = useIsRevealed(unitsReveal.id)
   const unitNumber = user?.unit?.number
-  const unitName = unitNumber === undefined ? undefined : identities.name(unitNumber)
+  const name = unitNumber === undefined ? undefined : unitName(unitNumber)
 
   const symbols = useMemo(
-    () => (unitName === undefined ? [] : unitSymbols(props.nodes, unitName)),
-    [props.nodes, unitName],
+    () => (name === undefined ? [] : unitSymbols(props.nodes, name)),
+    [props.nodes, name],
   )
 
-  if (!isRevealed || unitNumber === undefined || unitName === undefined || symbols.length === 0) {
+  if (!isRevealed || unitNumber === undefined || name === undefined || symbols.length === 0) {
     return null
   }
 

@@ -10,7 +10,6 @@ Read the [root `AGENTS.md`](../../AGENTS.md) first. This file is what is true on
 apps/web/
 ├── index.html    the cascade layer order, the icons, the stylesheet link, and the module script
 ├── assets/       served verbatim – the favicon, the app icons, the PWA's images
-│   └── units/    the units' manifest and one glyph per unit
 └── src/
     ├── main.tsx        the boot order before React: the theme stamp, the navigation wiring, the bfcache reload, the mount
     ├── routes.tsx      the route and widget tables, the sections, the gate, and the two chromes
@@ -18,7 +17,6 @@ apps/web/
     ├── outline.tsx     the desktop outline column, read from the page as rendered
     ├── query.ts        the one query client, its persister, the session wrapper, and the cache-owner handover
     ├── service-worker.ts   when a new deploy reaches an open page
-    ├── units.ts        the units' identities, loaded from assets/units/
     └── app.css         the chrome layout, the view transitions, and the one import of the design system's stylesheet
 ```
 
@@ -38,8 +36,7 @@ Every module and library is a `workspace:*` dependency, resolved to raw TypeScri
 `AppChrome` in `routes.tsx` is the router's `InnerWrap` and the session gate, one `Gate` state: `asking`, `signed-in`, `signed-out`, or `ending` ([Presentation layer](../../docs/guidebook/architecture/layers/presentation.md)).
 
 - It asks `currentUser(queryClient)` once at boot and renders nothing until the answer – no spinner, and no flash of the sign-in screen.
-- Signed in, it hands the cache to the member number with `adoptCacheOwner`, loads the units' identities, resolves the theme unit-first, makes the roles ambient, and branches once on `host.tier`.
-- The units' names and glyphs are runtime data from `assets/units/`, not code. A manifest that is missing or unreadable costs the names and nothing else – every consumer falls back to the unit's number.
+- Signed in, it hands the cache to the member number with `adoptCacheOwner`, resolves the theme unit-first, makes the roles ambient, and branches once on `host.tier`.
 - It listens through `subscribeToSession`. A session the service ends goes to `ending` while `forgetCache` empties the client and the store, then to `signed-out` at the same address; a session that changes hands reloads the page ([ADR 033](../../docs/decisions/033-recover-an-ended-session-at-the-query-client-and-the-gate.md)).
 - `ShellChrome` draws no chrome, because the shell draws it. It is the seam the bridge conversation fills ([ADR 018](../../docs/decisions/018-bridge-the-web-application-and-the-shells-with-versioned-messages.md)).
 - `BrowserChrome` draws the side menu, the navigation bar, the content column, the outline, the tab strip, and the profile control.

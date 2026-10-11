@@ -1,8 +1,8 @@
-/* The unit browser. */
+/* The groups view. */
 
 @layer screen {
   /* What the screen says in place of its rows – fetching, failing, or nobody to show. */
-  .units-status {
+  .groups-status {
     color: var(--color-ink-secondary);
     font-size: var(--font-size-footnote);
     margin: 0;

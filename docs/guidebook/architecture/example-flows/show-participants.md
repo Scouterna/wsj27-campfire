@@ -53,7 +53,7 @@ The contingent management team reads everyone, which the service offers only one
 
 A unit, IST, or management listing that fails is asked once more on its own. If it still fails, or the leaders' listing fails at all, the whole list fails with a way to try again. The list's first job is answering whether a person exists, and a list quietly missing a unit answers that wrongly with full confidence. A visible failure can be retried; a silent gap cannot.
 
-The management also browses by unit, for when the question is about a unit rather than a person. The unit browser groups the same assembled list by unit, IST, and management, so opening it costs no request, and an entry opens as a list of its own.
+The management also browses by group, for when the question is about a unit rather than a person. The groups view sorts the same assembled list into the units, the IST patrols with the IST outside every patrol, and the management by function, so opening it costs no request, and an entry opens as a list of its own. An IST patrol is numbered in the same series as the units but kept apart from them, so nobody in a patrol shows in the unit with the same number. A filter narrows the view to one of the three, and lives in the address like the list's own.
 
 ## Narrowing and coming back
 

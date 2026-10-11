@@ -30,11 +30,9 @@ The trip: departure, the camp, and the way home. The dates are fixed and public,
 
 ## Participants
 
-The contingent's list of participants: the list, a person's details, the unit browser, and the unit widget on the start screen. It is the only module that reads the list from the participants service. The application tells it who is reading – a leader's unit, or everyone for the contingent management, and whether health answers are theirs to read – and the module composes the list one unit at a time within that scope. It validates every field it receives, because the service's shape will change during the build ([Data layer](./layers/data)).
+The contingent's list of participants: the list, a person's details, the groups view, and the unit widget on the start screen. It is the only module that reads the list from the participants service. The application tells it who is reading – a leader's unit, or everyone for the contingent management, and whether health answers are theirs to read – and the module composes the list one unit at a time within that scope. It validates every field it receives, because the service's shape will change during the build ([Data layer](./layers/data)).
 
 The list can grow to the contingent's size, so it is virtualized ([ADR 036](/decisions/036-virtualize-a-list-that-can-grow-to-the-contingents-size)). It is also how someone chooses who to write to: the people shown, or their relatives, can be mailed or have their addresses copied, straight from the list as it is searched and narrowed. [Show participants](./example-flows/show-participants) walks a leader's view of their unit.
-
-The units' names and marks are not in the module. They are runtime data the application loads at the gate, and every surface shows the unit's number until they arrive.
 
 ## Material
 

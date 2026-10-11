@@ -4,7 +4,6 @@ import {
   ThemeScope,
   UnitAvatar,
   unitTheme,
-  useUnitIdentities,
   type Theme,
 } from "@scouterna/wsj27-campfire-ui"
 import {
@@ -19,6 +18,7 @@ import {
 } from "react"
 
 import type { Participant } from "../../../model/Participant"
+import type { Unit } from "../../../model/Unit"
 import { useFullScreen } from "./use-full-screen"
 
 import "./UnitCard.css"
@@ -58,7 +58,7 @@ export interface UnitCardProps {
   /**
    * The unit the card is about.
    */
-  readonly unitNumber: number
+  readonly unit: Unit
   /**
    * The theme of whoever is looking, which the card wears where it is not the unit's own
    * – the management's, when the management is looking. The unit's theme when unsaid.
@@ -67,7 +67,7 @@ export interface UnitCardProps {
 }
 
 /**
- * One unit's identity – its mark, its number, and its name once one is public – over a
+ * One unit's identity – its mark, its number, and its name – over a
  * map of where its people live, which opens up to the map in full, and from there to the
  * whole screen. The card wears the theme of whoever is looking – the unit's own for its
  * leaders, and the management's for the management.
@@ -76,7 +76,6 @@ export interface UnitCardProps {
  * @returns The card.
  */
 export function UnitCard(props: UnitCardProps): ReactElement {
-  const identities = useUnitIdentities()
   const [isMapOpen, setIsMapOpen] = useState(false)
   const identityRef = useRef<HTMLDivElement>(null)
   const fullScreen = useFullScreen(identityRef)
@@ -91,8 +90,8 @@ export function UnitCard(props: UnitCardProps): ReactElement {
   // A unit nobody's home town is known for has nothing to draw, which is known here
   // without loading the map to learn it.
   const hasHomeTowns = homeTowns.some((town) => town !== undefined)
-  const name = identities.name(props.unitNumber)
-  const theme = props.viewerTheme ?? unitTheme(props.unitNumber)
+  const { name, number } = props.unit
+  const theme = props.viewerTheme ?? unitTheme(number)
 
   // The map is unmounted here, and the control that leaves full screen with it, so full
   // screen ends with the map rather than leaving no way out.
@@ -123,13 +122,13 @@ export function UnitCard(props: UnitCardProps): ReactElement {
               />
             </Suspense>
           )}
-          <Row leading={<UnitAvatar size="profile" unitNumber={props.unitNumber} />}>
+          <Row leading={<UnitAvatar size="profile" unitNumber={number} />}>
             {name === undefined ? (
-              <strong>Avdelning {props.unitNumber}</strong>
+              <strong>Avdelning {number}</strong>
             ) : (
               <>
                 <strong>{name}</strong>
-                <small>Avdelning {props.unitNumber}</small>
+                <small>Avdelning {number}</small>
               </>
             )}
           </Row>

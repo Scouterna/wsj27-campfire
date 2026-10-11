@@ -156,7 +156,7 @@ async function wholeContingent(): Promise<readonly Participant[]> {
   const units = [
     ...new Set(
       leaders
-        .map((leader) => leader.unitNumber)
+        .map((leader) => leader.unit?.number)
         .filter((unit): unit is number => unit !== undefined),
     ),
   ].map(String)

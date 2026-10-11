@@ -8,7 +8,6 @@ import {
   SearchField,
   SearchIcon,
   SegmentedControl,
-  useUnitIdentities,
 } from "@scouterna/wsj27-campfire-ui"
 import { useRoles } from "@scouterna/wsj27-campfire-utils"
 import { useMemo, type ReactElement } from "react"
@@ -49,13 +48,13 @@ const unitSegments = segments.slice(0, 3)
 // rewritten on every keystroke.
 const swedish = new Intl.NumberFormat("sv-SE")
 
-// The title row's one action, the way into the unit browser at every width. A link
+// The title row's one action, the way into the groups view at every width. A link
 // rather than a handler, so the navigation animates and remembers itself like any other,
 // and a constant, because the chrome republishes what it is handed.
 const unitsAction = {
   icon: <ParticipantsIcon size={24} strokeWidth={2.2} />,
-  label: "Avdelningar",
-  link: { to: "/participants/units" },
+  label: "Grupper",
+  link: { to: "/participants/groups" },
 } as const
 
 // The designed empty answers, constant because their words never depend on the render.
@@ -136,8 +135,7 @@ export function ParticipantsScreen(): ReactElement {
   // narrows nothing, because a filter no chip shows is an invisible one.
   const roll = offered.some((segment) => segment.filter === rawRoll) ? rawRoll : undefined
 
-  const nameOf = useUnitIdentities().name
-  const found = useMemo(() => narrow(people, query, roll, nameOf), [nameOf, people, query, roll])
+  const found = useMemo(() => narrow(people, query, roll), [people, query, roll])
   const jumps = useLetterJumps(found)
   // Mailing and copying act on the list as it is narrowed, so narrowing is how somebody
   // chooses who to write to.

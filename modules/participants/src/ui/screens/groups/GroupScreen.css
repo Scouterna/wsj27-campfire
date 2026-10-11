@@ -1,15 +1,15 @@
-/* One unit's own screen: the count over the rows, and whatever the screen has to say in
+/* One group's own screen: the count over the rows, and whatever the screen has to say in
    its place. */
 
 @layer screen {
-  .unit-status {
+  .group-status {
     color: var(--color-ink-secondary);
     font-size: var(--font-size-footnote);
     margin: 0;
   }
 
   /* Heard, never seen, because the count lives in the lists' own headings. */
-  .unit-status-spoken {
+  .group-status-spoken {
     clip-path: inset(50%);
     height: 1px;
     overflow: hidden;

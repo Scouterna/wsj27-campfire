@@ -1,6 +1,7 @@
 import { cmtTheme } from "@scouterna/wsj27-campfire-ui"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { unitNumbered } from "../../../model/Unit"
 import { ApiDecorator } from "../../storybook/ApiDecorator"
 import { unitWithHomeTowns } from "../../storybook/cast"
 import { UnitCard } from "./UnitCard"
@@ -23,7 +24,7 @@ const meta: Meta<typeof UnitCard> = {
   // For its network, which reaches nothing off the catalog's origin, so the map draws
   // its dots over no background, as it does offline.
   decorators: [ApiDecorator],
-  args: { openLabel: "Visa på kartan", people: regional, unitNumber: 1 },
+  args: { openLabel: "Visa på kartan", people: regional, unit: unitNumbered(1) },
 }
 
 export default meta
@@ -45,7 +46,7 @@ export const OnHome: Story = {
 }
 
 /**
- * As the management sees a unit in the unit browser: the whole card in the management's
+ * As the management sees a unit in the groups view: the whole card in the management's
  * color rather than the unit's.
  */
 export const ForTheManagement: Story = {

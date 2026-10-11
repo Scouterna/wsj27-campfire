@@ -108,7 +108,7 @@ describe("reading one person in full", () => {
 
     expect(person?.memberNo).toBe("1100101")
     expect(person?.role).toBe("ledare")
-    expect(person?.unitNumber).toBe(1)
+    expect(person?.unit).toEqual({ name: "Björnen", number: 1 })
     expect(person?.birthDate).toBe("1995-07-16")
   })
 

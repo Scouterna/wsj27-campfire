@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router"
 import type { ReactElement } from "react"
 
 import { ageOf, fullName, whereFrom, type Participant } from "../../../model/Participant"
+import { unitNumbered } from "../../../model/Unit"
 import { GenderMark } from "../../components/gender/GenderMark"
 import { UnitCard } from "../../components/unitcard/UnitCard"
 import { useParticipants } from "../../screens/participants/use-participants"
@@ -82,7 +83,7 @@ declare module "@scouterna/wsj27-campfire-ui" {
 
 /**
  * The leader's unit on the home screen: the unit itself – its mark, its number, and its
- * name where the identities know one, over a map of where its people live – then the
+ * name, over a map of where its people live – then the
  * deltagare and the ledarteam, each row a doorway into the person. Reads the same list
  * the participants section holds, so opening the section afterwards costs no request.
  *
@@ -103,7 +104,7 @@ export function UnitWidget(): ReactElement | null {
         openLabel="Se var ni bor"
         people={people}
         title="Min avdelning"
-        unitNumber={scope.unitNumber}
+        unit={unitNumbered(scope.unitNumber)}
       >
         {isPending && (
           <p className="unit-widget-note" role="status">

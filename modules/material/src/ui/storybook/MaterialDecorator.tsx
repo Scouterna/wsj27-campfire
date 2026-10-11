@@ -1,4 +1,3 @@
-import { UnitIdentitiesProvider, type UnitIdentities } from "@scouterna/wsj27-campfire-ui"
 import { UserProvider, type User } from "@scouterna/wsj27-campfire-utils"
 import type { Decorator } from "@storybook/react-vite"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
@@ -25,17 +24,6 @@ export interface MaterialParameters {
    * default, which is what hides the card.
    */
   readonly user?: User
-}
-
-/**
- * The units the stories know by name – only the signed-in person's own unit is ever
- * looked up.
- */
-const identities: UnitIdentities = {
-  glyphSrc: () => {
-    // No glyphs in the catalog, so the avatar wears its number.
-  },
-  name: (unitNumber) => (unitNumber === 1 ? "Björnen" : undefined),
 }
 
 /**
@@ -80,8 +68,8 @@ function makeClient(material: MaterialParameters): QueryClient {
 }
 
 /**
- * Puts a seeded query cache under a story that reads the material, with the units'
- * identities and, where the story names one, the signed-in person the unit card reads.
+ * Puts a seeded query cache under a story that reads the material, with the signed-in
+ * person the unit card reads where the story names one.
  * A story without `parameters.material` gets an empty tree.
  * @param Story The story being rendered.
  * @param context The story's own parameters.
@@ -93,21 +81,19 @@ export const MaterialDecorator: Decorator = (Story, context): ReactElement => {
 
   return (
     <QueryClientProvider client={client}>
-      <UnitIdentitiesProvider identities={identities}>
-        {material.user === undefined ? (
+      {material.user === undefined ? (
+        <Story />
+      ) : (
+        <UserProvider user={material.user}>
           <Story />
-        ) : (
-          <UserProvider user={material.user}>
-            <Story />
-          </UserProvider>
-        )}
-      </UnitIdentitiesProvider>
+        </UserProvider>
+      )}
     </QueryClientProvider>
   )
 }
 
 /**
- * A leader of unit 1, which the stories' identities name Björnen.
+ * A leader of unit 1, Björnen.
  */
 export const bearLeader: User = {
   firstName: "Lars",

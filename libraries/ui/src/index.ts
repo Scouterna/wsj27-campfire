@@ -96,11 +96,7 @@ export {
 } from "./foundations/theme/ThemeProvider"
 export type { ThemeProviderProps, ThemeScopeProps } from "./foundations/theme/ThemeProvider"
 export { cmtTheme, istTheme, unitTheme } from "./foundations/theme/UnitTheme"
-export { UnitIdentitiesProvider, useUnitIdentities } from "./foundations/units/UnitIdentities"
-export type {
-  UnitIdentities,
-  UnitIdentitiesProviderProps,
-} from "./foundations/units/UnitIdentities"
+export { unitName } from "./foundations/units/names"
 export { rootRoute } from "./routing/root-route"
 export { matchScreen, mountRoutes } from "./routing/routes"
 export type {

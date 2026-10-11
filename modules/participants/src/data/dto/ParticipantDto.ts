@@ -1,7 +1,9 @@
 import type { Gender } from "../../model/Gender"
+import { istPatrolNumbered, type IstPatrol } from "../../model/IstPatrol"
 import type { Participant } from "../../model/Participant"
 import type { ParticipantRole } from "../../model/ParticipantRole"
 import type { CmtFunktion } from "../../model/Participation"
+import { unitNumbered } from "../../model/Unit"
 import { answer, flattenAnswers } from "./answers"
 import { toContactValues, toCurrent } from "./contact"
 
@@ -26,6 +28,11 @@ export interface ParticipantDto {
   readonly member_type?: unknown
   readonly access_level?: unknown
   readonly troop?: unknown
+  /**
+   * The Patrull answer, as plain text – an IST patrol's number, or the name a unit's
+   * leaders chose for a patrol of their own.
+   */
+  readonly patrol?: unknown
   readonly roles?: unknown
   /**
    * The contact answers, which the service sends with a listing as well as with a person
@@ -167,6 +174,50 @@ function toName(value: unknown): { firstName: string; lastName: string } | undef
 }
 
 /**
+ * The IST patrol an IST member's patrol answer names – their patrol's number, alone.
+ * @param text The answer, as the service sent it.
+ * @returns The patrol, or undefined when the answer is no patrol's number.
+ */
+function toIstPatrol(text: string): IstPatrol | undefined {
+  const trimmed = text.trim()
+  const number = /^\d+$/u.test(trimmed) ? Number(trimmed) : 0
+  return number > 0 ? istPatrolNumbered(number) : undefined
+}
+
+/**
+ * Which unit and which patrol a person belongs to. The troop is a unit only for a
+ * deltagare or a ledare, and the service leaves it empty for everyone else. The patrol
+ * answer means one of two things: an IST member's is the number of one of the IST's
+ * patrols, which share the units' series, and a deltagare's or a ledare's is the name
+ * their unit's leaders chose for a patrol of their own.
+ * @param role What the person is at the jamboree.
+ * @param dto The row the participants service sent.
+ * @returns The unit and the patrol, each present only where there is one.
+ */
+function toBelonging(
+  role: ParticipantRole,
+  dto: ParticipantDto,
+): Pick<Participant, "istPatrol" | "unit" | "unitPatrol"> {
+  const patrol = typeof dto.patrol === "string" ? dto.patrol : ""
+  if (role === "ist") {
+    const istPatrol = toIstPatrol(patrol)
+    return istPatrol === undefined ? {} : { istPatrol }
+  }
+  if (role === "kontingentledning") {
+    return {}
+  }
+  const unit =
+    typeof dto.troop === "string" && /^\d+$/u.test(dto.troop)
+      ? unitNumbered(Number(dto.troop))
+      : undefined
+  const name = patrol.trim()
+  return {
+    ...(unit !== undefined && { unit }),
+    ...(name !== "" && { unitPatrol: { name } }),
+  }
+}
+
+/**
  * A free-text field as the domain carries it: trimmed, and absent when blank.
  * @param value The untyped value the text arrived in.
  * @returns The text, or undefined when there is none.
@@ -201,12 +252,6 @@ export function toParticipant(dto: ParticipantDto): Participant | undefined {
     return undefined
   }
 
-  // The troop is a string upstream and empty for anyone who has none – the contingent
-  // management, and the IST, whose patrols the participants service does not carry. So a
-  // unit number here is always a unit, never anything else.
-  const unitNumber =
-    typeof dto.troop === "string" && /^\d+$/u.test(dto.troop) ? Number(dto.troop) : undefined
-
   // The birth date rides along only when it is the ISO date the service documents –
   // anything else is absence, never a guess.
   const birthDate =
@@ -226,10 +271,10 @@ export function toParticipant(dto: ParticipantDto): Participant | undefined {
     memberNo,
     ...name,
     role,
-    // Spread rather than assigned, because an absent unit is a missing key, not a key
+    ...toBelonging(role, dto),
+    // Spread rather than assigned, because an absent field is a missing key, not a key
     // holding undefined, which is the distinction `exactOptionalPropertyTypes` holds the
     // code to.
-    ...(unitNumber !== undefined && { unitNumber }),
     ...(birthDate !== undefined && { birthDate }),
     ...(gender !== undefined && { gender }),
     ...(memberGroup !== undefined && { memberGroup }),

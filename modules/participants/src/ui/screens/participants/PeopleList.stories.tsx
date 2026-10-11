@@ -42,7 +42,7 @@ export const Rows: Story = {}
 export const UnitScoped: Story = {
   args: {
     isUnitScoped: true,
-    people: inReadingOrder(cast.filter((person) => person.unitNumber === 1)),
+    people: inReadingOrder(cast.filter((person) => person.unit?.number === 1)),
   },
 }
 

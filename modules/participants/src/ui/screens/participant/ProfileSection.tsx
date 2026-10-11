@@ -1,10 +1,4 @@
-import {
-  Callout,
-  Card,
-  IdCardIcon,
-  UnitAvatar,
-  useUnitIdentities,
-} from "@scouterna/wsj27-campfire-ui"
+import { Callout, Card, IdCardIcon, UnitAvatar } from "@scouterna/wsj27-campfire-ui"
 import type { ReactElement, ReactNode } from "react"
 
 import { genderName } from "../../../model/Gender"
@@ -87,28 +81,16 @@ function Fact(props: FactProps): ReactElement {
 
 /**
  * The line placing the person: the function a management member serves in where the
- * record carries one, and where they belong otherwise – a unit with its name joined
- * on when the identities know one.
+ * record carries one, and where they belong otherwise.
  * @param participant Whose profile is being drawn.
- * @param unitName What the unit is called, where the identities know it.
  * @returns The label and the value of the placing line.
  */
-function placing(
-  participant: ParticipantDetail,
-  unitName: string | undefined,
-): { label: string; value: string } {
+function placing(participant: ParticipantDetail): { label: string; value: string } {
   if (participant.funktion !== undefined) {
     const fa = participant.isFunktionsansvarig === true ? " · FA" : ""
     return { label: "Funktion", value: `${funktionName(participant.funktion)}${fa}` }
   }
-  // The participants service does not carry an IST's patrol, and the line above already
-  // says IST, so the belonging is honestly an open question rather than the role repeated.
-  if (participant.role === "ist") {
-    return { label: "Tillhörighet", value: "?" }
-  }
-  const value =
-    unitName === undefined ? belonging(participant) : `${belonging(participant)} · ${unitName}`
-  return { label: "Tillhörighet", value }
+  return { label: "Tillhörighet", value: belonging(participant) }
 }
 
 /**
@@ -120,10 +102,7 @@ function placing(
 export function ProfileSection(props: ProfileSectionProps): ReactElement {
   const participant = props.participant
 
-  const identities = useUnitIdentities()
-  const unitName =
-    participant.unitNumber === undefined ? undefined : identities.name(participant.unitNumber)
-  const where = placing(participant, unitName)
+  const where = placing(participant)
   const avatarNumber = avatarNumberFor(participant)
   const age = ageOf(participant, new Date())
 

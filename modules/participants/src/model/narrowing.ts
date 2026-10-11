@@ -36,40 +36,32 @@ function fold(value: string): string {
 predicate it is at every call site, which an `is`-prefixed spelling of the same thing does
 not */
 /**
- * A lookup of what a unit is called, where anything names it – taken as a parameter
- * because unit names are runtime data the presentation layer owns and this model cannot
- * import.
- */
-export type UnitNameLookup = (unitNumber: number) => string | undefined
-
-/**
  * Whether a person answers a search.
  *
- * The query is tested against the full name, the unit's name, and the management
- * member's funktion, each separately – never joined, so a query cannot match across the
- * seam between two fields. A query that is only digits is a unit number and matches it
+ * The query is tested against the full name, the unit's or the IST patrol's name, and the
+ * management member's funktion, each separately – never joined, so a query cannot match
+ * across the seam between two fields. A query that is only digits is a unit number and matches it
  * exactly – "2" finds Avdelning 2, never 28. The member number and the plain role words
  * stay out, because the chips narrow by role and a search that matched "ist" would be a
  * second, accidental filter. An empty query, or one that is only whitespace, matches
  * everybody.
  * @param person The person to test.
  * @param query What the reader typed.
- * @param nameOf What a unit is called – without it, no unit name is searched.
  * @returns True when the person answers the query.
  */
-export function matches(person: Participant, query: string, nameOf?: UnitNameLookup): boolean {
+export function matches(person: Participant, query: string): boolean {
   const needle = fold(query.trim())
   if (needle === "") {
     return true
   }
   if (/^\d+$/u.test(needle)) {
-    return person.unitNumber !== undefined && String(person.unitNumber) === needle
+    return person.unit !== undefined && String(person.unit.number) === needle
   }
   if (fold(fullName(person)).includes(needle)) {
     return true
   }
-  const unitName = person.unitNumber === undefined ? undefined : nameOf?.(person.unitNumber)
-  if (unitName !== undefined && fold(unitName).includes(needle)) {
+  const groupName = person.istPatrol?.name ?? person.unit?.name
+  if (groupName !== undefined && fold(groupName).includes(needle)) {
     return true
   }
   return person.funktion !== undefined && fold(funktionName(person.funktion)).includes(needle)
@@ -84,16 +76,14 @@ export function matches(person: Participant, query: string, nameOf?: UnitNameLoo
  * @param people The people to narrow.
  * @param query What the reader typed. Empty or whitespace narrows nothing.
  * @param roll The role to keep, or undefined to keep every role.
- * @param nameOf What a unit is called – without it, no unit name is searched.
  * @returns The people that answer both, in the order they arrived.
  */
 export function narrow(
   people: readonly Participant[],
   query: string,
   roll: RoleFilter | undefined,
-  nameOf?: UnitNameLookup,
 ): readonly Participant[] {
   const role = roll === undefined ? undefined : rolesByFilter.get(roll)
   const byRole = role === undefined ? people : people.filter((person) => person.role === role)
-  return query.trim() === "" ? byRole : byRole.filter((person) => matches(person, query, nameOf))
+  return query.trim() === "" ? byRole : byRole.filter((person) => matches(person, query))
 }

@@ -80,7 +80,7 @@ test("shows a leader their own unit, with the unit's own filter", async ({ page 
   await expect(filter.getByRole("button", { name: "IST" })).toHaveCount(0)
   await filter.getByRole("button", { name: "Ledare", pressed: false }).click()
   await expect(page.getByRole("status")).toHaveText("2 av 8 personer")
-  await expect(page.getByRole("link", { name: "Avdelningar" })).toHaveCount(0)
+  await expect(page.getByRole("link", { name: "Grupper" })).toHaveCount(0)
 })
 
 test("says where a leader's own people come from, their gender, and how old the deltagare are", async ({
@@ -121,7 +121,7 @@ test("says where the management's rows come from only where the line has room", 
   await page.setViewportSize({ height: 768, width: 1024 })
   await page.goto("/participants")
   await signInAs(page, "Anna Almgren")
-  await expect(page.getByRole("status")).toHaveText("59 personer i kontingenten")
+  await expect(page.getByRole("status")).toHaveText("60 personer i kontingenten")
 
   // The whole contingent keeps its line – role, unit, and the unit's name – and a wide
   // screen says where the person comes from after it. Searched for, because the rows far
@@ -132,6 +132,16 @@ test("says where the management's rows come from only where the line has room", 
   const from = lars.locator(".person-row-wide")
   await expect(from).toBeVisible()
   await expect(from).toHaveText(" · Mockåsens scoutkår · Göteborg")
+
+  // An IST member is placed by their patrol, with its name, where a unit member is by
+  // their unit.
+  await page.getByRole("searchbox", { name: "Sök deltagare" }).fill("Nils Söderberg")
+  const nils = page.getByRole("listitem").getByRole("link", { name: /^Nils Söderberg/u })
+  await expect(nils.locator("small")).toHaveText(
+    "IST · Patrull 7 · Tordyvel · Fixturby scoutkår · Stockholm",
+  )
+
+  await page.getByRole("searchbox", { name: "Sök deltagare" }).fill("Lars Lindberg")
 
   // A phone's line has no room for both, so it keeps the one it had.
   await page.setViewportSize({ height: 844, width: 390 })
@@ -168,7 +178,7 @@ test("opens a unit's card up to the map of where it lives, and folds it back", a
   await page.goto("/")
   await signInAs(page, "Anna Almgren")
 
-  await page.goto("/participants/units/1")
+  await page.goto("/participants/groups/1")
   await expect(page.getByRole("heading", { level: 1, name: "Avdelning 1" })).toBeVisible()
 
   // The folded card is the button; opened, the map is a region and the same control
@@ -212,9 +222,9 @@ test("opens a unit's card up to the map of where it lives, and folds it back", a
   )
   await expect(page.getByRole("region", { name: "Karta över var avdelningen bor" })).toHaveCount(0)
 
-  // The IST and the management are no avdelning, so neither page has a unit's card.
-  await page.goto("/participants/units/ist")
-  await expect(page.getByRole("heading", { level: 1, name: "IST" })).toBeVisible()
+  // An IST patrol and the management are no avdelning, so neither page has a unit's card.
+  await page.goto("/participants/groups/ist-1")
+  await expect(page.getByRole("heading", { level: 1, name: "IST-patrull 1" })).toBeVisible()
   await expect(page.getByRole("button", { name: "Visa på kartan" })).toHaveCount(0)
 })
 
@@ -234,16 +244,16 @@ test("lets the management search the contingent and narrow it by roll", async ({
 
   await page.locator(".sidemenu").getByRole("link", { name: "Deltagare" }).click()
   await expect(page.getByRole("heading", { level: 1, name: "Deltagare" })).toBeVisible()
-  await expect(page.getByRole("status")).toHaveText("59 personer i kontingenten")
+  await expect(page.getByRole("status")).toHaveText("60 personer i kontingenten")
 
   // Searching narrows, counts what is shown, and lands in the address.
   await page.getByRole("searchbox", { name: "Sök deltagare" }).fill("ström")
-  await expect(page.getByRole("status")).toHaveText("2 av 59 personer")
+  await expect(page.getByRole("status")).toHaveText("2 av 60 personer")
   await expect(page).toHaveURL(/q=str%C3%B6m/)
 
   // A roll on top of the search narrows further, and the search survives the chip.
   await page.getByRole("button", { name: "Ledare", pressed: false }).click()
-  await expect(page.getByRole("status")).toHaveText("1 av 59 personer")
+  await expect(page.getByRole("status")).toHaveText("1 av 60 personer")
   await expect(page.getByRole("button", { name: "Ledare", pressed: true })).toBeVisible()
   await expect(page.getByRole("searchbox", { name: "Sök deltagare" })).toHaveValue("ström")
   await expect(page.getByRole("listitem")).toHaveCount(1)
@@ -263,7 +273,7 @@ test("returns from a person to the list exactly as it was left", async ({ page }
 
   await page.getByRole("searchbox", { name: "Sök deltagare" }).fill("ström")
   await page.getByRole("button", { name: "Ledare", pressed: false }).click()
-  await expect(page.getByRole("status")).toHaveText("1 av 59 personer")
+  await expect(page.getByRole("status")).toHaveText("1 av 60 personer")
 
   await page.getByRole("link", { name: /Hanna Hellström/ }).click()
   await expect(page).toHaveTitle("Hanna Hellström – Campfire")
@@ -271,7 +281,7 @@ test("returns from a person to the list exactly as it was left", async ({ page }
   await page.goBack()
   await expect(page.getByRole("searchbox", { name: "Sök deltagare" })).toHaveValue("ström")
   await expect(page.getByRole("button", { name: "Ledare", pressed: true })).toBeVisible()
-  await expect(page.getByRole("status")).toHaveText("1 av 59 personer")
+  await expect(page.getByRole("status")).toHaveText("1 av 60 personer")
   await expect(page.getByRole("link", { name: /Hanna Hellström/ })).toBeVisible()
 })
 
@@ -280,15 +290,43 @@ test("browses the contingent by unit, down to a person", async ({ page }) => {
   await signInAs(page, "Anna Almgren")
   await page.locator(".sidemenu").getByRole("link", { name: "Deltagare" }).click()
 
-  await page.getByRole("link", { name: "Avdelningar" }).click()
-  await expect(page.getByRole("heading", { level: 1, name: "Avdelningar" })).toBeVisible()
+  await page.getByRole("link", { name: "Grupper" }).click()
+  await expect(page.getByRole("heading", { level: 1, name: "Grupper" })).toBeVisible()
 
-  // Every entry with its count – the units, then the IST and the management, so
-  // everyone in the contingent is reachable through the browser.
+  // Every entry with its count – the units, then the IST patrols with their names and the
+  // IST outside them, then the management by funktion, so everyone in the contingent is
+  // reachable through the groups view.
   await expect(page.getByRole("link", { name: /Avdelning 1.*8 personer/ })).toBeVisible()
   await expect(page.getByRole("link", { name: /Avdelning 2.*40 personer/ })).toBeVisible()
-  await expect(page.getByRole("link", { name: /IST.*2 personer/ })).toBeVisible()
-  await expect(page.getByRole("link", { name: /CMT.*9 personer/ })).toBeVisible()
+  await expect(page.getByRole("link", { name: /IST-patrull 1 Ekoxe · 1 person$/ })).toBeVisible()
+  await expect(page.getByRole("link", { name: /IST-patrull 7 Tordyvel · 1 person$/ })).toBeVisible()
+  await expect(page.getByRole("link", { name: /IST utan patrull.*1 person$/ })).toBeVisible()
+  await expect(page.getByRole("link", { name: /^HoC.*1 person$/ })).toBeVisible()
+  await expect(page.getByRole("link", { name: /^Admin.*1 person$/ })).toBeVisible()
+
+  // The filter narrows the groups view to one kind, and the address keeps it, so coming
+  // back from a group finds it still in force.
+  const groups = page.getByRole("group", { name: "Filtrera efter grupp" })
+  await groups.getByRole("button", { name: "IST", pressed: false }).click()
+  await expect(page).toHaveURL(/grupp=ist/u)
+  await expect(page.getByRole("link", { name: /Avdelning 1/ })).toHaveCount(0)
+  await expect(page.getByRole("link", { name: /^HoC/ })).toHaveCount(0)
+  await page.getByRole("link", { name: /IST-patrull 7/ }).click()
+  await expect(page.getByRole("heading", { level: 1, name: "IST-patrull 7" })).toBeVisible()
+  await page.goBack()
+  await expect(groups.getByRole("button", { name: "IST", pressed: true })).toBeVisible()
+  await expect(page.getByRole("link", { name: /Avdelning 1/ })).toHaveCount(0)
+
+  await groups.getByRole("button", { name: "CMT", pressed: false }).click()
+  await page.getByRole("link", { name: /^Admin/ }).click()
+  await expect(page.getByRole("heading", { level: 1, name: "Admin" })).toBeVisible()
+  await expect(
+    page.getByRole("listitem").getByRole("link", { name: /^Anna Almgren/u }),
+  ).toBeVisible()
+  await page.goBack()
+
+  await groups.getByRole("button", { name: "Alla", pressed: false }).click()
+  await expect(page).not.toHaveURL(/grupp=/u)
 
   await page.getByRole("link", { name: /Avdelning 2/ }).click()
   await expect(page.getByRole("heading", { level: 1, name: "Avdelning 2" })).toBeVisible()
@@ -296,6 +334,34 @@ test("browses the contingent by unit, down to a person", async ({ page }) => {
 
   await page.getByRole("link", { name: /Anders Andersson/ }).click()
   await expect(page).toHaveTitle("Anders Andersson – Campfire")
+})
+
+test("browses the IST by patrol, never mixed with the unit of the same number", async ({
+  page,
+}) => {
+  await page.goto("/")
+  await signInAs(page, "Anna Almgren")
+
+  // Patrol 1 holds the IST member whose patrol is 1, and unit 1 never shows her.
+  await page.goto("/participants/groups/ist-1")
+  await expect(page.getByRole("status")).toHaveText("Ekoxe · 1 person")
+  await expect(page.getByRole("link", { name: /Freja Sandberg/ })).toBeVisible()
+  await page.goto("/participants/groups/1")
+  await expect(page.getByRole("status")).toHaveText("8 personer i avdelningen")
+  await expect(page.getByRole("link", { name: /Freja Sandberg/ })).toHaveCount(0)
+
+  // The IST outside every patrol are listed together, and their page says they have none.
+  await page.goto("/participants/groups/ist")
+  await expect(page.getByRole("heading", { level: 1, name: "IST utan patrull" })).toBeVisible()
+  await page.getByRole("link", { name: /Tove Ekman/ }).click()
+  await expect(page).toHaveTitle("Tove Ekman – Campfire")
+  await expect(page.getByText("Ingen patrull", { exact: true })).toBeVisible()
+
+  // A patrol's member is placed by it on their page, by number and name.
+  await page.goto("/participants/groups/ist-7")
+  await page.getByRole("link", { name: /Nils Söderberg/ }).click()
+  await expect(page).toHaveTitle("Nils Söderberg – Campfire")
+  await expect(page.getByText("Patrull 7 · Tordyvel", { exact: true })).toBeVisible()
 })
 
 test("asks again on every visit, and keeps the list it has when the ask fails", async ({
@@ -406,7 +472,7 @@ test("gives a management function the whole section, in the management's name", 
   await link.click()
 
   await expect(page.getByRole("heading", { level: 1, name: "Deltagare" })).toBeVisible()
-  await expect(page.getByRole("status")).toHaveText("59 personer i kontingenten")
+  await expect(page.getByRole("status")).toHaveText("60 personer i kontingenten")
 
   // The profile control names the management function rather than the management as a
   // whole, which is the one place a CMT member's line differs from a leader's.
@@ -418,7 +484,7 @@ test("offers the management the addresses but not the sheet", async ({ page }) =
   await page.goto("/participants")
   await signInAs(page, "Anna Almgren")
   // The menu is published from the rows the list holds, so it exists only once they do.
-  await expect(page.getByRole("status")).toHaveText("59 personer i kontingenten")
+  await expect(page.getByRole("status")).toHaveText("60 personer i kontingenten")
 
   await page.getByRole("button", { name: "Fler åtgärder" }).click()
   await expect(page.getByRole("menuitem")).toHaveCount(4)
