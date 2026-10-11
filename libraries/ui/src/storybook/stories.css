@@ -129,6 +129,7 @@
   align-items: flex-end;
   color: var(--color-ink);
   display: flex;
+  flex-wrap: wrap;
   gap: 28px;
 }
 
