@@ -145,6 +145,11 @@ export interface Participant {
   readonly memberGroup?: string
   readonly memberNo: string
   /**
+   * Their answer to the Patrull question – an IST patrol's number, or the name a unit's
+   * leaders chose for a patrol of their own. Absent is unanswered.
+   */
+  readonly patrol?: string
+  /**
    * Their mobile number in Scoutnet. Absent is null on the wire.
    */
   readonly phone?: string
@@ -154,7 +159,9 @@ export interface Participant {
    */
   readonly sex: string
   /**
-   * The unit they belong to. The contingent management belongs to none.
+   * Their answer to the Avdelning question – the unit a deltagare or a ledare belongs to.
+   * The contingent management leaves it unanswered, and so does the IST, apart from a
+   * member whose patrol was put there before Patrull was asked.
    */
   readonly unitNumber?: number
 }

@@ -41,6 +41,7 @@ describe("the decoded list of participants", () => {
       "participation_type",
       "roles",
       "troop",
+      "patrol",
       "contact_info",
       "forms_data",
     ])
@@ -139,6 +140,30 @@ describe("the decoded list of participants", () => {
   it("gives the IST and the contingent management an empty troop", () => {
     expect(decoded(1_300_098)).toMatchObject({ member_type: "IST", troop: "" })
     expect(decoded(1_200_401)).toMatchObject({ member_type: "Kontingentledning", troop: "" })
+  })
+
+  it("reads the patrol from Patrull, as it was answered", () => {
+    // An IST member's is their patrol's number, and a unit member's the name their
+    // leaders chose.
+    expect(decoded(1_300_210).patrol).toBe("7")
+    expect(decoded(1_100_101).patrol).toBe("Falkarna")
+    expect(decoded(1_300_533).patrol).toBe("")
+  })
+
+  it("reads an IST member's Avdelning answer as their patrol until Patrull is answered", () => {
+    // No seeded IST member has an Avdelning answer, so Tove, who has answered no Patrull,
+    // is given one here.
+    const tove = participants.find((participant) => participant.memberNo === "1300533")
+    if (tove === undefined) {
+      throw new Error("No seeded Tove")
+    }
+    const [record] = decodeParticipantsList(
+      [{ ...tove, unitNumber: 12 }],
+      forms,
+      loadCmtRoles(readCmtRoles()),
+    ).values()
+
+    expect(record).toMatchObject({ patrol: "12", troop: "" })
   })
 
   it("mints each participant's roles once, from their fields and the roster", () => {
