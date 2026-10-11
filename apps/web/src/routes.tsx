@@ -44,7 +44,6 @@ import {
   TabBar,
   ThemeProvider,
   UnitAvatar,
-  UnitIdentitiesProvider,
   unitsReveal,
   unitTheme,
   usePageActions,
@@ -58,7 +57,6 @@ import {
   type ScreenSpec,
   type SideMenuItem,
   type Theme,
-  type UnitIdentities,
   type Widgets,
 } from "@scouterna/wsj27-campfire-ui"
 import {
@@ -85,7 +83,6 @@ import {
 } from "./navigation"
 import { Outline } from "./outline"
 import { adoptCacheOwner, forgetCache, queryClient } from "./query"
-import { loadUnitIdentities } from "./units"
 
 /**
  * The route tree, and the chrome around it. This is the composition root – the one place
@@ -362,16 +359,12 @@ function viewerFor(user: User): Viewer {
 function SignedInChrome(props: SignedInProps): ReactElement {
   const memberNo = props.user.memberNo
   const [adopted, setAdopted] = useState(false)
-  const [identities, setIdentities] = useState<UnitIdentities>()
 
   // The cache changes hands before anything under it renders – a screen that mounted
-  // first would read whatever the last person to use this device left behind – and
-  // the units' identities load alongside, so an avatar never flashes its number
-  // before wearing its glyph.
+  // first would read whatever the last person to use this device left behind.
   useEffect(() => {
     async function adopt(): Promise<void> {
-      const [, loaded] = await Promise.all([adoptCacheOwner(memberNo), loadUnitIdentities()])
-      setIdentities(loaded)
+      await adoptCacheOwner(memberNo)
       setAdopted(true)
     }
     void adopt()
@@ -385,7 +378,7 @@ function SignedInChrome(props: SignedInProps): ReactElement {
     return watchExpiry()
   }, [])
 
-  if (!adopted || identities === undefined) {
+  if (!adopted) {
     return <></>
   }
 
@@ -398,21 +391,19 @@ function SignedInChrome(props: SignedInProps): ReactElement {
           <SignOutProvider onSignOut={leave}>
             <QueryClientProvider client={queryClient}>
               <ViewerProvider viewer={viewerFor(props.user)}>
-                <UnitIdentitiesProvider identities={identities}>
-                  {/* The design system's curtains, hung once over the chrome and the
-                  screens alike – each closed until its moment, opening live for
-                  everything under it. A new reveal is another catalog entry, not
-                  another mechanism. */}
-                  <RevealProvider reveals={reveals}>
-                    <WidgetsProvider widgets={widgets}>
-                      {host.tier === "shell" ? (
-                        <ShellChrome user={props.user}>{props.children}</ShellChrome>
-                      ) : (
-                        <BrowserChrome user={props.user}>{props.children}</BrowserChrome>
-                      )}
-                    </WidgetsProvider>
-                  </RevealProvider>
-                </UnitIdentitiesProvider>
+                {/* The design system's curtains, hung once over the chrome and the
+                screens alike – each closed until its moment, opening live for
+                everything under it. A new reveal is another catalog entry, not
+                another mechanism. */}
+                <RevealProvider reveals={reveals}>
+                  <WidgetsProvider widgets={widgets}>
+                    {host.tier === "shell" ? (
+                      <ShellChrome user={props.user}>{props.children}</ShellChrome>
+                    ) : (
+                      <BrowserChrome user={props.user}>{props.children}</BrowserChrome>
+                    )}
+                  </WidgetsProvider>
+                </RevealProvider>
               </ViewerProvider>
             </QueryClientProvider>
           </SignOutProvider>

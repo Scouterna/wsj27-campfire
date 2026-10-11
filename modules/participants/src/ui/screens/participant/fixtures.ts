@@ -1,4 +1,5 @@
 import type { ParticipantDetail } from "../../../model/ParticipantDetail"
+import { unitNumbered } from "../../../model/Unit"
 
 /**
  * The people this screen's stories are told about. They live here rather than in the
@@ -16,7 +17,7 @@ export const complete: ParticipantDetail = {
   firstName: "Anna",
   lastName: "Björk",
   role: "ledare",
-  unitNumber: 3,
+  unit: unitNumbered(3),
   birthDate: "1987-04-12",
   gender: "kvinna",
   travel: "rundresa",
@@ -125,7 +126,7 @@ export const withoutHealth: ParticipantDetail = {
   firstName: "Vilgot",
   lastName: "Ek",
   role: "deltagare",
-  unitNumber: 3,
+  unit: unitNumbered(3),
   birthDate: "2011-09-02",
   gender: "man",
   homeTown: "Kungsbacka",

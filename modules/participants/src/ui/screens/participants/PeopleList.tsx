@@ -1,4 +1,4 @@
-import { Row, UnitAvatar, useUnitIdentities } from "@scouterna/wsj27-campfire-ui"
+import { Row, UnitAvatar } from "@scouterna/wsj27-campfire-ui"
 import { useVirtualizer, useWindowVirtualizer, type Virtualizer } from "@tanstack/react-virtual"
 import {
   memo,
@@ -14,6 +14,7 @@ import {
   ageOf,
   avatarNumberFor,
   fullName,
+  unitOrPatrolLine,
   whereFrom,
   type Participant,
 } from "../../../model/Participant"
@@ -52,51 +53,37 @@ interface RowDetail {
 }
 
 /**
- * The line that places a person: the role first, then what places them. A deltagare or a
- * ledare is placed by their unit – with its name joined on when the identities know it –
- * the management by their funktion where the roster details one, and the IST by the one
- * word alone, since the participants service does not carry their patrols.
+ * The line that places a person: the role first, then their unit or IST patrol, by number
+ * and name, or the management member's funktion where the roster details one.
  * @param person The row's person.
- * @param nameOf What a unit is called, from the unit identities.
  * @returns The line.
  */
-function placingLine(
-  person: Participant,
-  nameOf: (unitNumber: number) => string | undefined,
-): string {
+function placingLine(person: Participant): string {
   const role = roleName(person.role)
   if (person.role === "kontingentledning") {
     return person.funktion === undefined ? role : `${role} · ${funktionName(person.funktion)}`
   }
-  if (person.unitNumber === undefined) {
-    return role
-  }
-  const unitName = nameOf(person.unitNumber)
-  const unit = `Avdelning ${String(person.unitNumber)}`
-  return unitName === undefined ? `${role} · ${unit}` : `${role} · ${unit} · ${unitName}`
+  const line = unitOrPatrolLine(person)
+  return line === undefined ? role : `${role} · ${line}`
 }
 
 /**
- * The line under a name. In a list whose people all share one unit, the unit says
- * nothing, so where the person comes from takes its place after the role. Anywhere else
- * the line places the person as always, and where they come from follows on a screen
- * wide enough to hold both.
+ * The line under a name. In a list whose people all belong to the same unit, IST patrol,
+ * or funktion, saying so says nothing, so where the person comes from takes its place
+ * after the role. Anywhere else the line places the person as always, and where they come
+ * from follows on a screen wide enough to hold both.
  * @param person The row's person.
- * @param nameOf What a unit is called, from the unit identities.
- * @param isUnitScoped Whether every row in the list shares one unit.
+ * @param isUnitScoped Whether every row in the list belongs to the same unit, IST patrol,
+ *   or funktion.
  * @returns The row's detail line.
  */
-function rowDetail(
-  person: Participant,
-  nameOf: (unitNumber: number) => string | undefined,
-  isUnitScoped: boolean,
-): RowDetail {
+function rowDetail(person: Participant, isUnitScoped: boolean): RowDetail {
   const from = whereFrom(person)
   if (isUnitScoped) {
     const role = roleName(person.role)
     return { always: from === undefined ? role : `${role} · ${from}` }
   }
-  const always = placingLine(person, nameOf)
+  const always = placingLine(person)
   return from === undefined ? { always } : { always, wide: from }
 }
 
@@ -105,8 +92,8 @@ function rowDetail(
  */
 export interface PersonRowProps {
   /**
-   * Whether every row in the list shares one unit, so the unit is left out of the detail
-   * line in favor of where the person comes from.
+   * Whether every row in the list belongs to the same unit, IST patrol, or funktion, so
+   * that is left out of the detail line in favor of where the person comes from.
    */
   readonly isUnitScoped: boolean
   /**
@@ -123,8 +110,7 @@ export interface PersonRowProps {
  */
 export const PersonRow = memo(function PersonRow(props: PersonRowProps): ReactElement {
   const { isUnitScoped, person } = props
-  const identities = useUnitIdentities()
-  const detail = rowDetail(person, identities.name, isUnitScoped)
+  const detail = rowDetail(person, isUnitScoped)
   const avatarNumber = avatarNumberFor(person)
   // A deltagare's age is the fact a leader reaches for, as on the home screen; a grown
   // member's says nothing the row needs.
@@ -366,8 +352,8 @@ function WindowScrolledRows(props: VariantProps): ReactElement {
 
 export interface PeopleListProps {
   /**
-   * Whether every row in the list shares one unit, so the unit is left out of the detail
-   * line in favor of where the person comes from.
+   * Whether every row in the list belongs to the same unit, IST patrol, or funktion, so
+   * that is left out of the detail line in favor of where the person comes from.
    */
   readonly isUnitScoped: boolean
   /**

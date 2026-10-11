@@ -1,5 +1,7 @@
+import { istPatrolNumbered } from "../../model/IstPatrol"
 import type { Participant } from "../../model/Participant"
 import type { ParticipantsList } from "../../model/ParticipantsList"
+import { unitNumbered } from "../../model/Unit"
 
 /**
  * The people the stories are told about. The cast is the mock back-end's own seeded
@@ -10,8 +12,8 @@ import type { ParticipantsList } from "../../model/ParticipantsList"
 
 /**
  * The mock's contingent: units of leaders and deltagare, the IST, and the contingent
- * management. The IST carry no unit, because the participants service does not hold their
- * patrols.
+ * management. The IST carry a patrol of their own rather than a unit, and one of them is
+ * in no patrol yet.
  */
 export const cast: readonly Participant[] = [
   {
@@ -22,7 +24,8 @@ export const cast: readonly Participant[] = [
     firstName: "Lars",
     lastName: "Lindberg",
     role: "ledare",
-    unitNumber: 1,
+    unit: unitNumbered(1),
+    unitPatrol: { name: "Falkarna" },
   },
   {
     memberGroup: "Seedviks scoutkår",
@@ -32,7 +35,8 @@ export const cast: readonly Participant[] = [
     firstName: "Hanna",
     lastName: "Hellström",
     role: "ledare",
-    unitNumber: 1,
+    unit: unitNumbered(1),
+    unitPatrol: { name: "Uttrarna" },
   },
   {
     memberGroup: "Mockåsens scoutkår",
@@ -42,7 +46,8 @@ export const cast: readonly Participant[] = [
     firstName: "Ester",
     lastName: "Dahl",
     role: "deltagare",
-    unitNumber: 1,
+    unit: unitNumbered(1),
+    unitPatrol: { name: "Falkarna" },
     birthDate: "2012-03-14",
   },
   {
@@ -53,7 +58,8 @@ export const cast: readonly Participant[] = [
     firstName: "Ivar",
     lastName: "Forsberg",
     role: "deltagare",
-    unitNumber: 1,
+    unit: unitNumbered(1),
+    unitPatrol: { name: "Uttrarna" },
     birthDate: "2011-11-02",
   },
   {
@@ -64,7 +70,8 @@ export const cast: readonly Participant[] = [
     firstName: "Otto",
     lastName: "Lind",
     role: "deltagare",
-    unitNumber: 1,
+    unit: unitNumbered(1),
+    unitPatrol: { name: "Falkarna" },
     birthDate: "2013-06-21",
   },
   {
@@ -75,7 +82,8 @@ export const cast: readonly Participant[] = [
     firstName: "Leo",
     lastName: "Ström",
     role: "deltagare",
-    unitNumber: 1,
+    unit: unitNumbered(1),
+    unitPatrol: { name: "Uttrarna" },
     birthDate: "2012-09-05",
   },
   {
@@ -86,7 +94,8 @@ export const cast: readonly Participant[] = [
     firstName: "Edvin",
     lastName: "Malm",
     role: "deltagare",
-    unitNumber: 1,
+    unit: unitNumbered(1),
+    unitPatrol: { name: "Falkarna" },
     birthDate: "2013-01-30",
   },
   {
@@ -97,7 +106,8 @@ export const cast: readonly Participant[] = [
     firstName: "Astrid",
     lastName: "Forsberg",
     role: "deltagare",
-    unitNumber: 1,
+    unit: unitNumbered(1),
+    unitPatrol: { name: "Uttrarna" },
     birthDate: "2012-05-17",
   },
   {
@@ -105,6 +115,7 @@ export const cast: readonly Participant[] = [
     firstName: "Freja",
     lastName: "Sandberg",
     role: "ist",
+    istPatrol: istPatrolNumbered(1),
   },
   {
     memberGroup: "Stubbhults scoutkår",
@@ -113,7 +124,8 @@ export const cast: readonly Participant[] = [
     firstName: "Anders",
     lastName: "Andersson",
     role: "ledare",
-    unitNumber: 2,
+    unit: unitNumbered(2),
+    unitPatrol: { name: "Hökarna" },
   },
   {
     memberGroup: "Stubbhults scoutkår",
@@ -122,7 +134,8 @@ export const cast: readonly Participant[] = [
     firstName: "Molly",
     lastName: "Sundqvist",
     role: "deltagare",
-    unitNumber: 2,
+    unit: unitNumbered(2),
+    unitPatrol: { name: "Hökarna" },
   },
   {
     memberGroup: "Stubbhults scoutkår",
@@ -131,7 +144,8 @@ export const cast: readonly Participant[] = [
     firstName: "Alva",
     lastName: "Lundgren",
     role: "deltagare",
-    unitNumber: 2,
+    unit: unitNumbered(2),
+    unitPatrol: { name: "Ekorrarna" },
   },
   {
     memberGroup: "Stubbhults scoutkår",
@@ -140,7 +154,8 @@ export const cast: readonly Participant[] = [
     firstName: "Axel",
     lastName: "Lind",
     role: "deltagare",
-    unitNumber: 2,
+    unit: unitNumbered(2),
+    unitPatrol: { name: "Bävrarna" },
   },
   {
     memberGroup: "Fixturby scoutkår",
@@ -148,6 +163,15 @@ export const cast: readonly Participant[] = [
     homeTown: "Stockholm",
     firstName: "Nils",
     lastName: "Söderberg",
+    role: "ist",
+    istPatrol: istPatrolNumbered(7),
+  },
+  {
+    memberGroup: "Seedviks scoutkår",
+    memberNo: "1300533",
+    homeTown: "Uppsala",
+    firstName: "Tove",
+    lastName: "Ekman",
     role: "ist",
   },
   {
@@ -241,7 +265,7 @@ export const wholeList: ParticipantsList = { people: cast, scope: { kind: "all" 
  */
 export function unitList(unitNumber: number): ParticipantsList {
   return {
-    people: cast.filter((person) => person.unitNumber === unitNumber),
+    people: cast.filter((person) => person.unit?.number === unitNumber),
     scope: { kind: "unit", unitNumber },
   }
 }
@@ -292,7 +316,7 @@ const memberGroups = [
 const homeTowns = ["Göteborg", "Upplands Väsby", "Bryssel (Belgien)", "Östra Sönnarslöv", "Umeå"]
 
 /**
- * The units the contingent is divided into – the real number, so the unit browser
+ * The units the contingent is divided into – the real number, so the groups view
  * generated below is the length it will actually be.
  */
 const unitCount = 53
@@ -307,24 +331,34 @@ const istCount = 150
 const cmtCount = 30
 
 /**
+ * The IST patrols, and how often an IST member is in none – the real number of patrols,
+ * so the groups view lists every one.
+ */
+const istPatrolCount = 44
+const istUnpatrolledEvery = 15
+
+/**
  * One generated seat in the contingent. The management is handed out first, then the IST,
  * then the units – so a smaller count still produces a shape rather than only deltagare –
  * and the unit seats go round by round across every unit, which makes the first rounds
  * each unit's leaders and everything after them its deltagare.
  * @param index The seat's position in the whole contingent.
- * @returns What that seat is, and which unit it belongs to.
+ * @returns What that seat is, and which unit or IST patrol it belongs to.
  */
-function seatAt(index: number): Pick<Participant, "role" | "unitNumber"> {
+function seatAt(index: number): Pick<Participant, "istPatrol" | "role" | "unit"> {
   if (index < cmtCount) {
     return { role: "kontingentledning" }
   }
   const seat = index - cmtCount - istCount
   if (seat < 0) {
-    return { role: "ist" }
+    const istSeat = index - cmtCount
+    return istSeat % istUnpatrolledEvery === 0
+      ? { role: "ist" }
+      : { istPatrol: istPatrolNumbered((istSeat % istPatrolCount) + 1), role: "ist" }
   }
   return {
     role: Math.floor(seat / unitCount) < leadersPerUnit ? "ledare" : "deltagare",
-    unitNumber: (seat % unitCount) + 1,
+    unit: unitNumbered((seat % unitCount) + 1),
   }
 }
 
@@ -380,7 +414,7 @@ export function unitWithHomeTowns(homeTowns: readonly string[]): ParticipantsLis
       memberGroup: memberGroups[index % memberGroups.length] ?? "Mockåsens scoutkår",
       memberNo: String(1_500_000 + index),
       role: index < 4 ? "ledare" : "deltagare",
-      unitNumber: 1,
+      unit: unitNumbered(1),
       ...(homeTown !== undefined && { homeTown }),
       ...(index >= 4 && { birthDate: `2012-0${String((index % 9) + 1)}-15` }),
     }

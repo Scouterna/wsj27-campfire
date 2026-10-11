@@ -1,10 +1,11 @@
 import type { Address, Routes } from "@scouterna/wsj27-campfire-ui"
 
+import { GroupRoute } from "./ui/screens/groups/GroupRoute"
+import { GroupsScreen } from "./ui/screens/groups/GroupsScreen"
+import { toGroupsSearch } from "./ui/screens/groups/search"
 import { ParticipantRoute } from "./ui/screens/participant/ParticipantRoute"
 import { ParticipantsScreen } from "./ui/screens/participants/ParticipantsScreen"
 import { toParticipantsSearch } from "./ui/screens/participants/search"
-import { UnitRoute } from "./ui/screens/units/UnitRoute"
-import { UnitsScreen } from "./ui/screens/units/UnitsScreen"
 
 declare module "@scouterna/wsj27-campfire-ui" {
   interface RouteRegistry {
@@ -18,14 +19,16 @@ declare module "@scouterna/wsj27-campfire-ui" {
      */
     "/participants/$memberNo": Address<"participants">
     /**
-     * The unit browser: every unit the viewer may read, plus the IST and the contingent
-     * management.
+     * The groups view: every unit the viewer may read, the IST patrols, and the
+     * contingent management by funktion. It carries its filter in its search params, so
+     * coming back from a group keeps it.
      */
-    "/participants/units": Address<"participants">
+    "/participants/groups": Address<"participants">
     /**
-     * One entry of the browser – a unit number, `ist`, or `cmt`.
+     * One group of the groups view – a unit number, `ist-` and a patrol number, `ist`, or
+     * `cmt-` and a funktion.
      */
-    "/participants/units/$unit": Address<"participants">
+    "/participants/groups/$group": Address<"participants">
   }
 }
 
@@ -34,8 +37,8 @@ declare module "@scouterna/wsj27-campfire-ui" {
  * annotation, so the table's keys stay the narrow literals the router checks links
  * against.
  *
- * The browser sits under the list and one unit under the browser, so back walks the way
- * the reader came – and the browser's segment is a literal where a person's is a
+ * The groups view sits under the list and one group under the view, so back walks the way
+ * the reader came – and the view's segment is a literal where a person's is a
  * parameter, which is what keeps a unit from being read as a member number.
  */
 export const participantsRoutes = {
@@ -49,14 +52,15 @@ export const participantsRoutes = {
     parent: "/participants",
     tab: "participants",
   },
-  "/participants/units": {
-    Component: UnitsScreen,
+  "/participants/groups": {
+    Component: GroupsScreen,
     parent: "/participants",
     tab: "participants",
+    validateSearch: toGroupsSearch,
   },
-  "/participants/units/$unit": {
-    Component: UnitRoute,
-    parent: "/participants/units",
+  "/participants/groups/$group": {
+    Component: GroupRoute,
+    parent: "/participants/groups",
     tab: "participants",
   },
 } satisfies Routes

@@ -33,18 +33,24 @@ describe("a participant's name", () => {
 })
 
 describe("where a participant belongs", () => {
-  it("names a deltagare's unit by number", () => {
-    expect(belonging(person({ unitNumber: 3 }))).toBe("Avdelning 3")
+  it("names a deltagare's unit by number and name", () => {
+    expect(belonging(person({ unit: { name: "Ekorren", number: 3 } }))).toBe(
+      "Avdelning 3 · Ekorren",
+    )
   })
 
-  it("names a ledare's unit the same way", () => {
-    expect(belonging(person({ unitNumber: 3, role: "ledare" }))).toBe("Avdelning 3")
+  it("names a ledare's unit the same way, and by number alone when it has no name", () => {
+    expect(belonging(person({ role: "ledare", unit: { number: 3 } }))).toBe("Avdelning 3")
   })
 
-  it("places an IST member in the IST, whatever the service sent as their troop", () => {
-    // The participants service sends an empty troop for every IST member, so the number
-    // that would be a unit is absent.
-    expect(belonging(person({ role: "ist" }))).toBe("IST")
+  it("places an IST member by their patrol, by number and name", () => {
+    expect(belonging(person({ istPatrol: { name: "Tordyvel", number: 7 }, role: "ist" }))).toBe(
+      "Patrull 7 · Tordyvel",
+    )
+  })
+
+  it("says so when an IST member is in no patrol", () => {
+    expect(belonging(person({ role: "ist" }))).toBe("Ingen patrull")
   })
 
   it("places the contingent management in the contingent", () => {
@@ -61,8 +67,8 @@ describe("reading order", () => {
   it("orders by name alone, whatever the unit or the role", () => {
     const ordered = inReadingOrder([
       person({ memberNo: "c", role: "kontingentledning", firstName: "Cecilia" }),
-      person({ memberNo: "b", unitNumber: 2, role: "ledare", firstName: "Bertil" }),
-      person({ memberNo: "a", unitNumber: 1, role: "deltagare", firstName: "Anna" }),
+      person({ memberNo: "b", unit: { number: 2 }, role: "ledare", firstName: "Bertil" }),
+      person({ memberNo: "a", unit: { number: 1 }, role: "deltagare", firstName: "Anna" }),
     ])
 
     expect(ordered.map((one) => one.memberNo)).toEqual(["a", "b", "c"])
@@ -70,11 +76,11 @@ describe("reading order", () => {
 
   it("sorts by name with Swedish collation", () => {
     const ordered = inReadingOrder([
-      person({ memberNo: "o", unitNumber: 1, firstName: "Örjan" }),
-      person({ memberNo: "aa", unitNumber: 1, firstName: "Åsa" }),
-      person({ memberNo: "ae", unitNumber: 1, firstName: "Ärla" }),
-      person({ memberNo: "a", unitNumber: 1, firstName: "Anna" }),
-      person({ memberNo: "z", unitNumber: 1, firstName: "Zara" }),
+      person({ memberNo: "o", unit: { number: 1 }, firstName: "Örjan" }),
+      person({ memberNo: "aa", unit: { number: 1 }, firstName: "Åsa" }),
+      person({ memberNo: "ae", unit: { number: 1 }, firstName: "Ärla" }),
+      person({ memberNo: "a", unit: { number: 1 }, firstName: "Anna" }),
+      person({ memberNo: "z", unit: { number: 1 }, firstName: "Zara" }),
     ])
 
     // Å, Ä, and Ö sort after Z in Swedish, in that order – a default sort would put all
@@ -84,8 +90,8 @@ describe("reading order", () => {
 
   it("sorts by the family name when the given names match", () => {
     const ordered = inReadingOrder([
-      person({ memberNo: "b", unitNumber: 1, firstName: "Anna", lastName: "Berg" }),
-      person({ memberNo: "a", unitNumber: 1, firstName: "Anna", lastName: "Andersson" }),
+      person({ memberNo: "b", unit: { number: 1 }, firstName: "Anna", lastName: "Berg" }),
+      person({ memberNo: "a", unit: { number: 1 }, firstName: "Anna", lastName: "Andersson" }),
     ])
 
     expect(ordered.map((one) => one.memberNo)).toEqual(["a", "b"])
@@ -93,8 +99,8 @@ describe("reading order", () => {
 
   it("leaves the caller's array untouched", () => {
     const people = [
-      person({ memberNo: "b", unitNumber: 2 }),
-      person({ memberNo: "a", unitNumber: 1 }),
+      person({ memberNo: "b", unit: { number: 2 } }),
+      person({ memberNo: "a", unit: { number: 1 } }),
     ]
 
     inReadingOrder(people)

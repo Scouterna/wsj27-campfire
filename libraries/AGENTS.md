@@ -42,12 +42,13 @@ libraries/ui/
 │   ├── styles.css     the aggregator behind the ./styles.css export
 │   ├── styles/        tokens.css, fonts.css, reset.css, base.css
 │   ├── images/        the wordmark, one cut per theme
+│   ├── units/         one glyph per unit, and the IST's and the management's
 │   └── fonts/         Bravely Script, the display face
 └── src/
-    ├── assets.d.ts    a .css or .svg import is Vite's business, told to TypeScript
+    ├── assets.d.ts    a .css or .svg import and a glob import are Vite's business, told to TypeScript
     ├── behavior/      the view-transition direction contract
     ├── components/    one directory per component
-    ├── foundations/   the icons, the themes, the reveals, and the units' identities
+    ├── foundations/   the icons, the themes, the reveals, and the units' names and glyphs
     ├── routing/       RouteRegistry, Address, matchScreen, mountRoutes, and the root route
     ├── storybook/     the decorators, stories.css, and Introduction.mdx
     └── widgets/       WidgetRegistry, WidgetFrom, WidgetsProvider, and Widget
@@ -58,7 +59,7 @@ libraries/ui/
 - **Raw values live in `tokens.css` and nowhere else.** A component names a role – `--color-theme-bright` – never a hex code.
 - **A theme is the unit's color identity**, taken from its badge mark – the outer ring is the bright, the inner disc the ink – so the marks are the palette's source of truth. A theme is its pair in `tokens.css` and its name in `src/foundations/theme/Theme.ts`, so adding one changes both. A theme name arrives from outside, so `isTheme` checks it rather than asserting it.
 - **A unit's theme** comes from `UnitTheme.ts`, keyed by the unit's number, because the list of participants knows only the number.
-- **The units' names and glyphs are runtime data**, not code. The application loads them and hands them to `UnitIdentitiesProvider`, and anything reading `useUnitIdentities` outside a provider, or before they load, gets nothing and falls back to the number.
+- **A unit's glyph** is a file in `assets/units/`, named for its number and imported without inlining, so each loads like any image and only its address is in the bundle. `UnitAvatar` draws a number with no glyph as the number itself. A unit's name is `unitName`, because more than one module needs it, and holding it back until the units reveal opens is each caller's business.
 - **A reveal is a moment part of the product becomes visible**, with its time and the hint under its countdown. `ui` holds the reveals, and what a reveal's id gates is each consumer's business.
 - **A `style` prop carries only a value the runtime alone knows**, such as a virtualized row's offset. Everything a rule could say goes in the cascade layers `apps/web/index.html` declares.
 - **Font sizes come from the `--font-size-*` tokens**, in rem against the 17-point base, never a bare `px`, so Dynamic Type carries the reader's text size. Weights are tokens too.

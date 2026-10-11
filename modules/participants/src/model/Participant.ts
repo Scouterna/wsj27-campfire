@@ -1,6 +1,9 @@
 import type { Gender } from "./Gender"
+import type { IstPatrol } from "./IstPatrol"
 import { type ParticipantRole } from "./ParticipantRole"
 import type { CmtFunktion } from "./Participation"
+import type { Unit } from "./Unit"
+import type { UnitPatrol } from "./UnitPatrol"
 
 /**
  * The slots the registration names people in, in the order it asks for them – the
@@ -49,11 +52,20 @@ export interface Participant {
    */
   readonly role: ParticipantRole
   /**
-   * The unit a deltagare or a ledare belongs to. Absent for the IST, whose patrols the
-   * participants service does not carry, and for the contingent management, which
-   * belongs to no unit.
+   * The unit a deltagare or a ledare belongs to. Absent for the IST, who are in patrols
+   * of their own instead, and for the contingent management, which belongs to no unit.
    */
-  readonly unitNumber?: number
+  readonly unit?: Unit
+  /**
+   * The patrol a deltagare or a ledare is in within their unit. Absent for everyone else,
+   * and for anybody their leaders have not put in one.
+   */
+  readonly unitPatrol?: UnitPatrol
+  /**
+   * The IST patrol an IST member is in. Absent for everyone outside the IST, and for an
+   * IST member whose patrol answer names none.
+   */
+  readonly istPatrol?: IstPatrol
   /**
    * The birth date as the service sent it, an ISO date. Absent when the service left
    * it out.
@@ -124,8 +136,8 @@ const cmtAvatarNumber = 55
  * @returns The number, or undefined when they have no mark.
  */
 export function avatarNumberFor(person: Participant): number | undefined {
-  if (person.unitNumber !== undefined) {
-    return person.unitNumber
+  if (person.unit !== undefined) {
+    return person.unit.number
   }
   if (person.role === "ist") {
     return istAvatarNumber
@@ -191,30 +203,46 @@ export function fullName(person: Participant): string {
 }
 
 /**
- * Where a person sits in the contingent, for the line under their name: their unit, the
- * IST, or the contingent when they belong to neither. A unit is given by its number,
- * because its name is runtime data the screen adds beside it.
+ * The unit or the IST patrol a person belongs to, by number and with its name where the
+ * contingent names it – "Avdelning 1 · Björnen", "Patrull 7 · Tordyvel".
+ * @param person The person to place.
+ * @returns The line, or undefined when they belong to neither.
+ */
+export function unitOrPatrolLine(person: Participant): string | undefined {
+  if (person.istPatrol !== undefined) {
+    return withName(`Patrull ${String(person.istPatrol.number)}`, person.istPatrol.name)
+  }
+  if (person.unit !== undefined) {
+    return withName(`Avdelning ${String(person.unit.number)}`, person.unit.name)
+  }
+  return undefined
+}
+
+/**
+ * A numbered label with a name joined on – "Avdelning 1 · Björnen".
+ * @param numbered The label naming the number.
+ * @param name The name, where there is one.
+ * @returns The label, with the name after it when there is one.
+ */
+function withName(numbered: string, name: string | undefined): string {
+  return name === undefined ? numbered : `${numbered} · ${name}`
+}
+
+/**
+ * Where a person sits in the contingent: their unit or IST patrol, an IST member's lack
+ * of one, or the contingent when they belong to no unit.
  * @param person The person to place.
  * @returns The one line that says where they belong.
  */
 export function belonging(person: Participant): string {
-  switch (person.role) {
-    case "ist": {
-      return "IST"
-    }
-    case "kontingentledning": {
-      return "Kontingenten"
-    }
-    case "deltagare":
-    case "ledare": {
-      // A deltagare or a ledare the service placed in no unit is rare and not an error to
-      // surface here, because the contingent is the honest answer for anybody the units
-      // do not hold.
-      return person.unitNumber === undefined
-        ? "Kontingenten"
-        : `Avdelning ${String(person.unitNumber)}`
-    }
+  const line = unitOrPatrolLine(person)
+  if (line !== undefined) {
+    return line
   }
+  // A deltagare or a ledare the service placed in no unit is rare and not an error to
+  // surface here, because the contingent is the honest answer for anybody the units do
+  // not hold.
+  return person.role === "ist" ? "Ingen patrull" : "Kontingenten"
 }
 
 /**

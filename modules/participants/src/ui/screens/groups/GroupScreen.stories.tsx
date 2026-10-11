@@ -3,19 +3,19 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ApiDecorator } from "../../storybook/ApiDecorator"
 import { unitWithHomeTowns, wholeList } from "../../storybook/cast"
-import { UnitScreen } from "./UnitScreen"
+import { GroupScreen } from "./GroupScreen"
 
-const meta: Meta<typeof UnitScreen> = {
-  title: "Modules/Participants/Screens/UnitScreen",
-  component: UnitScreen,
+const meta: Meta<typeof GroupScreen> = {
+  title: "Modules/Participants/Screens/GroupScreen",
+  component: GroupScreen,
   decorators: [ScreenDecorator, ApiDecorator],
   parameters: { api: { list: wholeList }, layout: "fullscreen" },
-  args: { entryKey: "1" },
+  args: { groupKey: "1" },
 }
 
 export default meta
 
-type Story = StoryObj<typeof UnitScreen>
+type Story = StoryObj<typeof GroupScreen>
 
 /**
  * One numbered unit: its own card over a dimmed map of where its people live – press it
@@ -25,17 +25,25 @@ type Story = StoryObj<typeof UnitScreen>
 export const OneUnit: Story = {}
 
 /**
- * The IST is not an avdelning, so the count says only how many they are.
+ * An IST patrol, numbered in the same series as the units but never one of them – no
+ * unit's card, and a count that says only how many they are.
  */
-export const Ist: Story = {
-  args: { entryKey: "ist" },
+export const IstPatrol: Story = {
+  args: { groupKey: "ist-7" },
 }
 
 /**
- * The contingent management, the other entry that is not a unit.
+ * The IST outside every patrol, together.
  */
-export const Cmt: Story = {
-  args: { entryKey: "cmt" },
+export const IstWithoutPatrol: Story = {
+  args: { groupKey: "ist" },
+}
+
+/**
+ * One funktion of the contingent management.
+ */
+export const CmtFunktion: Story = {
+  args: { groupKey: "cmt-administration" },
 }
 
 /**
@@ -43,7 +51,7 @@ export const Cmt: Story = {
  * either way, with the title kept so the screen still says where the reader is.
  */
 export const UnknownUnit: Story = {
-  args: { entryKey: "42" },
+  args: { groupKey: "42" },
 }
 
 /**

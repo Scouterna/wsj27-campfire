@@ -18,7 +18,7 @@ type Story = StoryObj<typeof Fab>
 export const Default: Story = {
   args: {
     icon: <ParticipantsIcon size={24} strokeWidth={2.2} />,
-    label: "Avdelningar",
+    label: "Grupper",
     onPress: () => {
       // A story's press goes nowhere.
     },
