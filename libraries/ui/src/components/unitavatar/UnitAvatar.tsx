@@ -1,17 +1,16 @@
 import type { ReactElement } from "react"
 
-import { useUnitIdentities } from "../../foundations/units/UnitIdentities"
+import { glyphUrl } from "../../foundations/units/glyphs"
 
 import "./UnitAvatar.css"
 
 /**
- * The IST's slot among the unit identities: beyond the units, with a mark and a name
- * of its own.
+ * The IST's slot beyond the units, with a glyph of its own.
  */
 export const istAvatarNumber = 54
 
 /**
- * The contingent management's slot among the unit identities.
+ * The contingent management's slot beyond the units, with a glyph of its own.
  */
 export const cmtAvatarNumber = 55
 
@@ -38,8 +37,8 @@ export interface UnitAvatarProps {
  * unit's white glyph – the badge the whole identity system draws from. Every mark
  * wears the surrounding theme rather than its unit's own, so a mixed list – the whole
  * contingent under the management's red – reads as one list, and the glyph alone says
- * which unit it is. While the identities are unloaded, the disc carries the unit's
- * number instead, in the same dress.
+ * which unit it is. A number with no glyph carries the number itself on the disc instead,
+ * in the same dress.
  *
  * Decorative on purpose: every surface that draws the avatar says the unit or the
  * person in text beside it, so the mark is hidden from assistive technology.
@@ -48,8 +47,7 @@ export interface UnitAvatarProps {
  * @returns The mark.
  */
 export function UnitAvatar(props: UnitAvatarProps): ReactElement {
-  const identities = useUnitIdentities()
-  const glyph = identities.glyphSrc(props.unitNumber)
+  const glyph = glyphUrl(props.unitNumber)
   const size = props.size ?? "row"
 
   const mark = (
