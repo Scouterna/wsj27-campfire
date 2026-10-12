@@ -71,6 +71,21 @@
     margin: 0 0 6px;
   }
 
+  /* Who alone an entry is for, a small chip after its heading in the theme's wash, so a
+     reader sees at a glance that not everyone reads it. */
+  .timeline-audience {
+    background: var(--color-theme-wash);
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    display: inline-block;
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.04em;
+    margin-left: var(--spacing-stack);
+    padding: 2px 8px;
+    vertical-align: 3px;
+  }
+
   .timeline-card {
     background: var(--color-sheet);
     border-radius: var(--border-radius-default);

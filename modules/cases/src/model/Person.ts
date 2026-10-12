@@ -58,7 +58,7 @@ const roleNames: ReadonlyMap<PersonRole, string> = new Map([
  * The line under a person's name in full – their role, then their unit by number and
  * name – such as "Deltagare · Avdelning 1 · Ankan".
  * @param person The person to place.
- * @param unitName What a unit is called, from the unit identities.
+ * @param unitName What a unit is called, or undefined for a number the contingent has not named.
  * @returns The line, or undefined for somebody the module knows nothing about.
  */
 export function placingLine(

@@ -1,4 +1,5 @@
 import type { Note } from "../../model/Note"
+import { isSecrecyLevel } from "../../model/SecrecyLevel"
 import { isRecord, toDate, toId } from "./validation"
 
 /**
@@ -20,7 +21,9 @@ export interface NoteDto {
 
 /**
  * One note as the domain knows it, or undefined when the payload is not one. Undefined
- * rather than a throw, because a case drops the note it cannot read and shows the rest.
+ * rather than a throw, because a case drops the note it cannot read and shows the rest. A
+ * level this module does not know makes the note unreadable too, because who reads it
+ * could not be said.
  * @param value The note the service sent.
  * @returns The note, or undefined when it is not usable.
  */
@@ -39,7 +42,8 @@ export function toNote(value: unknown): Note | undefined {
     caseId === undefined ||
     createdAt === undefined ||
     authorMemberNo === undefined ||
-    typeof dto.note !== "string"
+    typeof dto.note !== "string" ||
+    !isSecrecyLevel(dto.secrecy_level)
   ) {
     return undefined
   }
@@ -49,6 +53,7 @@ export function toNote(value: unknown): Note | undefined {
     caseId,
     createdAt,
     id,
+    secrecyLevel: dto.secrecy_level,
     text: dto.note,
     title: typeof dto.title === "string" ? dto.title : "",
   }

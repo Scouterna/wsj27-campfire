@@ -1,4 +1,4 @@
-import { useUnitIdentities } from "@scouterna/wsj27-campfire-ui"
+import { unitName } from "@scouterna/wsj27-campfire-ui"
 import type { ReactElement } from "react"
 
 import { placingLine, type Person } from "../../../model/Person"
@@ -25,8 +25,7 @@ export interface SubjectCardProps {
  * @returns The card.
  */
 export function SubjectCard(props: SubjectCardProps): ReactElement {
-  const identities = useUnitIdentities()
-  const placing = placingLine(props.about, identities.name)
+  const placing = placingLine(props.about, unitName)
 
   return (
     <section aria-label="Gäller" className="card subject-card">

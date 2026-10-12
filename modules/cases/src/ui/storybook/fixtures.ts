@@ -13,8 +13,8 @@
 const absent = null
 
 /**
- * The listing rows the contingent is read from – a few deltagare of unit 1, one IST, and
- * two of the contingent management, who keep the cases.
+ * The listing rows the contingent is read from – a few deltagare of unit 1 and its two
+ * leaders, one IST, and three of the contingent management.
  */
 export const peopleRows: readonly unknown[] = [
   { member_no: 1_300_035, member_type: "Deltagare", name: "Ester Dahl", troop: "1" },
@@ -24,6 +24,9 @@ export const peopleRows: readonly unknown[] = [
   { member_no: 1_300_098, member_type: "IST", name: "Freja Sandberg", troop: "" },
   { member_no: 1_200_001, member_type: "Kontingentledning", name: "Helena Hägg", troop: "" },
   { member_no: 1_200_002, member_type: "Kontingentledning", name: "Henrik Holm", troop: "" },
+  { member_no: 1_200_401, member_type: "Kontingentledning", name: "Karin Kron", troop: "" },
+  { member_no: 1_100_101, member_type: "Avdelningsledare", name: "Lars Lindberg", troop: "1" },
+  { member_no: 1_100_402, member_type: "Avdelningsledare", name: "Hanna Hellström", troop: "1" },
 ]
 
 /**
@@ -39,7 +42,7 @@ function caseRow(fields: Readonly<Record<string, unknown>>): Readonly<Record<str
     closed_at: absent,
     closed_by_id: absent,
     extra_access: [],
-    secrecy_level: 5,
+    secrecy_level: 3,
     tags: [],
     type: "hälsa",
     ...fields,
@@ -47,15 +50,39 @@ function caseRow(fields: Readonly<Record<string, unknown>>): Readonly<Record<str
 }
 
 /**
- * Every case the stories know, newest first – two open and one closed.
+ * Every case the stories know, newest first – four open and one closed, among them a
+ * management case only the management sees, a health case private to its creator, and a
+ * health case shared with the head of contingent.
  */
 export const caseRows: readonly Readonly<Record<string, unknown>>[] = [
+  caseRow({
+    about_person_id: 1_300_077,
+    created_at: "2027-08-03T09:10:00Z",
+    creator_id: 1_200_002,
+    id: 5,
+    latest_note_at: absent,
+    secrecy_level: 4,
+    title: "Passet saknas",
+    troop: "1",
+    type: "cmt",
+  }),
+  caseRow({
+    about_person_id: 1_300_287,
+    created_at: "2027-08-02T19:30:00Z",
+    creator_id: 1_200_001,
+    id: 4,
+    latest_note_at: absent,
+    secrecy_level: 5,
+    title: "Samtal om hemlängtan",
+    troop: "1",
+  }),
   caseRow({
     about_person_id: 1_300_049,
     created_at: "2027-08-02T07:40:00Z",
     creator_id: 1_200_001,
+    extra_access: [1_200_401],
     id: 3,
-    latest_note_at: "2027-08-02T14:15:00Z",
+    latest_note_at: "2027-08-02T16:00:00Z",
     title: "Stukad fotled",
     troop: "1",
   }),
@@ -88,7 +115,7 @@ export const caseRows: readonly Readonly<Record<string, unknown>>[] = [
  * @returns The note's payload.
  */
 function noteRow(fields: Readonly<Record<string, unknown>>): Readonly<Record<string, unknown>> {
-  return { extra_access: [], secrecy_level: 5, tags: [], ...fields }
+  return { secrecy_level: 3, tags: [], ...fields }
 }
 
 /**
@@ -115,7 +142,18 @@ export const noteRows: Readonly<Record<string, readonly unknown[]>> = {
     }),
   ],
   "2": [],
+  "4": [],
+  "5": [],
   "3": [
+    noteRow({
+      case_id: 3,
+      created_at: "2027-08-02T16:00:00Z",
+      creator_id: 1_200_001,
+      id: 33,
+      note: "Föräldrarna nämnde en tidigare fraktur i samma fot. Kollar journalen.",
+      secrecy_level: 4,
+      title: "Stukad fotled",
+    }),
     noteRow({
       case_id: 3,
       created_at: "2027-08-02T14:15:00Z",

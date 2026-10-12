@@ -10,7 +10,9 @@
  * does not know grants none.
  */
 // Grouped rather than alphabetical – the leader role, then the cmt umbrella, then the
-// management functions under it in alphabetical order.
+// management functions under it in alphabetical order, then the personal grant, which
+// belongs to no function. `health` is the support function's health roll alone, and
+// `healthGrant` the grant that reads health answers without it.
 export type Role =
   | { readonly kind: "leader"; readonly unitNumber?: number }
   | { readonly kind: "cmt" }
@@ -22,6 +24,7 @@ export type Role =
   | { readonly kind: "program" }
   | { readonly kind: "support" }
   | { readonly kind: "unitSupport" }
+  | { readonly kind: "healthGrant" }
 
 /**
  * Whether the held roles carry at least one of the given kinds.

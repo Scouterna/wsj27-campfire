@@ -16,7 +16,7 @@ function row(overrides: Record<string, unknown> = {}): Record<string, unknown> {
     id: 7,
     created_at: "2026-09-26T12:05:00.123456+00:00",
     creator_id: 1_100_101,
-    secrecy_level: 5,
+    secrecy_level: 4,
     title: "Feber",
     type: "hälsa",
     about_person_id: 1_100_111,
@@ -26,7 +26,7 @@ function row(overrides: Record<string, unknown> = {}): Record<string, unknown> {
     closed: false,
     closed_at: wireNull,
     closed_by_id: wireNull,
-    extra_access: [],
+    extra_access: [1_200_401, "x"],
     tags: [],
     ...overrides,
   }
@@ -38,11 +38,14 @@ describe("reading one case", () => {
       aboutMemberNo: "1100111",
       createdAt: new Date("2026-09-26T12:05:00.123Z"),
       creatorMemberNo: "1100101",
+      extraAccess: ["1200401"],
       id: "7",
       isClosed: false,
       latestNoteAt: new Date("2026-09-26T12:05:01Z"),
+      secrecyLevel: 4,
       title: "Feber",
       troop: "1",
+      type: "hälsa",
     })
   })
 
@@ -73,6 +76,12 @@ describe("reading one case", () => {
     expect(toCase(row({ created_at: "yesterday" }))).toBeUndefined()
     expect(toCase(row({ creator_id: wireNull }))).toBeUndefined()
     expect(toCase(row({ title: 42 }))).toBeUndefined()
+  })
+
+  it("drops a case of a type or at a level this module cannot say who it reaches", () => {
+    expect(toCase(row({ type: "admin" }))).toBeUndefined()
+    expect(toCase(row({ secrecy_level: 2 }))).toBeUndefined()
+    expect(toCase(row({ secrecy_level: "3" }))).toBeUndefined()
   })
 
   it("drops anything that is not an object", () => {

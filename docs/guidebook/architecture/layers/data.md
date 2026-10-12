@@ -2,7 +2,7 @@
 
 The data layer is where the outside world is dealt with – the back-end services, Google Drive, the shapes they send, and the cache that keeps their answers – and turned into the types [the domain](./domain) declares.
 
-Only a module that owns a capability has one. Authentication asks the auth service who is signed in, and reads the signed-in person's own registration – their unit and how they travel – from the participants service. Participants reads the list of participants. Cases reads and writes the health team's cases, and reads the contingent's names to show them with. Material reads the contingent's material from Google Drive. No other module reads from anywhere.
+Only a module that owns a capability has one. Authentication asks the auth service who is signed in, and reads the signed-in person's own registration – their unit and how they travel – from the participants service. Participants reads the list of participants. Cases reads and writes the cases its reader reaches, and reads the names within their reach to show them with. Material reads the contingent's material from Google Drive. No other module reads from anywhere.
 
 ## Query factories
 

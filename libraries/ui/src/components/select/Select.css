@@ -1,0 +1,45 @@
+/* The select: the platform's own control, redrawn as a pill in the theme's wash with a
+   chevron at its end, the height of the button it usually stands beside. */
+
+@layer component {
+  .select {
+    display: inline-flex;
+    max-width: 100%;
+    position: relative;
+  }
+
+  .select-field {
+    appearance: none;
+    background: var(--color-theme-wash);
+    border: none;
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--font-size-entry);
+    font-weight: var(--font-weight-strong);
+    height: 44px;
+    max-width: 100%;
+    overflow: hidden;
+    padding: 0 40px 0 18px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .select-field:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: 2px;
+  }
+
+  /* The back chevron turned to point down, over the field and out of the way of a press,
+     which passes through it to the select beneath. */
+  .select-chevron {
+    color: var(--color-theme-ink);
+    display: flex;
+    pointer-events: none;
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%) rotate(-90deg);
+  }
+}

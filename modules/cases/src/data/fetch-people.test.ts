@@ -61,11 +61,13 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
+const contingent = { kind: "contingent" } as const
+
 describe("everyone in the contingent", () => {
   it("walks the leaders' listing, then every unit it names, the IST, and the management", async () => {
     const asked = networkAnswers(contingentAnswers())
 
-    await testClient().query(fetchPeopleQuery())
+    await testClient().query(fetchPeopleQuery(contingent))
 
     expect(asked).toEqual([
       troopinfo("al"),
@@ -79,7 +81,7 @@ describe("everyone in the contingent", () => {
   it("holds each person once, by member number", async () => {
     networkAnswers(contingentAnswers())
 
-    const people = await testClient().query(fetchPeopleQuery())
+    const people = await testClient().query(fetchPeopleQuery(contingent))
 
     expect(
       people
@@ -105,7 +107,7 @@ describe("everyone in the contingent", () => {
     answers[troopinfo("ist")] = () => new Response("{}", { status: 404 })
     networkAnswers(answers)
 
-    const people = await testClient().query(fetchPeopleQuery())
+    const people = await testClient().query(fetchPeopleQuery(contingent))
 
     expect(people.has("31")).toBe(false)
     expect(people.size).toBe(5)
@@ -121,7 +123,7 @@ describe("everyone in the contingent", () => {
     }
     const asked = networkAnswers(answers)
 
-    const people = await testClient().query(fetchPeopleQuery())
+    const people = await testClient().query(fetchPeopleQuery(contingent))
 
     expect(people.has("21")).toBe(true)
     expect(asked.filter((url) => url === troopinfo("2"))).toHaveLength(2)
@@ -134,7 +136,7 @@ describe("everyone in the contingent", () => {
     answers[troopinfo("2")] = () => new Response("{}", { status: 500 })
     networkAnswers(answers)
 
-    await expect(testClient().query(fetchPeopleQuery())).rejects.toThrow(/answered 500/u)
+    await expect(testClient().query(fetchPeopleQuery(contingent))).rejects.toThrow(/answered 500/u)
   })
 
   it("fails with the refusal ahead of any other failure", async () => {
@@ -143,7 +145,7 @@ describe("everyone in the contingent", () => {
     answers[troopinfo("2")] = () => new Response("{}", { status: 401 })
     const asked = networkAnswers(answers)
 
-    const refused = testClient().query(fetchPeopleQuery())
+    const refused = testClient().query(fetchPeopleQuery(contingent))
 
     await expect(refused).rejects.toBeInstanceOf(HttpError)
     await expect(refused).rejects.toMatchObject({ status: 401 })
@@ -157,13 +159,30 @@ describe("everyone in the contingent", () => {
     answers[troopinfo("al")] = () => new Response("{}", { status: 503 })
     networkAnswers(answers)
 
-    await expect(testClient().query(fetchPeopleQuery())).rejects.toThrow(/answered 503/u)
+    await expect(testClient().query(fetchPeopleQuery(contingent))).rejects.toThrow(/answered 503/u)
   })
 
   it("caches under the module's own key, fresh long enough to spare the walk", () => {
-    const options = fetchPeopleQuery()
+    const options = fetchPeopleQuery(contingent)
 
-    expect(options.queryKey).toEqual(["cases", "people"])
+    expect(options.queryKey).toEqual(["cases", "people", "contingent"])
     expect(options.staleTime).toBeGreaterThanOrEqual(60 * 60 * 1000)
+  })
+})
+
+describe("a leader's own units", () => {
+  const unitOne = { kind: "units", unitNumbers: [1] } as const
+
+  it("reads only the leader's own units' listings", async () => {
+    const asked = networkAnswers(contingentAnswers())
+
+    const people = await testClient().query(fetchPeopleQuery(unitOne))
+
+    expect(asked).toEqual([troopinfo("1")])
+    expect(people.keys().toArray()).toEqual(["1", "11"])
+  })
+
+  it("caches apart from the contingent, by the units it holds", () => {
+    expect(fetchPeopleQuery(unitOne).queryKey).toEqual(["cases", "people", "1"])
   })
 })

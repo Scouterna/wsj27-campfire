@@ -15,7 +15,8 @@ function seededClient(): QueryClient {
   client.setQueryData(fetchCasesQuery(true).queryKey, [])
   client.setQueryData(fetchCasesQuery(false).queryKey, [])
   client.setQueryData(fetchNotesQuery("7").queryKey, [])
-  client.setQueryData(fetchPeopleQuery().queryKey, [])
+  client.setQueryData(fetchPeopleQuery({ kind: "contingent" }).queryKey, [])
+  client.setQueryData(fetchPeopleQuery({ kind: "units", unitNumbers: [7] }).queryKey, [])
   return client
 }
 
@@ -38,6 +39,9 @@ describe("refreshing after a write", () => {
     expect(isInvalidated(client, fetchCasesQuery(true).queryKey)).toBe(true)
     expect(isInvalidated(client, fetchCasesQuery(false).queryKey)).toBe(true)
     expect(isInvalidated(client, fetchNotesQuery("7").queryKey)).toBe(true)
-    expect(isInvalidated(client, fetchPeopleQuery().queryKey)).toBe(false)
+    expect(isInvalidated(client, fetchPeopleQuery({ kind: "contingent" }).queryKey)).toBe(false)
+    expect(
+      isInvalidated(client, fetchPeopleQuery({ kind: "units", unitNumbers: [7] }).queryKey),
+    ).toBe(false)
   })
 })

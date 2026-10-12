@@ -33,6 +33,7 @@ describe("reading one note", () => {
       caseId: "7",
       createdAt: new Date("2026-09-26T12:05:00Z"),
       id: "3",
+      secrecyLevel: 5,
       text: "38,5 på morgonen, vilar i tältet.",
       title: "Feber",
     })
@@ -48,6 +49,11 @@ describe("reading one note", () => {
     expect(toNote(row({ created_at: undefined }))).toBeUndefined()
     expect(toNote(row({ creator_id: "" }))).toBeUndefined()
     expect(toNote(row({ note: wireNull }))).toBeUndefined()
+  })
+
+  it("drops a note at a level this module cannot say who reads", () => {
+    expect(toNote(row({ secrecy_level: 2 }))).toBeUndefined()
+    expect(toNote(row({ secrecy_level: wireNull }))).toBeUndefined()
   })
 })
 

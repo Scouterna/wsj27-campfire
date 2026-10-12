@@ -1,5 +1,7 @@
+import type { SecrecyLevel } from "./SecrecyLevel"
+
 /**
- * One entry in a case's history – what somebody in the health team wrote, and when.
+ * One entry in a case's history – what somebody who reaches the case wrote, and when.
  */
 export interface Note {
   /**
@@ -18,6 +20,11 @@ export interface Note {
    * The service's identifier.
    */
   readonly id: string
+  /**
+   * Who may read the note – its case's level, or a higher one that hides it from some of
+   * those who reach the case.
+   */
+  readonly secrecyLevel: SecrecyLevel
   /**
    * What was written.
    */

@@ -75,6 +75,9 @@ services:
       # default builds the discovery URL from the incoming request and lands outside
       # /api/auth.
       OIDC_SERVER_PATH: http://localhost:8000/api/auth/
+      # Where the ingress serves the service, whose prefix it strips, so the docs page asks
+      # for its schema there rather than at the origin's root, where the web answers.
+      ROOT_PATH: /api/project
       # The Scoutnet credentials live in the gitignored .env beside this file, with
       # the Keycloak client's. Without them the service runs and serves nobody.
       SCOUTNET_PROJECTS: "${SCOUTNET_PROJECTS:-[]}"

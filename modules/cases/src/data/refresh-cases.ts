@@ -11,7 +11,7 @@ import { fetchPeopleQuery } from "./fetch-people"
  * reads succeeded.
  */
 export async function refreshCases(client: QueryClient): Promise<void> {
-  const [, people] = fetchPeopleQuery().queryKey
+  const [, people] = fetchPeopleQuery({ kind: "contingent" }).queryKey
   await client.invalidateQueries({
     predicate: (query) => query.queryKey[1] !== people,
     queryKey: ["cases"],

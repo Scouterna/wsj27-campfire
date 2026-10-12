@@ -5,15 +5,24 @@ The cases service keeps follow-ups: a case about a person or a unit, and the not
 ## What Campfire uses it for
 
 - **Listing cases** – the open ones newest first, and the closed ones on request.
-- **Opening a case** about a person, under a title.
-- **Reading and writing notes** – a case's thread, newest first, and a new note on an open case.
+- **Opening a case** about a person, under a title, of a type and at a secrecy level the creator chooses.
+- **Learning which types a person may open** – the service's own answer, because it follows their roles.
+- **Renaming an open case.**
+- **Sharing a case** with named leaders and members of the management team, by its type's role holders, and never with someone who sees it already – a unit's case only with the unit's other leaders while it is private, and a CMT case with the leaders of its person's unit.
+- **Reading and writing notes** – a case's thread, newest first, and a new note on an open case, kept from some of those who see the case where its writer chooses.
 - **Closing and reopening** – closing records who did it and when, and reopening clears both.
 
 There is no read for one case, so Campfire finds a case in the list. Every read of a case's notes is logged by the service, with who read them and when, and a note can be neither edited nor deleted. The cases module is the only part of Campfire that calls it.
 
 ## Who may see what
 
-The service refuses a caller with no WSJ27 role and admits every other – every unit leader, every member of the management team, and anyone holding a personal grant may list, read, write, close, and reopen every case. A case's type, secrecy level, and extra-access list are stored for an access model the service has not decided, and none of them restricts a reader yet. Campfire writes every case as a health case at the highest secrecy level and offers the section only to the health team, so the front-end's gate is what keeps the cases within the team. What the service will enforce is decided in its repository, and the gate follows it when it lands.
+Three things decide who reaches a case, and the service enforces all of them:
+
+- **Its type**, each with the role it needs – a health case the health team's role, a management case any role in the contingent management team, and a unit's case a leader of that unit. A person whose roles give no type at all is refused every case route.
+- **Its secrecy level**, fixed when it is opened – at the default, everyone the type's role reaches and anyone it is shared with; one level up, the role alone, and it can never be shared; at the top, its creator alone and anyone they share it with.
+- **Its extra-access list**, the named people it is shared with, who may do what a role holder may except share it further.
+
+A note can be more secret than its case, down to its author alone. A case the caller does not reach answers exactly like one that does not exist, and a list holds only the cases the caller reaches, so Campfire shows whatever the service answers. Campfire offers the cases section to whoever holds a case type – the management team and the leaders of a unit – mirroring the service's rule rather than standing in for it. A personal health grant opens health answers in the [participants service](./participants-service) but no health case.
 
 ## Locally
 

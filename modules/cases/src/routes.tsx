@@ -9,7 +9,8 @@ import { PersonCasesRoute } from "./ui/screens/personcases/PersonCasesRoute"
 declare module "@scouterna/wsj27-campfire-ui" {
   interface RouteRegistry {
     /**
-     * The health team's cases, the open ones first and the closed ones on request.
+     * The cases the reader's roles reach, the open ones first and the closed ones on
+     * request.
      */
     "/cases": Address<"cases">
     /**

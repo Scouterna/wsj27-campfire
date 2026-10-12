@@ -48,7 +48,14 @@ describe("one case's notes", () => {
   it("reads the notes in the order they came, dropping the unreadable ones", async () => {
     networkAnswers(() =>
       Response.json([
-        { id: 2, case_id: 7, created_at: "2026-09-26T13:00:00Z", creator_id: 1, note: "Bättre" },
+        {
+          id: 2,
+          case_id: 7,
+          created_at: "2026-09-26T13:00:00Z",
+          creator_id: 1,
+          note: "Bättre",
+          secrecy_level: 3,
+        },
         { id: 1, case_id: 7 },
       ]),
     )

@@ -1,8 +1,7 @@
-import { useQuery } from "@tanstack/react-query"
 import { useCallback, useMemo } from "react"
 
-import { fetchPeopleQuery } from "../../../data/fetch-people"
 import type { Person } from "../../../model/Person"
+import { usePeople } from "../../use-people"
 
 /**
  * The most people a search shows at once. A few letters match hundreds in a contingent,
@@ -42,17 +41,25 @@ export interface PeopleSearchView {
 }
 
 /**
- * Everyone in the contingent whose name holds the search text.
+ * Everyone within the reader's reach who may be chosen and whose name holds the search
+ * text.
  * @param query What the reader typed. Surrounding spaces and case are ignored.
+ * @param isOffered Whether a person may be chosen at all. Left out, everyone within reach
+ * may. Kept stable across renders, because the matches are recomputed when it changes.
  * @returns The matches, and the states around them.
  */
-export function usePeopleSearch(query: string): PeopleSearchView {
-  const { data, error, isPending, refetch } = useQuery(fetchPeopleQuery())
+export function usePeopleSearch(
+  query: string,
+  isOffered?: (person: Person) => boolean,
+): PeopleSearchView {
+  const { data, error, isPending, refetch } = usePeople()
 
   const everyone = useMemo(
     () =>
-      [...(data?.values() ?? [])].toSorted((left, right) => swedish.compare(left.name, right.name)),
-    [data],
+      [...(data?.values() ?? [])]
+        .filter((person) => isOffered === undefined || isOffered(person))
+        .toSorted((left, right) => swedish.compare(left.name, right.name)),
+    [data, isOffered],
   )
 
   const needle = query.trim().toLocaleLowerCase("sv")

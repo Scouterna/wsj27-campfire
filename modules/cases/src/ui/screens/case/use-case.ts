@@ -3,10 +3,10 @@ import { useMemo } from "react"
 
 import { fetchCasesQuery } from "../../../data/fetch-cases"
 import { fetchNotesQuery } from "../../../data/fetch-notes"
-import { fetchPeopleQuery } from "../../../data/fetch-people"
 import type { Case } from "../../../model/Case"
 import type { Note } from "../../../model/Note"
 import type { People } from "../../../model/Person"
+import { usePeople } from "../../use-people"
 
 /**
  * What the case screen needs to draw itself: the case and its notes, or the states they
@@ -55,7 +55,7 @@ export interface CaseView {
 export function useCase(caseId: string): CaseView {
   const cases = useQuery(fetchCasesQuery(true))
   const notes = useQuery(fetchNotesQuery(caseId))
-  const { data: people } = useQuery(fetchPeopleQuery())
+  const { data: people } = usePeople()
 
   const found = cases.data?.find((item) => item.id === caseId)
   const sortedNotes = useMemo(

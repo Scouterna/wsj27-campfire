@@ -1,7 +1,9 @@
 import { persona as health } from "./personas/health.ts"
+import { persona as hoc } from "./personas/hoc.ts"
+import { persona as leader1 } from "./personas/leader-1.ts"
 
 /**
- * One note in a seeded case.
+ * One note in a seeded case, written by the case's creator at the case's secrecy level.
  */
 export interface SeededNote {
   /**
@@ -13,8 +15,7 @@ export interface SeededNote {
 }
 
 /**
- * A case as the seed writes it, before the cases service numbers it. Every seeded case is a
- * health one at the highest secrecy, written by the health persona.
+ * A case as the seed writes it, before the cases service numbers it.
  */
 export interface SeededCase {
   /**
@@ -22,9 +23,14 @@ export interface SeededCase {
    */
   readonly aboutMemberNo: string
   /**
-   * When it was closed, in minutes after `seededAt`, or undefined while it is open.
+   * When it was closed, in minutes after `seededAt`, or undefined while it is open. Its creator
+   * closed it.
    */
   readonly closedMinute?: number
+  /**
+   * The member number of the persona who opened it and wrote its notes.
+   */
+  readonly creatorMemberNo: string
   /**
    * When it was opened, in minutes after `seededAt`.
    */
@@ -33,12 +39,17 @@ export interface SeededCase {
    * Its notes, oldest first, the first written as the case was opened.
    */
   readonly notes: readonly SeededNote[]
+  /**
+   * Its secrecy level, which its notes share.
+   */
+  readonly secrecyLevel: number
   readonly title: string
   /**
    * The troop the service stores beside the person, which is their unit in the list of
    * participants.
    */
   readonly troop: string
+  readonly type: string
 }
 
 /**
@@ -48,19 +59,17 @@ export interface SeededCase {
 export const seededAt = Date.UTC(2026, 8, 19, 7)
 
 /**
- * The member number of the one person who writes the seeded cases – Helena Hägg, in the
- * health function.
- */
-export const caseAuthor = health.memberNo
-
-/**
- * The health team's cases, oldest first, about deltagare in both units: a sprained ankle
- * already closed, and an allergic reaction and a fever still being followed up.
+ * The seeded cases, oldest first, one set for each kind of reader. The health team's are about
+ * deltagare in both units – a sprained ankle already closed, and an allergic reaction and a
+ * fever still being followed up. The head of contingent follows a deltagare's early journey
+ * home, and a unit 1 leader a deltagare's homesickness, so each case type has a case only its
+ * own roles reach.
  */
 export const cases: readonly SeededCase[] = [
   {
     aboutMemberNo: "1300049",
     closedMinute: 24 * 60,
+    creatorMemberNo: health.memberNo,
     minute: 0,
     notes: [
       {
@@ -74,11 +83,14 @@ export const cases: readonly SeededCase[] = [
         title: "Kvällskoll",
       },
     ],
+    secrecyLevel: 3,
     title: "Stukad fot",
     troop: "1",
+    type: "hälsa",
   },
   {
     aboutMemberNo: "1300035",
+    creatorMemberNo: health.memberNo,
     minute: 24 * 60 + 30,
     notes: [
       {
@@ -97,11 +109,14 @@ export const cases: readonly SeededCase[] = [
         title: "Köket har svarat",
       },
     ],
+    secrecyLevel: 3,
     title: "Allergisk reaktion",
     troop: "1",
+    type: "hälsa",
   },
   {
     aboutMemberNo: "1300140",
+    creatorMemberNo: health.memberNo,
     minute: 29 * 60 + 45,
     notes: [
       {
@@ -115,7 +130,46 @@ export const cases: readonly SeededCase[] = [
         title: "Kvällskoll",
       },
     ],
+    secrecyLevel: 3,
     title: "Feber",
     troop: "2",
+    type: "hälsa",
+  },
+  {
+    aboutMemberNo: "1300252",
+    creatorMemberNo: hoc.memberNo,
+    minute: 36 * 60,
+    notes: [
+      {
+        minute: 36 * 60,
+        note: "Alvas föräldrar vill att hon reser hem två dagar före resten av avdelningen, för ett bröllop i familjen.",
+        title: "Tidig hemresa",
+      },
+      {
+        minute: 46 * 60 + 30,
+        note: "Resebyrån kan boka om tåget från Gdańsk. Föräldrarna möter henne i Malmö.",
+        title: "Ombokning",
+      },
+    ],
+    secrecyLevel: 3,
+    title: "Tidig hemresa",
+    troop: "2",
+    type: "cmt",
+  },
+  {
+    aboutMemberNo: "1300084",
+    creatorMemberNo: leader1.memberNo,
+    minute: 48 * 60,
+    notes: [
+      {
+        minute: 48 * 60,
+        note: "Leo har haft hemlängtan sedan i går kväll och vill ringa hem ofta. Patrullen håller honom sällskap, och vi pratar med honom efter lunch.",
+        title: "Hemlängtan",
+      },
+    ],
+    secrecyLevel: 3,
+    title: "Hemlängtan",
+    troop: "1",
+    type: "avdelning",
   },
 ]

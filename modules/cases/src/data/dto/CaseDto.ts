@@ -1,4 +1,6 @@
 import type { Case } from "../../model/Case"
+import { isCaseType } from "../../model/CaseType"
+import { isSecrecyLevel } from "../../model/SecrecyLevel"
 import { isRecord, toDate, toId } from "./validation"
 
 /**
@@ -26,7 +28,9 @@ export interface CaseDto {
 
 /**
  * One case as the domain knows it, or undefined when the payload is not one. Undefined
- * rather than a throw, because a list drops the case it cannot read and shows the rest.
+ * rather than a throw, because a list drops the case it cannot read and shows the rest. A
+ * type or a level this module does not know makes the case unreadable too, because
+ * neither who it reaches nor how to say so could be shown.
  * @param value The case the service sent.
  * @returns The case, or undefined when it is not usable.
  */
@@ -43,7 +47,9 @@ export function toCase(value: unknown): Case | undefined {
     id === undefined ||
     createdAt === undefined ||
     creatorMemberNo === undefined ||
-    typeof dto.title !== "string"
+    typeof dto.title !== "string" ||
+    !isCaseType(dto.type) ||
+    !isSecrecyLevel(dto.secrecy_level)
   ) {
     return undefined
   }
@@ -52,6 +58,11 @@ export function toCase(value: unknown): Case | undefined {
   const closedAt = toDate(dto.closed_at)
   const closedByMemberNo = toId(dto.closed_by_id)
   const latestNoteAt = toDate(dto.latest_note_at)
+  // A member number that cannot be read is left out rather than making the case
+  // unreadable, because the rest of who sees it can still be said.
+  const extraAccess = Array.isArray(dto.extra_access)
+    ? dto.extra_access.flatMap((value: unknown) => toId(value) ?? [])
+    : []
 
   return {
     ...(aboutMemberNo !== undefined && { aboutMemberNo }),
@@ -59,11 +70,14 @@ export function toCase(value: unknown): Case | undefined {
     ...(closedByMemberNo !== undefined && { closedByMemberNo }),
     createdAt,
     creatorMemberNo,
+    extraAccess,
     id,
     isClosed: dto.closed === true,
     ...(latestNoteAt !== undefined && { latestNoteAt }),
+    secrecyLevel: dto.secrecy_level,
     title: dto.title,
     troop: typeof dto.troop === "string" ? dto.troop : "",
+    type: dto.type,
   }
 }
 

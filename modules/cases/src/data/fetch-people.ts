@@ -5,9 +5,18 @@ import type { People } from "../model/Person"
 import { toPeople, toPerson } from "./dto/PersonDto"
 
 /**
- * The key everyone's names are cached under.
+ * Whose names a reader may be shown – the whole contingent for the contingent
+ * management, who read everyone at the basic level, and their own units for a leader,
+ * whom the participants service refuses every other listing.
  */
-type PeopleQueryKey = readonly ["cases", "people"]
+export type PeopleReach =
+  | { readonly kind: "contingent" }
+  | { readonly kind: "units"; readonly unitNumbers: readonly number[] }
+
+/**
+ * The key the names are cached under, one entry per reach.
+ */
+type PeopleQueryKey = readonly ["cases", "people", string]
 
 /**
  * How long the names count as fresh. Walking the contingent is dozens of requests, and
@@ -16,12 +25,13 @@ type PeopleQueryKey = readonly ["cases", "people"]
 const staleTime = 60 * 60 * 1000
 
 /**
- * Query options for everyone in the contingent, by member number – the names a case and
- * a note are shown with, and the people a new case can be about.
+ * Query options for everyone within a reach, by member number – the names a case and a
+ * note are shown with, and the people a new case can be about.
  *
  * The participants service lists one troop or one member type at a time, so the
  * contingent is walked here: the leaders' listing, every unit it names, the IST, and the
- * contingent management, all at the basic level the health team may read. A listing that
+ * contingent management, all at the basic level. A leader's reach is their own units'
+ * listings and nothing else. A listing that
  * fails for anything but a refusal is asked once more, and one that fails again fails the
  * whole query, because a contingent missing a unit looks complete, and nobody searching
  * for a person in it could tell. A 401 is never asked again and is thrown ahead of any
@@ -29,12 +39,17 @@ const staleTime = 60 * 60 * 1000
  *
  * The cache holds the rows as they arrived and `select` converts them on the way out,
  * because the cache is persisted as JSON, which has no map.
+ * @param reach Whose names to read, which also keys the cache, so a reach never reads
+ * another's names.
  * @returns Options for `useQuery`, `useSuspenseQuery`, or the client's `query`.
  */
-export function fetchPeopleQuery(): UseQueryOptions<unknown, Error, People, PeopleQueryKey> {
+export function fetchPeopleQuery(
+  reach: PeopleReach,
+): UseQueryOptions<unknown, Error, People, PeopleQueryKey> {
+  const units = reach.kind === "units" ? reach.unitNumbers.map(String) : undefined
   return queryOptions({
-    queryFn: wholeContingent,
-    queryKey: ["cases", "people"] as const,
+    queryFn: async () => (units === undefined ? wholeContingent() : listings(units)),
+    queryKey: ["cases", "people", units === undefined ? "contingent" : units.join(",")] as const,
     // Only when stale, rather than the application's every mount, since the stale time
     // is what spares the walk.
     refetchOnMount: true,
@@ -144,8 +159,16 @@ async function wholeContingent(): Promise<unknown> {
       units.add(troop)
     }
   }
+  return [...leaders, ...(await listings([...units, "ist", "cmt"]))]
+}
 
-  const first = await round([...units, "ist", "cmt"])
+/**
+ * Every row of the given listings, each failed one asked once more.
+ * @param keys The listings to read.
+ * @returns The rows, one listing after the other.
+ */
+async function listings(keys: readonly string[]): Promise<readonly unknown[]> {
+  const first = await round(keys)
   const second = first.failed.length > 0 ? await round(first.failed) : undefined
 
   const refusal = first.refusal ?? second?.refusal
@@ -159,5 +182,5 @@ async function wholeContingent(): Promise<unknown> {
       : new Error("The contingent could not be read", { cause: second.reason })
   }
 
-  return [...leaders, ...first.rows, ...(second?.rows ?? [])]
+  return [...first.rows, ...(second?.rows ?? [])]
 }

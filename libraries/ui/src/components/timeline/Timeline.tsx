@@ -33,6 +33,11 @@ export function Timeline(props: TimelineProps): ReactElement {
 
 export interface TimelineEntryProps {
   /**
+   * Who alone the entry is for, when it is not for everyone who reads the timeline – a
+   * short phrase marked beside its heading. Left out, nothing is marked.
+   */
+  readonly audience?: string | undefined
+  /**
    * The entry itself – what somebody wrote, or the sentence an event is told in.
    */
   readonly children: ReactNode
@@ -52,8 +57,9 @@ export interface TimelineEntryProps {
 }
 
 /**
- * One entry on the rail: the avatar, the moment in small capitals, the heading, and the
- * entry on its card – or, for an event, a quiet line.
+ * One entry on the rail: the avatar, the moment in small capitals, the heading – marked
+ * with who alone it is for, when it is not for everyone – and the entry on its card, or,
+ * for an event, a quiet line.
  * @param props The entry, and when and by whom it happened.
  * @returns The entry.
  */
@@ -67,7 +73,12 @@ export function TimelineEntry(props: TimelineEntryProps): ReactElement {
         <time className="timeline-when" dateTime={props.at.toISOString()}>
           {formatTimelineMoment(props.at)}
         </time>
-        <p className="timeline-title">{props.title}</p>
+        <p className="timeline-title">
+          {props.title}
+          {props.audience !== undefined && (
+            <span className="timeline-audience">{props.audience}</span>
+          )}
+        </p>
         <div className={props.isEvent === true ? "timeline-event" : "timeline-card"}>
           {props.children}
         </div>

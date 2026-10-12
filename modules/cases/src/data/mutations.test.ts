@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { addNote, closeCase, createCase, reopenCase } from "./mutations"
+import { addNote, closeCase, createCase, renameCase, reopenCase, shareCase } from "./mutations"
 
 /**
  * A case as the cases service answers a write with it.
@@ -10,7 +10,9 @@ function caseRow(overrides: Record<string, unknown> = {}): Record<string, unknow
     id: 7,
     created_at: "2026-09-26T12:05:00+00:00",
     creator_id: 1_100_101,
+    secrecy_level: 3,
     title: "Feber",
+    type: "hälsa",
     about_person_id: 1_100_111,
     troop: "1",
     closed: false,
@@ -26,6 +28,7 @@ const noteRow = {
   case_id: 7,
   created_at: "2026-09-26T12:05:01+00:00",
   creator_id: 1_100_101,
+  secrecy_level: 3,
   title: "Feber",
   note: "38,5 på morgonen.",
 }
@@ -66,47 +69,60 @@ afterEach(() => {
 
 describe("opening a case", () => {
   const person = { memberNo: "1100111", name: "Ester Dahl", troop: "1" }
+  const health = { type: "hälsa" } as const
 
-  it("opens a health case about the person, as secret as the service allows", async () => {
+  it("opens a case of the chosen type, leaving the default level to the service", async () => {
     const sent = networkAnswers(Response.json(caseRow(), { status: 201 }))
 
-    const opened = await createCase({ person, title: "Feber" })
+    const opened = await createCase({ level: 3, person, scope: health, title: "Feber" })
 
     expect(opened.id).toBe("7")
     expect(sent).toEqual([
       {
         url: "/api/project/cases",
         method: "POST",
-        body: {
-          about_person_id: 1_100_111,
-          secrecy_level: 5,
-          title: "Feber",
-          troop: "1",
-          type: "hälsa",
-        },
+        body: { about_person_id: 1_100_111, title: "Feber", troop: "1", type: "hälsa" },
       },
     ])
   })
 
-  it("sends an empty troop for somebody without a unit", async () => {
-    const sent = networkAnswers(Response.json(caseRow({ troop: "" }), { status: 201 }))
+  it("sends a level only when it is not the default", async () => {
+    const sent = networkAnswers(Response.json(caseRow({ secrecy_level: 5 }), { status: 201 }))
 
-    await createCase({ person: { memberNo: "41", name: "Pernilla Palm" }, title: "Huvudvärk" })
+    await createCase({ level: 5, person, scope: health, title: "Feber" })
 
-    expect(sent[0]?.body).toMatchObject({ about_person_id: 41, troop: "" })
+    expect(sent[0]?.body).toMatchObject({ secrecy_level: 5 })
+  })
+
+  it("keeps a unit's case for its unit", async () => {
+    const sent = networkAnswers(Response.json(caseRow({ type: "avdelning" }), { status: 201 }))
+    const scope = { type: "avdelning", unitNumber: 7 } as const
+
+    await createCase({ level: 3, person, scope, title: "Hemlängtan" })
+
+    expect(sent[0]?.body).toMatchObject({ troop: "7", type: "avdelning" })
+  })
+
+  it("files any other case under its person's unit, and empty for somebody without one", async () => {
+    const sent = networkAnswers(Response.json(caseRow({ troop: "", type: "cmt" }), { status: 201 }))
+    const nobody = { memberNo: "41", name: "Pernilla Palm" }
+
+    await createCase({ level: 3, person: nobody, scope: { type: "cmt" }, title: "Pass" })
+
+    expect(sent[0]?.body).toMatchObject({ about_person_id: 41, troop: "", type: "cmt" })
   })
 
   it("fails when the service's answer is not a case", async () => {
     networkAnswers(Response.json({ id: 7 }, { status: 201 }))
 
-    await expect(createCase({ person, title: "Feber" })).rejects.toThrow(
+    await expect(createCase({ level: 3, person, scope: health, title: "Feber" })).rejects.toThrow(
       "/api/project/cases answered with something that is not readable",
     )
   })
 })
 
 describe("writing on a case", () => {
-  it("posts the note under its title, as secret as its case", async () => {
+  it("posts the note under its title, leaving its level to its case", async () => {
     const sent = networkAnswers(Response.json(noteRow, { status: 201 }))
 
     const note = await addNote("7", "38,5 på morgonen.", "Feber")
@@ -115,8 +131,17 @@ describe("writing on a case", () => {
     expect(sent[0]).toEqual({
       url: "/api/project/cases/7/notes",
       method: "POST",
-      body: { note: "38,5 på morgonen.", secrecy_level: 5, title: "Feber" },
+      body: { note: "38,5 på morgonen.", title: "Feber" },
     })
+  })
+
+  it("sends a level only when one above the case's is asked for", async () => {
+    const sent = networkAnswers(Response.json({ ...noteRow, secrecy_level: 5 }, { status: 201 }))
+
+    const note = await addNote("7", "Ringde hem.", "Feber", 5)
+
+    expect(note.secrecyLevel).toBe(5)
+    expect(sent[0]?.body).toEqual({ note: "Ringde hem.", secrecy_level: 5, title: "Feber" })
   })
 
   it("fails with the refusal when the case is closed", async () => {
@@ -153,5 +178,35 @@ describe("closing and reopening a case", () => {
     await reopenCase("7/../1")
 
     expect(sent[0]?.url).toBe("/api/project/cases/7%2F..%2F1/reopen")
+  })
+})
+
+describe("renaming a case", () => {
+  it("puts the new title and returns the case under it", async () => {
+    const sent = networkAnswers(Response.json(caseRow({ title: "Hög feber" })))
+
+    const renamed = await renameCase("7", "Hög feber")
+
+    expect(renamed.title).toBe("Hög feber")
+    expect(sent).toEqual([
+      { url: "/api/project/cases/7/title", method: "PUT", body: { title: "Hög feber" } },
+    ])
+  })
+})
+
+describe("sharing a case", () => {
+  it("puts the whole list, as numbers, and returns the case shared with them", async () => {
+    const sent = networkAnswers(Response.json(caseRow({ extra_access: [1_200_201, 1_200_401] })))
+
+    const shared = await shareCase("7", ["1200201", "1200401"])
+
+    expect(shared.extraAccess).toEqual(["1200201", "1200401"])
+    expect(sent).toEqual([
+      {
+        url: "/api/project/cases/7/extra_access",
+        method: "PUT",
+        body: { extra_access: [1_200_201, 1_200_401] },
+      },
+    ])
   })
 })

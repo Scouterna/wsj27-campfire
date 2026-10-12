@@ -10,7 +10,7 @@ Every word a user reads is Swedish and comes from the web application ([ADR 011]
 
 The session gate stands in front of every screen. It asks the auth service who is signed in, hands the query cache to that person before any screen mounts, and then shows either the sign-in screen or the application. It keeps listening: a session that ends mid-use returns to the sign-in screen in place, and a session that changes hands reloads the page ([ADR 033](/decisions/033-recover-an-ended-session-at-the-query-client-and-the-gate)). [Presentation layer](./layers/presentation) describes the gate, and [Data layer](./layers/data) the cache behind it.
 
-Behind the gate, the application offers each person the sections their roles grant: home for everyone, the list of participants for leaders and the contingent management team, and the cases for the health team. An address outside a person's sections answers exactly like one that matches nothing, so the application never shows what exists for other roles. The roles only decide what is offered – the back-end still decides what may be read.
+Behind the gate, the application offers each person the sections their roles grant: home for everyone, and the list of participants and the cases for leaders and the contingent management team. An address outside a person's sections answers exactly like one that matches nothing, so the application never shows what exists for other roles. The roles only decide what is offered – the back-end still decides what may be read.
 
 Below the gate, the application branches once on its tier, which `libraries/host` reads from the User-Agent before the first render:
 

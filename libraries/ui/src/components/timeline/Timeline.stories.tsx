@@ -21,7 +21,7 @@ export const Default: Story = {
       <TimelineEntry at={new Date(2027, 7, 5, 8, 15)} isEvent title="Ärendet avslutades">
         Helena Hägg avslutade ärendet.
       </TimelineEntry>
-      <TimelineEntry at={new Date(2027, 7, 1, 16, 40)} title="Helena Hägg (du)">
+      <TimelineEntry at={new Date(2027, 7, 1, 16, 40)} audience="Bara du" title="Helena Hägg (du)">
         Tova är pigg igen efter två timmar i skuggan och en liter vätskeersättning.
       </TimelineEntry>
       <TimelineEntry at={new Date(2027, 7, 1, 12, 30)} title="Henrik Holm">

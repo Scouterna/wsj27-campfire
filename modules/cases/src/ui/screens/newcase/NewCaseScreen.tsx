@@ -1,46 +1,108 @@
 import {
   Button,
+  ChoiceGroup,
   expectPop,
   PageTitle,
   setNavDirection,
-  useUnitIdentities,
+  type ChoiceGroupOption,
 } from "@scouterna/wsj27-campfire-ui"
-import { useQuery } from "@tanstack/react-query"
 import { useCanGoBack, useNavigate, useRouter } from "@tanstack/react-router"
-import { useCallback, useId, useState, type ReactElement } from "react"
+import { useId, useMemo, useState, type ReactElement } from "react"
 
-import { fetchPeopleQuery } from "../../../data/fetch-people"
-import { placingLine, type Person } from "../../../model/Person"
-import { PersonMark } from "../../components/personmark/PersonMark"
+import { canBeAbout, scopeName, type CaseScope } from "../../../model/CaseType"
+import type { Person } from "../../../model/Person"
+import {
+  defaultSecrecyLevel,
+  isSecrecyLevel,
+  levelChoice,
+  levelsFor,
+  type SecrecyLevel,
+} from "../../../model/SecrecyLevel"
+import { PersonPicker } from "../../components/personpicker/PersonPicker"
+import { usePeople } from "../../use-people"
+import { useCaseScopes, type CaseScopesView } from "./use-case-scopes"
 import { useCreateCase } from "./use-create-case"
-import { usePeopleSearch, type PeopleSearchView } from "./use-people-search"
 
 import "./NewCaseScreen.css"
 
 /**
- * The line in the search's corner, whatever the search is doing, or nothing before
- * anything is typed or while the contingent could not be read, which the box says in a
- * line of its own.
- * @param search What the search found.
- * @param query What the reader typed.
- * @returns The words to announce.
+ * A scope as a choice group carries it – the type, and a unit's number after a colon.
+ * @param scope The scope.
+ * @returns The key, unique among the scopes a reader is offered.
  */
-function countOf(search: PeopleSearchView, query: string): string {
-  if (search.isPending) {
-    return "Hämtar …"
-  }
-  if (search.error !== null || query.trim() === "") {
-    return ""
-  }
-  if (search.total > search.matches.length) {
-    return `${String(search.matches.length)} av ${String(search.total)}`
-  }
-  return search.total === 1 ? "1 träff" : `${String(search.total)} träffar`
+function scopeKey(scope: CaseScope): string {
+  return scope.unitNumber === undefined ? scope.type : `${scope.type}:${String(scope.unitNumber)}`
 }
 
-interface PersonPickerProps {
+interface ScopeQuestionProps {
   /**
-   * The id of the text that names the picker, which labels the search field.
+   * The id the question's eyebrow carries, which names the choices.
+   */
+  readonly labelId: string
+  /**
+   * Fires with the chosen scope's key.
+   */
+  readonly onChange: (key: string) => void
+  /**
+   * The scopes on offer, and the states they are in.
+   */
+  readonly offered: CaseScopesView
+  /**
+   * The chosen scope, undefined while none is.
+   */
+  readonly scope: CaseScope | undefined
+}
+
+/**
+ * What kind of case it is: the kinds side by side to choose from – each named alone, since
+ * the levels under them say whose role each reaches – or nothing at all where there is
+ * only one, because there is nothing to ask and the levels already name its group. While
+ * the kinds are on their way or could not be read, the line the question says instead.
+ * @param props The scopes, the one chosen, and what choosing does.
+ * @returns The question, or nothing for a single kind.
+ */
+function ScopeQuestion(props: ScopeQuestionProps): ReactElement | null {
+  const { offered } = props
+  const options: readonly ChoiceGroupOption<string>[] = offered.scopes.map((candidate) => ({
+    label: scopeName(candidate),
+    value: scopeKey(candidate),
+  }))
+  if (offered.scopes.length === 1) {
+    return null
+  }
+
+  return (
+    <div className="newcase-group">
+      <p className="newcase-label" id={props.labelId}>
+        Typ av ärende
+      </p>
+      {offered.isPending && (
+        <p className="newcase-status" role="status">
+          Hämtar …
+        </p>
+      )}
+      {offered.error !== null && (
+        <p className="newcase-status" role="alert">
+          Det gick inte att se vilka ärenden du kan skapa.
+          <Button label="Försök igen" onPress={offered.refetch} variant="plain" />
+        </p>
+      )}
+      {options.length > 1 && (
+        <ChoiceGroup
+          labelledBy={props.labelId}
+          layout="row"
+          onChange={props.onChange}
+          options={options}
+          value={props.scope === undefined ? undefined : scopeKey(props.scope)}
+        />
+      )}
+    </div>
+  )
+}
+
+interface PersonQuestionProps {
+  /**
+   * The id the question's eyebrow carries, which names the search.
    */
   readonly labelId: string
   /**
@@ -50,119 +112,159 @@ interface PersonPickerProps {
   /**
    * The person chosen, once there is one.
    */
-  readonly picked: Person | undefined
+  readonly person: Person | undefined
+  /**
+   * The case's scope, which decides who it can be about. Undefined while none is chosen,
+   * when anyone within reach may be.
+   */
+  readonly scope: CaseScope | undefined
 }
 
 /**
- * Who the case is about: the chosen person with a way to change them, or a search over
- * the whole contingent with the matches as rows to choose from.
- * @param props The chosen person, and what choosing does.
- * @returns The picker.
+ * Who the case is about: a person within the reader's reach, and for a unit's case one of
+ * the unit's deltagare.
+ * @param props The person chosen, what choosing does, and the scope to keep to.
+ * @returns The question.
  */
-function PersonPicker(props: PersonPickerProps): ReactElement {
-  const [query, setQuery] = useState("")
-  const [isChanging, setIsChanging] = useState(false)
-  const search = usePeopleSearch(query)
-  const identities = useUnitIdentities()
-  const { onPick, picked } = props
-
-  // Choosing replaces the focused row with the chosen person, and Byt replaces itself
-  // with the search, so focus follows to what took its place rather than falling to the
-  // page. Stable, so a render while typing never moves focus again.
-  const focusOnMount = useCallback((node: HTMLElement | null) => {
-    node?.focus()
-  }, [])
-  const focusSearchOnMount = useCallback(
-    (node: HTMLInputElement | null) => {
-      if (isChanging) {
-        node?.focus()
-      }
-    },
-    [isChanging],
+function PersonQuestion(props: PersonQuestionProps): ReactElement {
+  const { scope } = props
+  const unitNumber = scope?.unitNumber
+  const isOffered = useMemo(
+    () =>
+      scope === undefined
+        ? undefined
+        : (candidate: Person): boolean => canBeAbout(scope, candidate),
+    [scope],
   )
 
-  if (picked !== undefined) {
-    const placing = placingLine(picked, identities.name)
-    return (
-      <div className="newcase-picked">
-        <PersonMark name={picked.name} person={picked} />
-        <span className="newcase-person">
-          <strong>{picked.name}</strong>
-          {placing !== undefined && <small>{placing}</small>}
-        </span>
-        <button
-          aria-label={`Byt från ${picked.name}`}
-          className="newcase-change"
-          onClick={() => {
-            setIsChanging(true)
-            onPick(undefined)
-          }}
-          ref={focusOnMount}
-          type="button"
-        >
-          Byt
-        </button>
-      </div>
-    )
-  }
-
-  const count = countOf(search, query)
   return (
-    <div className="newcase-results">
-      <div className="newcase-search">
-        <input
-          aria-labelledby={props.labelId}
-          autoComplete="off"
-          className="newcase-search-field"
-          onChange={(event) => {
-            setQuery(event.target.value)
-          }}
-          placeholder="Sök namn"
-          enterKeyHint="search"
-          ref={focusSearchOnMount}
-          type="text"
-          value={query}
+    <div aria-labelledby={props.labelId} className="newcase-group" role="group">
+      <p className="newcase-label" id={props.labelId}>
+        Vem gäller det?
+      </p>
+      <PersonPicker
+        isOffered={isOffered}
+        labelId={props.labelId}
+        nobodyText={
+          unitNumber === undefined
+            ? undefined
+            : `Ingen deltagare i avdelning ${String(unitNumber)} heter så.`
+        }
+        onPick={props.onPick}
+        picked={props.person}
+      />
+    </div>
+  )
+}
+
+interface LevelQuestionProps {
+  /**
+   * The id the question's eyebrow carries, which names the choices.
+   */
+  readonly labelId: string
+  /**
+   * The level chosen.
+   */
+  readonly level: SecrecyLevel
+  /**
+   * Fires with the chosen level.
+   */
+  readonly onChange: (level: SecrecyLevel) => void
+  /**
+   * The case's scope, which names who each level reaches.
+   */
+  readonly scope: CaseScope
+}
+
+/**
+ * Who sees the case: each level said in the scope's own words.
+ * @param props The scope, the level chosen, and what choosing does.
+ * @returns The question.
+ */
+function LevelQuestion(props: LevelQuestionProps): ReactElement {
+  const options: readonly ChoiceGroupOption<string>[] = levelsFor(props.scope).map((candidate) => {
+    const choice = levelChoice(candidate, props.scope)
+    return { description: choice.description, label: choice.title, value: String(candidate) }
+  })
+
+  return (
+    <div className="newcase-group">
+      <p className="newcase-label" id={props.labelId}>
+        Vem ser ärendet?
+      </p>
+      <ChoiceGroup
+        labelledBy={props.labelId}
+        onChange={(value) => {
+          const next = Number(value)
+          if (isSecrecyLevel(next)) {
+            props.onChange(next)
+          }
+        }}
+        options={options}
+        value={String(props.level)}
+      />
+    </div>
+  )
+}
+
+interface AccessQuestionsProps {
+  /**
+   * What the questions' ids start with, unique on the page.
+   */
+  readonly idPrefix: string
+  /**
+   * The level chosen.
+   */
+  readonly level: SecrecyLevel
+  /**
+   * The scopes on offer, and the states they are in.
+   */
+  readonly offered: CaseScopesView
+  /**
+   * Fires with the chosen level.
+   */
+  readonly onLevel: (level: SecrecyLevel) => void
+  /**
+   * Fires with the chosen scope's key.
+   */
+  readonly onScope: (key: string) => void
+  /**
+   * The chosen scope, undefined while none is.
+   */
+  readonly scope: CaseScope | undefined
+}
+
+/**
+ * What kind of case it is and who sees it, set apart by space with the one fact that
+ * holds for both – neither changes once the case exists. Who sees it is asked once the
+ * kind is known, because its choices are said in the kind's own words.
+ * @param props The scopes, the level, and what choosing each does.
+ * @returns The questions.
+ */
+function AccessQuestions(props: AccessQuestionsProps): ReactElement {
+  return (
+    <div className="newcase-access">
+      <ScopeQuestion
+        labelId={`${props.idPrefix}-kind`}
+        offered={props.offered}
+        onChange={props.onScope}
+        scope={props.scope}
+      />
+
+      {props.scope !== undefined && (
+        <LevelQuestion
+          labelId={`${props.idPrefix}-level`}
+          level={props.level}
+          onChange={props.onLevel}
+          scope={props.scope}
         />
-        <small className="newcase-count" role="status">
-          {count}
-        </small>
-      </div>
-
-      {search.error !== null && (
-        <p className="newcase-failed" role="alert">
-          Kontingenten kunde inte hämtas.
-          <Button label="Försök igen" onPress={search.refetch} variant="plain" />
-        </p>
       )}
 
-      {query.trim() !== "" && !search.isPending && search.error === null && search.total === 0 && (
-        <p className="newcase-none">Ingen heter så.</p>
-      )}
-
-      {search.matches.length > 0 && (
-        <ul className="newcase-options">
-          {search.matches.map((person) => {
-            const placing = placingLine(person, identities.name)
-            return (
-              <li key={person.memberNo}>
-                <button
-                  className="newcase-option"
-                  onClick={() => {
-                    onPick(person)
-                  }}
-                  type="button"
-                >
-                  <PersonMark name={person.name} person={person} />
-                  <span className="newcase-person">
-                    <strong>{person.name}</strong>
-                    {placing !== undefined && <small>{placing}</small>}
-                  </span>
-                </button>
-              </li>
-            )
-          })}
-        </ul>
-      )}
+      <p className="newcase-fixed">
+        {props.offered.scopes.length === 1
+          ? "Vem som ser ärendet går inte att ändra när ärendet är skapat."
+          : "Typen och vem som ser ärendet går inte att ändra när ärendet är skapat."}
+      </p>
     </div>
   )
 }
@@ -176,9 +278,12 @@ export interface NewCaseScreenProps {
 }
 
 /**
- * The form for a new case, on one card: who it is about and its title – nothing more, so
- * a case is opened the moment it is needed. The reader lands on it in place of the form,
- * so back leads to the list rather than to a form already sent.
+ * The form for a new case, on one card: who it is about and its title, then – together,
+ * because they decide one thing – what kind of case it is and who sees it. The kind is
+ * asked outright rather than defaulted where there is a choice, because neither can be
+ * changed once the case exists, and a case filed with the wrong people cannot be taken
+ * back from them. The reader lands on the case in place of the form, so back leads to the
+ * list rather than to a form already sent.
  * @param props The person to have chosen already, if any.
  * @returns The screen.
  */
@@ -187,22 +292,41 @@ export function NewCaseScreen(props: NewCaseScreenProps): ReactElement {
   const router = useRouter()
   const canGoBack = useCanGoBack()
   const { create, hasFailed, isPending } = useCreateCase()
-  const { data: people } = useQuery(fetchPeopleQuery())
+  const { data: people } = usePeople()
+  const offered = useCaseScopes()
+  const [chosenScope, setChosenScope] = useState<string | undefined>(undefined)
+  const [level, setLevel] = useState<SecrecyLevel>(defaultSecrecyLevel)
   const [picked, setPicked] = useState<Person | undefined>(undefined)
   // The person the address names stays chosen until the reader changes them, and
   // arrives with the names rather than being copied into state before they have.
   const [isPresetDropped, setIsPresetDropped] = useState(false)
+  const [title, setTitle] = useState("")
+  const id = useId()
+
+  // A single scope is the only answer there is, so it is chosen; with more, the reader
+  // chooses.
+  const onlyScope = offered.scopes.length === 1 ? offered.scopes[0] : undefined
+  const scope = onlyScope ?? offered.scopes.find((candidate) => scopeKey(candidate) === chosenScope)
+
   const preset =
     props.memberNo === undefined || isPresetDropped ? undefined : people?.get(props.memberNo)
-  const person = picked ?? preset
+  const chosen = picked ?? preset
+  // Someone the scope does not offer – a leader, or someone outside the unit, for a unit's
+  // case – is set aside rather than kept, whether they came with the address or were
+  // chosen before the scope changed.
+  const isNotOffered = chosen !== undefined && scope !== undefined && !canBeAbout(scope, chosen)
+  const person = isNotOffered ? undefined : chosen
   const setPerson = (next: Person | undefined): void => {
     setIsPresetDropped(true)
     setPicked(next)
   }
-  const [title, setTitle] = useState("")
-  const id = useId()
 
-  const isComplete = person !== undefined && title.trim() !== ""
+  // A level chosen for one scope and not offered for the one chosen since falls back to
+  // the default, so no case is ever sent at a level the reader was not shown.
+  const offeredLevel =
+    scope === undefined || levelsFor(scope).includes(level) ? level : defaultSecrecyLevel
+
+  const isComplete = scope !== undefined && person !== undefined && title.trim() !== ""
 
   // Canceling is going back, not onward, so it returns to wherever the form was opened
   // from – the list, a person, or a case – and leaves no form behind in the history. A
@@ -219,10 +343,10 @@ export function NewCaseScreen(props: NewCaseScreenProps): ReactElement {
   }
 
   const submit = (): void => {
-    if (person === undefined) {
+    if (scope === undefined || person === undefined) {
       return
     }
-    create({ person, title: title.trim() }, (created) => {
+    create({ level: offeredLevel, person, scope, title: title.trim() }, (created) => {
       void navigate({ params: { caseId: created.id }, replace: true, to: "/cases/$caseId" })
     })
   }
@@ -232,12 +356,7 @@ export function NewCaseScreen(props: NewCaseScreenProps): ReactElement {
       <PageTitle title="Nytt ärende" />
 
       <section aria-label="Nytt ärende" className="card newcase-form">
-        <div aria-labelledby={`${id}-who`} className="newcase-group" role="group">
-          <p className="newcase-label" id={`${id}-who`}>
-            Vem gäller det?
-          </p>
-          <PersonPicker labelId={`${id}-who`} onPick={setPerson} picked={person} />
-        </div>
+        <PersonQuestion labelId={`${id}-who`} onPick={setPerson} person={person} scope={scope} />
 
         <div className="newcase-group">
           <label className="newcase-label" htmlFor={`${id}-title`}>
@@ -255,6 +374,15 @@ export function NewCaseScreen(props: NewCaseScreenProps): ReactElement {
           />
         </div>
 
+        <AccessQuestions
+          idPrefix={id}
+          level={offeredLevel}
+          offered={offered}
+          onLevel={setLevel}
+          onScope={setChosenScope}
+          scope={scope}
+        />
+
         {hasFailed && (
           <p className="newcase-failure" role="alert">
             Ärendet kunde inte skapas. Försök igen.
@@ -262,9 +390,7 @@ export function NewCaseScreen(props: NewCaseScreenProps): ReactElement {
         )}
 
         <div className="newcase-actions">
-          <button className="newcase-cancel" onClick={cancel} type="button">
-            Avbryt
-          </button>
+          <Button label="Avbryt" onPress={cancel} variant="plain" />
           <Button disabled={!isComplete || isPending} label="Skapa ärende" onPress={submit} />
         </div>
       </section>

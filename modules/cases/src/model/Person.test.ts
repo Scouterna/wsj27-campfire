@@ -40,7 +40,7 @@ describe("writing the line under a name", () => {
     expect(placingLine(leader, () => "Ankan")).toBe("Ledare · Avdelning 1 · Ankan")
   })
 
-  it("leaves out a unit name the identities do not know", () => {
+  it("leaves out the name of a unit the contingent has not named", () => {
     const otherUnits = new Map([[2, "Myran"]])
     expect(placingLine(leader, (unit) => otherUnits.get(unit))).toBe("Ledare · Avdelning 1")
   })

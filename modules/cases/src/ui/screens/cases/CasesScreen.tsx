@@ -49,9 +49,9 @@ function isMatch(item: Case, people: People | undefined, needle: string): boolea
 }
 
 /**
- * The section root: the health team's cases, narrowed to the reader's own, the open
- * ones, or the closed ones, and searched over names and titles – the open cases on one
- * card and the closed ones on another, each newest first.
+ * The section root: the cases the reader's roles reach, narrowed to the reader's own,
+ * the open ones, or the closed ones, and searched over names and titles – the open cases
+ * on one card and the closed ones on another, each newest first.
  * @returns The screen.
  */
 export function CasesScreen(): ReactElement {

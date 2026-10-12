@@ -23,8 +23,9 @@ type Story = StoryObj<typeof CaseScreen>
 const seeded = { api: { cases: caseRows, notes: noteRows, people: peopleRows } }
 
 /**
- * An open case: who it is about, the field for a new note, the action that closes it,
- * and its history newest first.
+ * An open case: who it is about, what kind of case it is and who sees it, the field for a
+ * new note, the action that closes it, and its history newest first. "Byt rubrik" in the
+ * menu opens the title for a new one.
  */
 export const Open: Story = {
   parameters: seeded,
@@ -36,6 +37,22 @@ export const Open: Story = {
  */
 export const Closed: Story = {
   args: { caseId: "1" },
+  parameters: seeded,
+}
+
+/**
+ * A management case only the management sees, which can never be shared.
+ */
+export const NeverShared: Story = {
+  args: { caseId: "5" },
+  parameters: seeded,
+}
+
+/**
+ * A health case private to the member of the health team who opened it.
+ */
+export const Private: Story = {
+  args: { caseId: "4" },
   parameters: seeded,
 }
 

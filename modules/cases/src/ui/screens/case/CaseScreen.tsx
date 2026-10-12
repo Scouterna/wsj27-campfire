@@ -4,18 +4,23 @@ import {
   PageActions,
   PageTitle,
   ParticipantsIcon,
+  PencilIcon,
   PersonIcon,
   Timeline,
   TimelineEntry,
   type OverflowMenuItem,
 } from "@scouterna/wsj27-campfire-ui"
-import { useUser } from "@scouterna/wsj27-campfire-utils"
-import { useId, useState, type ReactElement } from "react"
+import { useRoles, useUser } from "@scouterna/wsj27-campfire-utils"
+import { useCallback, useId, useState, type ReactElement } from "react"
 
-import { aboutName, type Case } from "../../../model/Case"
+import { aboutName, scopeOf, type Case } from "../../../model/Case"
 import type { Note } from "../../../model/Note"
-import { nameOf, type People } from "../../../model/Person"
+import { nameOf, type People, type Person } from "../../../model/Person"
+import { noteAudience, noteLevels } from "../../../model/SecrecyLevel"
+import { canShare, isRoleHolder } from "../../case-roles"
 import { SubjectCard } from "../../components/subjectcard/SubjectCard"
+import { AccessCard } from "./AccessCard"
+import { Composer } from "./Composer"
 import { useCase } from "./use-case"
 import { useCaseActions } from "./use-case-actions"
 
@@ -38,6 +43,10 @@ const pendingTitle = "Ärende"
  * One entry of the case's history – a note, or a moment something happened to the case.
  */
 interface HistoryEntry {
+  /**
+   * Who alone a note is for, when it is more secret than its case.
+   */
+  readonly audience?: string
   /**
    * When it happened, which orders the history.
    */
@@ -94,6 +103,11 @@ function historyOf(
     // A note under its case's own title says nothing by repeating it, so only a note
     // under a title of its own leads with one.
     ...(note.title !== "" && note.title !== item.title && { noteTitle: note.title }),
+    // Only a note more secret than its case is marked, since the case already says who
+    // sees everything else on it.
+    ...(note.secrecyLevel > item.secrecyLevel && {
+      audience: noteAudience(note.secrecyLevel, item.secrecyLevel, scopeOf(item)),
+    }),
     title: who(note.authorMemberNo),
   }))
   entries.push({
@@ -117,53 +131,80 @@ function historyOf(
   return entries.toSorted((left, right) => right.at.getTime() - left.at.getTime())
 }
 
-interface ComposerProps {
+interface TitleEditorProps {
   /**
-   * Whether a write is under way, which holds the button still.
+   * Whether a write is under way, which holds the buttons still.
    */
   readonly isBusy: boolean
   /**
-   * Writes the note, then calls `onAdded` so the field can be emptied.
+   * Puts the editor away without saving.
    */
-  readonly onAdd: (text: string, onAdded: () => void) => void
+  readonly onCancel: () => void
+  /**
+   * Saves the new title, then calls `onSaved` so the editor can be put away.
+   */
+  readonly onSave: (title: string, onSaved: () => void) => void
+  /**
+   * The title as it stands, which the field starts from.
+   */
+  readonly title: string
 }
 
 /**
- * The field a new note is written in, and the button that adds it to the case.
- * @param props What adding does, and whether it is under way.
+ * The case's title opened for a new one, on a card of its own over the case. Saved with
+ * Enter or the button, and only once it says something different.
+ * @param props The title, and what saving and canceling do.
  * @returns The card.
  */
-function Composer(props: ComposerProps): ReactElement {
-  const [draft, setDraft] = useState("")
+function TitleEditor(props: TitleEditorProps): ReactElement {
+  const [draft, setDraft] = useState(props.title)
   const id = useId()
+  const next = draft.trim()
+  const canSave = next !== "" && next !== props.title && !props.isBusy
+
+  // The editor opens from the menu, which hands focus back to its trigger as it closes,
+  // so the field takes it on the next frame rather than as it mounts.
+  const focusOnOpen = useCallback((node: HTMLInputElement | null) => {
+    if (node !== null) {
+      requestAnimationFrame(() => {
+        node.select()
+      })
+    }
+  }, [])
+
+  const save = (): void => {
+    if (canSave) {
+      props.onSave(next, props.onCancel)
+    }
+  }
 
   return (
-    <section aria-labelledby={id} className="card case-compose">
-      <label className="case-compose-label" htmlFor={`${id}-field`} id={id}>
-        Ny anteckning
+    <form
+      aria-labelledby={id}
+      className="card case-rename"
+      onSubmit={(event) => {
+        event.preventDefault()
+        save()
+      }}
+    >
+      <label className="case-rename-label" htmlFor={`${id}-field`} id={id}>
+        Rubrik
       </label>
-      <textarea
-        className="case-compose-field"
+      <input
+        autoComplete="off"
+        className="case-rename-field"
         id={`${id}-field`}
         onChange={(event) => {
           setDraft(event.target.value)
         }}
-        placeholder="Skriv en anteckning…"
-        rows={2}
+        ref={focusOnOpen}
         value={draft}
       />
-      <div className="case-compose-actions">
-        <Button
-          disabled={draft.trim() === "" || props.isBusy}
-          label="Lägg till anteckning"
-          onPress={() => {
-            props.onAdd(draft.trim(), () => {
-              setDraft("")
-            })
-          }}
-        />
+      <div className="case-rename-actions">
+        <Button label="Avbryt" onPress={props.onCancel} variant="plain" />
+        <Button disabled={!canSave} label="Spara" onPress={save} />
       </div>
-    </section>
+    </form>
   )
 }
 
@@ -191,21 +232,70 @@ interface CaseBodyProps {
 }
 
 /**
- * The case once it has arrived: who it is about, the field for a new note while it is
- * open, and its history. Closing – asked about first – and reopening sit beside the
- * page's menu, because they are done now and then rather than every visit.
- * @param props The case, its notes, and the names to show them with.
- * @returns The screen's content.
+ * The case's history down its timeline, newest first, under the line saying where its
+ * notes are while they are on their way or could not be read.
+ * @param props The case, its notes and their state, the names, and the reader.
+ * @returns The history.
  */
-function CaseBody(props: CaseBodyProps): ReactElement {
-  const { item, people } = props
-  const user = useUser()
-  const actions = useCaseActions(item.id)
-  const [isConfirming, setIsConfirming] = useState(false)
-  const about = item.aboutMemberNo === undefined ? undefined : people?.get(item.aboutMemberNo)
-  const name = aboutName(item, people)
+function CaseHistory(
+  props: CaseBodyProps & { readonly readerMemberNo: string | undefined },
+): ReactElement {
+  let notesStatus: string | undefined
+  if (props.notesPending) {
+    notesStatus = "Hämtar anteckningarna …"
+  } else if (props.notesError !== null) {
+    notesStatus = "Anteckningarna kunde inte hämtas."
+  }
 
+  return (
+    <>
+      {notesStatus !== undefined && (
+        <p className="case-notes-status" role="status">
+          {notesStatus}
+        </p>
+      )}
+
+      <Timeline label="Anteckningar">
+        {historyOf(props.item, props.notes, props.people, props.readerMemberNo).map((entry) => (
+          <TimelineEntry
+            at={entry.at}
+            audience={entry.audience}
+            isEvent={entry.isEvent}
+            key={entry.key}
+            title={entry.title}
+          >
+            {entry.noteTitle !== undefined && <strong>{entry.noteTitle}</strong>}
+            {entry.body}
+          </TimelineEntry>
+        ))}
+      </Timeline>
+    </>
+  )
+}
+
+/**
+ * The case's menu: renaming while it is open, and the way to the person it is about and
+ * to their unit. Sharing is not here, because the card that says who sees the case offers
+ * it where the reader is already looking.
+ * @param item The case.
+ * @param about The person it is about, undefined while the names are loading.
+ * @param onRename Opens the title for a new one.
+ * @returns The entries, empty when there are none.
+ */
+function menuFor(
+  item: Case,
+  about: Person | undefined,
+  onRename: () => void,
+): readonly OverflowMenuItem[] {
   const menu: OverflowMenuItem[] = []
+  // A closed case cannot be changed until it is reopened, so only an open one offers it.
+  if (!item.isClosed) {
+    menu.push({
+      icon: <PencilIcon size={20} />,
+      label: "Byt rubrik",
+      onSelect: onRename,
+    })
+  }
   if (item.aboutMemberNo !== undefined) {
     menu.push({
       icon: <PersonIcon size={20} />,
@@ -217,16 +307,34 @@ function CaseBody(props: CaseBodyProps): ReactElement {
     menu.push({
       icon: <ParticipantsIcon size={20} />,
       label: "Visa avdelningen",
-      link: { params: { unit: about.troop }, to: "/participants/units/$unit" },
+      link: { params: { group: about.troop }, to: "/participants/groups/$group" },
     })
   }
+  return menu
+}
 
-  let notesStatus: string | undefined
-  if (props.notesPending) {
-    notesStatus = "Hämtar anteckningarna …"
-  } else if (props.notesError !== null) {
-    notesStatus = "Anteckningarna kunde inte hämtas."
-  }
+/**
+ * The case once it has arrived: who it is about, what kind of case it is and who sees it,
+ * the field for a new note while it is open, and its history. Closing – asked about
+ * first – and reopening sit beside the page's menu, because they are done now and then
+ * rather than every visit.
+ * @param props The case, its notes, and the names to show them with.
+ * @returns The screen's content.
+ */
+function CaseBody(props: CaseBodyProps): ReactElement {
+  const { item, people } = props
+  const user = useUser()
+  const actions = useCaseActions(item.id)
+  const [isConfirming, setIsConfirming] = useState(false)
+  const [isRenaming, setIsRenaming] = useState(false)
+  const roles = useRoles()
+  const isSharable = canShare(item, roles, user?.memberNo)
+  const about = item.aboutMemberNo === undefined ? undefined : people?.get(item.aboutMemberNo)
+  const name = aboutName(item, people)
+
+  const menu = menuFor(item, about, () => {
+    setIsRenaming(true)
+  })
 
   return (
     <>
@@ -246,14 +354,41 @@ function CaseBody(props: CaseBodyProps): ReactElement {
         }
       />
 
+      {isRenaming && !item.isClosed && (
+        <TitleEditor
+          isBusy={actions.isBusy}
+          onCancel={() => {
+            setIsRenaming(false)
+          }}
+          onSave={actions.rename}
+          title={item.title}
+        />
+      )}
+
       <SubjectCard about={about} name={name} />
+
+      <AccessCard
+        canShare={isSharable}
+        isBusy={actions.isBusy}
+        item={item}
+        onShare={actions.share}
+        people={people}
+        readerMemberNo={user?.memberNo}
+      />
 
       {!item.isClosed && (
         <Composer
+          caseLevel={item.secrecyLevel}
           isBusy={actions.isBusy}
-          onAdd={(text, onAdded) => {
-            actions.addNote(text, item.title, onAdded)
+          levels={noteLevels(
+            item.secrecyLevel,
+            scopeOf(item),
+            isRoleHolder(item, roles, user?.memberNo),
+          )}
+          onAdd={(text, level, onAdded) => {
+            actions.addNote(text, item.title, level, onAdded)
           }}
+          scope={scopeOf(item)}
         />
       )}
 
@@ -277,20 +412,7 @@ function CaseBody(props: CaseBodyProps): ReactElement {
         </p>
       )}
 
-      {notesStatus !== undefined && (
-        <p className="case-notes-status" role="status">
-          {notesStatus}
-        </p>
-      )}
-
-      <Timeline label="Anteckningar">
-        {historyOf(item, props.notes, people, user?.memberNo).map((entry) => (
-          <TimelineEntry at={entry.at} isEvent={entry.isEvent} key={entry.key} title={entry.title}>
-            {entry.noteTitle !== undefined && <strong>{entry.noteTitle}</strong>}
-            {entry.body}
-          </TimelineEntry>
-        ))}
-      </Timeline>
+      <CaseHistory {...props} readerMemberNo={user?.memberNo} />
     </>
   )
 }

@@ -1,7 +1,9 @@
 import { Card, formatRowMoment, Row, VirtualList } from "@scouterna/wsj27-campfire-ui"
+import { useUser } from "@scouterna/wsj27-campfire-utils"
 import type { ReactElement } from "react"
 
-import { aboutName, type Case } from "../../../model/Case"
+import { aboutName, scopeOf, type Case } from "../../../model/Case"
+import { scopeName } from "../../../model/CaseType"
 import { nameOf, unitTag, type People } from "../../../model/Person"
 import { PersonMark } from "../personmark/PersonMark"
 
@@ -30,7 +32,10 @@ interface CaseRowProps {
 
 /**
  * One case in a list – a doorway into it: the case's title, then who it is about and their
- * unit where the page does not already say, who opened it, and when at the row's end.
+ * unit where the page does not already say, what kind of case it is and who opened it, and
+ * when at the row's end. A private case is marked beside its title, as a funktionsansvarig
+ * is beside their name, because it is the one level a reader opening it would not
+ * otherwise expect.
  * @param props The case, and the names to show it with.
  * @returns The row.
  */
@@ -39,6 +44,13 @@ function CaseRow(props: CaseRowProps): ReactElement {
   const about = item.aboutMemberNo === undefined ? undefined : people?.get(item.aboutMemberNo)
   const name = aboutName(item, people)
   const unit = unitTag(about)
+  const reader = useUser()
+  // Only its creator and those it is shared with see a private case, so to its creator it
+  // is theirs alone, and to anyone else it is someone else's.
+  let mark: string | undefined
+  if (item.secrecyLevel === 5) {
+    mark = item.creatorMemberNo === reader?.memberNo ? "Bara du" : "Privat"
+  }
 
   return (
     <Row
@@ -51,11 +63,16 @@ function CaseRow(props: CaseRowProps): ReactElement {
         </time>
       }
     >
-      <strong>{item.title}</strong>
+      <strong>
+        {item.title}
+        {mark !== undefined && <span className="case-row-mark">{mark}</span>}
+      </strong>
       {props.isAboutShown ? (
         <span className="case-row-about">{unit === undefined ? name : `${name} · ${unit}`}</span>
       ) : null}
-      <small>Skapat av {nameOf(people, item.creatorMemberNo)}</small>
+      <small>
+        {scopeName(scopeOf(item))} · Skapat av {nameOf(people, item.creatorMemberNo)}
+      </small>
     </Row>
   )
 }

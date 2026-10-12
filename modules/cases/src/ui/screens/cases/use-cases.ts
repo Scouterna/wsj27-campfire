@@ -2,9 +2,9 @@ import { useQuery } from "@tanstack/react-query"
 import { useCallback, useMemo } from "react"
 
 import { fetchCasesQuery } from "../../../data/fetch-cases"
-import { fetchPeopleQuery } from "../../../data/fetch-people"
 import type { Case } from "../../../model/Case"
 import type { People } from "../../../model/Person"
+import { usePeople } from "../../use-people"
 
 /**
  * What the list of cases needs to draw itself: every case, the names to show them with,
@@ -37,13 +37,13 @@ export interface CasesView {
 }
 
 /**
- * The cases the health team keeps, open and closed, with the contingent's names beside
- * them.
+ * The cases the reader's roles reach, open and closed, with the names in their reach
+ * beside them.
  * @returns The cases, the names, and the states around them.
  */
 export function useCases(): CasesView {
   const { data, error, isPending, refetch } = useQuery(fetchCasesQuery(true))
-  const { data: people } = useQuery(fetchPeopleQuery())
+  const { data: people } = usePeople()
 
   const cases = useMemo(
     () =>

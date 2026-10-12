@@ -1,4 +1,4 @@
-import { caseAuthor, seededAt, cases as seededCases } from "../../seed/cases.ts"
+import { seededAt, cases as seededCases } from "../../seed/cases.ts"
 
 /**
  * One row of the cases service's `cases` table. Times are milliseconds since the epoch, and
@@ -17,7 +17,7 @@ export interface CaseRecord {
   latestNoteAt: number | undefined
   readonly secrecyLevel: number
   tags: readonly string[]
-  readonly title: string
+  title: string
   readonly troop: string
   readonly type: string
 }
@@ -29,7 +29,6 @@ export interface NoteRecord {
   readonly caseId: number
   readonly createdAt: number
   readonly creatorId: bigint
-  extraAccess: readonly bigint[]
   readonly id: number
   readonly note: string
   readonly secrecyLevel: number
@@ -112,35 +111,32 @@ function seededTime(minute: number): number {
 }
 
 /**
- * Makes a store holding the seeded cases, inserted in the order they were written.
+ * Makes a store holding the seeded cases, inserted in the order they were written, each with
+ * its notes written by its creator at its own level.
  * @returns The store.
  */
 export function seededStore(): CaseStore {
   const store = new CaseStore()
-  const author = BigInt(caseAuthor)
   for (const seeded of seededCases) {
+    const creatorId = BigInt(seeded.creatorMemberNo)
     const record = store.addCase({
       aboutPersonId: BigInt(seeded.aboutMemberNo),
       assignedToId: undefined,
       createdAt: seededTime(seeded.minute),
-      creatorId: author,
+      creatorId,
       extraAccess: [],
-      secrecyLevel: 5,
+      secrecyLevel: seeded.secrecyLevel,
       tags: [],
       title: seeded.title,
       troop: seeded.troop,
-      type: "hälsa",
+      type: seeded.type,
     })
     for (const { minute, note, title } of seeded.notes) {
-      const written = {
-        createdAt: seededTime(minute),
-        creatorId: author,
-        extraAccess: [],
-      }
       store.addNote(record, {
-        ...written,
+        createdAt: seededTime(minute),
+        creatorId,
         note,
-        secrecyLevel: 5,
+        secrecyLevel: seeded.secrecyLevel,
         tags: [],
         title,
       })
@@ -148,7 +144,7 @@ export function seededStore(): CaseStore {
     if (seeded.closedMinute !== undefined) {
       record.closed = true
       record.closedAt = seededTime(seeded.closedMinute)
-      record.closedById = author
+      record.closedById = creatorId
     }
   }
   return store
@@ -203,7 +199,6 @@ export function noteJson(note: NoteRecord): Record<string, unknown> {
     secrecy_level: note.secrecyLevel,
     title: note.title,
     note: note.note,
-    extra_access: note.extraAccess,
     tags: note.tags,
   }
 }

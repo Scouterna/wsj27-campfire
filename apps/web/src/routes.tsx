@@ -64,7 +64,6 @@ import {
   type Widgets,
 } from "@scouterna/wsj27-campfire-ui"
 import {
-  hasAllRoles,
   hasAnyRole,
   leaderUnit,
   RolesProvider,
@@ -152,9 +151,8 @@ interface AppSection {
 }
 
 /**
- * The sections, in menu order: home for everyone, the participants and material sections
- * for a leader and for any management function, and the cases section for the health
- * team – for nobody else.
+ * The sections, in menu order: home for everyone, and the participants, material, and cases
+ * sections for a leader and for any management function – for nobody else.
  */
 const sections: readonly AppSection[] = [
   { icon: <HomeIcon />, id: "home", isGranted: () => true, label: () => "Hem", path: "/" },
@@ -181,9 +179,9 @@ const sections: readonly AppSection[] = [
   {
     icon: <ChatIcon />,
     id: "cases",
-    // Both, because a personal health grant also reads as health, and a leader holding
-    // one may not read the contingent the section names people from.
-    isGranted: (roles) => hasAllRoles(roles, "cmt", "health"),
+    // Mirrors the cases service, which opens to whoever holds a case type: every
+    // management member, and a leader of a numbered unit. A bare leader role gives none.
+    isGranted: (roles) => hasAnyRole(roles, "cmt") || leaderUnit(roles) !== undefined,
     label: () => casesSectionLabel,
     path: "/cases",
   },
@@ -274,8 +272,8 @@ type PersonMenuProps = {
 
 /**
  * What other sections offer on a person's own screen, each only where the section itself
- * is granted – the cases about them, and a new one, for the health team. Composed here,
- * because the person screen and the cases belong to different modules.
+ * is granted – the cases about them, and a new one. Composed here, because the person
+ * screen and the cases belong to different modules.
  * @param props The roles, and the subtree that shows the entries.
  * @returns The subtree, with the entries in scope.
  */
@@ -388,7 +386,7 @@ function viewerFor(user: User): Viewer {
   return {
     memberNo: user.memberNo,
     readsEveryone: hasAnyRole(user.roles, "cmt"),
-    readsHealth: hasAnyRole(user.roles, "health"),
+    readsHealth: hasAnyRole(user.roles, "health", "healthGrant"),
     ...(unitNumber !== undefined && { unitNumber }),
   }
 }

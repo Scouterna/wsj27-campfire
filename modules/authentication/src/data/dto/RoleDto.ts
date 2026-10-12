@@ -113,7 +113,7 @@ export function toRoles(spelling: string): readonly Role[] {
     segments.length === 3 &&
     segments[2] === healthAccessLevel
   ) {
-    return [{ kind: "health" }]
+    return [{ kind: "healthGrant" }]
   }
 
   return []

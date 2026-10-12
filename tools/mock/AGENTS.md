@@ -39,15 +39,15 @@ tools/mock/
 
 **Copy the services' code, not a description of it**, from the branch `config/environments/dev/compose.yaml` builds each service from. Every route answers as the service's source does – the status, the body byte for byte, the headers, and the cookies – including what FastAPI and Starlette answer on its behalf: pydantic's 422 bodies, JSON 404s and 405s, the no-cache headers, and cookies quoted the way Python quotes them. The files follow the services' modules, so a change in a service is a change in the file beside its name:
 
-| Mock                                                                       | The service's code                                                                        |
-| -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `src/auth/browser.ts`, `machine.ts`, `cookies.ts`, `tokens.ts`, `roles.ts` | `wsj27-auth-api`: `routes.py`, `cookies.py` and `constants.py`, `tokens.py`, `roles.py`   |
-| `src/project/authentication.ts`, `participants.ts`, `role-map.ts`          | `wsj27-project-api`: `authenctication.py`, `participants.py`, and the route in `roles.py` |
-| `src/project/roles.ts`, `participants-list.ts`                             | `wsj27-project-api`: the minting in `roles.py`, and `scoutnet_forms.py`                   |
-| `src/project/cases.ts`, `case-store.ts`                                    | `wsj27-project-api`: `case.py`                                                            |
-| `src/settings.ts`                                                          | The auth service's environment in `config/environments/dev/compose.yaml`                  |
-| `seed/participants/forms.ts`                                               | `wsj27-project-api`: `src/app/forms_template.json`, copied whole                          |
-| `static/refresh.js`                                                        | `wsj27-auth-api`: `static/refresh.js`, copied verbatim                                    |
+| Mock                                                                              | The service's code                                                                        |
+| --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `src/auth/browser.ts`, `machine.ts`, `cookies.ts`, `tokens.ts`, `roles.ts`        | `wsj27-auth-api`: `routes.py`, `cookies.py` and `constants.py`, `tokens.py`, `roles.py`   |
+| `src/project/authentication.ts`, `participants.ts`, `role-map.ts`                 | `wsj27-project-api`: `authenctication.py`, `participants.py`, and the route in `roles.py` |
+| `src/project/roles.ts`, `participants-list.ts`                                    | `wsj27-project-api`: the minting in `roles.py`, and `scoutnet_forms.py`                   |
+| `src/project/cases.ts`, `case-access.ts`, `case-dependencies.ts`, `case-store.ts` | `wsj27-project-api`: `case.py`                                                            |
+| `src/settings.ts`                                                                 | The auth service's environment in `config/environments/dev/compose.yaml`                  |
+| `seed/participants/forms.ts`                                                      | `wsj27-project-api`: `src/app/forms_template.json`, copied whole                          |
+| `static/refresh.js`                                                               | `wsj27-auth-api`: `static/refresh.js`, copied verbatim                                    |
 
 - **`/api/auth`** serves every route the auth service serves. The access token is a real RS256 JWT in the service's claim shape, signed with a key made at start and published at `certs`, with the service's cookie lifetimes.
 - **The settings are the dev environment's**, not the service's defaults: the public URL on `localhost:8000`, redirects only there, no `Secure` flag, and no service-account secrets, so `token` refuses every client.
@@ -55,7 +55,7 @@ tools/mock/
 - **`/api/project`** serves the service's participant routes, and `scoutnet/refresh` answers `null`. It serves the cases service too, with its cases in memory where the service has its database. Every route verifies the auth service's token from its cookie or a bearer header, with the service's leeway and no issuer or audience check.
 - **`/__mock__/scoutid`** is the one part that is not a copy, because ScoutID is not ours. It is shaped like the Keycloak realm it replaces – its own idle and maximum session, a short-lived code checked against its PKCE challenge, refresh tokens that die with the session, and an end-session endpoint. Its sign-in page is the persona picker.
 
-**Scope every answer exactly as the service does.** An avdelningsledare reads their own troop at any level and nothing else. Kontingentledning reads everyone at `basic`, and at `full` only with a health grant – 403, never a quietly downgraded 200. No access answers 404, indistinguishable from a record that does not exist, so membership never leaks through the difference. A leader's own contact details and health answers go only to kontingentledning with a health grant. `troopinfo` authorizes before it looks a troop up; `individual` looks first, because the person's troop decides the answer.
+**Scope every answer exactly as the service does.** An avdelningsledare reads their own troop at any level and nothing else. Kontingentledning reads everyone at `basic`, and at `full` only with a health grant – 403, never a quietly downgraded 200. No access answers 404, indistinguishable from a record that does not exist, so membership never leaks through the difference. A leader's own contact details and health answers go only to kontingentledning with a health grant. `troopinfo` authorizes before it looks a troop up; `individual` looks first, because the person's troop decides the answer. A case reaches the roles its type names – `hälsa` the health function, `cmt` all of kontingentledning, `avdelning` its own troop's leaders – and the members on its `extra_access`, as its secrecy level allows. A caller whose roles give no case type is refused all of `/cases` with 403, and a case they do not reach answers 404.
 
 **Roles are minted, never written down.** A persona carries no roles. The project API mints them from each row of the list of participants – `wsj27:al:<unit>`, `wsj27:cmt:<function>:<role>` from the CMT roster, and `wsj27:legacy-access:<level>` from the form's access question – and the auth service puts them in the token. A check is a segment-wise prefix match, so `wsj27:cmt:admin:fa` satisfies `wsj27:cmt` while `wsj27:cmtx` satisfies nothing. A new role starts in the real service, never here.
 
@@ -70,7 +70,7 @@ tools/mock/
 - `seed/units.ts` seeds two units, because a leader's boundary needs a unit on each side. Their real names and glyphs come from the web application's own unit identities, not from the mock.
 - `seed/participants/participants.ts` is the list before the service decodes it, every answer keyed by its question. The ledare and kontingentledning rows carry the personas' identities, so a signed-in persona holds the roles their row mints. The holes – a missing mobile number, a missing scout group, a missing home town, a home town abroad – are deliberate.
 - `seed/participants/cmt-roles.csv` is the CMT roster in the columns the service's own tooling writes, so the service's slug rules run on it.
-- `seed/cases.ts` is the health persona's cases about deltagare in both units – two open, one closed. They are dated from a fixed moment, so a case written while the mock runs sorts above them.
+- `seed/cases.ts` holds a case of each type at secrecy level 3, each written by a persona who holds its role: the health persona's three about deltagare in both units – two open, one closed – the head of contingent's one, and a unit 1 leader's one. They are dated from a fixed moment, so a case written while the mock runs sorts above them.
 - `src/project/participants-list.ts` walks the form template rather than the answers, so an answer the template does not carry never reaches the wire.
 - `max-lines` is off for `seed/**`, because a row carries a whole registration form.
 

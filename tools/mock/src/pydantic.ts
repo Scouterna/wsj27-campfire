@@ -247,6 +247,23 @@ export function toText(input: PyValue, loc: Loc, errors: FieldError[]): string {
 }
 
 /**
+ * Validates a `str` declared with `Field(min_length=1)`. The length is checked only once the
+ * value is text.
+ * @param input The value sent.
+ * @param loc Where it was sent.
+ * @param errors Where a refusal goes.
+ * @returns The text.
+ */
+export function toNonEmptyText(input: PyValue, loc: Loc, errors: FieldError[]): string {
+  const text = toText(input, loc, errors)
+  if (input === "") {
+    const message = "String should have at least 1 character"
+    errors.push(fieldError("string_too_short", loc, message, input, { min_length: 1 }))
+  }
+  return text
+}
+
+/**
  * Makes the validator of a `list` of one type, each item refused at its own index.
  * @param item The validator for each item.
  * @returns The list's validator.

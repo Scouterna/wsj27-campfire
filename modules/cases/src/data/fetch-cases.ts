@@ -10,7 +10,8 @@ import { toCases } from "./dto/CaseDto"
 type CasesQueryKey = readonly ["cases", "list", boolean]
 
 /**
- * Query options for the cases the health team keeps, newest first.
+ * Query options for the cases the caller's roles reach, newest first. The service leaves
+ * out every case the caller does not reach, so the list is already theirs.
  *
  * The cache holds the payload as it arrived and `select` converts it on the way out,
  * because the cache is persisted as JSON, and a `Date` written that way comes back a
