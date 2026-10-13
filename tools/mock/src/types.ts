@@ -147,6 +147,11 @@ export interface Participant {
   /**
    * Their mobile number in Scoutnet. Absent is null on the wire.
    */
+  /**
+   * The patrol Campfire has stored for them, which the service keeps with its other stored
+   * values on the Scoutnet record. Absent for anybody not yet placed in one.
+   */
+  readonly patrol?: string
   readonly phone?: string
   readonly role: ParticipantRole
   /**

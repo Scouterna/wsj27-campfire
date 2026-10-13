@@ -43,6 +43,7 @@ describe("the decoded list of participants", () => {
       "troop",
       "contact_info",
       "forms_data",
+      "scout_db",
     ])
     expect(lars).toMatchObject({
       name: "Lars Lindberg",

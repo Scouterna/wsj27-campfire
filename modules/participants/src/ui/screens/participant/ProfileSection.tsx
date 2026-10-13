@@ -151,6 +151,16 @@ export function ProfileSection(props: ProfileSectionProps): ReactElement {
             <p>
               <span>{where.label}:</span> <strong>{where.value}</strong>
             </p>
+            {participant.unitNumber !== undefined && (
+              <p>
+                <span>Patrull:</span>{" "}
+                {participant.patrol === undefined ? (
+                  <em>Ingen än</em>
+                ) : (
+                  <strong>{participant.patrol}</strong>
+                )}
+              </p>
+            )}
           </div>
         </div>
 

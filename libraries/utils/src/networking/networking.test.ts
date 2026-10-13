@@ -22,6 +22,18 @@ describe("asking a service for JSON", () => {
     expect(body.total).toBe(3)
   })
 
+  it("hands a write's method and body to the network", async () => {
+    const sent = vi.fn<typeof globalThis.fetch>(() => Promise.resolve(Response.json({})))
+    vi.stubGlobal("fetch", sent)
+
+    await fetch("/api/project/participants/1/patrol", { body: "{}", method: "POST" })
+
+    expect(sent).toHaveBeenCalledWith("/api/project/participants/1/patrol", {
+      body: "{}",
+      method: "POST",
+    })
+  })
+
   it("names the address when the request never reached a server", async () => {
     // No network, a refused connection, or a DNS failure, which is not a server saying no.
     networkAnswers(() => Promise.reject(new TypeError("Load failed")))

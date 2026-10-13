@@ -13,10 +13,13 @@ import type { Participant } from "../../src/types.ts"
  * Scoutnet holds Beata Sjögren's father's address as her own, and the address that is
  * hers is the alternative one, which is why a list writes to both. Julia Berggren has a kår
  * but no home town, and Ulrik Månsson's home town is abroad, where the unit's map cannot
- * place it. Edvin Malm registered as Annat, and Scoutnet knows none for Otto
- * Lind. Every answer is keyed by the form template's question key and carries the label
- * Scoutnet would export – "Ja", "Nej", the diet option texts, "1"–"5" severities, and a list
- * where the question takes several options.
+ * place it. Edvin Malm registered as Annat, as did Hedda Wik and Wilma Falk in unit 2 – one
+ * in a patrol and one not – and Scoutnet knows none for Otto Lind. Unit 2 is half divided
+ * into patrols – two of them named and filled, each with a leader, and the rest of its
+ * scouts in none – and unit 1 is not divided at all. Every answer is keyed by the form
+ * template's question key and carries the label Scoutnet would export – "Ja", "Nej", the
+ * diet option texts, "1"–"5" severities, and a list where the question takes several
+ * options.
  *
  * - The ledare and kontingentledning rows carry the sign-in personas' identities, so a
  *   signed-in persona exists in the list of participants and their roles are minted from
@@ -487,6 +490,7 @@ export const participants: readonly Participant[] = [
     role: "deltagare",
     unitNumber: 2,
     memberNo: "1300140",
+    patrol: "Falkarna",
     birthDate: "2011-01-11",
     sex: "Kvinna",
     memberGroup: "Stubbhults scoutkår",
@@ -496,6 +500,9 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Direktresa",
+      hasFoodAllergy: "Ja",
+      foodAllergyNuts: "5",
+      foodAllergyDetails: "Jordnötter och trädnötter ger anafylaxi – bär EpiPen.",
       email: "molly.sundqvist@example.se",
       mobilePhone: "070-848 76 45",
       alternateEmail: "molly.sundqvist@example.org",
@@ -506,7 +513,6 @@ export const participants: readonly Participant[] = [
       nextOfKin2Name: "Björn Sundqvist",
       nextOfKin2Relation: "Förälder",
       specialDiet: "Ingen specialkost",
-      hasFoodAllergy: "Nej",
       childhoodVaccinationsComplete: "Ja",
       usesPrescriptionMedication: "Nej",
       hasMedicalCondition: "Nej",
@@ -530,6 +536,7 @@ export const participants: readonly Participant[] = [
     role: "deltagare",
     unitNumber: 2,
     memberNo: "1300252",
+    patrol: "Uttrarna",
     birthDate: "2009-08-10",
     sex: "Kvinna",
     memberGroup: "Stubbhults scoutkår",
@@ -574,6 +581,7 @@ export const participants: readonly Participant[] = [
     role: "deltagare",
     unitNumber: 2,
     memberNo: "1300497",
+    patrol: "Falkarna",
     birthDate: "2011-09-17",
     sex: "Man",
     memberGroup: "Stubbhults scoutkår",
@@ -1059,6 +1067,7 @@ export const participants: readonly Participant[] = [
     role: "deltagare",
     unitNumber: 2,
     memberNo: "1300500",
+    patrol: "Uttrarna",
     birthDate: "2012-12-09",
     sex: "Man",
     memberGroup: "Mockåsens scoutkår",
@@ -1083,6 +1092,7 @@ export const participants: readonly Participant[] = [
     role: "deltagare",
     unitNumber: 2,
     memberNo: "1300501",
+    patrol: "Falkarna",
     birthDate: "2012-07-06",
     sex: "Kvinna",
     memberGroup: "Stubbhults scoutkår",
@@ -1117,6 +1127,9 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Egen resa",
+      usesPrescriptionMedication: "Ja",
+      medicationDetails: "Astmamedicin, Bricanyl vid behov.",
+      managesOwnMedication: "Ja",
       email: "cornelia.holm@example.se",
       mobilePhone: "070-635 63 16",
       nextOfKin1Name: "Mats Holm",
@@ -1131,6 +1144,7 @@ export const participants: readonly Participant[] = [
     role: "deltagare",
     unitNumber: 2,
     memberNo: "1300503",
+    patrol: "Falkarna",
     birthDate: "2012-03-20",
     sex: "Man",
     memberGroup: "Mockåsens scoutkår",
@@ -1139,6 +1153,7 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Rundresa",
+      specialDiet: "Vegetarian",
     },
   },
   {
@@ -1148,6 +1163,7 @@ export const participants: readonly Participant[] = [
     role: "deltagare",
     unitNumber: 2,
     memberNo: "1300504",
+    patrol: "Uttrarna",
     birthDate: "2011-12-27",
     sex: "Kvinna",
     email: "ebba.torn@example.se",
@@ -1155,6 +1171,11 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Direktresa",
+      hasMedicalCondition: "Ja",
+      medicalConditionDetails: "Epilepsi, välkontrollerad med medicin.",
+      usesPrescriptionMedication: "Ja",
+      medicationDetails: "Lamotrigin morgon och kväll.",
+      managesOwnMedication: "Nej",
       email: "ebba.torn@example.se",
       mobilePhone: "070-736 28 22",
       nextOfKin1Name: "Peter Torn",
@@ -1188,6 +1209,7 @@ export const participants: readonly Participant[] = [
     role: "deltagare",
     unitNumber: 2,
     memberNo: "1300506",
+    patrol: "Uttrarna",
     birthDate: "2011-11-01",
     sex: "Man",
     memberGroup: "Mockåsens scoutkår",
@@ -1254,8 +1276,9 @@ export const participants: readonly Participant[] = [
     role: "deltagare",
     unitNumber: 2,
     memberNo: "1300509",
+    patrol: "Falkarna",
     birthDate: "2012-06-25",
-    sex: "Kvinna",
+    sex: "Annat",
     memberGroup: "Stubbhults scoutkår",
     city: "Upplands Väsby",
     email: "hedda.wik@example.se",
@@ -1294,6 +1317,7 @@ export const participants: readonly Participant[] = [
     role: "deltagare",
     unitNumber: 2,
     memberNo: "1300511",
+    patrol: "Falkarna",
     birthDate: "2012-09-04",
     sex: "Man",
     memberGroup: "Seedviks scoutkår",
@@ -1336,6 +1360,7 @@ export const participants: readonly Participant[] = [
     role: "deltagare",
     unitNumber: 2,
     memberNo: "1300513",
+    patrol: "Uttrarna",
     birthDate: "2010-09-14",
     sex: "Man",
     email: "kalle.nyberg@example.se",
@@ -1343,6 +1368,9 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Direktresa",
+      specialDiet: "Halal",
+      hasFoodAllergy: "Ja",
+      foodAllergyLactose: "2",
       email: "kalle.nyberg@example.se",
       mobilePhone: "070-620 68 10",
     },
@@ -1377,6 +1405,7 @@ export const participants: readonly Participant[] = [
     role: "deltagare",
     unitNumber: 2,
     memberNo: "1300515",
+    patrol: "Falkarna",
     birthDate: "2010-06-02",
     sex: "Kvinna",
     memberGroup: "Mockåsens scoutkår",
@@ -1435,6 +1464,7 @@ export const participants: readonly Participant[] = [
     role: "deltagare",
     unitNumber: 2,
     memberNo: "1300518",
+    patrol: "Uttrarna",
     birthDate: "2011-07-26",
     sex: "Kvinna",
     memberGroup: "Stubbhults scoutkår",
@@ -1487,6 +1517,8 @@ export const participants: readonly Participant[] = [
     formId: "deltagare_ist",
     answers: {
       travel: "Egen resa",
+      additionalInfoUnitLeader:
+        "Har svårt att sova i stora tält – vill gärna ligga nära en kompis.",
       email: "petra.hedlund@example.se",
       mobilePhone: "070-513 15 26",
       nextOfKin1Name: "Maria Hedlund",
@@ -1521,6 +1553,7 @@ export const participants: readonly Participant[] = [
     role: "deltagare",
     unitNumber: 2,
     memberNo: "1300522",
+    patrol: "Uttrarna",
     birthDate: "2013-02-02",
     sex: "Man",
     email: "rasmus.ohman@example.se",
@@ -1602,6 +1635,7 @@ export const participants: readonly Participant[] = [
     role: "deltagare",
     unitNumber: 2,
     memberNo: "1300526",
+    patrol: "Uttrarna",
     birthDate: "2010-12-26",
     sex: "Kvinna",
     memberGroup: "Fejkbo scoutkår",
@@ -1626,7 +1660,7 @@ export const participants: readonly Participant[] = [
     unitNumber: 2,
     memberNo: "1300527",
     birthDate: "2010-11-24",
-    sex: "Kvinna",
+    sex: "Annat",
     memberGroup: "Fejkbo scoutkår",
     city: "Upplands Väsby",
     phone: "070-337 49 94",
@@ -1747,6 +1781,7 @@ export const participants: readonly Participant[] = [
     role: "ledare",
     unitNumber: 2,
     memberNo: "1100202",
+    patrol: "Falkarna",
     birthDate: "1984-05-04",
     sex: "Kvinna",
     memberGroup: "Mockåsens scoutkår",
@@ -1767,6 +1802,7 @@ export const participants: readonly Participant[] = [
     role: "ledare",
     unitNumber: 2,
     memberNo: "1100203",
+    patrol: "Uttrarna",
     birthDate: "1995-10-09",
     sex: "Man",
     memberGroup: "Seedviks scoutkår",

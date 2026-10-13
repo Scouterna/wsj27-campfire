@@ -31,6 +31,12 @@ export interface ParticipantRecord {
    * The roles minted for the participant at decode time.
    */
   readonly roles: readonly string[]
+  /**
+   * The values Campfire keeps on the member's Scoutnet record – the patrol among them. The
+   * object is replaced whole when one of them is written, as Scoutnet stores it as one
+   * string, and is the one part of the list that changes while the mock runs.
+   */
+  scout_db: Readonly<Record<string, unknown>>
   readonly sex: string
   readonly troop: string
 }
@@ -109,6 +115,7 @@ export function decodeParticipantsList(
       troop,
       contact_info: contactInfo,
       forms_data: formsData,
+      scout_db: participant.patrol === undefined ? {} : { patrol: participant.patrol },
     })
   }
   return participantsList

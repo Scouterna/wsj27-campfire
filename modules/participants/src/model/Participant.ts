@@ -55,6 +55,11 @@ export interface Participant {
    */
   readonly unitNumber?: number
   /**
+   * The patrol within their unit, by the name the unit's leaders gave it. Absent for
+   * anybody not yet placed in one.
+   */
+  readonly patrol?: string
+  /**
    * The birth date as the service sent it, an ISO date. Absent when the service left
    * it out.
    */

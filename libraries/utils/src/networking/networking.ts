@@ -39,13 +39,15 @@ export class HttpError extends Error {
  *
  * @param url Where to ask. Origin-relative, so the same call works against the mock, the
  * local back-end, and the deployed one.
+ * @param init The method, headers, and body of a request that is not a plain read – a
+ * write, which answers JSON like a read does. Left out for a GET.
  * @returns The body, parsed as JSON and typed as the caller asked.
  */
-export async function fetch<T>(url: string): Promise<T> {
+export async function fetch<T>(url: string, init?: RequestInit): Promise<T> {
   let response: Response
   try {
     // The global, because this function's own name shadows it.
-    response = await globalThis.fetch(url)
+    response = await globalThis.fetch(url, init)
   } catch (error) {
     // No network, a refused connection, or a DNS failure never reached a server, and a
     // caller in a field with no signal must tell that apart from a refusal – one means

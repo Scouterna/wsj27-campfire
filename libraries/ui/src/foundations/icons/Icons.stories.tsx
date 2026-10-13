@@ -9,8 +9,10 @@ import { CopyIcon } from "./set/CopyIcon"
 import { GenderFemaleIcon } from "./set/GenderFemaleIcon"
 import { GenderMaleIcon } from "./set/GenderMaleIcon"
 import { GenderOtherIcon } from "./set/GenderOtherIcon"
+import { HealthIcon } from "./set/HealthIcon"
 import { HomeIcon } from "./set/HomeIcon"
 import { IdCardIcon } from "./set/IdCardIcon"
+import { LeafIcon } from "./set/LeafIcon"
 import { MailIcon } from "./set/MailIcon"
 import { MoreIcon } from "./set/MoreIcon"
 import { ParticipantsIcon } from "./set/ParticipantsIcon"
@@ -31,8 +33,10 @@ const icons: readonly (readonly [string, (props: IconProps) => ReactElement])[] 
   ["Gender female", GenderFemaleIcon],
   ["Gender male", GenderMaleIcon],
   ["Gender other", GenderOtherIcon],
+  ["Health", HealthIcon],
   ["Home", HomeIcon],
   ["Id card", IdCardIcon],
+  ["Leaf", LeafIcon],
   ["Mail", MailIcon],
   ["More", MoreIcon],
   ["Participants", ParticipantsIcon],

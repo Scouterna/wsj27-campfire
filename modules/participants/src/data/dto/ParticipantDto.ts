@@ -32,6 +32,11 @@ export interface ParticipantDto {
    * – and leaves out of a leader's row for a caller who may not read a leader's own.
    */
   readonly contact_info?: unknown
+  /**
+   * The values Campfire itself keeps on the person's Scoutnet record, the patrol among
+   * them – an object the service leaves empty for anybody nothing was stored for.
+   */
+  readonly scout_db?: unknown
 }
 
 // Scoutnet's member types, mapped to the domain's roles. A type invented by a later
@@ -176,6 +181,19 @@ function toText(value: unknown): string | undefined {
 }
 
 /**
+ * The patrol Campfire stored on the record, trimmed. Absent when the stored object holds
+ * none, or holds something that is not a name.
+ * @param stored The record's `scout_db` field, as the service sent it.
+ * @returns The patrol's name, or undefined when there is none.
+ */
+function toPatrol(stored: unknown): string | undefined {
+  if (typeof stored !== "object" || stored === null || !("patrol" in stored)) {
+    return undefined
+  }
+  return toText(stored.patrol)
+}
+
+/**
  * One listing row as the domain knows it, or undefined when the payload is not one.
  * Undefined rather than a throw because a list drops the row it cannot read and shows the
  * rest – one broken record must not empty the list somebody is standing in a field trying
@@ -219,6 +237,7 @@ export function toParticipant(dto: ParticipantDto): Participant | undefined {
   // kår or a town with no name.
   const memberGroup = toText(dto.member_group)
   const homeTown = toText(dto.city)
+  const patrol = toPatrol(dto.scout_db)
 
   const cmtDetail = toCmtDetail(dto.roles)
 
@@ -230,6 +249,7 @@ export function toParticipant(dto: ParticipantDto): Participant | undefined {
     // holding undefined, which is the distinction `exactOptionalPropertyTypes` holds the
     // code to.
     ...(unitNumber !== undefined && { unitNumber }),
+    ...(patrol !== undefined && { patrol }),
     ...(birthDate !== undefined && { birthDate }),
     ...(gender !== undefined && { gender }),
     ...(memberGroup !== undefined && { memberGroup }),

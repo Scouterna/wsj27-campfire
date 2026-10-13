@@ -58,6 +58,33 @@ const unitsAction = {
   link: { to: "/participants/units" },
 } as const
 
+// A leader's way in to dividing their unit, where the management's is the unit browser.
+const patrolsAction = {
+  icon: <ParticipantsIcon size={24} strokeWidth={2.2} />,
+  label: "Patruller",
+  link: { to: "/participants/patrols" },
+} as const
+
+/**
+ * The page's primary action for what the list covers: the unit browser for the whole
+ * contingent, the patrols for a leader's own unit, and nothing for nobody.
+ * @param scope What the list is a list of.
+ * @returns The action, or undefined for none.
+ */
+function actionFor(scope: ListScope): typeof patrolsAction | typeof unitsAction | undefined {
+  switch (scope.kind) {
+    case "all": {
+      return unitsAction
+    }
+    case "unit": {
+      return patrolsAction
+    }
+    case "nobody": {
+      return undefined
+    }
+  }
+}
+
 // The designed empty answers, constant because their words never depend on the render.
 // An empty scope has nothing to narrow, while an empty search has a way forward.
 const nobodyState = (
@@ -169,7 +196,7 @@ export function ParticipantsScreen(): ReactElement {
 
       {/* One declaration for both: the chrome holds a single one, so a second would
           replace the first rather than join it. */}
-      <PageActions action={isWholeContingent ? unitsAction : undefined} menu={addressMenu} />
+      <PageActions action={actionFor(scope)} menu={addressMenu} />
 
       <SearchField
         label="Sök deltagare"

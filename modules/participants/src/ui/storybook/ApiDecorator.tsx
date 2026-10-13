@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactElement } from "react"
 
 import { fetchParticipantQuery } from "../../data/fetch-participant"
 import { fetchParticipantsQuery } from "../../data/fetch-participants"
+import { fetchUnitDetailsQuery } from "../../data/fetch-unit-details"
 import { ViewerProvider, type Viewer } from "../../data/viewer"
 import type { ParticipantDetail } from "../../model/ParticipantDetail"
 import type { ParticipantsList } from "../../model/ParticipantsList"
@@ -32,6 +33,11 @@ export interface ApiParameters {
    */
   readonly state?: "error" | "pending"
   /**
+   * What reading the viewer's own unit in full answers with – the records the patrol
+   * editor weighs care by.
+   */
+  readonly unitDetails?: readonly ParticipantDetail[]
+  /**
    * Who is reading. The widest viewer when unsaid.
    */
   readonly viewer?: Viewer
@@ -52,6 +58,9 @@ function makeClient(api: ApiParameters): QueryClient {
 
   if (api.list !== undefined) {
     client.setQueryData(fetchParticipantsQuery(viewer).queryKey, api.list)
+  }
+  if (api.unitDetails !== undefined) {
+    client.setQueryData(fetchUnitDetailsQuery(viewer).queryKey, api.unitDetails)
   }
   const details = api.details ?? []
   for (const detail of details) {
