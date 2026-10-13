@@ -144,6 +144,9 @@ detekt {
 
 dependencies {
   implementation(platform("androidx.compose:compose-bom:2026.08.00"))
+  // The Material icons the bridge's semantic icon names map to. The core set only, because
+  // the extended one adds tens of megabytes to a debug build for a handful of glyphs.
+  implementation("androidx.compose.material:material-icons-core")
   implementation("androidx.compose.material3:material3")
   implementation("androidx.compose.ui:ui")
   implementation("androidx.compose.ui:ui-graphics")
@@ -151,7 +154,15 @@ dependencies {
   implementation("androidx.activity:activity-compose:1.13.0")
   implementation("androidx.core:core-ktx:1.19.0")
 
+  // WebViewCompat.addWebMessageListener, the only channel into a WebView that carries an
+  // origin restriction. addJavascriptInterface carries none.
+  implementation("androidx.webkit:webkit:1.17.0")
+
   testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
+  // org.json is one of the android.jar stubs on a JVM test's classpath, answering a
+  // default from every method, so the bridge's decoder would decode nothing. The real
+  // implementation is what Android's is derived from.
+  testImplementation("org.json:json:20260814")
   testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
   androidTestImplementation(platform("androidx.compose:compose-bom:2026.08.00"))

@@ -6,4 +6,19 @@
          background color and on Android 11 the window is plain blue. -->
     <item name="android:windowBackground">@color/launch_background</item>
   </style>
+
+  <!-- The same window in another unit's color, chosen by the activity for the next
+       launch once the web has named the signed-in person's theme. -->
+  <style name="Theme.Campfire.Brown">
+    <item name="android:windowBackground">@color/launch_brown</item>
+  </style>
+  <style name="Theme.Campfire.Green">
+    <item name="android:windowBackground">@color/launch_green</item>
+  </style>
+  <style name="Theme.Campfire.Red">
+    <item name="android:windowBackground">@color/launch_red</item>
+  </style>
+  <style name="Theme.Campfire.Yellow">
+    <item name="android:windowBackground">@color/launch_yellow</item>
+  </style>
 </resources>

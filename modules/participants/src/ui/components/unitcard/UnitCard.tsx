@@ -7,6 +7,7 @@ import {
   useUnitIdentities,
   type Theme,
 } from "@scouterna/wsj27-campfire-ui"
+import { useRouterState } from "@tanstack/react-router"
 import {
   lazy,
   Suspense,
@@ -36,6 +37,14 @@ const UnitPlaces = lazy(async () => {
     return { default: (): null => null }
   }
 })
+
+/**
+ * The cards left opened up to the map, by history entry and unit, so a page gone back to
+ * shows its card as it was left, and the scroll position restored with it points at what
+ * the reader last saw. Kept in memory with the rest of the navigation memory, so a
+ * reload starts every card folded.
+ */
+const openCards = new Set<string>()
 
 export interface UnitCardProps {
   /**
@@ -77,7 +86,9 @@ export interface UnitCardProps {
  */
 export function UnitCard(props: UnitCardProps): ReactElement {
   const identities = useUnitIdentities()
-  const [isMapOpen, setIsMapOpen] = useState(false)
+  const entry = useRouterState({ select: (state) => state.location.state.__TSR_key })
+  const cardKey = `${entry ?? ""}:${String(props.unitNumber)}`
+  const [isMapOpen, setIsMapOpen] = useState(() => openCards.has(cardKey))
   const identityRef = useRef<HTMLDivElement>(null)
   const fullScreen = useFullScreen(identityRef)
   // Keyed on the towns themselves rather than on the list, so a payload that changes
@@ -108,16 +119,33 @@ export function UnitCard(props: UnitCardProps): ReactElement {
       <Card {...(props.title !== undefined && { title: props.title })}>
         {/* A popover only so it can be lifted into the top layer to fill the screen,
             without leaving its place in the tree and rebuilding the map. */}
-        <div className="unit-card-identity" popover="manual" ref={identityRef}>
+        {/* Full screen, a modal layer of its own, as a native full-screen map is, with
+            the page behind it made inert. */}
+        <div
+          className="unit-card-identity"
+          popover="manual"
+          ref={identityRef}
+          {...(fullScreen.isFullScreen && {
+            "aria-label": "Karta i helskärm",
+            "aria-modal": true,
+            role: "dialog",
+          })}
+        >
           {hasHomeTowns && (
             <Suspense fallback={null}>
               <UnitPlaces
                 homeTowns={homeTowns}
+                fullScreenToggle={fullScreen.registerToggle}
                 isFullScreen={fullScreen.isFullScreen}
                 isOpen={isMapOpen}
                 onFullScreenToggle={fullScreen.toggle}
                 onToggle={() => {
-                  setIsMapOpen((open) => !open)
+                  if (isMapOpen) {
+                    openCards.delete(cardKey)
+                  } else {
+                    openCards.add(cardKey)
+                  }
+                  setIsMapOpen(!isMapOpen)
                 }}
                 openLabel={props.openLabel}
               />

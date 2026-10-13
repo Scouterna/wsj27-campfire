@@ -1,8 +1,7 @@
 import { PageOutline, usePageJumps } from "@scouterna/wsj27-campfire-ui"
-import { useRouterState } from "@tanstack/react-router"
 import { useEffect, useRef, useState, type ReactElement } from "react"
 
-import { scrollBehavior, scrollToTop } from "./navigation"
+import { scrollBehavior, scrollToTop, useRenderedPathname } from "./navigation"
 
 /**
  * What the outline needs from the chrome around it.
@@ -28,7 +27,7 @@ const sections = "main h2"
  * @returns The outline column.
  */
 export function Outline(props: OutlineProps): ReactElement | null {
-  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const pathname = useRenderedPathname()
   const [headings, setHeadings] = useState<readonly string[]>([])
   const [current, setCurrent] = useState(0)
   const holdUntil = useRef(0)

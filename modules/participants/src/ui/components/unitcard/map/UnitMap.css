@@ -42,6 +42,15 @@
     padding-right: var(--unit-map-safe-right, 0px);
   }
 
+  /* As long as the map's grow and shrink, so the controls move clear of the screen's
+     edges with the edges. */
+  @media (prefers-reduced-motion: no-preference) {
+    .unit-map .maplibregl-ctrl-bottom-left,
+    .unit-map .maplibregl-ctrl-bottom-right {
+      transition: padding 300ms ease;
+    }
+  }
+
   /* The controls and the counts belong to the open map, and fade in and out with it. */
   .unit-map .maplibregl-control-container,
   .unit-map-count {

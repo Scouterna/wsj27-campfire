@@ -65,6 +65,18 @@ export const Profile: StoryObj = {
 }
 
 /**
+ * Profil drawn from the person's row in the list while their record is on its way – the
+ * travel package, which only the record carries, left out rather than shown as unanswered.
+ */
+export const ProfileFromList: StoryObj = {
+  render: (): ReactElement => (
+    <Person>
+      <ProfileSection isSummary participant={complete} />
+    </Person>
+  ),
+}
+
+/**
  * Kontakt: the person's own channels, then the people to reach on their behalf – and the
  * same section for somebody who left nearly all of it blank.
  */

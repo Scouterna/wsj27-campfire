@@ -19,4 +19,6 @@ type Story = StoryObj<typeof meta>
 /**
  * How the screen opens for anyone who is not signed in.
  */
-export const Default: Story = {}
+export const Default: Story = {
+  args: { isHosted: false },
+}

@@ -1,14 +1,14 @@
 import { createHash, randomBytes } from "node:crypto"
 
 import type { Claims } from "../claims.ts"
-import { settings } from "../settings.ts"
+import { origin, settings } from "../settings.ts"
 import type { Persona } from "../types.ts"
 
 /**
  * Where the ScoutID stand-in answers – on the local stack's one origin, beside the auth service's
  * public URL.
  */
-export const scoutIdUrl = "http://localhost:8000/__mock__/scoutid/"
+export const scoutIdUrl = `${origin}/__mock__/scoutid/`
 
 /**
  * The stand-in's own session cookie, as Keycloak keeps one on its own paths.

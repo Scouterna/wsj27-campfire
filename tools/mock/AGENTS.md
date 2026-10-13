@@ -31,6 +31,7 @@ tools/mock/
 ## Running it
 
 - `pnpm start:mock` runs it alone on 8003. Signing in works only through `http://localhost:8000`, because the auth service's public URL and redirect allowlist name that origin.
+- `CAMPFIRE_MOCK_ORIGIN` moves that origin, and `pnpm start:local --lan` sets it to this machine's network address so a phone can sign in. Unset, it is `http://localhost:8000`, the dev environment's.
 - `pnpm start:local` runs it behind Caddy on `:8000`, where [`config/environments/local/Caddyfile`](../../config/environments/local/Caddyfile) proxies the three prefixes to it. Nothing talks to 8003 except Caddy.
 - `scripts/start/local.sh` reports the environment up only once `/__mock__/state` answers both on the port and through Caddy.
 - The dev and prod environments run the real services instead, behind the same paths.

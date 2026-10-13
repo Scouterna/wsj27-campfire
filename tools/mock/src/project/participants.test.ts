@@ -178,7 +178,7 @@ describe("the troop listing", () => {
     ).toBe(true)
     expect(troop.every((row) => row.forms_data === undefined)).toBe(true)
 
-    expect(await listing("/participants/troopinfo/2", "program@wsj.se")).toHaveLength(40)
+    expect(await listing("/participants/troopinfo/2", "program@wsj.se")).toHaveLength(41)
     const leaders = await listing("/participants/troopinfo/al", "program@wsj.se")
     expect(leaders).toHaveLength(6)
     expect(leaders.every((row) => row.contact_info === undefined)).toBe(true)

@@ -16,11 +16,10 @@ cd "$here/../../apps/apple"
 
 environment=$(sh "$here/environment.sh" "${1:-local}")
 
-# The Local origin is localhost, the one host name the sign-in cookies work on, which a
-# real phone cannot reach. CAMPFIRE_DEVICE=1 builds for a phone instead, with this
-# machine's LAN address as the origin – read now rather than committed, because DHCP
-# moves it. It is opt-in, because on a LAN address the app loads but sign-in cannot
-# complete, since ScoutID sends the flow back only to localhost.
+# The Local origin is localhost, which a real phone cannot reach. CAMPFIRE_DEVICE=1
+# builds for a phone instead, with this machine's LAN address as the origin – read now
+# rather than committed, because DHCP moves it. Sign-in completes only against a stack
+# started with `pnpm start:local --lan`, whose mock answers on the same address.
 destination='generic/platform=iOS Simulator'
 origin=""
 if [ "$environment" = "Local" ] && [ -n "${CAMPFIRE_DEVICE:-}" ]; then
@@ -31,7 +30,7 @@ if [ "$environment" = "Local" ] && [ -n "${CAMPFIRE_DEVICE:-}" ]; then
     # paths.
     destination='generic/platform=iOS'
     origin="CAMPFIRE_WEB_ORIGIN=http://${address}:8000"
-    echo "Web origin: http://${address}:8000 – sign-in will not complete on a device."
+    echo "Web origin: http://${address}:8000 – sign in against \`pnpm start:local --lan\`."
   else
     echo "Web origin: the xcconfig's localhost – no address on en0." >&2
   fi

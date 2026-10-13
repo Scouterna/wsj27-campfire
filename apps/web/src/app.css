@@ -31,10 +31,12 @@
     z-index: 1;
   }
 
-  main {
+  .shell main {
     /* Opaque and viewport-tall, so the view transition's snapshot is the whole page
        surface and a push reads as the full page swooshing rather than loose pieces.
-       The bar is its first child, so the page's h1 sits inside the landmark. */
+       The bar is its first child, so the page's h1 sits inside the landmark. A shell's
+       page slides as the root, whose paper is the body's, so it needs neither – and
+       a page made viewport-tall there would scroll by the native bars' height. */
     background: var(--color-paper);
     min-height: 100dvh;
   }
@@ -46,6 +48,43 @@
     flex-direction: column;
     gap: var(--spacing-container);
     padding: 0 var(--spacing-container) 120px;
+  }
+
+  /* --- Shell chrome ---
+     In a shell the bars are native and WebKit insets the page past them, but only along
+     the axis it scrolls, so the sides take the safe area themselves – the notch in
+     landscape. The native tab bar is outside the page, so nothing needs clearing below.
+     The page starts at the scroll view's edge, so the top keeps room for a first block's
+     focus ring, which would otherwise be clipped there. */
+  .shell-page .content {
+    padding: var(--spacing-container) max(var(--spacing-container), env(safe-area-inset-right))
+      var(--spacing-container) max(var(--spacing-container), env(safe-area-inset-left));
+  }
+
+  /* In a shell the page is an app screen rather than a document, so a long press on a row
+     selects no text and calls up no menu, a tap paints no browser highlight over the
+     control's own pressed state, and a rotation never inflates the text. Fields keep
+     selection, because typing needs it. WebKit reads only the prefixed properties, and
+     the dev server adds no prefixes. */
+  :root[data-shell] {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Android floats a page's primary action over the bottom of the page, so a page that
+     declares one scrolls its last rows clear of it – the button's height and its margin
+     above the tab bar. */
+  :root[data-shell="android"] .shell-page[data-action] .content {
+    padding-bottom: calc(var(--spacing-container) + 88px);
+  }
+
+  :root[data-shell] :is(input, textarea) {
+    -webkit-user-select: text;
+    user-select: text;
   }
 
   .tabstrip {
@@ -192,8 +231,9 @@
 
 /* --- View transitions ---
    Direction comes from the data-nav attribute the chrome writes before each navigation:
-   forward slides in like a native push, back slides out like a pop, and fade (siblings,
-   like a tab switch) keeps the browser's default cross-fade.
+   forward slides in like a native push, back slides out like a pop, fade (siblings,
+   like a tab switch) keeps the browser's default cross-fade, and none – a move the
+   platform already animated – is skipped before anything is captured.
 
    Only the page slides. The chrome around it carries its own
    view-transition-name, which snapshots each piece separately, so an unchanged piece sits
@@ -210,7 +250,7 @@
      a capture, which is enough for Safari on a phone to end the page. There the root wears
      the page's name instead, and only from the breakpoint, where the column scrolls
      itself and is one viewport tall, does the column. Only under the browser chrome,
-     because the shells' pages have no column and keep the root's own cross-fade. */
+     because a shell's page slides as the root under its own name – see below. */
   :root:has(.shell) {
     view-transition-name: page;
   }
@@ -258,14 +298,6 @@
   z-index: 2;
 }
 
-/* A pop the platform already animated – the browser's own back, an edge swipe – gets
-   no second animation from us, so the transition still runs, but as a no-op. */
-html[data-nav="none"]::view-transition-group(page),
-html[data-nav="none"]::view-transition-old(page),
-html[data-nav="none"]::view-transition-new(page) {
-  animation: none;
-}
-
 /* The outline cross-fades in place, because otherwise the group would morph its box
    from the old page's outline to the new one's, which reads as a jump rather than a
    change. */
@@ -311,15 +343,16 @@ html[data-nav="back"]::view-transition-new(outline) {
    and on a pop the eyebrow grows back into the title. One name, worn by the title in
    the old state and by the eyebrow in the new. data-vt-new is written between the two
    snapshots, which is what lets one stylesheet name each state's element differently
-   without ever naming both in the same snapshot. */
+   without ever naming both in the same snapshot. data-crumb-off is set where the title
+   is out of view on either page, and the morph is left out. */
 
-html[data-nav="forward"]:not([data-vt-new]),
-html[data-nav="back"][data-vt-new] {
+html[data-nav="forward"]:not([data-vt-new], [data-crumb-off]),
+html[data-nav="back"][data-vt-new]:not([data-crumb-off]) {
   --crumb-title: crumb;
 }
 
-html[data-nav="forward"][data-vt-new],
-html[data-nav="back"]:not([data-vt-new]) {
+html[data-nav="forward"][data-vt-new]:not([data-crumb-off]),
+html[data-nav="back"]:not([data-vt-new], [data-crumb-off]) {
   --crumb-eyebrow: crumb;
 }
 
@@ -363,6 +396,35 @@ html[data-nav="back"]:not([data-vt-new]) {
   }
 
   html[data-nav="back"]::view-transition-new(page) {
+    animation-name: page-return;
+  }
+}
+
+/* A shell's page slides as the root under the root's own name. Renamed, WebKit captures
+   the root from the document's top rather than as the scrolled viewport the reader sees,
+   so a page tapped further down jumps to its top as it leaves, and the row it lights up
+   lands as far from the finger as the page was scrolled. */
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.shell-page)::view-transition-old(root),
+  html:has(.shell-page)::view-transition-new(root) {
+    animation-duration: 300ms;
+    animation-timing-function: cubic-bezier(0.32, 0.72, 0.35, 1);
+  }
+
+  html:has(.shell-page)[data-nav="forward"]::view-transition-old(root) {
+    animation-name: page-recede;
+  }
+
+  html:has(.shell-page)[data-nav="forward"]::view-transition-new(root) {
+    animation-name: page-push-in;
+  }
+
+  html:has(.shell-page)[data-nav="back"]::view-transition-old(root) {
+    animation-name: page-pop-out;
+    z-index: 2;
+  }
+
+  html:has(.shell-page)[data-nav="back"]::view-transition-new(root) {
     animation-name: page-return;
   }
 }

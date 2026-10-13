@@ -174,17 +174,30 @@ const styles = `
           }
 
           /* Dynamic Type's base, as the design system sets it, so every rem below is
-             the number the application's own tokens carry. */
+             the number the application's own tokens carry. The page owns no press
+             highlight or callout, as the application does not. */
           html {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-text-size-adjust: 100%;
+            -webkit-touch-callout: none;
+            background: #f4f2ec;
             font-size: calc(100% * 17 / 16);
           }
+
+          /* Clear of the status bar, the home indicator, and a notch where the page is
+             drawn under them, with the application's container margin beyond them. */
           body {
-            background: #f4f2ec;
             color: #1a1a1a;
             font-family: system-ui, sans-serif;
+            margin: 0;
+            padding: calc(env(safe-area-inset-top, 0px) + 32px)
+              calc(env(safe-area-inset-right, 0px) + 16px)
+              calc(env(safe-area-inset-bottom, 0px) + 48px)
+              calc(env(safe-area-inset-left, 0px) + 16px);
+          }
+          main {
             margin: 0 auto;
             max-width: 560px;
-            padding: 48px 16px calc(48px + env(safe-area-inset-bottom));
           }
           h1 {
             color: var(--ink);
@@ -229,6 +242,8 @@ const styles = `
             padding: 12px 16px;
             text-decoration: none;
             transition: background 120ms ease;
+            -webkit-user-select: none;
+            user-select: none;
           }
           .card > .row:first-of-type {
             border-radius: 18px 18px 0 0;
@@ -237,8 +252,12 @@ const styles = `
           .card > .row:last-of-type {
             border-radius: 0 0 18px 18px;
           }
-          .row:hover {
-            background: color-mix(in srgb, var(--ink) 5%, transparent);
+          /* Only where a pointer hovers, because a touch browser keeps the hover on the
+             row a swipe started on after the scroll has ended. */
+          @media (hover: hover) {
+            .row:hover {
+              background: color-mix(in srgb, var(--ink) 5%, transparent);
+            }
           }
           .row:active {
             background: color-mix(in srgb, var(--ink) 11%, transparent);
@@ -294,7 +313,7 @@ export function pickerPage(
     <html lang="sv">
       <head>
         <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <title>Vem loggar in?</title>
         <script>
           ${raw(themeScript)}
@@ -304,9 +323,11 @@ export function pickerPage(
         </style>
       </head>
       <body>
-        <h1>Vem loggar in?</h1>
-        <p>Mockad inloggning – välj en person i stället för att ange lösenord.</p>
-        ${sections}
+        <main>
+          <h1>Vem loggar in?</h1>
+          <p>Mockad inloggning – välj en person i stället för att ange lösenord.</p>
+          ${sections}
+        </main>
       </body>
     </html>`
 }

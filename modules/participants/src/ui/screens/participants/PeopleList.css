@@ -8,7 +8,10 @@
     position: relative;
   }
 
+  /* A container, so a row can tell when the reader's text size leaves its name too little
+     room beside the facts at its end. */
   .people-row {
+    container-type: inline-size;
     inset-inline: 0;
     position: absolute;
     top: 0;
@@ -59,6 +62,24 @@
 
   .person-row-age {
     font-variant-numeric: tabular-nums;
+  }
+
+  /* At the accessibility text sizes a name word can be wider than what the facts leave
+     it, so the facts and the chevron step down under the text, as a native cell's
+     accessory does, and a word that still does not fit breaks rather than spill. The
+     width is in rem, which follow the reader's text size, so only large text stacks. */
+  @container (width < 15rem) {
+    .person-row {
+      grid-template-columns: 44px minmax(0, 1fr);
+    }
+
+    .person-row > :last-child {
+      grid-column: 2;
+    }
+
+    .person-row strong {
+      overflow-wrap: anywhere;
+    }
   }
 
   /* The funktionsansvarig's mark: a small chip after the name, in the theme's own

@@ -42,7 +42,7 @@ pnpm start:local   # the whole local environment, mock included, on http://local
 pnpm start:mock    # the mock alone, on port 8003, when the mock is what you are changing
 ```
 
-Sign-in works only through `http://localhost:8000`, the address the auth service's settings name, so the mock alone is for working on the mock rather than on the application. The mock ScoutID keeps a session of its own, as the real one does, so signing in again goes straight through without the picker – sign out to switch persona.
+Sign-in works only through `http://localhost:8000`, the address the auth service's settings name, so the mock alone is for working on the mock rather than on the application. `pnpm start:local --lan` moves that address to this machine's network address, so a phone on the same network can sign in, and the Apple shell's Local scheme follows it while the stack runs. The mock ScoutID keeps a session of its own, as the real one does, so signing in again goes straight through without the picker – sign out to switch persona.
 
 ## Its own tests
 

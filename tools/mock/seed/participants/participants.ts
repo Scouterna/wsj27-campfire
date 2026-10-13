@@ -13,10 +13,12 @@ import type { Participant } from "../../src/types.ts"
  * Scoutnet holds Beata Sjögren's father's address as her own, and the address that is
  * hers is the alternative one, which is why a list writes to both. Julia Berggren has a kår
  * but no home town, and Ulrik Månsson's home town is abroad, where the unit's map cannot
- * place it. Edvin Malm registered as Annat, and Scoutnet knows none for Otto
- * Lind. Every answer is keyed by the form template's question key and carries the label
- * Scoutnet would export – "Ja", "Nej", the diet option texts, "1"–"5" severities, and a list
- * where the question takes several options.
+ * place it. Edvin Malm registered as Annat, and Scoutnet knows none for Otto Lind.
+ * Alexandra Westerberg-Johansson's name is wider than a phone's title, so a screen titled
+ * with it shows how a long name is cut or wrapped. Every answer is keyed by the form
+ * template's question key and carries the label Scoutnet would export – "Ja", "Nej", the
+ * diet option texts, "1"–"5" severities, and a list where the question takes several
+ * options.
  *
  * - The ledare and kontingentledning rows carry the sign-in personas' identities, so a
  *   signed-in persona exists in the list of participants and their roles are minted from
@@ -1737,6 +1739,27 @@ export const participants: readonly Participant[] = [
       mobilePhone: "070-384 24 77",
       nextOfKin1Name: "Peter Kask",
       nextOfKin1Phone: "070-746 15 17",
+      nextOfKin1Relation: "Vårdnadshavare",
+    },
+  },
+  {
+    id: "p-060",
+    firstName: "Alexandra",
+    lastName: "Westerberg-Johansson",
+    role: "deltagare",
+    unitNumber: 2,
+    memberNo: "1300533",
+    birthDate: "2012-10-03",
+    sex: "Kvinna",
+    memberGroup: "Fejkbo scoutkår",
+    city: "Sundbyberg",
+    email: "alexandra.westerberg-johansson@example.se",
+    formId: "deltagare_ist",
+    answers: {
+      travel: "Rundresa",
+      email: "alexandra.westerberg-johansson@example.se",
+      nextOfKin1Name: "Kristina Westerberg-Johansson",
+      nextOfKin1Phone: "070-218 40 63",
       nextOfKin1Relation: "Vårdnadshavare",
     },
   },

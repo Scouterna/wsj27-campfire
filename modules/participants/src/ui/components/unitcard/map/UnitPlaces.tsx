@@ -7,6 +7,11 @@ import "./UnitPlaces.css"
 
 export interface UnitPlacesProps {
   /**
+   * Receives the control that grows the card to fill the screen, so the focus can be put
+   * on it as the card grows and shrinks.
+   */
+  readonly fullScreenToggle?: (control: HTMLButtonElement | null) => void
+  /**
    * Each of the unit's people's home town, absent where the service sent none.
    */
   readonly homeTowns: readonly (string | undefined)[]
@@ -56,7 +61,7 @@ export function UnitPlaces(props: UnitPlacesProps): ReactElement | null {
   // The control that leaves full screen is drawn with the map, so a map that goes away
   // while the card fills the screen shrinks the card back itself rather than leaving no
   // way out.
-  const { isFullScreen, onFullScreenToggle } = props
+  const { fullScreenToggle, isFullScreen, onFullScreenToggle } = props
   const hasNothingToShow = spots.length === 0 || hasFailed
   useEffect(() => {
     if (hasNothingToShow && isFullScreen) {
@@ -83,7 +88,12 @@ export function UnitPlaces(props: UnitPlacesProps): ReactElement | null {
           only the way back to the card. */}
       <div className={props.isOpen ? "unit-places-controls" : "unit-places-controls-folded"}>
         {props.isOpen && (
-          <button className="unit-places-control" onClick={props.onFullScreenToggle} type="button">
+          <button
+            className="unit-places-control"
+            onClick={props.onFullScreenToggle}
+            ref={fullScreenToggle}
+            type="button"
+          >
             <span className="unit-places-hint">
               {props.isFullScreen ? "Stäng helskärm" : "Helskärm"}
             </span>

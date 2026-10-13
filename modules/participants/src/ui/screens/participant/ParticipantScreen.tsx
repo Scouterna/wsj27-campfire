@@ -61,7 +61,20 @@ function hasFacts(experience: Experience): boolean {
  * @returns The screen.
  */
 export function ParticipantScreen(props: ParticipantScreenProps): ReactElement {
-  const { error, isPending, participant } = useParticipant(props.memberNo)
+  const { error, isPending, participant, summary } = useParticipant(props.memberNo)
+
+  // Opened from a list, the person's row stands in for the record, so the page slides in
+  // under the person's name and with their profile drawn rather than a waiting line.
+  if (isPending && summary !== undefined) {
+    return (
+      <>
+        <PageTitle title={fullName(summary)} />
+        <div className="person">
+          <ProfileSection isSummary participant={summary} />
+        </div>
+      </>
+    )
+  }
 
   if (isPending) {
     return (

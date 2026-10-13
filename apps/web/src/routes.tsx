@@ -9,7 +9,7 @@ import {
   watchExpiry,
 } from "@scouterna/wsj27-campfire-authentication"
 import { HomeScreen } from "@scouterna/wsj27-campfire-home"
-import { host } from "@scouterna/wsj27-campfire-host"
+import { host, sendToShell } from "@scouterna/wsj27-campfire-host"
 import { journeyWidgets } from "@scouterna/wsj27-campfire-journey"
 import {
   participantsRoutes,
@@ -48,9 +48,11 @@ import {
   usePageActions,
   usePageTitle,
   useRevealLookup,
+  useUnitAvatarPicture,
   WidgetsProvider,
   type Address,
   type AppPath,
+  type NavDirection,
   type PageActionsProps,
   type Routes,
   type ScreenSpec,
@@ -69,20 +71,30 @@ import {
   type User,
 } from "@scouterna/wsj27-campfire-utils"
 import { QueryClientProvider } from "@tanstack/react-query"
-import { createRouter, Link, useRouterState, type RouteComponent } from "@tanstack/react-router"
+import { createRouter, Link, type RouteComponent } from "@tanstack/react-router"
 import { useEffect, useState, type ReactElement, type ReactNode } from "react"
 
 import {
+  afterTransition,
   historyIndex,
   markPush,
+  reassertPoppedScroll,
   rootTrail,
   scrollToTop,
   sectionSwitch,
   titleTrail,
   useNavigationBookkeeping,
+  useRenderedPathname,
 } from "./navigation"
 import { Outline } from "./outline"
 import { adoptCacheOwner, forgetCache, queryClient } from "./query"
+import {
+  historyBack,
+  initialsOf,
+  useShellBridge,
+  type BackControl,
+  type ShellRouter,
+} from "./shell"
 import { loadUnitIdentities } from "./units"
 
 /**
@@ -126,6 +138,10 @@ interface AppSection {
    */
   readonly icon: ReactElement
   /**
+   * The semantic name the icon crosses the bridge as, for a shell's tab bar.
+   */
+  readonly iconName: string
+  /**
    * The id the screens' `tab` fields name.
    */
   readonly id: string
@@ -150,9 +166,17 @@ interface AppSection {
  * leader and for any management function – for nobody else.
  */
 const sections: readonly AppSection[] = [
-  { icon: <HomeIcon />, id: "home", isGranted: () => true, label: () => "Hem", path: "/" },
+  {
+    icon: <HomeIcon />,
+    iconName: "home",
+    id: "home",
+    isGranted: () => true,
+    label: () => "Hem",
+    path: "/",
+  },
   {
     icon: <ParticipantsIcon />,
+    iconName: "participants",
     id: "participants",
     // The reveal gates the section for everyone, so until the moment the contingent's
     // people are offered to nobody and the address answers as not found. A curtain,
@@ -286,6 +310,16 @@ function AppChrome(props: AppChromeProps): ReactElement {
     })
   }, [gate.kind])
 
+  // A shell holds one sign-in webview while nobody is signed in, and drops its tabs the
+  // moment a session ends, so it hears of signing out from whichever page saw it.
+  useEffect(() => {
+    if (gate.kind !== "signed-out") {
+      return
+    }
+    sendToShell({ signedIn: false, type: "session" })
+    sendToShell({ name: storedTheme() ?? "blue", type: "theme" })
+  }, [gate.kind])
+
   // An empty fragment rather than null, because the router's inner wrap must return an
   // element, and the gate renders nothing while it waits.
   if (gate.kind === "asking" || gate.kind === "ending") {
@@ -295,7 +329,7 @@ function AppChrome(props: AppChromeProps): ReactElement {
   if (gate.kind === "signed-out") {
     return (
       <ThemeProvider theme={storedTheme() ?? "blue"}>
-        <SignInScreen />
+        <SignInScreen isHosted={host.tier === "shell"} />
       </ThemeProvider>
     )
   }
@@ -411,21 +445,65 @@ function SignedInChrome(props: SignedInProps): ReactElement {
 }
 
 /**
- * The shell tier's chrome, which draws none, because the shell draws its own. It is the
- * seam the bridge conversation fills (ADR 018), so no screen can grow a native-only path
- * by accident.
+ * The shell tier's chrome, which draws none, because the shell draws its own. It reports
+ * over the bridge what the browser chrome would have drawn – the title, back, the bar's
+ * actions, the sections, and the theme – and does what the shell reports was tapped
+ * (ADR 018), so no screen can grow a native-only path by accident.
  * @param props The signed-in user, and the routed screens.
  * @returns The bare content column.
  */
 function ShellChrome(props: SignedInProps): ReactElement {
+  const user = props.user
+  const isRevealed = useRevealLookup()
+  const pathname = useRenderedPathname()
+  const found = matchScreen(pathname, screens)
+  const isGrantedScreen = found !== undefined && isGranted(found.spec.tab, user.roles, isRevealed)
   const title = usePageTitle() ?? ""
+  // A screen with no parent can still be pushed inside a tab – the profile, from the
+  // avatar on any screen – and a tab is a stack of its own with no section switches, so
+  // such a screen above the tab's first entry pops back to where it was opened from.
+  const back =
+    (isGrantedScreen ? backControlFor(found.spec.parent, user.roles) : undefined) ??
+    historyBack(shellRouter)
 
   useEffect(() => {
     document.title = title === "" ? "Campfire" : `${title} – Campfire`
   }, [title])
 
+  useNavigationBookkeeping(pathname, title)
+
+  // The mark waits for the units reveal, as the browser's profile pill does, and the
+  // initials stand until it is drawn.
+  const avatar = useUnitAvatarPicture(
+    isRevealed(unitsReveal.id) && user.mark !== undefined
+      ? (user.mark.unitNumber ?? cmtAvatarNumber)
+      : undefined,
+  )
+
+  const hasAction = usePageActions()?.action !== undefined
+
+  useShellBridge({
+    back,
+    profile: {
+      ...(avatar !== undefined && { avatar }),
+      initials: initialsOf(user.name),
+      path: "/profile",
+    },
+    router: shellRouter,
+    sections: sections
+      .filter((section) => section.isGranted(user.roles, isRevealed))
+      .map((section) => ({
+        icon: section.iconName,
+        id: section.id,
+        label: section.label(user.roles),
+        path: section.path,
+      })),
+    theme: themeFor(user),
+    title,
+  })
+
   return (
-    <main>
+    <main className="shell-page" data-action={hasAction ? "" : undefined}>
       <div className="content">{props.children}</div>
     </main>
   )
@@ -444,7 +522,7 @@ function ShellChrome(props: SignedInProps): ReactElement {
 function backControlFor(
   parent: AppPath | undefined,
   roles: readonly Role[],
-): { readonly label: string; readonly onBack: () => void } | undefined {
+): BackControl | undefined {
   if (parent === undefined) {
     return undefined
   }
@@ -459,8 +537,8 @@ function backControlFor(
 
   const isCold = index === 0 || index === undefined
 
-  const onBack = (): void => {
-    setNavDirection("back")
+  const go = (direction: NavDirection): void => {
+    setNavDirection(direction)
     if (isCold) {
       // No click for the capture-phase listener to see, so the push is declared here.
       markPush()
@@ -469,6 +547,18 @@ function backControlFor(
     }
     expectPop()
     router.history.back()
+  }
+
+  // A pop the platform animated cannot wait, because its gesture has already shown the
+  // page beneath.
+  const onBack = (direction: NavDirection = "back"): void => {
+    if (direction === "none") {
+      go(direction)
+    } else {
+      void afterTransition(() => {
+        go(direction)
+      })
+    }
   }
 
   // The trail knows what the previous entry called itself. Cold – or where the trail
@@ -511,7 +601,7 @@ function BrowserChrome(props: SignedInProps): ReactElement {
   // Live, so the menus, the marked section, and the pill's unit line all switch the
   // moment a reveal opens – the whole chrome changes as one, with no reload.
   const isRevealed = useRevealLookup()
-  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const pathname = useRenderedPathname()
   const found = matchScreen(pathname, screens)
   const isGrantedScreen = found !== undefined && isGranted(found.spec.tab, user.roles, isRevealed)
 
@@ -673,6 +763,27 @@ export const router = createRouter({
   defaultViewTransition: true,
   defaultNotFoundComponent: NotFoundRoute,
 })
+
+// Subscribed after the router's own scroll reset, which the router installs as it is
+// created, so a popped page's restored position is written back in the same task.
+// eslint-disable-next-line unicorn/no-top-level-side-effects -- the router exists only here, and the subscription lives as long as it
+router.subscribe("onRendered", reassertPoppedScroll)
+
+/**
+ * The router as the shell's taps drive it.
+ */
+const shellRouter: ShellRouter = {
+  go: (delta) => {
+    router.history.go(delta)
+  },
+  navigate: (target) => {
+    void router.navigate(
+      typeof target === "string"
+        ? { href: target }
+        : ({ params: target.params, to: target.to } as never),
+    )
+  },
+}
 
 declare module "@tanstack/react-router" {
   interface Register {

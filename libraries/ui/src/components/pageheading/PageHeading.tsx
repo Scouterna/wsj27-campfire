@@ -39,12 +39,21 @@ export interface PageHeadingProps {
  * @returns The heading, carrying the page's one `h1`.
  */
 export function PageHeading(props: PageHeadingProps): ReactElement {
+  const back = props.back
   return (
     <div className="pageheading">
-      {props.back ? (
-        <button type="button" className="eyebrow" onClick={props.back.onBack}>
+      {back ? (
+        // Called bare rather than handed the click, because a callback with an optional
+        // parameter of its own would take the event for it.
+        <button
+          type="button"
+          className="eyebrow"
+          onClick={() => {
+            back.onBack()
+          }}
+        >
           <BackIcon size={15} strokeWidth={2.3} />
-          {props.back.label}
+          {back.label}
         </button>
       ) : null}
       <div className="pageheading-row">

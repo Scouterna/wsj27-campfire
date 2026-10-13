@@ -1,6 +1,8 @@
 import type { Decorator, Meta, StoryObj } from "@storybook/react-vite"
+import type { ReactElement } from "react"
 
 import { UnitIdentitiesProvider } from "../../foundations/units/UnitIdentities"
+import { useUnitAvatarPicture } from "./unit-avatar-picture"
 import { UnitAvatar } from "./UnitAvatar"
 
 /**
@@ -87,4 +89,23 @@ export const Leader: Story = {
 export const Profile: Story = {
   decorators: [withGlyphs],
   render: () => <UnitAvatar size="profile" unitNumber={30} />,
+}
+
+/**
+ * The mark as a native bar receives it, drawn beside the component it copies – without
+ * a leader's star, which the bar's avatar has no room for.
+ */
+export const Picture: Story = {
+  decorators: [withGlyphs],
+  render: () => <PictureBeside unitNumber={1} />,
+}
+
+function PictureBeside(props: { readonly unitNumber: number }): ReactElement {
+  const picture = useUnitAvatarPicture(props.unitNumber)
+  return (
+    <div className="story-samples">
+      <UnitAvatar unitNumber={props.unitNumber} />
+      {picture === undefined ? null : <img alt="" height={44} src={picture} width={44} />}
+    </div>
+  )
 }

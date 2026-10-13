@@ -26,6 +26,8 @@ apps/android/local.properties
 # Xcode writes per-user state inside the project bundle, and IDEWorkspaceChecks
 # records one machine's answer to a one-time Xcode prompt.
 apps/apple/**/xcuserdata/
+# Written by `pnpm start:local --lan` for as long as it runs.
+apps/apple/config/Lan.xcconfig
 apps/apple/**/xcshareddata/IDEWorkspaceChecks.plist
 
 # sourcekit-lsp reads buildServer.json to resolve Xcode-built modules in editors

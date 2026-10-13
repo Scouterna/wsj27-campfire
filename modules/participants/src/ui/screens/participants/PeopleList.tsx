@@ -1,9 +1,15 @@
 import { Row, UnitAvatar, useUnitIdentities } from "@scouterna/wsj27-campfire-ui"
-import { useVirtualizer, useWindowVirtualizer, type Virtualizer } from "@tanstack/react-virtual"
+import {
+  measureElement,
+  useVirtualizer,
+  useWindowVirtualizer,
+  type Virtualizer,
+} from "@tanstack/react-virtual"
 import {
   memo,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type ReactElement,
@@ -21,6 +27,7 @@ import { roleName } from "../../../model/ParticipantRole"
 import { funktionName } from "../../../model/Participation"
 import { PersonBadge } from "../../components/badge/PersonBadge"
 import { GenderMark } from "../../components/gender/GenderMark"
+import { usePrefetchParticipant } from "../participant/use-participant"
 
 import "./PeopleList.css"
 
@@ -35,6 +42,66 @@ const estimatedRowHeight = 72
  * Rows rendered beyond the viewport on each side, so a flick does not outrun the list.
  */
 const overscan = 8
+
+/**
+ * Every row's height as last measured, by member number, and the last height measured
+ * at all, kept for the session rather than for one list. A history pop remounts the list
+ * under a scroll position the chrome has just restored, and a list that starts again
+ * from the estimate corrects the scroll by the difference as the rows above the viewport
+ * measure, moving the page under the reader after it has landed.
+ */
+const measured = { heights: new Map<string, number>(), typical: estimatedRowHeight }
+
+/**
+ * How tall the rows of a list will be, by what each last measured.
+ * @param people The people the rows are for.
+ * @returns The list's height, in pixels.
+ */
+function estimatedHeight(people: readonly Participant[]): number {
+  let height = 0
+  for (const person of people) {
+    height += measured.heights.get(person.memberNo) ?? measured.typical
+  }
+  return height
+}
+
+/**
+ * The virtualizer's sizing for a list of people: rows keyed by member number, so a
+ * height stays with its person through every narrowing, and sized from what they last
+ * measured, so a list that mounts again starts at the heights it ends at.
+ * @param people The people the rows are for, in the list's order.
+ * @returns The options that key, estimate, and measure the rows.
+ */
+function rowSizing<TScroll extends Element | Window>(
+  people: readonly Participant[],
+): {
+  estimateSize: (index: number) => number
+  getItemKey: (index: number) => string | number
+  measureElement: (
+    element: HTMLDivElement,
+    entry: ResizeObserverEntry | undefined,
+    instance: Virtualizer<TScroll, HTMLDivElement>,
+  ) => number
+} {
+  return {
+    estimateSize: (index) => {
+      // eslint-disable-next-line security/detect-object-injection -- index is the list's own
+      const person = people[index]
+      return (person && measured.heights.get(person.memberNo)) ?? measured.typical
+    },
+    // eslint-disable-next-line security/detect-object-injection -- index is the list's own
+    getItemKey: (index) => people[index]?.memberNo ?? index,
+    measureElement: (element, entry, instance) => {
+      const size = measureElement(element, entry, instance)
+      const person = people[Number(element.dataset["index"])]
+      if (person !== undefined && size > 0) {
+        measured.heights.set(person.memberNo, size)
+        measured.typical = size
+      }
+      return size
+    },
+  }
+}
 
 /**
  * A row's detail line: what always shows, and where the person comes from where it is
@@ -124,6 +191,7 @@ export interface PersonRowProps {
 export const PersonRow = memo(function PersonRow(props: PersonRowProps): ReactElement {
   const { isUnitScoped, person } = props
   const identities = useUnitIdentities()
+  const prefetch = usePrefetchParticipant()
   const detail = rowDetail(person, identities.name, isUnitScoped)
   const avatarNumber = avatarNumberFor(person)
   // A deltagare's age is the fact a leader reaches for, as on the home screen; a grown
@@ -141,6 +209,9 @@ export const PersonRow = memo(function PersonRow(props: PersonRowProps): ReactEl
       }
       className="person-row"
       link={{ to: "/participants/$memberNo", params: { memberNo: person.memberNo } }}
+      onPressStart={() => {
+        prefetch(person.memberNo)
+      }}
       {...((person.gender !== undefined || age !== undefined) && {
         trailing: (
           <span className="person-row-facts">
@@ -327,10 +398,11 @@ function ElementScrolledRows(
   // The virtualizer hands back functions that are new every render, which the React
   // Compiler cannot memoize, so it skips this component rather than memoizing a stale
   // list.
+  const sizing = useMemo(() => rowSizing<HTMLElement>(props.people), [props.people])
   // eslint-disable-next-line react-hooks/incompatible-library -- see above
   const virtualizer = useVirtualizer<HTMLElement, HTMLDivElement>({
+    ...sizing,
     count: props.people.length,
-    estimateSize: () => estimatedRowHeight,
     getScrollElement: () => props.scrollParent,
     overscan,
     scrollMargin: props.scrollMargin,
@@ -355,9 +427,10 @@ function ElementScrolledRows(
  * @returns The rows, watching the window.
  */
 function WindowScrolledRows(props: VariantProps): ReactElement {
+  const sizing = useMemo(() => rowSizing<Window>(props.people), [props.people])
   const virtualizer = useWindowVirtualizer<HTMLDivElement>({
+    ...sizing,
     count: props.people.length,
-    estimateSize: () => estimatedRowHeight,
     overscan,
     scrollMargin: props.scrollMargin,
   })
@@ -453,7 +526,7 @@ export function PeopleList(props: PeopleListProps): ReactElement {
       <div
         className="people-list"
         ref={listRef}
-        style={{ height: `${String(people.length * estimatedRowHeight)}px` }}
+        style={{ height: `${String(estimatedHeight(people))}px` }}
       />
     )
   }

@@ -10,20 +10,22 @@ That rule exists because the two sides do not ship together. The web deploys in 
 
 ## The messages
 
-| Direction   | Type        | Carries                                                                                 |
-| ----------- | ----------- | --------------------------------------------------------------------------------------- |
-| Web → shell | `screen`    | The title, whether back applies, and the toolbar and menu items                         |
-| Web → shell | `session`   | Whether someone is signed in, the sections they may open, and their initials and avatar |
-| Web → shell | `theme`     | The name of the theme the person wears                                                  |
-| Shell → web | `back`      | A back gesture, and whether the shell's own swipe already animated it                   |
-| Shell → web | `forward`   | A canceled back swipe, to restore what it popped                                        |
-| Shell → web | `popToRoot` | The active tab tapped again                                                             |
-| Shell → web | `action`    | Which toolbar or menu item was tapped                                                   |
-| Shell → web | `open`      | An address a native control wants shown, such as the profile                            |
+| Direction   | Type        | Carries                                                                                             |
+| ----------- | ----------- | --------------------------------------------------------------------------------------------------- |
+| Web → shell | `screen`    | The title, whether back applies, the toolbar and menu items, and whether something fills the screen |
+| Web → shell | `session`   | Whether someone is signed in, the sections they may open, and their initials and avatar             |
+| Web → shell | `theme`     | The name of the theme the person wears                                                              |
+| Shell → web | `back`      | A back gesture, and whether the shell's own swipe already animated it                               |
+| Shell → web | `forward`   | A canceled back swipe, to restore what it popped                                                    |
+| Shell → web | `popToRoot` | The active tab tapped again                                                                         |
+| Shell → web | `action`    | Which toolbar or menu item was tapped                                                               |
+| Shell → web | `open`      | An address a native control wants shown, such as the profile                                        |
 
 A section in the `session` message is an id, a label, an address, and an icon, and the shell builds a tab from each ([Applications](../applications)).
 
 A message carries text and state, never a color, a font, a size, or a layout value, because the native bars are styled natively – which is the reason for having them. A theme crosses as a name and an icon as a semantic name, and each shell maps them to its own palette and icon set: SF Symbols on Apple, Material icons on Android. An icon name a shell does not know draws a neutral shape instead of failing, because the web may lead the shells by a release.
+
+The avatar is the one picture that crosses, as an image URL, because it shows a person rather than styling a bar. The web draws the unit's mark itself and sends it embedded in a `data:` URL, since a shell cannot draw the mark from its parts. A shell keeps the initials for any URL it cannot load.
 
 ## Knowing a shell is there
 

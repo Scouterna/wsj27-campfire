@@ -12,6 +12,11 @@ export interface RowProps {
    */
   readonly link?: LinkTarget
   /**
+   * Called the moment a press on a linked row begins, before it navigates, so what the
+   * row opens can start loading while the finger is still down.
+   */
+  readonly onPressStart?: () => void
+  /**
    * The tile at the head of the row – an avatar, a mark.
    */
   readonly leading: ReactNode
@@ -67,7 +72,12 @@ export function Row(props: RowProps): ReactElement {
   const className = props.className === undefined ? "row" : `row ${props.className}`
 
   return props.link ? (
-    <Link className={className} to={props.link.to} params={props.link.params ?? {}}>
+    <Link
+      className={className}
+      onPointerDown={props.onPressStart}
+      to={props.link.to}
+      params={props.link.params ?? {}}
+    >
       {content}
     </Link>
   ) : (

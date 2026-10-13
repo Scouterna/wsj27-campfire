@@ -48,7 +48,7 @@ test("keeps a long unit's rows under the reader all the way to its end", async (
   // Waiting on the unit's last person rather than the last row drawn, because right after
   // a step the rows drawn for the previous one are still on screen.
   await page.mouse.move(640, 450)
-  const end = list.locator('[role="listitem"][aria-posinset="40"]')
+  const end = list.locator('[role="listitem"][aria-posinset="41"]')
   await expect(async () => {
     await page.mouse.wheel(0, 600)
     await expect(end).toBeInViewport({ timeout: 250 })
@@ -121,7 +121,7 @@ test("says where the management's rows come from only where the line has room", 
   await page.setViewportSize({ height: 768, width: 1024 })
   await page.goto("/participants")
   await signInAs(page, "Anna Almgren")
-  await expect(page.getByRole("status")).toHaveText("59 personer i kontingenten")
+  await expect(page.getByRole("status")).toHaveText("60 personer i kontingenten")
 
   // The whole contingent keeps its line – role, unit, and the unit's name – and a wide
   // screen says where the person comes from after it. Searched for, because the rows far
@@ -191,9 +191,22 @@ test("opens a unit's card up to the map of where it lives, and folds it back", a
     .poll(async () => map.boundingBox())
     .toEqual({ height: viewport?.height, width: viewport?.width, x: 0, y: 0 })
 
+  // A layer of its own, as a native full-screen map is – the focus on the way back, and
+  // the page behind out of reach.
+  await expect(shrink).toBeFocused()
+  await expect(page.getByRole("dialog", { name: "Karta i helskärm" })).toBeVisible()
+  const title = page.getByRole("heading", { level: 1, name: "Avdelning 1", includeHidden: true })
+  await expect
+    .poll(async () => title.evaluate((node) => node.closest("[inert]") !== null))
+    .toBe(true)
+
   await page.keyboard.press("Escape")
   await expect(page.getByRole("button", { name: "Helskärm" })).toBeVisible()
+  await expect(page.getByRole("button", { name: "Helskärm" })).toBeFocused()
   await expect(close).toBeVisible()
+  await expect
+    .poll(async () => title.evaluate((node) => node.closest("[inert]") !== null))
+    .toBe(false)
 
   await page.getByRole("button", { name: "Helskärm" }).click()
   await shrink.click()
@@ -204,6 +217,13 @@ test("opens a unit's card up to the map of where it lives, and folds it back", a
       return box?.y
     })
     .toBeGreaterThan(0)
+
+  // A person visited and gone back from finds the card as it was left, so the scroll
+  // position restored with it points at what was there.
+  await page.locator('a[href^="/participants/1"]').first().click()
+  await expect(page.getByRole("heading", { level: 1, name: "Avdelning 1" })).toHaveCount(0)
+  await page.goBack()
+  await expect(close).toHaveAttribute("aria-expanded", "true")
 
   await close.click()
   await expect(page.getByRole("button", { name: "Visa på kartan" })).toHaveAttribute(
@@ -234,16 +254,23 @@ test("lets the management search the contingent and narrow it by roll", async ({
 
   await page.locator(".sidemenu").getByRole("link", { name: "Deltagare" }).click()
   await expect(page.getByRole("heading", { level: 1, name: "Deltagare" })).toBeVisible()
-  await expect(page.getByRole("status")).toHaveText("59 personer i kontingenten")
+  await expect(page.getByRole("status")).toHaveText("60 personer i kontingenten")
 
-  // Searching narrows, counts what is shown, and lands in the address.
-  await page.getByRole("searchbox", { name: "Sök deltagare" }).fill("ström")
-  await expect(page.getByRole("status")).toHaveText("2 av 59 personer")
+  // Searching narrows, counts what is shown, and lands in the address. A name is
+  // searched as typed, never corrected, and the keyboard's Search key puts it away.
+  const search = page.getByRole("searchbox", { name: "Sök deltagare" })
+  await expect(search).toHaveAttribute("autocorrect", "off")
+  await expect(search).toHaveAttribute("spellcheck", "false")
+  await expect(search).toHaveAttribute("enterkeyhint", "search")
+  await search.fill("ström")
+  await expect(page.getByRole("status")).toHaveText("2 av 60 personer")
   await expect(page).toHaveURL(/q=str%C3%B6m/)
+  await search.press("Enter")
+  await expect(search).not.toBeFocused()
 
   // A roll on top of the search narrows further, and the search survives the chip.
   await page.getByRole("button", { name: "Ledare", pressed: false }).click()
-  await expect(page.getByRole("status")).toHaveText("1 av 59 personer")
+  await expect(page.getByRole("status")).toHaveText("1 av 60 personer")
   await expect(page.getByRole("button", { name: "Ledare", pressed: true })).toBeVisible()
   await expect(page.getByRole("searchbox", { name: "Sök deltagare" })).toHaveValue("ström")
   await expect(page.getByRole("listitem")).toHaveCount(1)
@@ -263,7 +290,7 @@ test("returns from a person to the list exactly as it was left", async ({ page }
 
   await page.getByRole("searchbox", { name: "Sök deltagare" }).fill("ström")
   await page.getByRole("button", { name: "Ledare", pressed: false }).click()
-  await expect(page.getByRole("status")).toHaveText("1 av 59 personer")
+  await expect(page.getByRole("status")).toHaveText("1 av 60 personer")
 
   await page.getByRole("link", { name: /Hanna Hellström/ }).click()
   await expect(page).toHaveTitle("Hanna Hellström – Campfire")
@@ -271,7 +298,7 @@ test("returns from a person to the list exactly as it was left", async ({ page }
   await page.goBack()
   await expect(page.getByRole("searchbox", { name: "Sök deltagare" })).toHaveValue("ström")
   await expect(page.getByRole("button", { name: "Ledare", pressed: true })).toBeVisible()
-  await expect(page.getByRole("status")).toHaveText("1 av 59 personer")
+  await expect(page.getByRole("status")).toHaveText("1 av 60 personer")
   await expect(page.getByRole("link", { name: /Hanna Hellström/ })).toBeVisible()
 })
 
@@ -286,16 +313,23 @@ test("browses the contingent by unit, down to a person", async ({ page }) => {
   // Every entry with its count – the units, then the IST and the management, so
   // everyone in the contingent is reachable through the browser.
   await expect(page.getByRole("link", { name: /Avdelning 1.*8 personer/ })).toBeVisible()
-  await expect(page.getByRole("link", { name: /Avdelning 2.*40 personer/ })).toBeVisible()
+  await expect(page.getByRole("link", { name: /Avdelning 2.*41 personer/ })).toBeVisible()
   await expect(page.getByRole("link", { name: /IST.*2 personer/ })).toBeVisible()
   await expect(page.getByRole("link", { name: /CMT.*9 personer/ })).toBeVisible()
 
   await page.getByRole("link", { name: /Avdelning 2/ }).click()
   await expect(page.getByRole("heading", { level: 1, name: "Avdelning 2" })).toBeVisible()
-  await expect(page.getByRole("status")).toHaveText("40 personer i avdelningen")
+  await expect(page.getByRole("status")).toHaveText("41 personer i avdelningen")
 
   await page.getByRole("link", { name: /Anders Andersson/ }).click()
   await expect(page).toHaveTitle("Anders Andersson – Campfire")
+
+  // A name wider than a phone's title is still the page's whole title.
+  await page.goto("/participants/1300533")
+  await expect(page).toHaveTitle("Alexandra Westerberg-Johansson – Campfire")
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Alexandra Westerberg-Johansson" }),
+  ).toBeVisible()
 })
 
 test("asks again on every visit, and keeps the list it has when the ask fails", async ({
@@ -406,7 +440,7 @@ test("gives a management function the whole section, in the management's name", 
   await link.click()
 
   await expect(page.getByRole("heading", { level: 1, name: "Deltagare" })).toBeVisible()
-  await expect(page.getByRole("status")).toHaveText("59 personer i kontingenten")
+  await expect(page.getByRole("status")).toHaveText("60 personer i kontingenten")
 
   // The profile control names the management function rather than the management as a
   // whole, which is the one place a CMT member's line differs from a leader's.
@@ -418,7 +452,7 @@ test("offers the management the addresses but not the sheet", async ({ page }) =
   await page.goto("/participants")
   await signInAs(page, "Anna Almgren")
   // The menu is published from the rows the list holds, so it exists only once they do.
-  await expect(page.getByRole("status")).toHaveText("59 personer i kontingenten")
+  await expect(page.getByRole("status")).toHaveText("60 personer i kontingenten")
 
   await page.getByRole("button", { name: "Fler åtgärder" }).click()
   await expect(page.getByRole("menuitem")).toHaveCount(4)

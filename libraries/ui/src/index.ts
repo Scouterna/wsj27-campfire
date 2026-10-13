@@ -4,6 +4,12 @@
  * with the component.
  */
 
+export {
+  dismissFullScreen,
+  useDeclareFullScreen,
+  useIsFullScreen,
+  whenScreenSettles,
+} from "./behavior/full-screen"
 export { expectPop, setNavDirection, wasPopExpected } from "./behavior/transitions"
 export type { NavDirection } from "./behavior/transitions"
 export { Button } from "./components/button/Button"
@@ -60,6 +66,7 @@ export { StatusRow } from "./components/statusrow/StatusRow"
 export type { StatusRowProps, StatusRowState } from "./components/statusrow/StatusRow"
 export { TabBar } from "./components/tabbar/TabBar"
 export type { TabBarItem, TabBarProps } from "./components/tabbar/TabBar"
+export { useUnitAvatarPicture } from "./components/unitavatar/unit-avatar-picture"
 export { UnitAvatar, cmtAvatarNumber, istAvatarNumber } from "./components/unitavatar/UnitAvatar"
 export type { UnitAvatarProps } from "./components/unitavatar/UnitAvatar"
 export type { IconProps } from "./foundations/icons/IconProps"

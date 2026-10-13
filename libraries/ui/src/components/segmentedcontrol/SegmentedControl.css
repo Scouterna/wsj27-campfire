@@ -55,7 +55,11 @@
     font-size: var(--font-size-entry);
     height: 38px;
     justify-content: center;
-    padding: 0 var(--spacing-card);
+
+    /* Tight enough that a phone holds every segment of the widest set side by side, as
+       a native segmented control does; only a large text size leaves the track to
+       scroll. */
+    padding: 0 var(--spacing-group);
     position: relative;
     transition: color 200ms ease;
   }
@@ -81,6 +85,12 @@
     .segmented button[aria-pressed="false"]:hover {
       color: var(--color-ink);
     }
+  }
+
+  /* A press darkens the label for as long as the finger is down, the feedback a touch
+     gets in place of a hover. */
+  .segmented button[aria-pressed="false"]:active {
+    color: var(--color-ink);
   }
 
   .segmented button:focus-visible {

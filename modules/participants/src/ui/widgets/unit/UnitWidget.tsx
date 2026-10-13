@@ -5,6 +5,7 @@ import type { ReactElement } from "react"
 import { ageOf, fullName, whereFrom, type Participant } from "../../../model/Participant"
 import { GenderMark } from "../../components/gender/GenderMark"
 import { UnitCard } from "../../components/unitcard/UnitCard"
+import { usePrefetchParticipant } from "../../screens/participant/use-participant"
 import { useParticipants } from "../../screens/participants/use-participants"
 
 import "./UnitWidget.css"
@@ -32,6 +33,7 @@ interface PeopleCardProps {
  * @returns The card, or nothing when it holds nobody.
  */
 function PeopleCard(props: PeopleCardProps): ReactElement | null {
+  const prefetch = usePrefetchParticipant()
   if (props.people.length === 0) {
     return null
   }
@@ -45,6 +47,9 @@ function PeopleCard(props: PeopleCardProps): ReactElement | null {
             <Link
               className="unit-widget-person"
               key={person.memberNo}
+              onPointerDown={() => {
+                prefetch(person.memberNo)
+              }}
               params={{ memberNo: person.memberNo }}
               to="/participants/$memberNo"
             >
