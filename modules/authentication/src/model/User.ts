@@ -8,8 +8,10 @@ import { hasAnyRole, type Role, type Unit, type UserMark } from "@scouterna/wsj2
 
 /**
  * What each management function is called, in the order a person holding more than
- * one is named by – the head of contingent first, then alphabetically by kind. The
- * words are the application's, because the role set carries kinds, never labels.
+ * one is named by – the head of contingent first, then alphabetically by kind, and the
+ * support function last, because every subgroup member holds it too and the subgroup
+ * says more. The words are the application's, because the role set carries kinds,
+ * never labels.
  */
 const cmtFunctions: readonly (readonly [Role["kind"], string])[] = [
   ["headOfContingent", "HoC"],
@@ -19,6 +21,7 @@ const cmtFunctions: readonly (readonly [Role["kind"], string])[] = [
   ["istSupport", "IST-support"],
   ["program", "Program"],
   ["unitSupport", "Avdelningssupport"],
+  ["support", "Support"],
 ]
 
 /**

@@ -75,6 +75,7 @@ const funktionOrder: readonly CmtFunktion[] = [
   "istSupport",
   "kommunikation",
   "program",
+  "support",
 ]
 
 /**

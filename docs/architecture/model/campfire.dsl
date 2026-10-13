@@ -131,6 +131,7 @@ campfire = softwareSystem "Campfire" {
   cmtHealth -> campfireApp "Read a participant's health answers"
   cmtIstSupport -> campfireApp "See and reach the IST"
   cmtProgram -> campfireApp "Plan around the units and leaders"
+  cmtSupport -> campfireApp "See and reach the whole function"
   cmtUnitSupport -> campfireApp "Follow the units and answer members"
   cmtHeadOfContingent -> campfireApp "See the whole contingent at a glance"
   developers -> this "Build and maintain"

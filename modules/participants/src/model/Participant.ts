@@ -117,8 +117,8 @@ export interface Participant {
    */
   readonly funktion?: CmtFunktion
   /**
-   * Marks the funktionsansvarig – the member responsible for their funktion, the "FA"
-   * roll on the contingent's roster. Absent rather than false for everyone else.
+   * Marks a funktionsansvarig – one of the members responsible for their funktion, the
+   * "FA" roll on the contingent's roster. Absent rather than false for everyone else.
    */
   readonly isFunktionsansvarig?: true
 }

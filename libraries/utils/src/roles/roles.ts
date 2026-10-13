@@ -20,6 +20,7 @@ export type Role =
   | { readonly kind: "health" }
   | { readonly kind: "istSupport" }
   | { readonly kind: "program" }
+  | { readonly kind: "support" }
   | { readonly kind: "unitSupport" }
 
 /**

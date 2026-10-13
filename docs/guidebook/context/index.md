@@ -6,11 +6,11 @@ Campfire holds no data and no identity of its own. A member signs in with ScoutI
 
 The system context diagram shows where Campfire fits.
 
-![System context diagram. The CMT functions – Administration, Communication, Head of Contingent, Health, IST support, Program, and Unit support – use Campfire, the developers build and maintain it through GitHub, and the leaders use it. Campfire signs members in and out through the auth service, which completes the sign-in with ScoutID. Campfire draws unit maps over tiles from OpenFreeMap, lists, previews, and downloads the contingent's material from Google Drive, reads the list of participants from the participants service, which reads its member data from Scoutnet, and sends members to sign in at ScoutID, which verifies sign-ins against Scoutnet.](../../architecture/diagrams/systemContext.svg)
+![System context diagram. The CMT functions – Administration, Communication, Head of Contingent, Health, IST support, Program, Support, and Unit support – use Campfire, the developers build and maintain it through GitHub, and the leaders use it. Campfire signs members in and out through the auth service, which completes the sign-in with ScoutID. Campfire draws unit maps over tiles from OpenFreeMap, lists, previews, and downloads the contingent's material from Google Drive, reads the list of participants from the participants service, which reads its member data from Scoutnet, and sends members to sign in at ScoutID, which verifies sign-ins against Scoutnet.](../../architecture/diagrams/systemContext.svg)
 
 ## The people
 
-The diagram names each CMT function as a person of its own, because what separates them is the part of the contingent each answers for. Support is one function with three parts – Health, IST support, and Unit support – and each part is drawn separately for the same reason. The same people are the audience an issue chooses from, so an issue, the guidebook, and the diagrams name the same groups.
+The diagram names each CMT function as a person of its own, because what separates them is the part of the contingent each answers for. Support is one function with three parts – Health, IST support, and Unit support – and each part is drawn separately for the same reason, with Support itself drawn for the members who serve in none of them. The same people are the audience an issue chooses from, so an issue, the guidebook, and the diagrams name the same groups.
 
 Everyone gets the same application – the same screens, colors, and offline behavior – and the back-end decides what each of them may read. A leader reads their own unit, their scouts' health answers included. Every CMT function reads the whole contingent, and only a health grant adds the health answers.
 
@@ -22,6 +22,7 @@ Everyone gets the same application – the same screens, colors, and offline beh
 | [CMT – Health](./people/cmt-health)                         | Help with health questions, and read a participant's health answers                                  |
 | [CMT – IST support](./people/cmt-ist-support)               | Select and follow the IST, and see and reach them as one group                                       |
 | [CMT – Program](./people/cmt-program)                       | Plan the meetings before the trip, the round trip, and the program, around the units and the leaders |
+| [CMT – Support](./people/cmt-support)                       | Answer for the Support function, and see and reach all of it                                         |
 | [CMT – Unit support](./people/cmt-unit-support)             | Compose and follow the units, and answer members who do not know whom to ask                         |
 | [CMT – Head of Contingent](./people/cmt-head-of-contingent) | Lead the contingent, and see all of it at a glance                                                   |
 | [Developers](./people/developers)                           | Build and maintain Campfire rather than use it                                                       |
