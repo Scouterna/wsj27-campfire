@@ -1,9 +1,10 @@
-import { PageTitle } from "@scouterna/wsj27-campfire-ui"
+import { PageActions, PageTitle } from "@scouterna/wsj27-campfire-ui"
 import type { ReactElement } from "react"
 
 import type { Experience } from "../../../model/Experience"
 import { fullName } from "../../../model/Participant"
 import type { Readiness } from "../../../model/Readiness"
+import { usePersonActions } from "../../person-actions"
 import { ContactSection } from "./ContactSection"
 import { DietSection } from "./DietSection"
 import { ExperienceSection } from "./ExperienceSection"
@@ -62,6 +63,7 @@ function hasFacts(experience: Experience): boolean {
  */
 export function ParticipantScreen(props: ParticipantScreenProps): ReactElement {
   const { error, isPending, participant } = useParticipant(props.memberNo)
+  const actions = usePersonActions()
 
   if (isPending) {
     return (
@@ -85,6 +87,7 @@ export function ParticipantScreen(props: ParticipantScreenProps): ReactElement {
     )
   }
 
+  const menu = actions(props.memberNo)
   const health = participant.health
   const readiness =
     participant.readiness !== undefined && hasAnswers(participant.readiness)
@@ -102,6 +105,7 @@ export function ParticipantScreen(props: ParticipantScreenProps): ReactElement {
   return (
     <>
       <PageTitle title={fullName(participant)} />
+      {menu.length > 0 && <PageActions menu={menu} />}
 
       <div className="person">
         <ProfileSection participant={participant} />

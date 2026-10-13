@@ -78,8 +78,8 @@ describe("the access policy", () => {
     [["wsj27:cmt:program:medlem"], "18", 1],
     [["wsj27:cmt"], undefined, 1],
     [["wsj27:cmt:support:halsa"], "18", 2],
-    [["wsj27:cmt:program:medlem", "wsj27:access:Hälsa plus intern information"], "18", 2],
-    [["wsj27:al:18", "wsj27:access:Hälsa plus intern information"], "19", 0],
+    [["wsj27:cmt:program:medlem", "wsj27:legacy-access:Hälsa plus intern information"], "18", 2],
+    [["wsj27:al:18", "wsj27:legacy-access:Hälsa plus intern information"], "19", 0],
     [["wsj27:al:18", "wsj27:cmt:program:medlem"], "19", 1],
     [["wsj27:al"], "18", 0],
     [["wsj27:alx:18"], "18", 0],
@@ -287,11 +287,11 @@ describe("the role map", () => {
     expect(Object.keys(participants)).toHaveLength(15)
     expect(participants["1200002"]).toEqual([
       "wsj27:cmt:support",
-      "wsj27:access:Hälsa plus intern information",
+      "wsj27:legacy-access:Hälsa plus intern information",
     ])
     expect(participants["1200101"]).toEqual([
       "wsj27:cmt:program:medlem",
-      "wsj27:access:Intern information",
+      "wsj27:legacy-access:Intern information",
     ])
     expect(participants["1200102"]).toEqual(["wsj27:cmt"])
     expect(participants["1200302"]).toEqual(["wsj27:cmt:support:ist-support"])

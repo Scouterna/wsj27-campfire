@@ -76,9 +76,22 @@ deploymentEnvironment "Dev" {
         devProject = softwareSystemInstance participantsService
       }
 
+      deploymentNode "Cases service" {
+        description "The cases service's own container, built from its repository."
+        technology "Python, container"
+        devCases = softwareSystemInstance casesService
+      }
+
+      devDatabase = infrastructureNode "Postgres" {
+        description "The database the cases service keeps its cases and notes in."
+        technology "PostgreSQL"
+      }
+
       devIngress -> devWeb "Routes every other path to"
       devIngress -> devAuth "Routes /api/auth to"
       devIngress -> devProject "Routes /api/project to"
+      devIngress -> devCases "Routes /api/project/cases to"
+      devCases -> devDatabase "Keeps cases and notes in"
     }
   }
 
@@ -135,9 +148,22 @@ deploymentEnvironment "Staging" {
         stagingProject = softwareSystemInstance participantsService
       }
 
+      deploymentNode "Cases service" {
+        description "Prod's cases service, which the staging site shares."
+        technology "Python, container"
+        stagingCases = softwareSystemInstance casesService
+      }
+
+      stagingDatabase = infrastructureNode "Postgres" {
+        description "Prod's database, where the shared cases service keeps its cases."
+        technology "PostgreSQL"
+      }
+
       stagingIngress -> stagingWeb "Routes every other path to"
       stagingIngress -> stagingAuth "Routes /api/auth to"
       stagingIngress -> stagingProject "Routes /api/project to"
+      stagingIngress -> stagingCases "Routes /api/project/cases to"
+      stagingCases -> stagingDatabase "Keeps cases and notes in"
     }
   }
 
@@ -192,9 +218,22 @@ deploymentEnvironment "Prod" {
         prodProject = softwareSystemInstance participantsService
       }
 
+      deploymentNode "Cases service" {
+        description "The cases service's own container, built from its repository."
+        technology "Python, container"
+        prodCases = softwareSystemInstance casesService
+      }
+
+      prodDatabase = infrastructureNode "Postgres" {
+        description "The database the cases service keeps its cases and notes in."
+        technology "PostgreSQL"
+      }
+
       prodIngress -> prodWeb "Routes every other path to"
       prodIngress -> prodAuth "Routes /api/auth to"
       prodIngress -> prodProject "Routes /api/project to"
+      prodIngress -> prodCases "Routes /api/project/cases to"
+      prodCases -> prodDatabase "Keeps cases and notes in"
     }
   }
 

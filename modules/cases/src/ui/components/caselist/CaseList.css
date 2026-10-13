@@ -1,0 +1,38 @@
+/* A case's row, three lines tall where most rows are two. */
+
+@layer component {
+  /* The mark leads at the top of a tall row, as every leading squircle does. */
+  .case-row > :first-child {
+    align-self: start;
+  }
+
+  /* Who the case is about, at the title's size and only lighter, because a reader scans
+     for the person as much as for what happened – the quiet small line is for who
+     opened it. */
+  .case-row-about {
+    display: block;
+    margin-top: 2px;
+  }
+
+  .case-row-time {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  /* A private case's mark: a small chip after its title in the theme's wash, as the
+     funktionsansvarig's is after a name, so it reads at a glance without shouting. */
+  .case-row-mark {
+    background: var(--color-theme-wash);
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.04em;
+    margin-left: var(--spacing-stack);
+    padding: 2px 8px;
+    vertical-align: 2px;
+    white-space: nowrap;
+  }
+}

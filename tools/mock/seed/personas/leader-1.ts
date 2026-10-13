@@ -9,5 +9,5 @@ export const persona: Persona = {
   familyName: "Lindberg",
   memberNo: "1100101",
   description:
-    "Ledare i avdelning 1. Ser hela sin avdelning, hälsouppgifter inräknade, men nekas avdelning 2.",
+    "Ledare i avdelning 1. Ser hela sin avdelning, hälsouppgifter inräknade, och avdelningens ärenden, men nekas avdelning 2.",
 }
