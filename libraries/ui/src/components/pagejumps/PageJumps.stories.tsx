@@ -26,17 +26,20 @@ function Readout(): ReactElement {
   }
   return (
     <div className="story-stack">
-      {declared.entries.map((entry, index) => (
-        <button
-          key={entry}
-          type="button"
-          onClick={() => {
-            declared.onJump(index)
-          }}
-        >
-          {index === declared.current ? `● ${entry}` : entry}
-        </button>
-      ))}
+      {declared.entries.map((entry, index) => {
+        const label = typeof entry === "string" ? entry : entry.label
+        return (
+          <button
+            key={index}
+            type="button"
+            onClick={() => {
+              declared.onJump(index)
+            }}
+          >
+            {index === declared.current ? `● ${label}` : label}
+          </button>
+        )
+      })}
     </div>
   )
 }

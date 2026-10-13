@@ -118,6 +118,7 @@ services:
       - web_ui_modules:/campfire/libraries/ui/node_modules
       - web_utils_modules:/campfire/libraries/utils/node_modules
       - web_authentication_modules:/campfire/modules/authentication/node_modules
+      - web_handbook_modules:/campfire/modules/handbook/node_modules
       - web_home_modules:/campfire/modules/home/node_modules
       - web_journey_modules:/campfire/modules/journey/node_modules
       - web_participants_modules:/campfire/modules/participants/node_modules
@@ -131,6 +132,7 @@ volumes:
   web_ui_modules:
   web_utils_modules:
   web_authentication_modules:
+  web_handbook_modules:
   web_home_modules:
   web_journey_modules:
   web_participants_modules:

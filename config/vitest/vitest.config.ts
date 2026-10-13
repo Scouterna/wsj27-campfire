@@ -48,6 +48,14 @@ export default defineConfig({
       },
       {
         test: {
+          name: "handbook",
+          root: "modules/handbook",
+          environment: "node",
+          include: ["src/**/*.test.ts"],
+        },
+      },
+      {
+        test: {
           name: "home",
           root: "modules/home",
           environment: "node",

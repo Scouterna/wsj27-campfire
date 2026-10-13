@@ -1,0 +1,289 @@
+/* The handbook on paper: the contingent's printed handbook, in the reader's own unit
+   color. Nothing of it shows on screen, and nothing but it prints. */
+
+@layer screen {
+  .printed-handbook {
+    display: none;
+  }
+
+  @media print {
+    /* The sheet, and what every sheet after the cover carries at its foot: who the
+       handbook is for, and the page number on a patch of the unit's color. */
+    @page {
+      margin: 22mm 20mm 26mm;
+      size: A4;
+
+      @bottom-left {
+        color: #7a7a7a;
+        content: "Den svenska kontingenten för WSJ27 Polen";
+        font-family: "Bravely Script", cursive;
+        font-size: 10pt;
+        text-transform: uppercase;
+        vertical-align: middle;
+      }
+
+      @bottom-right {
+        background: var(--color-theme-bright);
+        border-radius: 3mm 0 0 3mm;
+        color: var(--color-theme-on-bright);
+        content: "Sida " counter(page);
+        font-family: "Bravely Script", cursive;
+        font-size: 14pt;
+        margin: 6mm -20mm 6mm 0;
+        padding: 0 20mm 0 6mm;
+        text-transform: uppercase;
+        vertical-align: middle;
+        white-space: nowrap;
+      }
+    }
+
+    /* The cover runs to the paper's edge and carries no foot. */
+    @page cover {
+      margin: 0;
+
+      @bottom-left {
+        content: none;
+      }
+
+      @bottom-right {
+        content: none;
+      }
+    }
+
+    /* Only the printed copy – the application, its chrome, and every overlay stay off
+       the paper. What encloses the copy gives up its box, so the copy lays out as if it
+       sat directly in the page, free of the columns and padding of the screen. */
+    body :not(.printed-handbook, .printed-handbook *):not(:has(.printed-handbook)) {
+      display: none;
+    }
+
+    body :has(.printed-handbook) {
+      display: contents;
+    }
+
+    html,
+    body {
+      background: #fff;
+    }
+
+    .printed-handbook {
+      color: #1a1a1a;
+      display: block;
+      font-size: 10.5pt;
+      line-height: 1.5;
+      print-color-adjust: exact;
+
+      & a {
+        color: inherit;
+      }
+    }
+
+    .printed-cover {
+      background: var(--color-theme-bright);
+      box-sizing: border-box;
+      color: var(--color-theme-on-bright);
+      height: 297mm;
+      padding: 95mm 20mm 0;
+      page: cover;
+      position: relative;
+
+      & h1 {
+        font-family: "Bravely Script", cursive;
+        font-size: 60pt;
+        font-weight: normal;
+        line-height: 1;
+        margin: 0 0 6mm;
+        text-transform: uppercase;
+      }
+
+      & p {
+        font-family: "Bravely Script", cursive;
+        font-size: 14pt;
+        margin: 0;
+        text-transform: uppercase;
+      }
+    }
+
+    /* The mark in the corner, a shade under the cover so it reads as printed on it. */
+    .printed-cover-logo {
+      bottom: 12mm;
+      filter: brightness(0.92);
+      position: absolute;
+      right: 12mm;
+      width: 60mm;
+
+      & img {
+        display: block;
+        width: 100%;
+      }
+    }
+
+    .printed-contents {
+      break-before: page;
+      columns: 2;
+      column-gap: 12mm;
+      font-size: 9.5pt;
+
+      & h2 {
+        column-span: all;
+        font-family: "Bravely Script", cursive;
+        font-size: 13pt;
+        font-weight: normal;
+        margin: 0 0 6mm;
+        text-transform: uppercase;
+      }
+
+      & ol {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      & > ol > li {
+        break-inside: avoid;
+        margin-bottom: 5mm;
+
+        & > a {
+          border-bottom: 1px solid #1a1a1a;
+          display: block;
+          font-weight: 700;
+          margin-bottom: 1.5mm;
+          padding-bottom: 1mm;
+          text-decoration: none;
+          text-transform: uppercase;
+        }
+      }
+
+      & li li {
+        font-style: italic;
+        padding-left: 4mm;
+
+        & a {
+          text-decoration: none;
+        }
+      }
+    }
+
+    .printed-changes {
+      break-before: page;
+
+      & ul {
+        margin: 0;
+        padding: 0 0 0 5mm;
+      }
+
+      & li + li {
+        margin-top: 2mm;
+      }
+
+      & span {
+        color: #7a7a7a;
+      }
+    }
+
+    /* A chapter from a fresh sheet, its name in the display face at full size. */
+    .printed-chapter {
+      break-before: page;
+
+      & > h1 {
+        font-family: "Bravely Script", cursive;
+        font-size: 44pt;
+        font-weight: normal;
+        line-height: 1;
+        margin: 18mm 0 8mm;
+        text-transform: uppercase;
+      }
+    }
+
+    /* A page's title, and the changelog's, in the unit's color. */
+    .printed-page > h2,
+    .printed-changes > h2 {
+      break-after: avoid;
+      color: var(--color-theme-bright);
+      font-family: "Bravely Script", cursive;
+      font-size: 20pt;
+      font-weight: normal;
+      line-height: 1.1;
+      margin: 9mm 0 3mm;
+      text-transform: uppercase;
+    }
+
+    .printed-page:first-of-type > h2 {
+      margin-top: 0;
+    }
+
+    /* The content itself, set for paper rather than the screen's sheet. */
+    .printed-page .richtext {
+      color: #1a1a1a;
+      font-size: 10.5pt;
+      line-height: 1.55;
+
+      & h3,
+      & h4,
+      & h5,
+      & h6 {
+        break-after: avoid;
+        font-size: 11pt;
+        margin: 5mm 0 2mm;
+      }
+
+      & p,
+      & ul,
+      & ol {
+        margin-bottom: 3mm;
+      }
+
+      & li + li {
+        margin-top: 1mm;
+      }
+
+      & a,
+      & a :is(strong, em) {
+        color: var(--color-theme-ink);
+        font-weight: 700;
+      }
+
+      & .richtext-reminder {
+        break-inside: avoid;
+        font-size: 10pt;
+      }
+
+      & img {
+        break-inside: avoid;
+        max-height: 120mm;
+      }
+    }
+
+    .printed-page .richtext-table {
+      overflow: visible;
+
+      & table {
+        font-size: 9.5pt;
+        width: 100%;
+      }
+
+      & tr {
+        break-inside: avoid;
+      }
+
+      & th,
+      & td {
+        border-bottom: 0.75pt solid #1a1a1a;
+        font-weight: normal;
+        padding: 1mm 2mm;
+      }
+
+      /* The first row is the table's head, marked or not, and wears a heavier rule – the
+         way the printed handbook sets it. */
+      & tr:first-child > * {
+        border-bottom-width: 1.5pt;
+      }
+
+      /* A cell holds paragraphs, which sit flush in it rather than spaced as text. */
+      & td p,
+      & th p {
+        margin: 0;
+      }
+    }
+  }
+}

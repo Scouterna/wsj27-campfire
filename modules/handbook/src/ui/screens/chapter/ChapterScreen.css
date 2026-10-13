@@ -1,0 +1,87 @@
+/* One chapter of the handbook, read as one document. */
+
+@layer screen {
+  /* What the screen says in place of the chapter – fetching, failing, or not there. */
+  .handbook-chapter-status {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+  }
+
+  /* What changed since the reader was last here, in the caution tone so it is seen
+     before the text it is about. */
+  .handbook-news {
+    background: var(--color-tone-caution-wash);
+    border-radius: var(--border-radius-surface);
+    color: var(--color-tone-caution-ink);
+    padding: var(--spacing-group) var(--spacing-container);
+
+    & ul {
+      font-size: var(--font-size-value);
+      line-height: 1.6;
+      margin: 0;
+      padding-inline-start: 1.2em;
+    }
+  }
+
+  .handbook-news-head {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px var(--spacing-group);
+    margin: 0 0 var(--spacing-inline);
+
+    & strong {
+      font-size: var(--font-size-value);
+      font-weight: var(--font-weight-strong);
+    }
+
+    & span {
+      font-size: var(--font-size-footnote);
+    }
+  }
+
+  /* A page's card, which a link to the page scrolls to – clear of the bar above it. */
+  .handbook-section {
+    scroll-margin-top: calc(var(--spacing-section) * 2);
+  }
+
+  /* The chapters either side, under the last page. */
+  .handbook-onward {
+    display: flex;
+    gap: var(--spacing-group);
+    justify-content: space-between;
+    padding: var(--spacing-inline) var(--spacing-container) 0;
+  }
+
+  .handbook-neighbor {
+    align-items: center;
+    color: var(--color-theme-ink);
+    display: inline-flex;
+    font-size: var(--font-size-value);
+    font-weight: var(--font-weight-strong);
+    gap: var(--spacing-stack);
+    min-width: 0;
+    text-decoration: none;
+
+    & small {
+      color: var(--color-ink-tertiary);
+      display: block;
+      font-size: var(--font-size-caption);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    & svg {
+      flex-shrink: 0;
+    }
+  }
+
+  .handbook-neighbor-next {
+    text-align: end;
+
+    & svg {
+      transform: scaleX(-1);
+    }
+  }
+}
