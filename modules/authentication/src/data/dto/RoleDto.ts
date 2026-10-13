@@ -22,7 +22,8 @@ const managementFunctions = new Map<string, Role>([
 ])
 
 /**
- * The support function's rolls, and the role each one grants on top of `cmt`.
+ * The support function's subgroups, by the roll that names them, and the role each one
+ * grants on top of `cmt` and `support`.
  */
 const supportRolls = new Map<string, Role>([
   ["avdelningssupport", { kind: "unitSupport" }],
@@ -54,17 +55,22 @@ function leaderRoles(segments: readonly string[]): readonly Role[] {
 
 /**
  * The roles a `wsj27:cmt…` spelling grants – `cmt` itself, plus any management function
- * or support roll its deeper segments name.
+ * and support subgroup its deeper segments name.
  * @param segments The spelling, already split on `:`.
- * @returns `cmt` alone, or `cmt` and the function or roll it names.
+ * @returns `cmt` alone, or `cmt` and the function it names – for support, followed by
+ * the subgroup where the roll names one.
  */
 function cmtRoles(segments: readonly string[]): readonly Role[] {
   const funktion = segments[2]
 
   if (funktion === "support") {
+    // A roll that names no subgroup – the funktionsansvariga, and specialsupport – is
+    // still the support function, so it grants `support` alone.
     const roll = segments[3]
-    const supportRole = roll === undefined ? undefined : supportRolls.get(roll)
-    return supportRole === undefined ? [{ kind: "cmt" }] : [{ kind: "cmt" }, supportRole]
+    const subgroup = roll === undefined ? undefined : supportRolls.get(roll)
+    return subgroup === undefined
+      ? [{ kind: "cmt" }, { kind: "support" }]
+      : [{ kind: "cmt" }, { kind: "support" }, subgroup]
   }
 
   const managementRole = funktion === undefined ? undefined : managementFunctions.get(funktion)

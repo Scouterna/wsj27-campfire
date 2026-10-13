@@ -28,6 +28,7 @@ const contingent = [
   person({ istPatrol: { number: 1 }, memberNo: "h", role: "ist" }),
   person({ funktion: "program", memberNo: "i", role: "kontingentledning" }),
   person({ funktion: "kontingentledare", memberNo: "j", role: "kontingentledning" }),
+  person({ funktion: "support", memberNo: "k", role: "kontingentledning" }),
 ]
 
 describe("the groups view's entries", () => {
@@ -40,6 +41,7 @@ describe("the groups view's entries", () => {
       { count: 1, kind: "ist", key: "ist", label: "IST utan patrull" },
       { count: 1, kind: "cmt", key: "cmt-kontingentledare", label: "HoC" },
       { count: 1, kind: "cmt", key: "cmt-program", label: "Program" },
+      { count: 1, kind: "cmt", key: "cmt-support", label: "Support" },
       { count: 1, kind: "cmt", key: "cmt-ovriga", label: "Övriga" },
     ])
   })

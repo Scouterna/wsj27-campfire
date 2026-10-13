@@ -16,6 +16,13 @@ describe("the line that says what somebody is", () => {
     expect(roleLineFor([{ kind: "cmt" }])).toBe("CMT")
   })
 
+  it("names a support subgroup before the support function it belongs to", () => {
+    expect(roleLineFor([{ kind: "cmt" }, { kind: "support" }])).toBe("CMT · Support")
+    expect(roleLineFor([{ kind: "cmt" }, { kind: "support" }, { kind: "unitSupport" }])).toBe(
+      "CMT · Avdelningssupport",
+    )
+  })
+
   it("reads anybody else as a participant", () => {
     expect(roleLineFor([])).toBe("Deltagare")
   })

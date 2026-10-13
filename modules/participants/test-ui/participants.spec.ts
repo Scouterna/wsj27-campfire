@@ -303,6 +303,7 @@ test("browses the contingent by unit, down to a person", async ({ page }) => {
   await expect(page.getByRole("link", { name: /IST utan patrull.*1 person$/ })).toBeVisible()
   await expect(page.getByRole("link", { name: /^HoC.*1 person$/ })).toBeVisible()
   await expect(page.getByRole("link", { name: /^Admin.*1 person$/ })).toBeVisible()
+  await expect(page.getByRole("link", { name: /^Support.*1 person$/ })).toBeVisible()
 
   // The filter narrows the groups view to one kind, and the address keeps it, so coming
   // back from a group finds it still in force.

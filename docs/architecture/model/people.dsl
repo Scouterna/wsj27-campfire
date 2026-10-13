@@ -24,7 +24,7 @@ cmtCommunication = person "CMT – Communication" {
 }
 
 # Support is one function, and each of its parts is drawn as a person of its own for the
-# same reason the functions are.
+# same reason the functions are, with Support itself drawn for the members in none of them.
 
 cmtHealth = person "CMT – Health" {
   description "The part of Support that looks after health, care, and welfare."
@@ -38,6 +38,11 @@ cmtIstSupport = person "CMT – IST support" {
 
 cmtProgram = person "CMT – Program" {
   description "The function that plans what the contingent does around the jamboree."
+  tags "user"
+}
+
+cmtSupport = person "CMT – Support" {
+  description "The members of Support who serve in none of its parts."
   tags "user"
 }
 

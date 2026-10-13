@@ -77,6 +77,7 @@ const contextPeople = chapterPages("context/people", [
   "cmt-health",
   "cmt-ist-support",
   "cmt-program",
+  "cmt-support",
   "cmt-unit-support",
   "cmt-head-of-contingent",
   "developers",

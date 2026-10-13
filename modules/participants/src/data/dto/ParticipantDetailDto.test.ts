@@ -331,6 +331,17 @@ describe("reading the funktion out of the minted roles", () => {
     ).toBe("istSupport")
   })
 
+  it("places a support roll that names no subgroup in the support function itself", () => {
+    for (const role of [
+      "wsj27:cmt:support",
+      "wsj27:cmt:support:fa",
+      "wsj27:cmt:support:fa-cet",
+      "wsj27:cmt:support:specialsupport",
+    ]) {
+      expect(toParticipantDetail(record({ roles: [role] }))?.funktion).toBe("support")
+    }
+  })
+
   it("reads no funktion from a plain cmt role, or from none at all", () => {
     expect(toParticipantDetail(record({ roles: ["wsj27:cmt"] }))?.funktion).toBeUndefined()
     expect(toParticipantDetail(record({ roles: [] }))?.funktion).toBeUndefined()
@@ -344,6 +355,13 @@ describe("reading the funktion out of the minted roles", () => {
     expect(
       toParticipantDetail(record({ roles: ["wsj27:cmt:admin:fa-cet"] }))?.isFunktionsansvarig,
     ).toBe(true)
+    expect(
+      toParticipantDetail(record({ roles: ["wsj27:cmt:support:fa"] }))?.isFunktionsansvarig,
+    ).toBe(true)
+    expect(
+      toParticipantDetail(record({ roles: ["wsj27:cmt:support:specialsupport"] }))
+        ?.isFunktionsansvarig,
+    ).toBeUndefined()
     expect(
       toParticipantDetail(record({ roles: ["wsj27:cmt:admin:medlem"] }))?.isFunktionsansvarig,
     ).toBeUndefined()

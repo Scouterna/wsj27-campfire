@@ -44,26 +44,37 @@ describe("translating a provider spelling into roles", () => {
     expect(toRoles("wsj27:cmt:program")).toEqual([{ kind: "cmt" }, { kind: "program" }])
   })
 
-  it("grants unit support its own kind plus cmt", () => {
+  it("grants unit support its own kind plus cmt and support", () => {
     expect(toRoles("wsj27:cmt:support:avdelningssupport")).toEqual([
       { kind: "cmt" },
+      { kind: "support" },
       { kind: "unitSupport" },
     ])
   })
 
-  it("grants health its own kind plus cmt, from the support function", () => {
-    expect(toRoles("wsj27:cmt:support:halsa")).toEqual([{ kind: "cmt" }, { kind: "health" }])
+  it("grants health its own kind plus cmt and support, from the support function", () => {
+    expect(toRoles("wsj27:cmt:support:halsa")).toEqual([
+      { kind: "cmt" },
+      { kind: "support" },
+      { kind: "health" },
+    ])
   })
 
-  it("grants IST support its own kind plus cmt", () => {
+  it("grants IST support its own kind plus cmt and support", () => {
     expect(toRoles("wsj27:cmt:support:ist-support")).toEqual([
       { kind: "cmt" },
+      { kind: "support" },
       { kind: "istSupport" },
     ])
   })
 
-  it("reads a support member with no named roll as cmt alone", () => {
-    expect(toRoles("wsj27:cmt:support")).toEqual([{ kind: "cmt" }])
+  it("reads a support roll that names no subgroup as the support function alone", () => {
+    const supportAlone = [{ kind: "cmt" }, { kind: "support" }]
+
+    expect(toRoles("wsj27:cmt:support")).toEqual(supportAlone)
+    expect(toRoles("wsj27:cmt:support:fa")).toEqual(supportAlone)
+    expect(toRoles("wsj27:cmt:support:fa-cet")).toEqual(supportAlone)
+    expect(toRoles("wsj27:cmt:support:specialsupport")).toEqual(supportAlone)
   })
 
   it("reads the personal health grant as health, and nothing else", () => {
