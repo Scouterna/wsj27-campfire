@@ -351,6 +351,86 @@ describe("one participant", () => {
   })
 })
 
+describe("a participant's patrol", () => {
+  // An app of its own, because a write changes the list it answers from.
+  const writable = createApp({ key })
+
+  async function post(path: string, email: string, body: string): Promise<Response> {
+    return writable.request(`${origin}/api/project/participants${path}`, {
+      body,
+      headers: { ...as(email), "Content-Type": "application/json" },
+      method: "POST",
+    })
+  }
+
+  it("lets a leader set and clear a patrol in their own troop, answering the patrol stored", async () => {
+    const set = await post("/1300035/patrol", "leader-1@wsj.se", '{"patrol":" Falken "}')
+    expect(set.status).toBe(200)
+    expect(await set.text()).toBe('{"member_no":1300035,"patrol":"Falken"}')
+
+    const listed = await writable.request(`${origin}/api/project/participants/troopinfo/1`, {
+      headers: as("leader-1@wsj.se"),
+    })
+    const rows = (await listed.json()) as { member_no: number; patrol: unknown }[]
+    expect(rows.find((row) => row.member_no === 1_300_035)?.patrol).toBe("Falken")
+
+    const cleared = await post("/1300035/patrol", "leader-1@wsj.se", '{"patrol":""}')
+    expect(await cleared.text()).toBe('{"member_no":1300035,"patrol":""}')
+  })
+
+  it("answers anybody but the troop's own leaders as a person who does not exist", async () => {
+    for (const [path, email] of [
+      ["/1300140/patrol", "leader-1@wsj.se"],
+      ["/1100101/patrol", "leader-1@wsj.se"],
+      ["/1300035/patrol", "cmt@wsj.se"],
+      ["/9999999/patrol", "leader-1@wsj.se"],
+    ] as const) {
+      const response = await post(path, email, '{"patrol":"Falken"}')
+      expect(response.status).toBe(404)
+      expect(await response.json()).toEqual({ detail: "Participant not found in project." })
+    }
+  })
+
+  it("collects a bad member number and a patrol that is no string into one refusal", async () => {
+    const response = await post("/x/patrol", "leader-1@wsj.se", '{"patrol":4}')
+
+    expect(response.status).toBe(422)
+    expect(await response.json()).toEqual({
+      detail: [
+        {
+          type: "int_parsing",
+          loc: ["path", "member_id"],
+          msg: "Input should be a valid integer, unable to parse string as an integer",
+          input: "x",
+        },
+        {
+          type: "string_type",
+          loc: ["body", "patrol"],
+          msg: "Input should be a valid string",
+          input: 4,
+        },
+      ],
+    })
+  })
+
+  it("refuses a body that is not a JSON object", async () => {
+    const notJson = await post("/1300035/patrol", "leader-1@wsj.se", "nope")
+    const notObject = await post("/1300035/patrol", "leader-1@wsj.se", "[]")
+
+    expect(notJson.status).toBe(422)
+    expect(notObject.status).toBe(422)
+  })
+
+  it("answers any other method with 405", async () => {
+    const response = await writable.request(`${origin}/api/project/participants/1300035/patrol`, {
+      headers: as("leader-1@wsj.se"),
+    })
+
+    expect(response.status).toBe(405)
+    expect(response.headers.get("Allow")).toBe("POST")
+  })
+})
+
 describe("an adult's name", () => {
   it("is open to a leader by member number, wherever the adult is", async () => {
     const adults: readonly (readonly [string, string])[] = [

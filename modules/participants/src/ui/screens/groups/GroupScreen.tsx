@@ -9,12 +9,13 @@ import {
 import { useMemo, type ReactElement } from "react"
 
 import { istPatrolNumbered } from "../../../model/IstPatrol"
+import { patrolSections } from "../../../model/Patrol"
 import { unitNumbered } from "../../../model/Unit"
 import { istPatrolOf, unitNumberOf } from "../../../model/groups"
 import { useUnitActions } from "../../actions"
 import { UnitCard } from "../../components/unitcard/UnitCard"
 import { counted, personCount } from "../../counted"
-import { PeopleList } from "../participants/PeopleList"
+import { PeopleList, PersonRow } from "../participants/PeopleList"
 import { useLetterJumps } from "../participants/use-letter-jumps"
 import { groupLabel, useGroup } from "./use-groups"
 
@@ -41,6 +42,38 @@ function countOf(count: number, groupKey: string): string {
   return unitNumberOf(groupKey) === undefined ? people : `${people} i avdelningen`
 }
 
+interface GroupedPatrolsProps {
+  /**
+   * The unit's patrols, each with its people.
+   */
+  readonly sections: ReturnType<typeof patrolSections>
+}
+
+/**
+ * A unit grouped by patrol: a heading per patrol with its leader first, and the people in
+ * none closing as "Utan patrull". Plain sections rather than the virtual list – a patrol
+ * is ten people, and the headings are what the outline reads.
+ * @param props The sections to draw.
+ * @returns The grouped sections.
+ */
+function GroupedPatrols(props: GroupedPatrolsProps): ReactElement {
+  return (
+    <>
+      {props.sections.map((section) => (
+        <Card
+          aside={<span aria-hidden="true">{counted(section.people.length)}</span>}
+          key={section.label}
+          title={section.label}
+        >
+          {section.people.map((person) => (
+            <PersonRow isPatrolShown={false} isUnitScoped key={person.memberNo} person={person} />
+          ))}
+        </Card>
+      ))}
+    </>
+  )
+}
+
 export interface GroupScreenProps {
   /**
    * Which group of the groups view to show – a unit number, `"ist-"` and a patrol number,
@@ -51,7 +84,8 @@ export interface GroupScreenProps {
 
 /**
  * One unit, an IST patrol, the IST outside every patrol, or one funktion of the
- * contingent management: the people that group holds.
+ * contingent management: the people that group holds – a unit grouped by patrol once
+ * anybody in it is in one.
  *
  * Read out of the list the section already fetched, so arriving here from the groups view
  * costs no request – and a key no group has is not an error, only a group with nobody in
@@ -108,6 +142,8 @@ export function GroupScreen(props: GroupScreenProps): ReactElement {
     )
   }
 
+  const patrols = unitNumber === undefined ? [] : patrolSections(group.people)
+
   return (
     <>
       <PageTitle title={title} />
@@ -127,19 +163,28 @@ export function GroupScreen(props: GroupScreenProps): ReactElement {
           viewerTheme={cmtTheme}
         />
       )}
-      {/* The outline's stops over the name-sorted rows – declared, because the
-          virtualized rows are not in the document for the outline to scan. */}
-      <PageJumps current={jumps.current} entries={jumps.entries} onJump={jumps.onJump} />
-      <Card aside={<span aria-hidden="true">{counted(group.people.length)}</span>} title="Personer">
-        {/* Scoped, because everybody an entry holds belongs to what it names. */}
-        <PeopleList
-          isUnitScoped
-          onFirstVisibleChange={jumps.onFirstVisible}
-          people={group.people}
-          registerJump={jumps.registerJump}
-          resetKey={props.groupKey}
-        />
-      </Card>
+      {patrols.length > 0 ? (
+        <GroupedPatrols sections={patrols} />
+      ) : (
+        <>
+          {/* The outline's stops over the name-sorted rows – declared, because the
+              virtualized rows are not in the document for the outline to scan. */}
+          <PageJumps current={jumps.current} entries={jumps.entries} onJump={jumps.onJump} />
+          <Card
+            aside={<span aria-hidden="true">{counted(group.people.length)}</span>}
+            title="Personer"
+          >
+            {/* Scoped, because everybody an entry holds belongs to what it names. */}
+            <PeopleList
+              isUnitScoped
+              onFirstVisibleChange={jumps.onFirstVisible}
+              people={group.people}
+              registerJump={jumps.registerJump}
+              resetKey={props.groupKey}
+            />
+          </Card>
+        </>
+      )}
     </>
   )
 }

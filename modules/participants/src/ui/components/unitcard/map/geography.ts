@@ -1,3 +1,4 @@
+import type { Coordinates } from "../../../../model/Patrol"
 import { packedPlaces } from "./places"
 
 /**
@@ -44,6 +45,17 @@ function placeIndex(): ReadonlyMap<string, Place> {
     }),
   )
   return cache.index
+}
+
+/**
+ * Where a home town is on the map – its postort's place. Undefined for a town the table
+ * does not hold, abroad among them.
+ * @param town The home town, as the service sent it.
+ * @returns The place, or undefined when it cannot be placed.
+ */
+export function locateTown(town: string): Coordinates | undefined {
+  const place = placeIndex().get(fold(town))
+  return place === undefined ? undefined : { latitude: place[2], longitude: place[1] }
 }
 
 /**

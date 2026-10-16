@@ -22,9 +22,10 @@ export interface ValidationError {
    */
   readonly input: unknown
   /**
-   * Where the value was looked for – `["query", "infolevel"]`.
+   * Where the value was looked for – `["query", "infolevel"]`, or a position in the body
+   * that did not parse, which pydantic gives as a number.
    */
-  readonly loc: readonly string[]
+  readonly loc: readonly (number | string)[]
   /**
    * The sentence pydantic words the error in.
    */

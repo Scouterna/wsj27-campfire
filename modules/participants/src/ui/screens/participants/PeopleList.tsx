@@ -54,19 +54,24 @@ function placingLine(person: Participant): string {
 
 /**
  * The line under a name. In a list whose people all belong to the same unit, IST patrol,
- * or funktion, saying so says nothing, so where the person comes from takes its place
- * after the role. Anywhere else the line places the person as always, and where they come
- * from follows on a screen wide enough to hold both.
+ * or funktion, saying so says nothing, so their patrol and where they come from take its
+ * place after the role. Anywhere else the line places the person as always, and where
+ * they come from follows on a screen wide enough to hold both.
  * @param person The row's person.
  * @param isUnitScoped Whether every row in the list belongs to the same unit, IST patrol,
  *   or funktion.
+ * @param isPatrolShown Whether the row says the patrol, rather than a heading over it.
  * @returns The row's detail line.
  */
-function rowDetail(person: Participant, isUnitScoped: boolean): RowDetail {
+function rowDetail(person: Participant, isUnitScoped: boolean, isPatrolShown: boolean): RowDetail {
   const from = whereFrom(person)
   if (isUnitScoped) {
-    const role = roleName(person.role)
-    return { always: from === undefined ? role : `${role} · ${from}` }
+    const patrol = isPatrolShown ? person.unitPatrol?.name : undefined
+    return {
+      always: [roleName(person.role), patrol, from]
+        .filter((part) => part !== undefined)
+        .join(" · "),
+    }
   }
   const always = placingLine(person)
   return from === undefined ? { always } : { always, wide: from }
@@ -76,6 +81,11 @@ function rowDetail(person: Participant, isUnitScoped: boolean): RowDetail {
  * The person a `PersonRow` opens onto, and the list it sits in.
  */
 export interface PersonRowProps {
+  /**
+   * Whether the row says the person's patrol within their unit. Left out where the list
+   * already says it in a heading over their group. True when unsaid.
+   */
+  readonly isPatrolShown?: boolean
   /**
    * Whether every row in the list belongs to the same unit, IST patrol, or funktion, so
    * that is left out of the detail line in favor of where the person comes from.
@@ -94,8 +104,8 @@ export interface PersonRowProps {
  * rows unchanged, and a row that stays needs no work.
  */
 export const PersonRow = memo(function PersonRow(props: PersonRowProps): ReactElement {
-  const { isUnitScoped, person } = props
-  const detail = rowDetail(person, isUnitScoped)
+  const { isPatrolShown = true, isUnitScoped, person } = props
+  const detail = rowDetail(person, isUnitScoped, isPatrolShown)
   const avatarNumber = avatarNumberFor(person)
   // A deltagare's age is the fact a leader reaches for, as on the home screen; a grown
   // member's says nothing the row needs.

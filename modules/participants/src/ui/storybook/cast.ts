@@ -1,5 +1,6 @@
 import { istPatrolNumbered } from "../../model/IstPatrol"
 import type { Participant } from "../../model/Participant"
+import type { ParticipantDetail } from "../../model/ParticipantDetail"
 import type { ParticipantsList } from "../../model/ParticipantsList"
 import { unitNumbered } from "../../model/Unit"
 
@@ -420,4 +421,93 @@ export function unitWithHomeTowns(homeTowns: readonly string[]): ParticipantsLis
     }
   })
   return { people, scope: { kind: "unit", unitNumber: 1 } }
+}
+
+// Patrol names as a unit might choose them, dealt round the unit's people below.
+const patrolNames = ["Falkarna", "Uttrarna", "Ugglorna"]
+const genders = ["kvinna", "man", "kvinna", "man", "annat"] as const
+const unitTowns = ["Stockholm", "Uppsala", "Täby", "Nacka", "Solna", "Norrtälje", "Huddinge"]
+
+/**
+ * A unit at its real size, three patrols in and some of its scouts still in none – every
+ * scout with a gender, an age, a kår, and a town, so each patrol has figures to weigh.
+ * @param placed How many of the scouts are in a patrol already, dealt round the patrols
+ *   in turn. The leaders but the fourth lead one each whenever any scout is placed.
+ * @returns Unit 1, divided as far as asked.
+ */
+export function unitInPatrols(placed = 27): ParticipantsList {
+  const people = Array.from({ length: 40 }, (_, index): Participant => {
+    const isLeader = index < 4
+    const scout = index - 4
+    const leads = placed > 0 ? patrolNames.at(index) : undefined
+    const joins = scout < placed ? patrolNames.at(scout % patrolNames.length) : undefined
+    const patrol = isLeader ? leads : joins
+    return {
+      birthDate: isLeader
+        ? "1990-05-01"
+        : `201${String(1 + (index % 3))}-0${String((index % 9) + 1)}-15`,
+      firstName: firstNames[index % firstNames.length] ?? "Ester",
+      gender: genders[index % genders.length] ?? "kvinna",
+      homeTown: unitTowns[index % unitTowns.length] ?? "Stockholm",
+      lastName: lastNames[(index * 7) % lastNames.length] ?? "Dahl",
+      memberGroup: memberGroups[index % memberGroups.length] ?? "Mockåsens scoutkår",
+      memberNo: String(1_600_000 + index),
+      role: isLeader ? "ledare" : "deltagare",
+      unit: unitNumbered(1),
+      ...(patrol !== undefined && { unitPatrol: { name: patrol } }),
+    }
+  })
+  return { people, scope: { kind: "unit", unitNumber: 1 } }
+}
+
+/**
+ * The records of `unitInPatrols` in full, a few of its scouts with needs a leader plans a
+ * patrol around – a serious nut allergy, a special diet, a medication, and a note to the
+ * leaders – and everybody else with none.
+ * @returns The records.
+ */
+export function unitInPatrolsDetails(): readonly ParticipantDetail[] {
+  const vaccinations = {
+    childhoodProgram: true,
+    diphtheria: { kind: "notGiven" },
+    tetanus: { kind: "notGiven" },
+  } as const
+  const needs: ReadonlyMap<number, Pick<ParticipantDetail, "health" | "notes">> = new Map([
+    [
+      5,
+      {
+        health: {
+          foodAllergy: {
+            details: "Jordnötter ger anafylaxi – bär EpiPen.",
+            severities: [{ allergen: "nuts", severity: 5 }],
+          },
+          vaccinations,
+        },
+        notes: [],
+      },
+    ],
+    [8, { health: { diet: { sort: "vegetarian" }, vaccinations }, notes: [] }],
+    [
+      12,
+      {
+        health: {
+          medication: { details: "Astmamedicin vid behov.", managesOwn: true },
+          vaccinations,
+        },
+        notes: [],
+      },
+    ],
+    [
+      20,
+      {
+        health: { vaccinations },
+        notes: [{ audience: "avdelningsledaren", text: "Sover dåligt i stora tält." }],
+      },
+    ],
+  ])
+  return unitInPatrols().people.map((person, index) => ({
+    ...person,
+    contact: { email: "", emergencyContacts: [], phone: "", relatives: [] },
+    ...(needs.get(index) ?? { health: { vaccinations }, notes: [] }),
+  }))
 }

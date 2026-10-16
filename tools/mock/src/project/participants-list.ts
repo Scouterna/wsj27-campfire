@@ -29,9 +29,10 @@ export interface ParticipantRecord {
   readonly participation_type: string
   /**
    * The patrol, as plain text – the Patrull answer, or an IST member's Avdelning answer while
-   * their Patrull is unanswered. Empty when there is neither.
+   * their Patrull is unanswered. Empty when there is neither. The one part of the list that
+   * changes while the mock runs, because a unit's leaders write it.
    */
-  readonly patrol: string
+  patrol: string
   /**
    * The roles minted for the participant at decode time.
    */
