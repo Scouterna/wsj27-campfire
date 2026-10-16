@@ -32,6 +32,7 @@ COPY libraries/ui/package.json libraries/ui/
 COPY libraries/utils/package.json libraries/utils/
 COPY modules/authentication/package.json modules/authentication/
 COPY modules/cases/package.json modules/cases/
+COPY modules/handbook/package.json modules/handbook/
 COPY modules/home/package.json modules/home/
 COPY modules/journey/package.json modules/journey/
 COPY modules/material/package.json modules/material/

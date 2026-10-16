@@ -3,6 +3,7 @@ import type { ReactElement } from "react"
 
 import type { IconProps } from "./IconProps"
 import { BackIcon } from "./set/BackIcon"
+import { BookIcon } from "./set/BookIcon"
 import { ChatIcon } from "./set/ChatIcon"
 import { CheckIcon } from "./set/CheckIcon"
 import { CloseIcon } from "./set/CloseIcon"
@@ -42,6 +43,7 @@ export default meta
 
 const icons: readonly (readonly [string, (props: IconProps) => ReactElement])[] = [
   ["Back", BackIcon],
+  ["Book", BookIcon],
   ["Chat", ChatIcon],
   ["Check", CheckIcon],
   ["Close", CloseIcon],

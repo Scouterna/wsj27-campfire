@@ -72,7 +72,7 @@ export default defineConfig({
         // The worker answers every navigation with the precached shell, which is right
         // for a screen and wrong for anything else the ingress serves on this origin –
         // sign-in and sign-out are full-page navigations to /api/auth, and the CMS lives
-        // under /_services/cms. A shell served in their place means they work only until
+        // under /services/cms. A shell served in their place means they work only until
         // the worker is installed – on a browser's very first visit, and never again.
         navigateFallbackDenylist: [/^\/_services\//, /^\/api\//, /^\/services\//],
       },

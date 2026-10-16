@@ -17,6 +17,7 @@ import {
   useCasesAccess,
   type CasesAccess,
 } from "@scouterna/wsj27-campfire-cases"
+import { handbookRoutes } from "@scouterna/wsj27-campfire-handbook"
 import { HomeScreen } from "@scouterna/wsj27-campfire-home"
 import { host } from "@scouterna/wsj27-campfire-host"
 import { journeyWidgets } from "@scouterna/wsj27-campfire-journey"
@@ -30,6 +31,7 @@ import {
   type Viewer,
 } from "@scouterna/wsj27-campfire-participants"
 import {
+  BookIcon,
   Button,
   Card,
   ChatIcon,
@@ -129,6 +131,7 @@ const screens = guardScreens({
   "/": { Component: HomeScreen, tab: "home" },
   ...authenticationRoutes,
   ...casesRoutes,
+  ...handbookRoutes,
   ...materialRoutes,
   ...participantsRoutes,
 } satisfies Routes)
@@ -172,9 +175,10 @@ interface Grants {
 }
 
 /**
- * The sections, in menu order: home for everyone, the participants and material sections
- * for a leader and for any management function, the cases section for whoever the cases
- * service lets in, and the food section for a leader and the health team – for nobody else.
+ * The sections, in menu order: home for everyone, the participants, material, and handbook
+ * sections for a leader and for any management function, the cases section for whoever the
+ * cases service lets in, and the food section for a leader and the health team – for nobody
+ * else.
  */
 const sections: readonly AppSection[] = [
   { icon: <HomeIcon />, id: "home", isGranted: () => true, label: () => "Hem", path: "/" },
@@ -218,6 +222,13 @@ const sections: readonly AppSection[] = [
     isGranted: ({ roles }) => hasAnyRole(roles, "leader", "cmt"),
     label: materialSectionLabel,
     path: "/material",
+  },
+  {
+    icon: <BookIcon />,
+    id: "handbook",
+    isGranted: ({ roles }) => hasAnyRole(roles, "leader", "cmt"),
+    label: () => "Handbok",
+    path: "/handbook",
   },
 ]
 

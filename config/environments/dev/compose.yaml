@@ -149,6 +149,7 @@ services:
       - web_utils_modules:/campfire/libraries/utils/node_modules
       - web_authentication_modules:/campfire/modules/authentication/node_modules
       - web_cases_modules:/campfire/modules/cases/node_modules
+      - web_handbook_modules:/campfire/modules/handbook/node_modules
       - web_home_modules:/campfire/modules/home/node_modules
       - web_journey_modules:/campfire/modules/journey/node_modules
       - web_material_modules:/campfire/modules/material/node_modules
@@ -165,6 +166,7 @@ volumes:
   web_utils_modules:
   web_authentication_modules:
   web_cases_modules:
+  web_handbook_modules:
   web_home_modules:
   web_journey_modules:
   web_material_modules:

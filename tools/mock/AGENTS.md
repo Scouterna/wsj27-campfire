@@ -2,7 +2,7 @@
 
 Read the [root `AGENTS.md`](../../AGENTS.md) first. This file is what is true only of `tools/mock`, the stand-in for the whole back-end on a developer's machine ([ADR 021](../../docs/decisions/021-develop-against-a-mock-back-end.md)). How it is used is the guidebook's [mock page](../../docs/guidebook/testing/mock.md).
 
-It serves `wsj27-auth-api` under `/api/auth`, `wsj27-project-api` under `/api/project`, a ScoutID stand-in under `/__mock__/scoutid`, and a control surface under `/__mock__`. The two service prefixes are the ones the deployed ingress serves, so an address that works here works against dev unchanged ([ADR 012](../../docs/decisions/012-run-campfire-in-three-environments-on-one-origin.md)). It ships to nobody, and it defines nothing – **it copies what the services' code does**.
+It serves `wsj27-auth-api` under `/api/auth`, `wsj27-project-api` under `/api/project`, the CMS's handbook listing under `/services/cms`, a ScoutID stand-in under `/__mock__/scoutid`, and a control surface under `/__mock__`. The two service prefixes are the ones the deployed ingress serves, so an address that works here works against dev unchanged ([ADR 012](../../docs/decisions/012-run-campfire-in-three-environments-on-one-origin.md)). It ships to nobody, and it defines nothing – **it copies what the services' code does**.
 
 ## Layout
 
@@ -67,6 +67,7 @@ tools/mock/
 
 **A seed is data, not a special case.** Each persona is a file under `seed/personas/`, there for a case rather than for numbers, and listed for the picker in `seed/personas/index.ts` with a description of the case it covers. Add a persona by adding a file and listing it, and by giving them a row in the list of participants if they are in the contingent – never by branching in a route.
 
+- `seed/handbook.json` is the CMS's page listing as it answers one, with a short handbook whose pages carry every kind of block Campfire draws, in the editor's own serialized form. The pages are stored out of reading order, so the reader's ordering is what puts them right.
 - `seed/units.ts` seeds two units, because a leader's boundary needs a unit on each side. Their real names and glyphs come from the web application's own unit identities, not from the mock.
 - `seed/participants/participants.ts` is the list before the service decodes it, every answer keyed by its question. The ledare and kontingentledning rows carry the personas' identities, so a signed-in persona holds the roles their row mints. The holes – a missing mobile number, a missing scout group, a missing home town, a home town abroad – are deliberate.
 - `seed/participants/cmt-roles.csv` is the CMT roster in the columns the service's own tooling writes, so the service's slug rules run on it.
