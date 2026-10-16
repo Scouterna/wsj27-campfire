@@ -46,6 +46,8 @@ The contingent's material – the units' symbols, the logotypes, the templates, 
 
 A leader's own unit's symbols come first, gathered from the folders by the unit's name and grouped by shape and tone, each with every format it exists in. Which animal a unit wears is the surprise, so that card waits for the units' reveal; the symbols stay in the folders either way. A picture opens a larger preview in place, which offers Drive's own viewer only for a document whose picture shows its first page. A download comes from Drive, so the module never holds a file's bytes.
 
+It also makes material: a photo with text on it, in one of the contingent's frames or none, ready for social media. Nothing leaves the device, because the photos are mostly of other people's children, so there is no service behind it and there is not meant to be one. The frames are the module's own artwork, built into the release rather than read from Drive, so a deleted frame is a build error instead of a broken picture. A leader's frames take their unit's color and mark from the design system.
+
 ## The libraries
 
 A library is code that would still make sense in a product that is not Campfire. It depends on no module and no other library.

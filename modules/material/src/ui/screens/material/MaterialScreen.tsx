@@ -1,6 +1,8 @@
 import {
   Button,
   Card,
+  ImageIcon,
+  PageActions,
   PageTitle,
   SearchField,
   unitName,
@@ -25,6 +27,16 @@ import { useMaterial } from "./use-material"
 import "./MaterialScreen.css"
 
 /**
+ * The page's one primary action: putting a photo in the contingent's frames, the one
+ * thing on the page a reader makes rather than fetches.
+ */
+const socialAction = {
+  icon: <ImageIcon size={24} strokeWidth={2.2} />,
+  label: "Skapa bild",
+  link: { to: "/material/skapa-bild" },
+} as const
+
+/**
  * The material start screen: the signed-in leader's own unit's symbols first, then the
  * folders, with a search across everything above them.
  *
@@ -34,6 +46,21 @@ import "./MaterialScreen.css"
  * @returns The screen.
  */
 export function MaterialScreen(): ReactElement {
+  // Declared whatever state the material is in, because the image maker needs nothing
+  // from Drive and still works when the folders cannot be read.
+  return (
+    <>
+      <PageActions action={socialAction} />
+      <MaterialContent />
+    </>
+  )
+}
+
+/**
+ * The start screen's content, by the state the material is in.
+ * @returns The content.
+ */
+function MaterialContent(): ReactElement {
   const { error, isPending, nodes, refetch } = useMaterial()
   const [query, setQuery] = useState("")
   // Every keystroke searches the whole tree, so the results follow the field rather than

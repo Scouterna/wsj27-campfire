@@ -7,12 +7,14 @@ import { ChatIcon } from "./set/ChatIcon"
 import { CheckIcon } from "./set/CheckIcon"
 import { CloseIcon } from "./set/CloseIcon"
 import { CopyIcon } from "./set/CopyIcon"
+import { DownloadIcon } from "./set/DownloadIcon"
 import { FolderIcon } from "./set/FolderIcon"
 import { GenderFemaleIcon } from "./set/GenderFemaleIcon"
 import { GenderMaleIcon } from "./set/GenderMaleIcon"
 import { GenderOtherIcon } from "./set/GenderOtherIcon"
 import { HomeIcon } from "./set/HomeIcon"
 import { IdCardIcon } from "./set/IdCardIcon"
+import { ImageIcon } from "./set/ImageIcon"
 import { MailIcon } from "./set/MailIcon"
 import { MoreIcon } from "./set/MoreIcon"
 import { ParticipantsIcon } from "./set/ParticipantsIcon"
@@ -22,7 +24,11 @@ import { PersonPlusIcon } from "./set/PersonPlusIcon"
 import { PhoneIcon } from "./set/PhoneIcon"
 import { PictureIcon } from "./set/PictureIcon"
 import { PlusIcon } from "./set/PlusIcon"
+import { RotateLeftIcon } from "./set/RotateLeftIcon"
+import { RotateRightIcon } from "./set/RotateRightIcon"
 import { SearchIcon } from "./set/SearchIcon"
+import { TextLargerIcon } from "./set/TextLargerIcon"
+import { TextSmallerIcon } from "./set/TextSmallerIcon"
 
 const meta: Meta = {
   title: "Foundations/Icons",
@@ -36,12 +42,14 @@ const icons: readonly (readonly [string, (props: IconProps) => ReactElement])[] 
   ["Check", CheckIcon],
   ["Close", CloseIcon],
   ["Copy", CopyIcon],
+  ["Download", DownloadIcon],
   ["Folder", FolderIcon],
   ["Gender female", GenderFemaleIcon],
   ["Gender male", GenderMaleIcon],
   ["Gender other", GenderOtherIcon],
   ["Home", HomeIcon],
   ["Id card", IdCardIcon],
+  ["Image", ImageIcon],
   ["Mail", MailIcon],
   ["More", MoreIcon],
   ["Participants", ParticipantsIcon],
@@ -51,7 +59,11 @@ const icons: readonly (readonly [string, (props: IconProps) => ReactElement])[] 
   ["Phone", PhoneIcon],
   ["Picture", PictureIcon],
   ["Plus", PlusIcon],
+  ["Rotate left", RotateLeftIcon],
+  ["Rotate right", RotateRightIcon],
   ["Search", SearchIcon],
+  ["Text larger", TextLargerIcon],
+  ["Text smaller", TextSmallerIcon],
 ]
 
 /**
