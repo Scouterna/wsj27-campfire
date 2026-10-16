@@ -1,0 +1,420 @@
+/* The image maker's layout: the picture, and the controls beside or under it. */
+
+@layer component {
+  /* Measured on the editor rather than the window, because the side menu takes a share
+     of a desktop's width. Named, because the column of frames is a container too, and an
+     unnamed query from inside it would measure the column instead. */
+  .frame-editor {
+    container: frame-editor / inline-size;
+  }
+
+  /* On a phone the tools, the picture, the frames, and the form stack in that order, the
+     tools close over the picture they act on. */
+  .frame-editor-layout {
+    display: grid;
+    gap: var(--spacing-section);
+    grid-template-areas:
+      "tools"
+      "picture"
+      "frames"
+      "form";
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .frame-editor-tools {
+    grid-area: tools;
+    margin-bottom: calc(var(--spacing-group) - var(--spacing-section));
+  }
+
+  .frame-editor-picture {
+    grid-area: picture;
+  }
+
+  /* The picture and the frames speak for themselves on screen, but are still sections
+     of the page – named for the page's outline and for assistive technology, and kept
+     out of sight by clipping rather than hiding, because a display of none is read by
+     nobody. */
+  .frame-editor-heading {
+    clip-path: inset(50%);
+    height: 1px;
+    margin: 0;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+
+  /* Never wider than its column, however many frames the row inside it holds. */
+  .frame-editor-frames {
+    grid-area: frames;
+    min-width: 0;
+  }
+
+  .frame-editor-form {
+    align-content: start;
+    display: grid;
+    gap: var(--spacing-section);
+    grid-area: form;
+  }
+
+  /* Nothing under the picture for a leader, whose unit settles who an image is for, so
+     the row is not there to leave a gap. */
+  .frame-editor-form:empty {
+    display: none;
+  }
+
+  /* The picture and what is laid over it. A container, so the fields over it size their
+     text in shares of the picture, the way the picture itself draws it. */
+  .frame-stage {
+    container-type: inline-size;
+    position: relative;
+  }
+
+  @container frame-editor (min-width: 30rem) {
+    /* The frames' column is exactly as wide as a frame that, with its name, shares the
+       picture's height with the others – worked out from the editor's width, since the
+       picture takes what the column leaves and its height follows its width. The gap
+       between them is then the same at every width, and the column ends on the editor's
+       edge. */
+    .frame-editor-layout {
+      --frame-label: calc(var(--font-size-caption) * 1.25 + 0.4rem);
+
+      grid-template-areas:
+        "tools ."
+        "picture frames"
+        "form form";
+      grid-template-columns:
+        minmax(0, 1fr)
+        calc(
+          (
+              100cqw - var(--spacing-section) - 0.8 * (var(--frame-count) - 1) *
+                var(--spacing-group) - 0.8 * var(--frame-count) * var(--frame-label)
+            ) /
+            (var(--frame-count) + 1)
+        );
+    }
+
+    .frame-editor-frames {
+      display: grid;
+    }
+
+    /* Measured as a box of its own rather than by its frames, so the picture alone decides
+       how tall the row is. */
+    .frame-editor-frames .frame-choice {
+      align-content: start;
+      container-type: size;
+      grid-auto-columns: auto;
+      grid-auto-flow: row;
+      height: 100%;
+    }
+  }
+
+  /* Drawn at the finished image's own size and shown smaller, keeping its 4:5, on the
+     sheet a card is, so what is not chosen yet reads as an empty card. */
+  .frame-canvas {
+    aspect-ratio: 4 / 5;
+    background: var(--color-sheet);
+    border-radius: var(--border-radius-surface);
+    display: block;
+    height: auto;
+    width: 100%;
+  }
+
+  /* Text the reader may move is moved by dragging on the picture, so a finger there
+     drags rather than scrolls the page. Only while there is text to move, so the picture
+     otherwise scrolls like the rest of the page. */
+  .frame-stage-placeable {
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .frame-stage-placeable:active {
+    cursor: grabbing;
+  }
+
+  .frame-canvas:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: 3px;
+  }
+
+  /* The first photo is chosen in the middle of the picture it goes in, between what the
+     screen makes and the promise that the photo stays on the device. */
+  .frame-stage-choose {
+    display: grid;
+    gap: var(--spacing-group);
+    left: 50%;
+    position: absolute;
+    text-align: center;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(92%, 26rem);
+  }
+
+  .frame-stage-lead {
+    color: var(--color-ink);
+    display: grid;
+    font-size: var(--font-size-body);
+    gap: var(--spacing-group);
+    margin-bottom: var(--spacing-section);
+    text-wrap: balance;
+  }
+
+  .frame-stage-lead > p {
+    margin: 0;
+  }
+
+  /* The design system's button fills its container, and here it is one short action under
+     a wider text rather than the text's full width. */
+  .frame-stage-action {
+    justify-self: center;
+    width: min(100%, 15rem);
+  }
+
+  .frame-stage-note {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+  }
+
+  /* What acts on the picture sits on it, as glass so it reads over any photo. */
+  .frame-glass {
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    background: var(--color-glass);
+    border: none;
+    border-radius: var(--border-radius-round);
+    color: var(--color-ink);
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-strong);
+    padding: 0.45rem 0.85rem;
+    position: absolute;
+  }
+
+  .frame-glass:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: 2px;
+  }
+
+  .frame-change {
+    right: 0.75rem;
+    top: 0.75rem;
+  }
+
+  /* A field over the picture, where its slot's text is drawn: at its middle, its size,
+     and its turn, as shares of the picture – a height share is a fifth more than the same
+     width share, because the picture is four wide to five high. Its own letters are clear,
+     so only the caret and the selection show over the picture's drawing of them. */
+  .frame-slot {
+    appearance: none;
+    background: none;
+    border: none;
+    border-radius: 0.25rem;
+    caret-color: #fff;
+    color: transparent;
+    font-family: "Bravely Script", cursive;
+    font-size: calc(var(--size) * 125cqw);
+    height: calc(var(--height) * 125cqw);
+    left: calc(var(--x) * 100%);
+    line-height: 1.15;
+    outline: 1.5px dashed transparent;
+    outline-offset: 0.35rem;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    resize: none;
+    text-align: center;
+    top: calc(var(--y) * 100%);
+    transform: translate(-50%, -50%) rotate(calc(var(--angle) * 1deg));
+    white-space: pre;
+    width: calc(var(--width) * 100cqw);
+  }
+
+  /* Where a slot is empty, selected, or being written in, it shows where it is. */
+  .frame-slot:placeholder-shown,
+  .frame-slot:focus,
+  .frame-slot-selected {
+    outline-color: rgb(255 255 255 / 85%);
+  }
+
+  .frame-slot::placeholder {
+    color: rgb(255 255 255 / 92%);
+    text-shadow: 0 1px 4px rgb(0 0 0 / 45%);
+  }
+
+  .frame-slot::selection {
+    background: rgb(255 255 255 / 35%);
+  }
+
+  /* Movable text is dragged until it is tapped, and only then takes presses itself. */
+  .frame-slot-held {
+    pointer-events: none;
+  }
+
+  /* The button at the other corner of selected text, which removes it. */
+  .frame-remove {
+    align-items: center;
+    background: var(--color-sheet);
+    border: none;
+    border-radius: var(--border-radius-round);
+    box-shadow: 0 1px 4px rgb(0 0 0 / 30%);
+    color: var(--color-ink);
+    cursor: pointer;
+    display: flex;
+    height: 1.75rem;
+    justify-content: center;
+    left: calc(var(--x) * 100%);
+    padding: 0;
+    position: absolute;
+    top: calc(var(--y) * 100%);
+    transform: translate(-50%, -50%);
+    width: 1.75rem;
+  }
+
+  .frame-remove:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: 2px;
+  }
+
+  /* The tools over the picture: adding a text, and sizing, turning, and coloring the
+     selected one, as one row of the same quiet buttons, grouped by what they change. A
+     row that wraps on a phone keeps to the far edge, under the tools it continues. */
+  .text-toolbar {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-group);
+    justify-content: flex-end;
+  }
+
+  .text-tool-group {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .text-tool {
+    align-items: center;
+    background: var(--color-sheet);
+    border: none;
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    cursor: pointer;
+    display: inline-flex;
+    font: inherit;
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-strong);
+    height: 40px;
+    justify-content: center;
+    min-width: 40px;
+    padding: 0 0.6rem;
+  }
+
+  /* Adding a text leads, and the tools for the selected one keep to the far edge. */
+  .text-tool-add {
+    margin-right: auto;
+    padding: 0 var(--spacing-group);
+  }
+
+  .text-tool:disabled {
+    cursor: default;
+    opacity: 0.45;
+  }
+
+  .text-tool:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: 2px;
+  }
+
+  .text-tool-icon {
+    display: flex;
+  }
+
+  /* The colors a text can be set in, each a dot of itself, the one in use ringed. */
+  /* Square, as tall as the other tools, so the round button around the dot is round. */
+  .text-tool-color {
+    padding: 0;
+    width: 40px;
+  }
+
+  .text-tool-swatch {
+    border-radius: var(--border-radius-round);
+    box-shadow: inset 0 0 0 1px var(--color-divider);
+    display: block;
+    height: 1.25rem;
+    width: 1.25rem;
+  }
+
+  .text-tool-color-white .text-tool-swatch {
+    background: #fff;
+  }
+
+  .text-tool-color-black .text-tool-swatch {
+    background: #000;
+  }
+
+  .text-tool-color-theme .text-tool-swatch {
+    background: var(--color-theme-bright);
+  }
+
+  .text-tool-color[aria-pressed="true"] {
+    box-shadow: inset 0 0 0 2px var(--color-theme-ink);
+  }
+
+  /* The color tool, which fans its colors out under itself. */
+  .color-tool {
+    display: inline-flex;
+    position: relative;
+  }
+
+  /* The fan opens down along an arc, evenly either side of the button, with its middle
+     color straight under it. Each color starts folded behind the button and swings out
+     to its place a moment after the one before. */
+  .color-tool-fan {
+    --fan-reach: 4.25rem;
+    --fan-spread: -34deg;
+    --fan-start: 34deg;
+
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+    z-index: 2;
+  }
+
+  .color-tool-fan > .text-tool {
+    box-shadow: 0 2px 8px rgb(26 26 26 / 20%);
+    inset: 0;
+    opacity: 0;
+    position: absolute;
+    transform: scale(0.4);
+    transition:
+      opacity 120ms ease,
+      transform 200ms cubic-bezier(0.2, 0.8, 0.3, 1.2);
+    transition-delay: calc(var(--fan-index) * 30ms);
+  }
+
+  .color-tool-fan-open {
+    pointer-events: auto;
+  }
+
+  .color-tool-fan-open > .text-tool {
+    --fan-turn: calc(var(--fan-start) + var(--fan-index) * var(--fan-spread));
+
+    opacity: 1;
+    transform: rotate(var(--fan-turn)) translateY(var(--fan-reach))
+      rotate(calc(var(--fan-turn) * -1));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .color-tool-fan > .text-tool {
+      transition: none;
+    }
+  }
+
+  .frame-error {
+    color: var(--color-tone-danger-ink);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+    text-align: center;
+  }
+}

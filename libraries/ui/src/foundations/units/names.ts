@@ -56,6 +56,15 @@ const unitNames: ReadonlyMap<number, string> = new Map([
 ])
 
 /**
+ * Every unit the contingent has named, by number, in order. The IST's and the
+ * management's slots are not among them.
+ */
+export const unitNumbers: readonly number[] = unitNames
+  .keys()
+  .toArray()
+  .toSorted((left, right) => left - right)
+
+/**
  * What a unit is called – "Björnen". Which animal a unit wears is a surprise until the
  * units reveal opens, and holding the name back until then is each caller's business.
  * @param unitNumber The unit's number.
