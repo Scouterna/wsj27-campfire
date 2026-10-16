@@ -18,6 +18,12 @@ The client half of the auth service. It asks who is signed in, tries one refresh
 
 It also keeps the session after boot: every read runs under it, and it tells the gate when the session ends or changes owner ([ADR 033](/decisions/033-recover-an-ended-session-at-the-query-client-and-the-gate)). It owns the sign-in screen and the profile page, which carries the way out. Signing out is shared work – the application forgets its query cache, and this module starts the round trip. [Sign in](./example-flows/sign-in) walks it.
 
+## Cases
+
+Follow-ups about one person, for the health team, the management team, or a unit's leaders: a case holding the notes written on it over time, open until it is closed and open again when it is reopened. The list shows the open cases newest first and the closed ones on request, and a person's own cases are reached from their page through entries the application places in the person screen's menu, because the person screen belongs to Participants and no module imports another. Opening a case, renaming it, sharing it, writing a note and attaching its pictures, closing, and reopening are the product's writes, each a plain call followed by a fresh read of the module's own queries ([Data layer](./layers/data#writes)). A picture is made a JPEG no larger than the service keeps on the phone before it is sent, so a camera's photo crosses a slow network as a fraction of its size and its location never leaves the phone.
+
+The names a case shows come from the participants service's listings, which the module reads itself at the basic level – the whole contingent for the management team, a leader's own unit for a leader – since it cannot reach the list the Participants module composes. Who reaches a case is the cases service's to decide, from its type, its secrecy level, and who it is shared with. The module asks the service which types the reader may open, and says on every case who sees it ([Cases service](../context/systems/cases-service)).
+
 ## Home
 
 The start screen. It decides what the screen shows, to whom, and from when, and places other modules' widgets – the countdown, a leader's unit – by id without knowing which module draws them. Until a part of the product is revealed at its moment, the screen counts down to it instead.
@@ -30,7 +36,7 @@ The trip: departure, the camp, and the way home. The dates are fixed and public,
 
 ## Participants
 
-The contingent's list of participants: the list, a person's details, the groups view, and the unit widget on the start screen. It is the only module that reads the list from the participants service. The application tells it who is reading – a leader's unit, or everyone for the contingent management, and whether health answers are theirs to read – and the module composes the list one unit at a time within that scope. It validates every field it receives, because the service's shape will change during the build ([Data layer](./layers/data)).
+The contingent's list of participants: the list, a person's details, the groups view, and the unit widget on the start screen. It is the only module that shows the list the participants service holds. The application tells it who is reading – a leader's unit, or everyone for the contingent management, and whether health answers are theirs to read – and the module composes the list one unit at a time within that scope. It validates every field it receives, because the service's shape will change during the build ([Data layer](./layers/data)).
 
 The list can grow to the contingent's size, so it is virtualized ([ADR 036](/decisions/036-virtualize-a-list-that-can-grow-to-the-contingents-size)). It is also how someone chooses who to write to: the people shown, or their relatives, can be mailed or have their addresses copied, straight from the list as it is searched and narrowed. [Show participants](./example-flows/show-participants) walks a leader's view of their unit.
 

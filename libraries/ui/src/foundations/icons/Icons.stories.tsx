@@ -16,7 +16,12 @@ import { IdCardIcon } from "./set/IdCardIcon"
 import { MailIcon } from "./set/MailIcon"
 import { MoreIcon } from "./set/MoreIcon"
 import { ParticipantsIcon } from "./set/ParticipantsIcon"
+import { PencilIcon } from "./set/PencilIcon"
+import { PersonIcon } from "./set/PersonIcon"
+import { PersonPlusIcon } from "./set/PersonPlusIcon"
 import { PhoneIcon } from "./set/PhoneIcon"
+import { PictureIcon } from "./set/PictureIcon"
+import { PlusIcon } from "./set/PlusIcon"
 import { SearchIcon } from "./set/SearchIcon"
 
 const meta: Meta = {
@@ -40,7 +45,12 @@ const icons: readonly (readonly [string, (props: IconProps) => ReactElement])[] 
   ["Mail", MailIcon],
   ["More", MoreIcon],
   ["Participants", ParticipantsIcon],
+  ["Pencil", PencilIcon],
+  ["Person", PersonIcon],
+  ["Person plus", PersonPlusIcon],
   ["Phone", PhoneIcon],
+  ["Picture", PictureIcon],
+  ["Plus", PlusIcon],
   ["Search", SearchIcon],
 ]
 

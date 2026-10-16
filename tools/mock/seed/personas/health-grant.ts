@@ -10,5 +10,5 @@ export const persona: Persona = {
   familyName: "Holm",
   memberNo: "1200002",
   description:
-    "Support med en personlig behörighet. Ser hälsouppgifter genom behörigheten, inte genom funktionen.",
+    "Support med en personlig behörighet. Ser hälsouppgifter genom behörigheten, inte genom funktionen, men når inga hälsoärenden.",
 }

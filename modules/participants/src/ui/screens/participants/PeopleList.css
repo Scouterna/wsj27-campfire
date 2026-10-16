@@ -1,34 +1,6 @@
-/* The virtual list: the container is as tall as every row would be and the few rows that
-   exist are placed by the virtualizer, so the scrollbar and the scroll position read as
-   one long list. The container's height and each row's offset come from the virtualizer
-   as inline values, because they are per-render measurements no rule could state. */
+/* A person's row in the list of participants. */
 
 @layer component {
-  .people-list {
-    position: relative;
-  }
-
-  .people-row {
-    inset-inline: 0;
-    position: absolute;
-    top: 0;
-  }
-
-  /* The rows are not the card's direct children, so the card's own edge rules do not
-     reach them. The card gives up its vertical padding so the list fills its height, and
-     clips so a pressed edge row is cut to the radius. Selected by what the card holds,
-     because the card takes no class of its own. */
-  .card:has(> .people-list) {
-    overflow: clip;
-    padding-block: 0;
-  }
-
-  /* The divider belongs between rows, so the first one drops it – the rule the card
-     applies to a first child, applied to the first row the virtualizer drew. */
-  .people-row[data-index="0"] .row {
-    border-top: none;
-  }
-
   /* One detail line however long where the person comes from runs, because the rows are
      measured and a line that wrapped would make its row taller than the rest. */
   .person-row small {
