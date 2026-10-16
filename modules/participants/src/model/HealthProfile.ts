@@ -5,6 +5,18 @@
 export type SpecialDiet = "vegetarian" | "vegan" | "halal" | "kosher" | "hinduNoBeef" | "other"
 
 /**
+ * Every special diet, in the order the registration lists them.
+ */
+export const specialDiets: readonly SpecialDiet[] = [
+  "vegetarian",
+  "vegan",
+  "halal",
+  "kosher",
+  "hinduNoBeef",
+  "other",
+]
+
+/**
  * What a special diet is called in Swedish.
  * @param diet The diet to name.
  * @returns The Swedish label.

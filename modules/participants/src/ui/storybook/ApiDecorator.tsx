@@ -26,10 +26,19 @@ export interface ApiParameters extends NetworkParameters {
    */
   readonly list?: ParticipantsList
   /**
-   * What reading the viewer's own unit in full answers with – the records the patrol
-   * editor weighs care by.
+   * What reading one unit in full answers with – the records the patrol editor weighs
+   * care by, and the overview groups by allergen.
    */
-  readonly unitDetails?: readonly ParticipantDetail[]
+  readonly unitDetails?: {
+    /**
+     * The unit's records.
+     */
+    readonly people: readonly ParticipantDetail[]
+    /**
+     * The unit they are read as.
+     */
+    readonly unitNumber: number
+  }
   /**
    * Who is reading. The widest viewer when unsaid.
    */
@@ -48,7 +57,10 @@ export const ApiDecorator = queryDecorator<ApiParameters>({
       client.setQueryData(fetchParticipantsQuery(viewer).queryKey, api.list)
     }
     if (api.unitDetails !== undefined) {
-      client.setQueryData(fetchUnitDetailsQuery(viewer).queryKey, api.unitDetails)
+      client.setQueryData(
+        fetchUnitDetailsQuery(viewer, api.unitDetails.unitNumber).queryKey,
+        api.unitDetails.people,
+      )
     }
     const details = api.details ?? []
     for (const detail of details) {

@@ -42,7 +42,7 @@ export interface UnitCare {
  */
 export function useUnitCare(): UnitCare {
   const viewer = useViewer()
-  const { data, error } = useQuery(fetchUnitDetailsQuery(viewer))
+  const { data, error } = useQuery(fetchUnitDetailsQuery(viewer, viewer.unitNumber))
   const byMemberNo = useMemo(() => {
     const cares = new Map<string, PersonCare>()
     const people = data ?? []

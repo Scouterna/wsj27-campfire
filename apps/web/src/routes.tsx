@@ -39,6 +39,7 @@ import {
   Fab,
   FolderIcon,
   HomeIcon,
+  LeafIcon,
   matchScreen,
   mountRoutes,
   NavigationBar,
@@ -172,8 +173,8 @@ interface Grants {
 
 /**
  * The sections, in menu order: home for everyone, the participants and material sections
- * for a leader and for any management function, and the cases section for whoever the
- * cases service lets in.
+ * for a leader and for any management function, the cases section for whoever the cases
+ * service lets in, and the food section for a leader and the health team – for nobody else.
  */
 const sections: readonly AppSection[] = [
   { icon: <HomeIcon />, id: "home", isGranted: () => true, label: () => "Hem", path: "/" },
@@ -195,6 +196,19 @@ const sections: readonly AppSection[] = [
     isGranted: ({ cases }) => cases.isGranted,
     label: () => casesSectionLabel,
     path: "/cases",
+  },
+  {
+    icon: <LeafIcon />,
+    id: "food",
+    // A leader reads their own unit's health answers, and the health team every unit's –
+    // the management with health among its roles, as the participants service decides it.
+    // Behind the units' reveal, as the participants are.
+    isGranted: ({ isRevealed, roles }) =>
+      (hasAnyRole(roles, "leader") ||
+        (hasAnyRole(roles, "cmt") && hasAnyRole(roles, "health", "healthGrant"))) &&
+      isRevealed(unitsReveal.id),
+    label: () => "Kost",
+    path: "/food",
   },
   {
     icon: <FolderIcon />,

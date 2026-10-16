@@ -1,31 +1,14 @@
-import { Card, Chip, DotMeter, type DotMeterTone } from "@scouterna/wsj27-campfire-ui"
+import { Card, Chip, DotMeter } from "@scouterna/wsj27-campfire-ui"
 import { Fragment, type ReactElement } from "react"
 
-import {
-  allergenName,
-  dietName,
-  type HealthProfile,
-  type Severity,
-} from "../../../model/HealthProfile"
+import { allergenName, dietName, type HealthProfile } from "../../../model/HealthProfile"
+import { severityTone } from "../../severity-tone"
 
 export interface DietSectionProps {
   /**
    * The health profile whose diet and allergies to draw.
    */
   readonly health: HealthProfile
-}
-
-/**
- * The dot color family for a severity: danger for the top of the scale, caution just
- * under it, info for the milder grades.
- * @param severity The graded severity.
- * @returns The tone the meter and its reading wear.
- */
-function severityTone(severity: Severity): DotMeterTone {
-  if (severity >= 5) {
-    return "danger"
-  }
-  return severity === 4 ? "caution" : "info"
 }
 
 interface FreeTextProps {

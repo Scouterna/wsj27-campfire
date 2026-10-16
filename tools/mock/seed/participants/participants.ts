@@ -4,10 +4,11 @@ import type { Participant } from "../../src/types.ts"
  * The contingent's list of participants as wsj27-project-api holds it before it decodes a row –
  * two units of leaders, deltagare, and IST, plus the contingent management. Unit 1's rows are
  * each here for a case: a food allergy with severities, an allergen graded 1 beside them and a
- * food allergy graded 1 across the board, medication with medical equipment, mobility aids, a
- * diagnosis, a mental health condition, a phobia, incomplete vaccinations, special diets, the
- * youngest and oldest deltagare, a leader's record full of holes, and a personal grant beside a
- * function's own. The contact cases sit in unit 2 instead, where they read as the ordinary
+ * food allergy graded 1 across the board, nuts graded by two people at two grades, a food
+ * allergy declared through "Övriga" alone with a description, the diet Annat with one,
+ * medication with medical equipment, mobility aids, a diagnosis, a mental health condition, a
+ * phobia, incomplete vaccinations, special diets, the youngest and oldest deltagare, a leader's
+ * record full of holes, and a personal grant beside a function's own. The contact cases sit in unit 2 instead, where they read as the ordinary
  * thing they are. Alfred Berg's registration froze his mother's address and number as his own.
  * Scoutnet holds no address for Elsa Norén, so the registration's copy is the only one.
  * Scoutnet holds Beata Sjögren's father's address as her own, and the address that is
@@ -188,7 +189,7 @@ export const participants: readonly Participant[] = [
       nextOfKin1Phone: "070-702 77 94",
       nextOfKin1Relation: "Vårdnadshavare",
       specialDiet: "Ingen specialkost",
-      hasFoodAllergy: "Nej",
+      hasFoodAllergy: "Ja",
       hasOtherAllergy: "Nej",
       childhoodVaccinationsComplete: "Ja",
       diphtheriaBoosterAsAdult: "Nej",
@@ -212,6 +213,8 @@ export const participants: readonly Participant[] = [
       medicationStorageNeeded: "Ja",
       medicationStorageDetails: "Inlåst, i originalförpackning.",
       managesOwnMedication: "Nej",
+      foodAllergyNuts: "3",
+      foodAllergyDetails: "Hasselnötter och mandel ger klåda i munnen. Jordnötter går bra.",
       additionalInfoUnitLeader: "Blir lätt åksjuk – behöver sitta långt fram i bussen.",
     },
   },
@@ -235,7 +238,7 @@ export const participants: readonly Participant[] = [
       nextOfKin1Phone: "070-214 56 32",
       nextOfKin1Relation: "Vårdnadshavare",
       specialDiet: "Ingen specialkost",
-      hasFoodAllergy: "Nej",
+      hasFoodAllergy: "Ja",
       hasOtherAllergy: "Nej",
       childhoodVaccinationsComplete: "Ja",
       usesPrescriptionMedication: "Nej",
@@ -250,6 +253,8 @@ export const participants: readonly Participant[] = [
       comfortableInLargeCrowds: "Ja",
       physicalLimitationsDetails: "Opererade knät i våras och undviker längre marscher.",
       mobilityAids: ["Kryckor", "Större tält"],
+      foodAllergyOther: "Ja",
+      foodAllergyDetails: "Kiwi och ananas ger klåda i munnen och svullna läppar.",
     },
   },
   {
@@ -323,7 +328,7 @@ export const participants: readonly Participant[] = [
       nextOfKin2Relation: "Förälder",
       nextOfKin2Phone: "070-875 85 25",
       nextOfKin2Email: "katarina.axelsson@example.se",
-      specialDiet: "Ingen specialkost",
+      specialDiet: "Annat",
       hasFoodAllergy: "Nej",
       hasOtherAllergy: "Nej",
       childhoodVaccinationsComplete: "Ja",
@@ -346,6 +351,7 @@ export const participants: readonly Participant[] = [
       medicationStorageNeeded: "Ja",
       medicationStorageDetails: "Kylskåp, 2–8 grader.",
       managesOwnMedication: "Ja",
+      specialDietDetails: "Äter inte fläskkött.",
     },
   },
   {

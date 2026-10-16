@@ -17,7 +17,11 @@ const meta: Meta<typeof PatrolsScreen> = {
   component: PatrolsScreen,
   decorators: [ScreenDecorator, ApiDecorator],
   parameters: {
-    api: { list: unitInPatrols(), unitDetails: unitInPatrolsDetails(), viewer: leaderOfUnit1 },
+    api: {
+      list: unitInPatrols(),
+      unitDetails: { people: unitInPatrolsDetails(), unitNumber: 1 },
+      viewer: leaderOfUnit1,
+    },
     layout: "fullscreen",
   },
 }
