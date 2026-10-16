@@ -1,5 +1,8 @@
 import type { Address, Routes } from "@scouterna/wsj27-campfire-ui"
 
+import { FoodRoute } from "./ui/screens/food/FoodRoute"
+import { FoodStartRoute } from "./ui/screens/food/FoodStartRoute"
+import { toFoodSearch } from "./ui/screens/food/search"
 import { GroupRoute } from "./ui/screens/groups/GroupRoute"
 import { GroupsScreen } from "./ui/screens/groups/GroupsScreen"
 import { toGroupsSearch } from "./ui/screens/groups/search"
@@ -10,6 +13,17 @@ import { PatrolsScreen } from "./ui/screens/patrols/PatrolsScreen"
 
 declare module "@scouterna/wsj27-campfire-ui" {
   interface RouteRegistry {
+    /**
+     * Diets and food allergies by allergen – a leader's own unit, or the health team's
+     * choice of every unit. It carries the rows left expanded in its search params, so a
+     * return from a person finds them open.
+     */
+    "/food": Address<"participants">
+    /**
+     * One unit's diets and food allergies, by unit number, with the rows left expanded in
+     * its search params as the start screen carries them.
+     */
+    "/food/$unit": Address<"participants">
     /**
      * The list of participants – for a leader, their own unit. It carries its narrowing
      * in its search params, so a narrowed list can be shared and returned to.
@@ -47,6 +61,17 @@ declare module "@scouterna/wsj27-campfire-ui" {
  * is a parameter, which is what keeps a unit from being read as a member number.
  */
 export const participantsRoutes = {
+  "/food": {
+    Component: FoodStartRoute,
+    tab: "food",
+    validateSearch: toFoodSearch,
+  },
+  "/food/$unit": {
+    Component: FoodRoute,
+    parent: "/food",
+    tab: "food",
+    validateSearch: toFoodSearch,
+  },
   "/participants": {
     Component: ParticipantsScreen,
     tab: "participants",

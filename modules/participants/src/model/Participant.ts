@@ -252,6 +252,6 @@ export function belonging(person: Participant): string {
  * @param people The people to order. Left untouched.
  * @returns A new list, in reading order.
  */
-export function inReadingOrder(people: readonly Participant[]): readonly Participant[] {
+export function inReadingOrder<T extends Participant>(people: readonly T[]): readonly T[] {
   return people.toSorted((left, right) => swedish.compare(fullName(left), fullName(right)))
 }

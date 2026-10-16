@@ -31,6 +31,7 @@ import {
   Fab,
   FolderIcon,
   HomeIcon,
+  LeafIcon,
   matchScreen,
   mountRoutes,
   NavigationBar,
@@ -151,8 +152,9 @@ interface AppSection {
 }
 
 /**
- * The sections, in menu order: home for everyone, and the participants, material, and cases
- * sections for a leader and for any management function – for nobody else.
+ * The sections, in menu order: home for everyone, the participants, material, and cases
+ * sections for a leader and for any management function, and the food section for a
+ * leader and the health team – for nobody else.
  */
 const sections: readonly AppSection[] = [
   { icon: <HomeIcon />, id: "home", isGranted: () => true, label: () => "Hem", path: "/" },
@@ -166,6 +168,19 @@ const sections: readonly AppSection[] = [
       hasAnyRole(roles, "leader", "cmt") && isRevealed(unitsReveal.id),
     label: participantsSectionLabel,
     path: "/participants",
+  },
+  {
+    icon: <LeafIcon />,
+    id: "food",
+    // A leader reads their own unit's health answers, and the health team every unit's –
+    // the management with health among its roles, as the participants service decides it.
+    // Behind the units' reveal, as the participants are.
+    isGranted: (roles, isRevealed) =>
+      (hasAnyRole(roles, "leader") ||
+        (hasAnyRole(roles, "cmt") && hasAnyRole(roles, "health", "healthGrant"))) &&
+      isRevealed(unitsReveal.id),
+    label: () => "Kost",
+    path: "/food",
   },
   {
     icon: <FolderIcon />,

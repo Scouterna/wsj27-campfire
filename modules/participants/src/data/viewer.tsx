@@ -68,3 +68,16 @@ export function ViewerProvider(props: ViewerProviderProps): ReactElement {
 export function useViewer(): Viewer {
   return useContext(ViewerContext)
 }
+
+/**
+ * Whether the viewer may read a numbered unit's health answers – their own unit as its
+ * leader, or any unit as the contingent management with a health grant. A health grant
+ * without the management opens nothing beyond a leader's own unit, as the participants
+ * service decides it.
+ * @param viewer Who is reading.
+ * @param unitNumber The unit to read.
+ * @returns True when the unit's answers are the viewer's to read.
+ */
+export function canReadUnitHealth(viewer: Viewer, unitNumber: number): boolean {
+  return viewer.unitNumber === unitNumber || (viewer.readsEveryone && viewer.readsHealth)
+}

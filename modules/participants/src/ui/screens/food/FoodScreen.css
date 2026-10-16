@@ -1,0 +1,246 @@
+/* A unit's diets and food allergies: a card per allergen with its grades split over its
+   people, the rows that open to what each person wrote, and the special diets under them. */
+
+@layer screen {
+  .food-status,
+  .food-unit {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+  }
+
+  .food-note {
+    background: var(--color-tone-caution-wash);
+    border-radius: var(--border-radius-control);
+    color: var(--color-tone-caution-ink);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+    padding: var(--spacing-group) var(--spacing-container);
+  }
+
+  /* One column on a phone. From where two cards fit side by side they do, each keeping
+     its own height, so a long card never stretches the short one beside it. */
+  .food-cards {
+    align-items: start;
+    display: grid;
+    gap: var(--spacing-section);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 768px) {
+    .food-cards {
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+    }
+  }
+
+  /* The diets are a group of their own under the allergens, across the whole grid. */
+  .food-diets {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-group);
+    grid-column: 1 / -1;
+  }
+
+  .food-diets-title {
+    font-size: var(--font-size-heading);
+    font-weight: var(--font-weight-strong);
+    margin: var(--spacing-group) 0 0;
+  }
+
+  .food-card-line {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-entry);
+    margin: 0 0 var(--spacing-group);
+  }
+
+  /* The split: a thin bar of one segment per grade, with the gap that keeps two
+     segments in one tone reading as two, and the same split in words under it. */
+  .food-split {
+    margin-bottom: var(--spacing-group);
+  }
+
+  .food-split-bar {
+    display: flex;
+    gap: 3px;
+    height: 6px;
+  }
+
+  .food-split-segment {
+    border-radius: 3px;
+    flex-basis: 0;
+  }
+
+  .food-tone-caution {
+    background: var(--color-tone-caution-mark);
+  }
+
+  .food-tone-danger {
+    background: var(--color-tone-danger-mark);
+  }
+
+  .food-tone-info {
+    background: var(--color-tone-info-mark);
+  }
+
+  .food-split-caption {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-caption);
+    margin: var(--spacing-stack) 0 0;
+  }
+
+  .food-rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* The first and last rows bleed to the card's top and bottom edges as list rows do,
+     carrying the card's radius themselves so a fill never squares off a corner – and a
+     first row drops the divider, which only belongs between rows. */
+  .card > .food-rows:first-child {
+    margin-top: calc(-1 * var(--card-padding, var(--spacing-section)));
+  }
+
+  .card > .food-rows:first-child > .food-row:first-child,
+  .card > .food-rows:first-child > .food-row:first-child .food-row-button {
+    border-start-end-radius: var(--border-radius-surface);
+    border-start-start-radius: var(--border-radius-surface);
+    border-top: none;
+  }
+
+  .card > .food-rows:last-child {
+    margin-bottom: calc(-1 * var(--card-padding, var(--spacing-section)));
+  }
+
+  .food-row:last-child,
+  .food-row:last-child .food-row-button {
+    border-end-end-radius: var(--border-radius-surface);
+    border-end-start-radius: var(--border-radius-surface);
+  }
+
+  /* A row bleeds to the card's edges as a list row does, so a press fills the row and
+     the divider runs the card's full width. */
+  .food-row {
+    border-top: 1px solid var(--color-divider);
+    container-type: inline-size;
+    margin: 0 calc(-1 * var(--card-padding, var(--spacing-section)));
+  }
+
+  .food-row-button {
+    align-items: center;
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    display: grid;
+    font: inherit;
+    gap: var(--spacing-group);
+    grid-template-columns: 44px minmax(0, 1fr) auto auto;
+    padding: var(--spacing-group) var(--spacing-container);
+    text-align: start;
+    transition: background 120ms ease;
+    width: 100%;
+  }
+
+  @media (hover: hover) {
+    .food-row-button:hover {
+      background: color-mix(in srgb, var(--color-theme-ink) 5%, transparent);
+    }
+  }
+
+  .food-row-button:active {
+    background: color-mix(in srgb, var(--color-theme-ink) 11%, transparent);
+  }
+
+  .food-row-text strong {
+    display: block;
+    font-weight: var(--font-weight-strong);
+  }
+
+  .food-row-text small {
+    color: var(--color-ink-secondary);
+    display: block;
+    font-size: var(--font-size-entry);
+    margin-top: 2px;
+  }
+
+  .food-grade {
+    font-size: var(--font-size-value);
+    font-weight: var(--font-weight-strong);
+    white-space: nowrap;
+  }
+
+  .food-grade-caution {
+    color: var(--color-tone-caution-ink);
+  }
+
+  .food-grade-danger {
+    color: var(--color-tone-danger-ink);
+  }
+
+  .food-grade-info {
+    color: var(--color-tone-info-ink);
+  }
+
+  /* The back glyph turned to point down while closed, and up while open. */
+  .food-row-chevron {
+    color: var(--color-ink-tertiary);
+    display: flex;
+    transform: rotate(-90deg);
+    transition: transform 150ms ease;
+  }
+
+  .food-row-button[aria-expanded="true"] .food-row-chevron {
+    transform: rotate(90deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .food-row-button,
+    .food-row-chevron {
+      transition: none;
+    }
+  }
+
+  /* What they wrote, inset under the name it belongs to. */
+  .food-row-panel {
+    align-items: flex-start;
+    background: var(--color-paper);
+    border-radius: var(--border-radius-control);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-stack);
+    margin: 0 var(--spacing-container) var(--spacing-group)
+      calc(var(--spacing-container) + 44px + var(--spacing-group));
+    padding: var(--spacing-group) var(--spacing-container);
+  }
+
+  .food-row-panel p {
+    font-size: var(--font-size-entry);
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .food-row-link {
+    color: var(--color-theme-ink);
+    font-size: var(--font-size-value);
+    font-weight: var(--font-weight-strong);
+    text-decoration: none;
+  }
+
+  /* At the largest text sizes the grade drops under the name rather than squeeze it. */
+  @container (max-width: 16rem) {
+    .food-row-button {
+      grid-template-columns: 44px minmax(0, 1fr) auto;
+    }
+
+    .food-grade {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    .food-row-chevron {
+      grid-column: 3;
+      grid-row: 1;
+    }
+  }
+}
