@@ -23,12 +23,12 @@ The services run on Scouterna's shared Kubernetes cluster in Azure, set up from 
 
 Campfire's environments all answer on one origin, and the back-end paths are the same in each (Campfire's ADR 012):
 
-| Path                 | Reaches                                                      |
-| -------------------- | ------------------------------------------------------------ |
-| `/api/auth`          | `wsj27-auth-api`, prefix stripped                            |
-| `/api/project`       | `wsj27-project-api`, prefix stripped                         |
-| `/_services/cms`     | `wsj27-cms`, with the base path built into its image         |
-| `/_services/handbok` | The public handbook, rewritten by the CMS onto its own pages |
+| Path                | Reaches                                                      |
+| ------------------- | ------------------------------------------------------------ |
+| `/api/auth`         | `wsj27-auth-api`, prefix stripped                            |
+| `/api/project`      | `wsj27-project-api`, prefix stripped                         |
+| `/services/cms`     | `wsj27-cms`, with the base path built into its image         |
+| `/services/handbok` | The public handbook, rewritten by the CMS onto its own pages |
 
 The dev origin is `campfire.wsj27.scouterna.net`, the staging origin `staging.campfire.wsj27.se`, and the prod origin `campfire.wsj27.se`. Staging has no back-end of its own – its ingress routes to the prod services and ScoutID's production realm. Locally, Caddy stands in for the ingress with the same rules.
 
@@ -43,8 +43,8 @@ The dev origin is `campfire.wsj27.scouterna.net`, the staging origin `staging.ca
 
 `wsj27-cms` is a Payload and Next.js content system, forked from Jamboree 2026's, holding the leader handbook – chapters and ordered pages that editors manage as data, so a new audience is a new chapter rather than a deploy.
 
-- **Reading** the handbook under `/_services/handbok` is public.
-- **Editing** under `/_services/cms` signs in only through `wsj27-auth-api`, on the same host, because the session cookie is scoped to it. Anyone with a `wsj27:cmt` role may edit; others need `wsj27-cms:editor`, and managing users needs `wsj27-cms:admin`.
+- **Reading** the handbook under `/services/handbok` is public.
+- **Editing** under `/services/cms` signs in only through `wsj27-auth-api`, on the same host, because the session cookie is scoped to it. Anyone with a `wsj27:cmt` role may edit; others need `wsj27-cms:editor`, and managing users needs `wsj27-cms:admin`.
 - If the CMS's discovery URL answers with an HTML page rather than JSON, it treats everyone as signed out instead of failing. When everyone appears signed out, check that URL's content type, not its status.
 
 ## Discord

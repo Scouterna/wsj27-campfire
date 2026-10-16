@@ -2,6 +2,23 @@ import { useLayoutEffect, useRef, type ReactElement } from "react"
 
 import "./PageOutline.css"
 
+/**
+ * One entry in the outline: its label alone for a section of the page, or the label with
+ * how deep it sits, for an outline that nests – a chapter's pages under the chapter.
+ */
+export type OutlineEntry =
+  | string
+  | {
+      /**
+       * Whether the entry sits under the one before it, drawn indented and smaller.
+       */
+      readonly isNested: boolean
+      /**
+       * What the entry says.
+       */
+      readonly label: string
+    }
+
 export interface PageOutlineProps {
   /**
    * What the column is called, above the entries. "På denna sida" without one.
@@ -10,9 +27,10 @@ export interface PageOutlineProps {
   /**
    * The page's sections, in the order they appear.
    */
-  readonly entries: readonly string[]
+  readonly entries: readonly OutlineEntry[]
   /**
-   * Which entry the reader is at, by index.
+   * Which entry the reader is at, by index – or -1 for none, where the page is not one
+   * of the entries.
    */
   readonly current: number
   /**
@@ -40,7 +58,11 @@ export function PageOutline(props: PageOutlineProps): ReactElement {
   useLayoutEffect(() => {
     const list = items.current
     const target = list?.querySelectorAll("button").item(current)
-    if (!list || !(target instanceof HTMLElement)) {
+    if (!list) {
+      return
+    }
+    if (!(target instanceof HTMLElement)) {
+      list.style.setProperty("--outline-marker-height", "0px")
       return
     }
     list.style.setProperty("--outline-marker-top", `${String(target.offsetTop)}px`)
@@ -52,20 +74,24 @@ export function PageOutline(props: PageOutlineProps): ReactElement {
       <div className="outline-label">{props.label ?? "På denna sida"}</div>
       <div className="outline-items" ref={items}>
         <span className="outline-marker" />
-        {props.entries.map((entry, index) => (
-          <button
-            // Keyed by position, because two sections may share a heading and the caller
-            // selects by index.
-            key={index}
-            type="button"
-            aria-current={index === props.current ? "true" : undefined}
-            onClick={() => {
-              props.onSelect(index)
-            }}
-          >
-            {entry}
-          </button>
-        ))}
+        {props.entries.map((entry, index) => {
+          const isNested = typeof entry !== "string" && entry.isNested
+          return (
+            <button
+              // Keyed by position, because two sections may share a heading and the
+              // caller selects by index.
+              key={index}
+              className={isNested ? "outline-nested" : undefined}
+              type="button"
+              aria-current={index === props.current ? "true" : undefined}
+              onClick={() => {
+                props.onSelect(index)
+              }}
+            >
+              {typeof entry === "string" ? entry : entry.label}
+            </button>
+          )
+        })}
       </div>
     </aside>
   )

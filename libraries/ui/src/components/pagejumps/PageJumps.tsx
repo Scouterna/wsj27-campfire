@@ -1,5 +1,7 @@
 import { useLayoutEffect, useSyncExternalStore } from "react"
 
+import type { OutlineEntry } from "../pageoutline/PageOutline"
+
 /**
  * The jump entries the current page declared, and who is listening. Module state,
  * because the declaring page and the reading chrome sit on opposite sides of the
@@ -29,11 +31,11 @@ function setPageJumps(next: PageJumpsProps | undefined): void {
 export type PageJumpsProps = {
   /**
    * The stops, in the order the page holds them – the letter ranges of a long list,
-   * for one.
+   * for one, or a handbook's chapters with their pages nested under them.
    */
-  readonly entries: readonly string[]
+  readonly entries: readonly OutlineEntry[]
   /**
-   * The stop the reader is at, by index.
+   * The stop the reader is at, by index, or -1 where the page is none of them.
    */
   readonly current: number
   /**

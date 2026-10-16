@@ -40,6 +40,33 @@ export const Default: Story = {
 }
 
 /**
+ * An outline that nests, the way a handbook's chapters hold their pages – the nested
+ * entries indented and a step quieter.
+ */
+export const Nested: Story = {
+  render: function NestedStory(): ReactElement {
+    const [current, setCurrent] = useState(2)
+
+    return (
+      <div className="story-menu">
+        <PageOutline
+          entries={[
+            "Välkommen",
+            { isNested: true, label: "Vad är handboken?" },
+            { isNested: true, label: "Kontaktinformation" },
+            "Resa",
+            { isNested: true, label: "Resan till WSJ" },
+            { isNested: true, label: "Adresser" },
+          ]}
+          current={current}
+          onSelect={setCurrent}
+        />
+      </div>
+    )
+  },
+}
+
+/**
  * The label over the entries, reworded.
  */
 export const OwnLabel: Story = {

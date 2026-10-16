@@ -30,6 +30,17 @@
 		reverse_proxy localhost:8001
 	}
 
+	# The handbook's CMS runs nowhere locally, so it is read from the deployed dev
+	# environment, which publishes it openly. Only reading works this way – the CMS signs
+	# its editors in through the deployed auth service, whose cookie this origin never
+	# holds. The ingress routes by host, so the request carries the dev origin's rather
+	# than this one's.
+	handle /services/cms/* {
+		reverse_proxy https://campfire.wsj27.scouterna.net {
+			header_up Host {upstream_hostport}
+		}
+	}
+
 	handle {
 		reverse_proxy web:3000
 	}

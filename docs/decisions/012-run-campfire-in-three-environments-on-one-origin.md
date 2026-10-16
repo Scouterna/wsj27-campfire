@@ -21,7 +21,7 @@ From that:
 - **`start:<environment>` brings up a whole environment; `start:<server>` runs one server.** The shells always point at `http://localhost:8000` and take no environment. A shipped shell does bake a remote origin, so `build:android:dev`, `build:apple:prod`, and their siblings exist.
 - **Everything about running Campfire lives in `config/environments/`, one folder per environment.** The folders duplicate rather than share, because a folder that reads top to bottom is worth more than the lines a shared profile would save.
 - **Every back-end has its own prefix under `/api/`, named for it** – `/api/auth`, `/api/project`, and `/api/<name>` for any later one – stripped before the request reaches it. A back-end's services are paths below its prefix, such as `/api/project/participants` and `/api/project/cases`.
-- **`/services/` and `/_services/` are reserved for services that share the origin without being Campfire's back-end**, such as the CMS at `/_services/cms`. Everything outside them and `/api/` is the web application's.
+- **`/services/` and `/_services/` are reserved for services that share the origin without being Campfire's back-end**, such as the CMS at `/services/cms`. Everything outside them and `/api/` is the web application's.
 
 ## Consequences
 
