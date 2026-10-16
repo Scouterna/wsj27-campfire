@@ -2,7 +2,7 @@ import { ScreenDecorator } from "@scouterna/wsj27-campfire-ui"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ApiDecorator } from "../../storybook/ApiDecorator"
-import { unitWithHomeTowns, wholeList } from "../../storybook/cast"
+import { unitInPatrols, unitWithHomeTowns, wholeList } from "../../storybook/cast"
 import { GroupScreen } from "./GroupScreen"
 
 const meta: Meta<typeof GroupScreen> = {
@@ -23,6 +23,14 @@ type Story = StoryObj<typeof GroupScreen>
  * come from, and a count that says where they are.
  */
 export const OneUnit: Story = {}
+
+/**
+ * A unit divided into patrols: a section per patrol with its leader first, and the
+ * people in none closing the list.
+ */
+export const InPatrols: Story = {
+  parameters: { api: { list: unitInPatrols() } },
+}
 
 /**
  * An IST patrol, numbered in the same series as the units but never one of them – no

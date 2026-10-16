@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ApiDecorator } from "../../storybook/ApiDecorator"
-import { unitList, unitWithHomeTowns } from "../../storybook/cast"
+import { unitInPatrols, unitList, unitWithHomeTowns } from "../../storybook/cast"
 import { UnitWidget } from "./UnitWidget"
 
 const meta: Meta<typeof UnitWidget> = {
@@ -144,4 +144,12 @@ export const WithoutHomeTowns: Story = {
   parameters: {
     api: { list: unitWithHomeTowns([]), viewer: leaderOfUnit1 },
   },
+}
+
+/**
+ * A unit divided into patrols: the scouts come a patrol at a time, each patrol's leader
+ * named beside it, and the scouts in none close the patrols.
+ */
+export const InPatrols: Story = {
+  parameters: { api: { list: unitInPatrols(), viewer: { ...leaderOfUnit1, memberNo: "1600000" } } },
 }

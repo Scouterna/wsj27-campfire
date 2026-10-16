@@ -6,6 +6,7 @@ import { toGroupsSearch } from "./ui/screens/groups/search"
 import { ParticipantRoute } from "./ui/screens/participant/ParticipantRoute"
 import { ParticipantsScreen } from "./ui/screens/participants/ParticipantsScreen"
 import { toParticipantsSearch } from "./ui/screens/participants/search"
+import { PatrolsScreen } from "./ui/screens/patrols/PatrolsScreen"
 
 declare module "@scouterna/wsj27-campfire-ui" {
   interface RouteRegistry {
@@ -29,6 +30,10 @@ declare module "@scouterna/wsj27-campfire-ui" {
      * `cmt-` and a funktion.
      */
     "/participants/groups/$group": Address<"participants">
+    /**
+     * A leader's own unit divided into its patrols, where the leader arranges them.
+     */
+    "/participants/patrols": Address<"participants">
   }
 }
 
@@ -38,8 +43,8 @@ declare module "@scouterna/wsj27-campfire-ui" {
  * against.
  *
  * The groups view sits under the list and one group under the view, so back walks the way
- * the reader came – and the view's segment is a literal where a person's is a
- * parameter, which is what keeps a unit from being read as a member number.
+ * the reader came – and the view's segment and the patrols' are literals where a person's
+ * is a parameter, which is what keeps a unit from being read as a member number.
  */
 export const participantsRoutes = {
   "/participants": {
@@ -61,6 +66,11 @@ export const participantsRoutes = {
   "/participants/groups/$group": {
     Component: GroupRoute,
     parent: "/participants/groups",
+    tab: "participants",
+  },
+  "/participants/patrols": {
+    Component: PatrolsScreen,
+    parent: "/participants",
     tab: "participants",
   },
 } satisfies Routes
