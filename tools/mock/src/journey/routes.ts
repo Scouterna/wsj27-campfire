@@ -1,19 +1,8 @@
 import { Hono } from "hono"
 
-import { readBase, type JourneyBase } from "./airtable.ts"
-
-/**
- * A place as the journey answers it.
- */
-interface PlaceJson {
-  readonly city?: string | undefined
-  readonly country?: string | undefined
-  readonly kind?: string | undefined
-  readonly latitude?: number | undefined
-  readonly longitude?: number | undefined
-  readonly name: string
-  readonly timeZone: string
-}
+import { readBase, readTables } from "./airtable.ts"
+import { links, placeLookup, text } from "./fields.ts"
+import { tripPlan, tripTables } from "./trip.ts"
 
 /**
  * The spike's routes under `/api/journey` – a made-up service, since none exists yet. One
@@ -29,8 +18,14 @@ export function journeyRoutes(now: () => number): Hono {
   const app = new Hono()
 
   app.get("/plan", async (context) => {
+    // The trip base, shaped like the contingent's travel spreadsheet, wins where it is set.
+    const tripBase = process.env["AIRTABLE_TRIP_BASE_ID"]
+    if (tripBase !== undefined) {
+      const tables = await readTables(tripBase, tripTables, now())
+      return context.json(tripPlan(tables))
+    }
     const base = await readBase(now())
-    const place = placeLookup(base)
+    const place = placeLookup(base.places)
     const keyOf = new Map(base.units.map((unit) => [unit.id, unitKey(unit.fields)]))
     const unitsOfGroup = new Map<string, string[]>()
     for (const unit of base.units) {
@@ -129,48 +124,4 @@ export function journeyRoutes(now: () => number): Hono {
 function unitKey(fields: Readonly<Record<string, unknown>>): string {
   const kind = fields["Kind"] === "IST-patrull" ? "ist" : "avdelning"
   return `${kind}-${String(fields["Number"])}`
-}
-
-/**
- * Resolves a link field to its first place.
- * @param base The base.
- * @returns A function from a link field's value to the place, or undefined when unlinked.
- */
-function placeLookup(base: JourneyBase): (field: unknown) => PlaceJson | undefined {
-  const byId = new Map(
-    base.places.map((record) => {
-      const fields = record.fields
-      const json: PlaceJson = {
-        city: fields["City"] as string | undefined,
-        country: fields["Country"] as string | undefined,
-        kind: fields["Kind"] as string | undefined,
-        latitude: fields["Latitude"] as number | undefined,
-        longitude: fields["Longitude"] as number | undefined,
-        name: text(fields["Name"]),
-        // A place nobody gave a zone to is read as Swedish, because that is where the
-        // planners are.
-        timeZone: (fields["Time zone"] as string | undefined) ?? "Europe/Stockholm",
-      }
-      return [record.id, json]
-    }),
-  )
-  return (field) => byId.get(links(field)[0] ?? "")
-}
-
-/**
- * The record ids a link field holds.
- * @param value The field's value, absent when nothing is linked.
- * @returns The ids, empty when there are none.
- */
-function links(value: unknown): readonly string[] {
-  return Array.isArray(value) ? value.filter((id): id is string => typeof id === "string") : []
-}
-
-/**
- * A text field's value, empty when the field is.
- * @param value The field's value.
- * @returns The text.
- */
-function text(value: unknown): string {
-  return typeof value === "string" ? value : ""
 }

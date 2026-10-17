@@ -7,7 +7,7 @@
 /**
  * One Airtable record – its id and its fields by name, as the REST API returns them.
  */
-interface AirtableRecord {
+export interface AirtableRecord {
   /**
    * The record id, `rec…`, which link fields hold.
    */
@@ -19,7 +19,12 @@ interface AirtableRecord {
 }
 
 /**
- * The whole base, one array per table.
+ * A base's tables by name, each with every record in it.
+ */
+export type Tables = Readonly<Record<string, readonly AirtableRecord[] | undefined>>
+
+/**
+ * The whole itinerary base, one array per table.
  */
 export interface JourneyBase {
   /**
@@ -53,69 +58,100 @@ export interface JourneyBase {
 }
 
 /**
- * How long a read of the base is reused. Airtable allows five requests a second per base and
+ * How long a read of a base is reused. Airtable allows five requests a second per base and
  * the whole base is a handful of pages, so a short reuse keeps a busy screen inside the limit
  * while an edit in Airtable still shows within the minute.
  */
 const reuseMs = 60_000
 
 /**
- * The last read of the base, shared by every request.
+ * The last read of each base, by base id, shared by every request.
  */
-const cache: { entry?: { readonly at: number; readonly base: Promise<JourneyBase> } | undefined } =
-  {}
+const cache = new Map<string, { readonly at: number; readonly tables: Promise<Tables> }>()
 
 /**
- * Reads the whole base, reusing a read younger than a minute. A failed read is forgotten at
- * once, so the next request asks again rather than serving the failure for a minute.
+ * Reads the itinerary base that `AIRTABLE_BASE_ID` names.
  * @param now The clock, in milliseconds.
  * @returns Every record in every table.
  * @throws {Error} When the token or base id is missing, or Airtable refuses.
  */
 export async function readBase(now: number): Promise<JourneyBase> {
-  if (cache.entry === undefined || now - cache.entry.at > reuseMs) {
-    cache.entry = { at: now, base: forgettingFailure() }
+  const baseId = process.env["AIRTABLE_BASE_ID"]
+  if (baseId === undefined) {
+    throw new Error("AIRTABLE_BASE_ID is not set")
   }
-  return cache.entry.base
+  const tables = await readTables(
+    baseId,
+    ["Exceptions", "Itinerary", "Unit notes", "Places", "Travel groups", "Units", "Updates"],
+    now,
+  )
+  return {
+    exceptions: tables["Exceptions"] ?? [],
+    items: tables["Itinerary"] ?? [],
+    notes: tables["Unit notes"] ?? [],
+    places: tables["Places"] ?? [],
+    travelGroups: tables["Travel groups"] ?? [],
+    units: tables["Units"] ?? [],
+    updates: tables["Updates"] ?? [],
+  }
 }
 
 /**
- * Reads the base, emptying the cache if the read fails.
- * @returns The base.
+ * Reads the named tables of a base, reusing a read younger than a minute. A failed read is
+ * forgotten at once, so the next request asks again rather than serving the failure for a
+ * minute.
+ * @param baseId The base, `app…`.
+ * @param names The tables to read; a base is cached as one read, so every caller of a base
+ * asks for the same tables.
+ * @param now The clock, in milliseconds.
+ * @returns Every record in every table, by table name.
+ * @throws {Error} When the token is missing, or Airtable refuses.
  */
-async function forgettingFailure(): Promise<JourneyBase> {
+export async function readTables(
+  baseId: string,
+  names: readonly string[],
+  now: number,
+): Promise<Tables> {
+  const entry = cache.get(baseId)
+  if (entry !== undefined && now - entry.at <= reuseMs) {
+    return entry.tables
+  }
+  const tables = forgettingFailure(baseId, names)
+  cache.set(baseId, { at: now, tables })
+  return tables
+}
+
+/**
+ * Reads the tables, dropping the base from the cache if the read fails.
+ * @param baseId The base.
+ * @param names The tables.
+ * @returns The tables, by name.
+ */
+async function forgettingFailure(baseId: string, names: readonly string[]): Promise<Tables> {
   try {
-    return await fetchBase()
+    return await fetchTables(baseId, names)
   } catch (error) {
-    cache.entry = undefined
+    cache.delete(baseId)
     throw error
   }
 }
 
 /**
- * Reads every table in parallel.
- * @returns The base.
+ * Reads every named table in parallel.
+ * @param baseId The base.
+ * @param names The tables.
+ * @returns The tables, by name.
  */
-async function fetchBase(): Promise<JourneyBase> {
-  const token = process.env["AIRTABLE_TOKEN"]
-  const baseId = process.env["AIRTABLE_BASE_ID"]
-  if (token === undefined || baseId === undefined) {
-    throw new Error("AIRTABLE_TOKEN and AIRTABLE_BASE_ID are not set")
+async function fetchTables(baseId: string, names: readonly string[]): Promise<Tables> {
+  const token = process.env["AIRTABLE_TOKEN"] ?? ""
+  if (token.length === 0) {
+    throw new Error("AIRTABLE_TOKEN is not set")
   }
-  const [exceptions, items, notes, places, travelGroups, units, updates] = await Promise.all(
-    ["Exceptions", "Itinerary", "Unit notes", "Places", "Travel groups", "Units", "Updates"].map(
-      async (table) => fetchTable(token, baseId, table),
+  return Object.fromEntries(
+    await Promise.all(
+      names.map(async (name) => [name, await fetchTable(token, baseId, name)] as const),
     ),
   )
-  return {
-    exceptions: exceptions ?? [],
-    items: items ?? [],
-    notes: notes ?? [],
-    places: places ?? [],
-    travelGroups: travelGroups ?? [],
-    units: units ?? [],
-    updates: updates ?? [],
-  }
 }
 
 /**
