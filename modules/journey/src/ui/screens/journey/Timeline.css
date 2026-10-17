@@ -1,0 +1,201 @@
+/* The itinerary as one rail, after the journey design: a dashed line down the leading
+   edge, a round node per item on it, small capitals for the days, and the item that
+   covers the moment filled in the theme's dark ink. */
+
+@layer screen {
+  .timeline {
+    --node: 40px;
+    --rail-x: calc(var(--node) / 2);
+
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: relative;
+
+    /* The rail, dashed, behind every node. */
+    &::before {
+      border-inline-start: 2px dashed
+        color-mix(in srgb, var(--color-theme-ink) 30%, var(--color-paper));
+      bottom: var(--node);
+      content: "";
+      inset-inline-start: calc(var(--rail-x) - 1px);
+      position: absolute;
+      top: var(--node);
+    }
+  }
+
+  .timeline-node {
+    align-items: center;
+    background: var(--color-sheet);
+    border: 1.5px solid color-mix(in srgb, var(--color-theme-ink) 35%, var(--color-sheet));
+    border-radius: 50%;
+    color: var(--color-theme-ink);
+    display: flex;
+    flex: none;
+    height: var(--node);
+    justify-content: center;
+    position: relative;
+    width: var(--node);
+  }
+
+  .timeline-node-button {
+    cursor: pointer;
+    padding: 0;
+
+    &[aria-expanded="true"] svg {
+      transform: rotate(180deg);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-theme-bright);
+      outline-offset: 2px;
+    }
+  }
+
+  .timeline-earlier {
+    align-items: center;
+    display: flex;
+    gap: var(--spacing-group);
+    margin-block-end: var(--spacing-section);
+  }
+
+  .timeline-earlier-label {
+    color: var(--color-theme-ink);
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-strong);
+    margin: 0;
+  }
+
+  /* The day: its small capitals sit on the rail's text column, the items under it. */
+  .timeline-day {
+    margin-block-end: var(--spacing-section);
+  }
+
+  .timeline-date {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.14em;
+    margin: 0 0 var(--spacing-group) calc(var(--node) + var(--spacing-group));
+    text-transform: uppercase;
+  }
+
+  .timeline-earlier .timeline-date {
+    margin: 0;
+  }
+
+  .timeline-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-group);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .timeline-item {
+    align-items: start;
+    display: flex;
+    gap: var(--spacing-group);
+  }
+
+  .timeline-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    padding-block-start: 2px;
+  }
+
+  .timeline-meta {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    font-variant-numeric: tabular-nums;
+    margin: 0;
+  }
+
+  .timeline-title {
+    font-size: var(--font-size-entry);
+    font-weight: var(--font-weight-strong);
+    margin: 0;
+  }
+
+  .timeline-where {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+  }
+
+  .timeline-sheet {
+    background: var(--color-sheet);
+    border-radius: var(--border-radius-surface);
+    font-size: var(--font-size-body);
+    margin: var(--spacing-inline) 0 0;
+    padding: var(--spacing-group) var(--spacing-container);
+  }
+
+  /* A delay, beside the time it moved. */
+  .timeline-delay {
+    background: var(--color-tone-caution-wash);
+    border-radius: var(--border-radius-round);
+    color: var(--color-tone-caution-ink);
+    font-weight: var(--font-weight-strong);
+    margin-inline-start: var(--spacing-inline);
+    padding: 1px var(--spacing-inline);
+    white-space: nowrap;
+  }
+
+  /* A note the planners wrote for this unit alone. */
+  .timeline-note {
+    background: var(--color-theme-wash);
+    border-inline-start: 3px solid var(--color-theme-ink);
+    border-radius: var(--border-radius-control);
+    display: flex;
+    flex-direction: column;
+    font-size: var(--font-size-body);
+    gap: 2px;
+    margin: var(--spacing-inline) 0 0;
+    padding: var(--spacing-group) var(--spacing-container);
+
+    & strong {
+      color: var(--color-theme-ink);
+      font-size: var(--font-size-caption);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+  }
+
+  /* What has happened steps back. */
+  .timeline-item-past {
+    opacity: 0.55;
+  }
+
+  /* What covers the moment: the node filled, the body a dark sheet of its own. */
+  .timeline-item-now {
+    & .timeline-node {
+      background: var(--color-theme-ink);
+      border-color: var(--color-theme-ink);
+      box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-theme-ink) 18%, transparent);
+      color: var(--color-theme-on-ink);
+    }
+
+    & .timeline-body {
+      background: var(--color-theme-ink);
+      border-radius: var(--border-radius-surface);
+      color: var(--color-theme-on-ink);
+      padding: var(--spacing-group) var(--spacing-container);
+    }
+
+    & .timeline-meta,
+    & .timeline-where {
+      color: color-mix(in srgb, var(--color-theme-on-ink) 80%, transparent);
+    }
+
+    & .timeline-sheet {
+      background: transparent;
+      margin: 0;
+      padding: 0;
+    }
+  }
+}

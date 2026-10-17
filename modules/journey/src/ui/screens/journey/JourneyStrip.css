@@ -1,0 +1,131 @@
+/* The trip as a strip of days, after the journey design: the road light, the camp deep in
+   the theme's own color, home warm, the days ahead still to fill, and the day looked at
+   raised. */
+
+@layer screen {
+  .journey-strip {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-group);
+    padding: var(--card-padding);
+  }
+
+  .journey-strip-days,
+  .journey-strip-labels {
+    display: grid;
+    gap: 4px;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .journey-strip-day {
+    aspect-ratio: 1 / 1.15;
+    background: transparent;
+    border: 1.5px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    display: block;
+    padding: 0;
+    transition: transform 160ms ease;
+    width: 100%;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-theme-bright);
+      outline-offset: 2px;
+    }
+  }
+
+  /* Days gone: the road light, the camp deep. */
+  .journey-strip-past {
+    &.journey-strip-travel {
+      background: color-mix(in srgb, var(--color-theme-ink) 40%, var(--color-sheet));
+    }
+
+    &.journey-strip-camp {
+      background: color-mix(in srgb, var(--color-theme-ink) 85%, var(--color-sheet));
+    }
+  }
+
+  /* Days ahead: the road an outline still to fill, the camp a tint. */
+  .journey-strip-future {
+    &.journey-strip-travel {
+      border: 1.5px dashed color-mix(in srgb, var(--color-theme-ink) 50%, var(--color-sheet));
+    }
+
+    &.journey-strip-camp {
+      background: color-mix(in srgb, var(--color-theme-ink) 16%, var(--color-sheet));
+    }
+  }
+
+  .journey-strip-home {
+    background: color-mix(in srgb, var(--color-theme-bright) 40%, var(--color-sheet));
+  }
+
+  .journey-strip-today {
+    background: var(--color-theme-ink);
+    box-shadow:
+      0 0 0 2px var(--color-sheet),
+      0 0 0 4px var(--color-theme-ink);
+    transform: scale(1.12);
+
+    &:hover {
+      transform: scale(1.12) translateY(-2px);
+    }
+  }
+
+  .journey-strip-labels {
+    align-items: start;
+
+    & p {
+      display: flex;
+      flex-direction: column;
+      grid-column: span var(--span);
+      margin: 0;
+      min-width: 0;
+    }
+
+    & strong {
+      font-size: var(--font-size-footnote);
+      font-weight: var(--font-weight-strong);
+    }
+
+    & small {
+      color: var(--color-ink-secondary);
+      font-size: var(--font-size-caption);
+    }
+
+    & .journey-strip-label-home {
+      align-items: end;
+      text-align: end;
+    }
+  }
+
+  /* On a phone the labels wrap under the strip rather than sharing its columns. */
+  @media (width < 600px) {
+    .journey-strip-days {
+      gap: 2px;
+    }
+
+    .journey-strip-day {
+      border-radius: 3px;
+    }
+
+    .journey-strip-labels {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-inline) var(--spacing-group);
+
+      & .journey-strip-label-home {
+        align-items: start;
+        text-align: start;
+      }
+    }
+  }
+}

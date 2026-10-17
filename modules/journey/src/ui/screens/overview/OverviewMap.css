@@ -1,0 +1,36 @@
+/* Everyone at once: the region in the theme's colors, a count at every place someone is. */
+
+@layer screen {
+  .overview-map {
+    border-radius: var(--border-radius-surface);
+    display: flex;
+    height: 440px;
+    overflow: hidden;
+  }
+
+  .overview-map-canvas {
+    flex: 1;
+  }
+
+  .overview-spot {
+    align-items: center;
+    background: var(--color-theme-ink);
+    border: 2px solid var(--color-sheet);
+    border-radius: var(--border-radius-round);
+    box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
+    color: var(--color-theme-on-ink);
+    display: flex;
+    font-size: var(--font-size-caption);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--font-weight-strong);
+    justify-content: center;
+    min-width: 2em;
+    padding: 3px 7px;
+    pointer-events: none;
+  }
+
+  .overview-spot-moving {
+    background: var(--color-theme-bright);
+    color: var(--color-theme-on-bright);
+  }
+}

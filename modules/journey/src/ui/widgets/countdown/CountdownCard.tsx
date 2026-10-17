@@ -1,4 +1,4 @@
-import { Card, Chip } from "@scouterna/wsj27-campfire-ui"
+import { BackIcon, Card, Chip } from "@scouterna/wsj27-campfire-ui"
 import type { Travel } from "@scouterna/wsj27-campfire-utils"
 import type { ReactElement } from "react"
 
@@ -253,6 +253,11 @@ export interface CountdownCardProps {
    */
   readonly now: Date
   /**
+   * Whether the card leads somewhere, which puts a chevron after the count. Off by
+   * default.
+   */
+  readonly isLink?: boolean
+  /**
    * Whether the countdown runs to the second rather than the minute, off by default.
    * The caller hands in a moment that moves as often.
    */
@@ -283,7 +288,16 @@ export function CountdownCard(props: CountdownCardProps): ReactElement {
 
   return (
     <Card
-      aside={<Status now={props.now} phase={phase} seconds={props.seconds === true} trip={trip} />}
+      aside={
+        <>
+          <Status now={props.now} phase={phase} seconds={props.seconds === true} trip={trip} />
+          {props.isLink === true ? (
+            <span aria-hidden="true" className="countdown-chevron">
+              <BackIcon size={16} strokeWidth={2.1} />
+            </span>
+          ) : null}
+        </>
+      }
       title="Resan"
     >
       {/* Hidden from assistive technology, because the words already tell the same

@@ -53,6 +53,11 @@ export interface LinkTarget {
    * segment. Left out for an address without parameters.
    */
   readonly params?: Readonly<Record<string, string>>
+  /**
+   * The search params the address carries – a screen's own state, such as which unit
+   * and which moment it shows. Left out for an address without any.
+   */
+  readonly search?: Readonly<Record<string, string>>
 }
 
 /**

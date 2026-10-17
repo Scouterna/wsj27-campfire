@@ -163,4 +163,27 @@
       display: none;
     }
   }
+
+  /* The whole card is the way into the journey, held still – the chevron says it leads
+     somewhere. */
+  .countdown-link {
+    border-radius: var(--border-radius-surface);
+    color: inherit;
+    display: block;
+    text-decoration: none;
+
+    &:focus-visible {
+      outline: 2px solid var(--color-theme-bright);
+      outline-offset: 4px;
+    }
+  }
+
+  /* The chevron after the count, drawn like a list row's. */
+  .countdown-chevron {
+    color: var(--color-ink-tertiary);
+    display: inline-flex;
+    margin-inline-start: var(--spacing-inline);
+    transform: scaleX(-1);
+    vertical-align: middle;
+  }
 }

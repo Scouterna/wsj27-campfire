@@ -273,6 +273,15 @@ importers:
       '@scouterna/wsj27-campfire-utils':
         specifier: workspace:*
         version: link:../../libraries/utils
+      '@tanstack/react-query':
+        specifier: 5.102.8
+        version: 5.102.8(react@19.2.8)
+      '@tanstack/react-router':
+        specifier: 1.170.32
+        version: 1.170.32(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      maplibre-gl:
+        specifier: 6.10.0
+        version: 6.10.0
       react:
         specifier: 19.2.8
         version: 19.2.8

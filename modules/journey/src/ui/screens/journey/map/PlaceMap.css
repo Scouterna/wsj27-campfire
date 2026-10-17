@@ -1,0 +1,17 @@
+/* A small still map of an item's place, in the timeline. It shares the route map's palette,
+   and the land's color stands in for it while it is not built. */
+
+@layer screen {
+  .place-map {
+    background: var(--route-map-land);
+    border-radius: var(--border-radius-surface);
+    display: flex;
+    height: 150px;
+    margin-block-start: var(--spacing-inline);
+    overflow: hidden;
+  }
+
+  .place-map-canvas {
+    flex: 1;
+  }
+}

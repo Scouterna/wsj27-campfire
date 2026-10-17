@@ -5,6 +5,7 @@ import { RoleCache } from "./auth/roles.ts"
 import { authHealth, authRoutes } from "./auth/routes.ts"
 import { controlRoutes } from "./control/routes.ts"
 import { noCache, notFound } from "./fastapi.ts"
+import { journeyRoutes } from "./journey/routes.ts"
 import { generateSigningKey, type SigningKey } from "./keys.ts"
 import { decodeParticipantsList } from "./project/participants-list.ts"
 import { roleMapOf } from "./project/role-map.ts"
@@ -50,6 +51,7 @@ export function createApp(options: MockOptions = {}): Hono {
   app.get("/api/project/", (context) => projectHealth(context))
   app.route("/api/auth", authRoutes({ key, now, roles, scoutId }))
   app.route("/api/project", projectRoutes({ key, now, participantsList }))
+  app.route("/api/journey", journeyRoutes(now))
   app.route("/__mock__/scoutid", scoutIdRoutes(scoutId, roles))
   app.route("/__mock__", controlRoutes(scoutId, roles))
   app.notFound((context) => notFound(context))

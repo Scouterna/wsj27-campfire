@@ -1,0 +1,18 @@
+/* The contingent management's overview. */
+
+@layer screen {
+  .overview-status {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+  }
+
+  .overview-time {
+    align-items: center;
+    color: var(--color-ink-secondary);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-group);
+    margin-block: var(--spacing-section) var(--spacing-group);
+  }
+}

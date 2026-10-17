@@ -1,0 +1,18 @@
+/* The journey maps' palette, mixed from the unit theme's tokens so every map wears the unit's
+   color. The maps read it once when they are built. */
+
+@layer screen {
+  .route-map,
+  .place-map,
+  .overview-map {
+    --route-map-ahead: color-mix(in srgb, var(--color-theme-ink) 55%, var(--color-sheet));
+    --route-map-border: color-mix(in srgb, var(--color-theme-ink) 40%, var(--color-sheet));
+    --route-map-green: color-mix(in srgb, var(--color-theme-bright) 14%, var(--color-sheet));
+    --route-map-halo: var(--color-sheet);
+    --route-map-label: color-mix(in srgb, var(--color-theme-ink) 70%, var(--color-ink));
+    --route-map-land: color-mix(in srgb, var(--color-theme-bright) 5%, var(--color-sheet));
+    --route-map-road: color-mix(in srgb, var(--color-theme-ink) 12%, var(--color-sheet));
+    --route-map-travelled: var(--color-theme-ink);
+    --route-map-water: color-mix(in srgb, var(--color-theme-bright) 30%, var(--color-sheet));
+  }
+}

@@ -10,7 +10,7 @@ import {
 } from "@scouterna/wsj27-campfire-authentication"
 import { HomeScreen } from "@scouterna/wsj27-campfire-home"
 import { host } from "@scouterna/wsj27-campfire-host"
-import { journeyWidgets } from "@scouterna/wsj27-campfire-journey"
+import { journeyRoutes, journeyWidgets } from "@scouterna/wsj27-campfire-journey"
 import {
   participantsRoutes,
   participantsSectionLabel,
@@ -115,6 +115,7 @@ const screens = guardScreens({
   "/": { Component: HomeScreen, tab: "home" },
   ...authenticationRoutes,
   ...participantsRoutes,
+  ...journeyRoutes,
 } satisfies Routes)
 
 /**

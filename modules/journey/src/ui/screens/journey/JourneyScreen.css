@@ -1,0 +1,80 @@
+/* The spike's journey screen. */
+
+@layer screen {
+  .journey-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-group);
+    margin-block-end: var(--spacing-section);
+  }
+
+  .journey-field {
+    display: flex;
+    flex: 1 1 14rem;
+    flex-direction: column;
+    gap: var(--spacing-inline);
+
+    & span {
+      color: var(--color-ink-secondary);
+      font-size: var(--font-size-footnote);
+    }
+
+    & select,
+    & input {
+      background: var(--color-sheet);
+      border: 1px solid var(--color-divider);
+      border-radius: var(--border-radius-control);
+      color: inherit;
+      font: inherit;
+      min-height: 44px;
+      padding: 0 var(--spacing-container);
+    }
+  }
+
+  .journey-overview-link {
+    align-self: end;
+    color: var(--color-theme-ink);
+    font-weight: var(--font-weight-strong);
+    padding-block: var(--spacing-group);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .journey-now {
+    padding: var(--card-padding);
+  }
+
+  .journey-group {
+    color: var(--color-ink-secondary);
+    margin: 0 0 var(--spacing-group);
+  }
+
+  .journey-status {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+  }
+
+  /* Where the unit is beside the map – side by side where there is room, the map under
+     the summary on a phone. */
+  .journey-overview {
+    display: grid;
+    gap: var(--spacing-section);
+    grid-template-columns: minmax(0, 1fr);
+    margin-block: var(--spacing-section);
+
+    @media (width >= 900px) {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    }
+  }
+
+  .journey-map {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    min-height: 320px;
+  }
+}

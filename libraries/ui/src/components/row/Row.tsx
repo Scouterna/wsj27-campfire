@@ -67,7 +67,12 @@ export function Row(props: RowProps): ReactElement {
   const className = props.className === undefined ? "row" : `row ${props.className}`
 
   return props.link ? (
-    <Link className={className} to={props.link.to} params={props.link.params ?? {}}>
+    <Link
+      className={className}
+      params={props.link.params ?? {}}
+      search={props.link.search ?? {}}
+      to={props.link.to}
+    >
       {content}
     </Link>
   ) : (

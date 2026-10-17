@@ -1,5 +1,6 @@
 import type { WidgetFrom } from "@scouterna/wsj27-campfire-ui"
-import { useUser } from "@scouterna/wsj27-campfire-utils"
+import { hasAnyRole, useRoles, useUser } from "@scouterna/wsj27-campfire-utils"
+import { Link } from "@tanstack/react-router"
 import { useRef, type ReactElement } from "react"
 
 import { CountdownCard } from "./CountdownCard"
@@ -28,6 +29,7 @@ declare module "@scouterna/wsj27-campfire-ui" {
  */
 export function CountdownWidget(): ReactElement {
   const travel = useUser()?.travel
+  const isManagement = hasAnyRole(useRoles(), "cmt")
   const isWide = useIsMediaMatched("(min-width: 768px)")
   const isStill = useIsMediaMatched("(prefers-reduced-motion: reduce)")
   const hasSeconds = isWide && !isStill
@@ -36,9 +38,17 @@ export function CountdownWidget(): ReactElement {
   const now = useNow(hasSeconds ? 1000 : 60_000, isOnScreen)
 
   return (
-    // The card takes no ref, so the element the clock watches is the widget's own.
-    <div ref={card}>
-      <CountdownCard now={now} seconds={hasSeconds} travel={travel} />
-    </div>
+    // The card takes no ref, so the element the clock watches is the widget's own. The
+    // whole card opens the journey – the contingent management's overview of everyone, or
+    // a leader's own unit.
+    <Link
+      aria-label="Öppna resan"
+      className="countdown-link"
+      to={isManagement ? "/journey/oversikt" : "/journey"}
+    >
+      <div ref={card}>
+        <CountdownCard isLink now={now} seconds={hasSeconds} travel={travel} />
+      </div>
+    </Link>
   )
 }

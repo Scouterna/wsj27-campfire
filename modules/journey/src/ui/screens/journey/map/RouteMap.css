@@ -1,0 +1,65 @@
+/* The route map: the basemap in the theme's colors, the route over it, and a pulsing dot
+   where the unit is. */
+
+@layer screen {
+  .route-map {
+    border-radius: var(--border-radius-surface);
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* MapLibre's own stylesheet positions this box outside any layer, so its size comes
+     from the flex box around it rather than from a position of its own – and the canvas
+     inside never decides it, or every resize would feed the next. */
+  .route-map-canvas {
+    flex: 1;
+    min-height: 320px;
+  }
+
+  /* Where the unit is: the theme's ink ringed in white, with a ring breathing out of it. */
+  .route-map-here {
+    background: var(--color-theme-ink);
+    border: 3px solid var(--color-sheet);
+    border-radius: 50%;
+    box-shadow: 0 1px 4px rgb(0 0 0 / 30%);
+    display: block;
+    height: 18px;
+    pointer-events: none;
+    width: 18px;
+
+    &::after {
+      animation: route-map-pulse 2.2s ease-out infinite;
+      border: 2px solid var(--color-theme-ink);
+      border-radius: 50%;
+      content: "";
+      inset: -3px;
+      position: absolute;
+    }
+  }
+
+  /* On the road the dot is bright, so a unit between places reads as travelling. */
+  .route-map-here-moving {
+    background: var(--color-theme-bright);
+  }
+
+  @keyframes route-map-pulse {
+    from {
+      opacity: 0.8;
+      transform: scale(1);
+    }
+
+    to {
+      opacity: 0;
+      transform: scale(2.6);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .route-map-here::after {
+      animation: none;
+      opacity: 0;
+    }
+  }
+}
