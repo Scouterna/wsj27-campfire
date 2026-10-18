@@ -36,6 +36,18 @@ export function signInUrl(returnTo: string): string {
 }
 
 /**
+ * Where a sign-out lands to sign straight back in – the sign-in address, made absolute,
+ * because the auth service returns only to an absolute URL. After an impersonation the
+ * sign-out ends only Campfire's session and leaves ScoutID's open, so the sign-in passes
+ * through ScoutID without a prompt and the person is themselves again.
+ * @param returnTo The absolute URL to land on once signed back in.
+ * @returns The absolute sign-in address.
+ */
+export function signBackInUrl(returnTo: string): string {
+  return new URL(signInUrl(returnTo), returnTo).href
+}
+
+/**
  * Leaves for the sign-out round trip – out of this session and of ScoutID's. Landing
  * back on the sign-in screen is the confirmation that it worked; sign-out is a full-page
  * navigation through the auth service, so there is no path where the screen shows
