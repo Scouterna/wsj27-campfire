@@ -23,7 +23,17 @@
     font-size: var(--font-size-value);
   }
 
+  .profile-screen-impersonation {
+    margin-top: var(--spacing-container);
+  }
+
+  /* The ways out, stacked – the way back to the person's own account first while there
+     is one, then the way to somebody else's, then the way out of all of them. */
   .profile-screen-sign-out {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-stack);
     margin-top: var(--spacing-section);
   }
 }
