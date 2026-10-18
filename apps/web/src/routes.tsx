@@ -606,13 +606,15 @@ function BrowserChrome(props: SignedInProps): ReactElement {
  * round trip starts, and the round trip leaves whichever way the wipe ended, because a
  * browser that refuses its own storage must not be able to hold somebody inside a
  * session.
+ * @param returnTo The absolute URL the round trip lands on, which the authentication
+ * module decides.
  * @returns Nothing – the sign-out navigates the document away.
  */
-async function signOutAndForget(): Promise<void> {
+async function signOutAndForget(returnTo: string): Promise<void> {
   try {
     await forgetCache()
   } finally {
-    signOut(location.origin)
+    signOut(returnTo)
   }
 }
 
@@ -635,9 +637,10 @@ async function endSession(setGate: (gate: Gate) => void): Promise<void> {
 /**
  * The way out as the profile page presses it – the same round trip, with nothing to
  * wait for, because it ends by leaving the document.
+ * @param returnTo The absolute URL the round trip lands on.
  */
-function leave(): void {
-  void signOutAndForget()
+function leave(returnTo: string): void {
+  void signOutAndForget(returnTo)
 }
 
 /**

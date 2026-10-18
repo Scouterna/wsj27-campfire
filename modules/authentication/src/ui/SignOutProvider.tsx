@@ -8,7 +8,7 @@ function stay(): void {
   // Nothing to leave.
 }
 
-const SignOutContext = createContext<() => void>(stay)
+const SignOutContext = createContext<(returnTo: string) => void>(stay)
 
 /**
  * The way out, and the subtree that may take it.
@@ -20,9 +20,9 @@ export interface SignOutProviderProps {
   readonly children: ReactNode
   /**
    * Ends the session, forgetting what the application has cached before this module's
-   * sign-out round trip leaves the page.
+   * sign-out round trip leaves the page for the absolute URL it is handed.
    */
-  readonly onSignOut: () => void
+  readonly onSignOut: (returnTo: string) => void
 }
 
 /**
@@ -37,8 +37,9 @@ export function SignOutProvider(props: SignOutProviderProps): ReactElement {
 
 /**
  * The way out the nearest `SignOutProvider` holds.
- * @returns What ends the session, or a function that does nothing outside a provider.
+ * @returns What ends the session and lands on the absolute URL it is handed, or a
+ * function that does nothing outside a provider.
  */
-export function useSignOut(): () => void {
+export function useSignOut(): (returnTo: string) => void {
   return useContext(SignOutContext)
 }
