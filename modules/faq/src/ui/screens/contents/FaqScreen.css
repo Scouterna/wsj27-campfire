@@ -1,0 +1,91 @@
+/* The FAQ's front: the search, the folders, and the hits. */
+
+@layer screen {
+  .faq-search {
+    margin-bottom: var(--spacing-group);
+  }
+
+  /* The folder's number in a tinted tile, in the display face the page titles wear, so
+     the contents read as a table of contents rather than as a list of rows. */
+  .faq-number {
+    align-items: center;
+    aspect-ratio: 1;
+    background: var(--color-theme-wash);
+    border-radius: var(--border-radius-control);
+    color: var(--color-theme-ink);
+    display: flex;
+    font-family: var(--typography-display-font_family);
+    font-size: var(--font-size-display-mini);
+    font-weight: var(--typography-display-font_weight);
+    justify-content: center;
+  }
+
+  /* The offline promise, washed in the theme under the folders. */
+  .faq-offline {
+    background: var(--color-theme-wash);
+    border-radius: var(--border-radius-default);
+    color: var(--color-theme-ink);
+    font-size: var(--font-size-value);
+    margin: var(--spacing-group) 0 0;
+    padding: var(--spacing-group) var(--spacing-container);
+  }
+
+  .faq-source {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: var(--spacing-group) 0 0;
+
+    & a {
+      color: var(--color-theme-ink);
+    }
+  }
+
+  .faq-hits {
+    list-style: none;
+    margin: calc(-1 * var(--card-padding));
+    padding: 0;
+
+    & li + li {
+      border-top: 1px solid var(--color-divider);
+    }
+  }
+
+  /* A hit: the folder it is in and its question, over the passage with the match
+     marked. */
+  .faq-hit {
+    color: var(--color-ink);
+    display: block;
+    font-size: var(--font-size-value);
+    line-height: 1.6;
+    padding: var(--spacing-group) var(--card-padding);
+    text-decoration: none;
+
+    & small {
+      color: var(--color-ink-tertiary);
+      display: block;
+      font-size: var(--font-size-caption);
+      font-weight: var(--font-weight-strong);
+      letter-spacing: 0.14em;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    & strong {
+      display: block;
+      font-weight: var(--font-weight-strong);
+    }
+
+    & mark {
+      background: var(--color-tone-caution-wash);
+      border-radius: 3px;
+      color: var(--color-tone-caution-ink);
+      padding: 0 3px;
+    }
+  }
+
+  @media (hover: hover) {
+    .faq-hit:hover {
+      background: color-mix(in srgb, var(--color-theme-ink) 5%, transparent);
+    }
+  }
+}

@@ -23,6 +23,7 @@ const root = fileURLToPath(new URL("../..", import.meta.url))
 const modules = [
   "authentication",
   "cases",
+  "faq",
   "handbook",
   "home",
   "journey",

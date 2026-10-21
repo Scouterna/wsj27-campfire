@@ -56,6 +56,14 @@ export default defineConfig({
       },
       {
         test: {
+          name: "faq",
+          root: "modules/faq",
+          environment: "node",
+          include: ["src/**/*.test.ts"],
+        },
+      },
+      {
+        test: {
           name: "handbook",
           root: "modules/handbook",
           environment: "node",
