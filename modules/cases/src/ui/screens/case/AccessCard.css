@@ -32,10 +32,6 @@
     margin-left: auto;
   }
 
-  .access-card-head > .button {
-    margin-right: calc(-1 * var(--spacing-container));
-  }
-
   .access-card-shares {
     border-top: 1px solid var(--color-divider);
     display: flex;
@@ -59,10 +55,6 @@
     align-items: center;
     display: flex;
     justify-content: space-between;
-  }
-
-  .access-card-panel-head > .button {
-    margin-right: calc(-1 * var(--spacing-container));
   }
 
   /* What the panel offers, over the people it names. */
@@ -108,11 +100,9 @@
     transform: rotate(90deg);
   }
 
-  /* The way to share with more stands at its own width under the people, its word in line
-     with the rows and only its pressed fill reaching past. */
+  /* The way to share with more stands at its own width under the people. */
   .access-card-shares > .button {
     align-self: flex-start;
-    margin-left: calc(-1 * var(--spacing-container));
     margin-top: var(--spacing-stack);
   }
 

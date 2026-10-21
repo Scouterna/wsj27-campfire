@@ -1,5 +1,5 @@
-/* The composer: the field a note is written in, and who reads it beside the button that
-   adds it at the field's end. */
+/* The composer: one box holding the field a note is written in, the pictures that go
+   with it, and the row of tools along its foot. */
 
 @layer screen {
   /* The field is its own label's target, but the card says what it is by the
@@ -14,20 +14,21 @@
     width: 1px;
   }
 
-  /* Underlined rather than boxed, and growing with what is written, so a long note never
-     scrolls inside a little box of its own. */
+  /* The card is the box, so the field draws nothing of its own. One line until something
+     is written, then growing with it, so a long note never scrolls inside a little box,
+     up to most of a phone's height. */
   .case-compose-field {
     background: transparent;
     border: none;
-    border-bottom: 1px solid var(--color-divider);
     color: var(--color-ink);
+    display: block;
     field-sizing: content;
     font-family: inherit;
     font-size: var(--font-size-body);
     line-height: 1.45;
-    min-height: 64px;
+    max-height: 60dvh;
     outline: none;
-    padding: 0 0 14px;
+    padding: 0;
     resize: none;
     width: 100%;
   }
@@ -36,18 +37,39 @@
     color: var(--color-ink-tertiary);
   }
 
-  /* Who reads the note, then the button that adds it, at the field's end – wrapping onto
-     two lines on a screen too narrow for both rather than squeezing either. */
+  /* The tools along the field's foot, under a line that comes with them: a picture, who
+     reads the note, and at the far end adding it – on one line at any phone's width,
+     because only the choice of reader has words, and it is the one that may shrink. The
+     line keeps the card's padding on both sides, so the row sits as far from it as from
+     the card's edge below. */
+  .case-compose-tools {
+    align-items: center;
+    border-top: 1px solid var(--color-divider);
+    display: flex;
+    gap: var(--spacing-stack);
+    margin-top: var(--card-padding);
+    min-width: 0;
+    padding-top: var(--card-padding);
+  }
+
+  .case-compose-tools .select {
+    min-width: 0;
+  }
+
+  .case-compose-send {
+    margin-left: auto;
+  }
+
+  /* The choices for a note whose pictures did not all arrive, at the card's end. */
   .case-compose-actions {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
     gap: var(--spacing-stack);
     justify-content: flex-end;
-    margin-top: 14px;
+    margin-top: var(--card-padding);
   }
 
-  /* The add button sits at the field's end at its own width, not across the card. */
   .case-compose-actions .button {
     width: auto;
   }
@@ -61,7 +83,7 @@
     flex-wrap: wrap;
     gap: var(--spacing-stack);
     list-style: none;
-    margin: 14px 0 0;
+    margin: var(--spacing-group) 0 0;
     padding: 0;
   }
 
@@ -139,21 +161,12 @@
   .case-compose-stranded {
     color: var(--color-ink-secondary);
     font-size: var(--font-size-footnote);
-    margin: 10px 0 0;
+    margin: var(--spacing-stack) 0 0;
   }
 
   .case-compose-stranded {
     color: var(--color-ink);
     font-size: var(--font-size-body);
-    margin: 0 0 4px;
-  }
-
-  /* Attaching sits at the row's start, away from the button that adds the note. */
-  .case-compose-attach {
-    margin-right: auto;
-  }
-
-  .case-compose-attach .button {
-    padding-left: 0;
+    margin: 0;
   }
 }

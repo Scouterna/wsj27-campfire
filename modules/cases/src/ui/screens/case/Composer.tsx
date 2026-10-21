@@ -2,8 +2,10 @@ import {
   Button,
   CheckIcon,
   CloseIcon,
+  IconButton,
   PictureIcon,
   Select,
+  SendIcon,
   type SelectOption,
 } from "@scouterna/wsj27-campfire-ui"
 import { useCallback, useEffect, useId, useRef, useState, type ReactElement } from "react"
@@ -319,7 +321,7 @@ interface AttachProps {
 function Attach(props: AttachProps): ReactElement {
   const picker = useRef<HTMLInputElement>(null)
   return (
-    <span className="case-compose-attach">
+    <>
       <input
         accept="image/*"
         hidden
@@ -332,25 +334,150 @@ function Attach(props: AttachProps): ReactElement {
         ref={picker}
         type="file"
       />
-      <Button
+      <IconButton
         disabled={props.disabled}
-        icon={<PictureIcon size={18} />}
+        icon={<PictureIcon size={20} />}
         label="Bifoga bild"
         onPress={() => {
           picker.current?.click()
         }}
-        variant="plain"
       />
-    </span>
+    </>
+  )
+}
+
+interface ToolsProps {
+  /**
+   * Whether the note can be added now – it says something, and nothing is on its way.
+   */
+  readonly canAdd: boolean
+  /**
+   * Whether no more pictures may be chosen now.
+   */
+  readonly isAttachDisabled: boolean
+  /**
+   * The level chosen, as the choice's value.
+   */
+  readonly level: string
+  /**
+   * Adds the note.
+   */
+  readonly onAdd: () => void
+  /**
+   * Called with the pictures chosen.
+   */
+  readonly onChoose: (files: readonly File[]) => void
+  /**
+   * Called with the level chosen.
+   */
+  readonly onLevel: (value: string) => void
+  /**
+   * Who may read the note, its case's own level first. With only that one, the choice is
+   * not offered.
+   */
+  readonly options: readonly SelectOption<string>[]
+}
+
+/**
+ * The row along the field's foot: a picture, who reads the note, and the button that adds
+ * it at the far end – icons where words would crowd a phone's width, and the one choice
+ * that needs its words in between.
+ * @param props What each tool does, and whether it can now.
+ * @returns The row.
+ */
+function Tools(props: ToolsProps): ReactElement {
+  return (
+    <div className="case-compose-tools">
+      <Attach disabled={props.isAttachDisabled} onChoose={props.onChoose} />
+      {props.options.length > 1 && (
+        <Select
+          label="Vem ser anteckningen?"
+          onChange={props.onLevel}
+          options={props.options}
+          value={props.level}
+          variant="plain"
+        />
+      )}
+      <span className="case-compose-send">
+        <IconButton
+          disabled={!props.canAdd}
+          icon={<SendIcon size={20} strokeWidth={2.4} />}
+          label="Lägg till anteckning"
+          onPress={props.onAdd}
+          variant="primary"
+        />
+      </span>
+    </div>
+  )
+}
+
+interface NoteFieldProps {
+  /**
+   * The id the field's label carries, which names the composer.
+   */
+  readonly id: string
+  /**
+   * Adds the note, from the keyboard.
+   */
+  readonly onAdd: () => void
+  /**
+   * Called with what is written as it changes.
+   */
+  readonly onChange: (text: string) => void
+  /**
+   * Called as the field takes focus, which brings out the tools.
+   */
+  readonly onOpen: () => void
+  /**
+   * What is written.
+   */
+  readonly value: string
+}
+
+/**
+ * The field a note is written in, under a label spoken rather than shown. Enter starts a
+ * new line, as a note runs to paragraphs; with Ctrl or Cmd it adds the note, for whoever
+ * writes at a keyboard.
+ * @param props What is written, and what writing does.
+ * @returns The label and the field.
+ */
+function NoteField(props: NoteFieldProps): ReactElement {
+  const { id, onAdd, onChange, onOpen, value } = props
+  return (
+    <>
+      <label className="case-compose-label" htmlFor={`${id}-field`} id={id}>
+        Ny anteckning
+      </label>
+      <textarea
+        className="case-compose-field"
+        id={`${id}-field`}
+        onChange={(event) => {
+          onChange(event.target.value)
+        }}
+        onFocus={onOpen}
+        onKeyDown={(event) => {
+          if (event.key !== "Enter" || !(event.metaKey || event.ctrlKey)) {
+            return
+          }
+          event.preventDefault()
+          onAdd()
+        }}
+        placeholder="Skriv en anteckning…"
+        rows={1}
+        value={value}
+      />
+    </>
   )
 }
 
 /**
- * The field a new note is written in, the pictures that go with it, and the button that
- * adds it to the case beside who reads it, where the writer may choose. The choice stays
- * as it was after a note is added, because a writer keeping a run of notes to themselves
- * would otherwise have to remember to ask again each time, and the one they forgot would
- * be read by everyone.
+ * The field a new note is written in, the pictures that go with it, and under them a row
+ * of tools – a picture, who reads the note, and adding it. The row stays out of the way
+ * until the field is first used, so a case that is only being read stays calm, and then
+ * stays for a run of notes. Who reads the note stays as it was
+ * after one is added, because a writer keeping a run of notes to themselves would
+ * otherwise have to remember to ask again each time, and the one they forgot would be
+ * read by everyone.
  *
  * The note is written first and its pictures follow one by one, each tile showing how it
  * went. A picture that does not arrive stays behind with the note already written, offered
@@ -361,6 +488,7 @@ function Attach(props: AttachProps): ReactElement {
 export function Composer(props: ComposerProps): ReactElement {
   const [draft, setDraft] = useState("")
   const [level, setLevel] = useState<SecrecyLevel>(props.caseLevel)
+  const [isOpen, setIsOpen] = useState(false)
   // The note whose pictures did not all arrive, while they wait to be sent again.
   const [stranded, setStranded] = useState<string | undefined>(undefined)
   const pictures = usePictures((noteId) => {
@@ -368,10 +496,6 @@ export function Composer(props: ComposerProps): ReactElement {
     setStranded(noteId)
   })
   const id = useId()
-  const options: readonly SelectOption<string>[] = props.levels.map((candidate) => ({
-    label: noteAudience(candidate, props.caseLevel, props.scope),
-    value: String(candidate),
-  }))
   const files = pictures.chosen.map((item) => item.file)
 
   if (stranded !== undefined) {
@@ -391,19 +515,28 @@ export function Composer(props: ComposerProps): ReactElement {
     )
   }
 
+  const options = props.levels.map((candidate) => ({
+    label: noteAudience(candidate, props.caseLevel, props.scope),
+    value: String(candidate),
+  }))
+  const canAdd = draft.trim() !== "" && !props.isBusy
+  const add = (): void => {
+    if (!canAdd) {
+      return
+    }
+    const chosenLevel = level === props.caseLevel ? undefined : level
+    props.onAdd(draft.trim(), chosenLevel, files, pictures.progress)
+  }
+
   return (
     <section aria-labelledby={id} className="card case-compose">
-      <label className="case-compose-label" htmlFor={`${id}-field`} id={id}>
-        Ny anteckning
-      </label>
-      <textarea
-        className="case-compose-field"
-        id={`${id}-field`}
-        onChange={(event) => {
-          setDraft(event.target.value)
+      <NoteField
+        id={id}
+        onAdd={add}
+        onChange={setDraft}
+        onOpen={() => {
+          setIsOpen(true)
         }}
-        placeholder="Skriv en anteckning…"
-        rows={2}
         value={draft}
       />
       {pictures.chosen.length > 0 && (
@@ -417,33 +550,22 @@ export function Composer(props: ComposerProps): ReactElement {
           {pictures.status}
         </p>
       )}
-      <div className="case-compose-actions">
-        <Attach
-          disabled={props.isBusy || pictures.chosen.length >= picturesPerNote}
+      {(isOpen || draft !== "" || pictures.chosen.length > 0) && (
+        <Tools
+          canAdd={canAdd}
+          isAttachDisabled={props.isBusy || pictures.chosen.length >= picturesPerNote}
+          level={String(level)}
+          onAdd={add}
           onChoose={pictures.choose}
-        />
-        {options.length > 1 && (
-          <Select
-            label="Vem ser anteckningen?"
-            onChange={(value) => {
-              const next = Number(value)
-              if (isSecrecyLevel(next)) {
-                setLevel(next)
-              }
-            }}
-            options={options}
-            value={String(level)}
-          />
-        )}
-        <Button
-          disabled={draft.trim() === "" || props.isBusy}
-          label="Lägg till anteckning"
-          onPress={() => {
-            const chosenLevel = level === props.caseLevel ? undefined : level
-            props.onAdd(draft.trim(), chosenLevel, files, pictures.progress)
+          onLevel={(value) => {
+            const next = Number(value)
+            if (isSecrecyLevel(next)) {
+              setLevel(next)
+            }
           }}
+          options={options}
         />
-      </div>
+      )}
     </section>
   )
 }

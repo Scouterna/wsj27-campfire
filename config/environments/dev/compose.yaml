@@ -26,7 +26,7 @@ services:
   # up with `--build`, so the ref is resolved fresh every start.
   auth:
     build:
-      context: https://github.com/Scouterna/wsj27-auth-api.git#main
+      context: https://github.com/Scouterna/wsj27-auth-api.git#dev
     # The credentials come from the gitignored .env beside this file, which you write and
     # nothing overwrites: OIDC_SERVER, OIDC_CLIENT_ID, and OIDC_CLIENT_SECRET. Everything
     # else is the same on every machine, so it is here where it can be read rather than in

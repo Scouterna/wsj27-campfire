@@ -8,7 +8,8 @@ import "./Button.css"
 /**
  * How loudly a button asks to be pressed: primary for the action a reader takes every
  * time, filled in the theme's ink and filling its row, secondary for one they take now
- * and then, in the menu trigger's glass and hugging its label, and plain for the way back
+ * and then, hugging its label in the menu trigger's glass – or on a card, the theme's
+ * wash – and plain for the way back
  * beside a primary, its label alone in the theme's ink.
  */
 export type ButtonVariant = "plain" | "primary" | "secondary"

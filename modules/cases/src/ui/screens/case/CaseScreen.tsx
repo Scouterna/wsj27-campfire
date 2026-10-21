@@ -13,8 +13,10 @@ import {
   type OverflowMenuItem,
 } from "@scouterna/wsj27-campfire-ui"
 import { useRoles, useUser } from "@scouterna/wsj27-campfire-utils"
+import { useQuery } from "@tanstack/react-query"
 import { useCallback, useId, useState, type ReactElement } from "react"
 
+import { fetchCaseTypesQuery } from "../../../data/fetch-case-types"
 import type { Attachment } from "../../../model/Attachment"
 import { aboutName, scopeOf, type Case } from "../../../model/Case"
 import type { Note } from "../../../model/Note"
@@ -295,7 +297,9 @@ function CaseHistory(
             {entry.noteTitle !== undefined && <strong>{entry.noteTitle}</strong>}
             {entry.body}
             {entry.pictures !== undefined && (
-              <Gallery label="Bilder" placeholder="Bild" pictures={galleryOf(entry.pictures)} />
+              <div className="case-note-pictures">
+                <Gallery label="Bilder" placeholder="Bild" pictures={galleryOf(entry.pictures)} />
+              </div>
             )}
           </TimelineEntry>
         ))}
@@ -359,7 +363,9 @@ function CaseBody(props: CaseBodyProps): ReactElement {
   const [isConfirming, setIsConfirming] = useState(false)
   const [isRenaming, setIsRenaming] = useState(false)
   const roles = useRoles()
-  const isSharable = canShare(item, roles, user?.memberNo)
+  const { data: types } = useQuery(fetchCaseTypesQuery())
+  const reader = { memberNo: user?.memberNo, roles, types }
+  const isSharable = canShare(item, reader)
   const about = item.aboutMemberNo === undefined ? undefined : people?.get(item.aboutMemberNo)
   const name = aboutName(item, people)
 
@@ -411,11 +417,7 @@ function CaseBody(props: CaseBodyProps): ReactElement {
         <Composer
           caseLevel={item.secrecyLevel}
           isBusy={actions.isBusy}
-          levels={noteLevels(
-            item.secrecyLevel,
-            scopeOf(item),
-            isRoleHolder(item, roles, user?.memberNo),
-          )}
+          levels={noteLevels(item.secrecyLevel, scopeOf(item), isRoleHolder(item, reader))}
           onAdd={(text, level, pictures, progress) => {
             actions.addNote({ level, pictures, text, title: item.title }, progress)
           }}

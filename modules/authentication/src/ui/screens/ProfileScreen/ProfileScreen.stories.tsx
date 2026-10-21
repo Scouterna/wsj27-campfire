@@ -8,12 +8,14 @@ import { UserProvider, type User } from "@scouterna/wsj27-campfire-utils"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import type { ReactElement } from "react"
 
+import { ApiDecorator, type ApiParameters } from "../../storybook/ApiDecorator"
+import { admin } from "../../storybook/fixtures"
 import { ProfileScreen } from "./ProfileScreen"
 
 const meta = {
   title: "Modules/Authentication/Screens/ProfileScreen",
   component: ProfileScreen,
-  decorators: [ScreenDecorator],
+  decorators: [ApiDecorator, ScreenDecorator],
   parameters: {
     // A screen fills the frame, because the decorator draws the page surface, so the
     // canvas adds no padded box around it.
@@ -89,6 +91,32 @@ export const Management: Story = {
 export const NobodyInParticular: Story = {
   render: (): ReactElement => (
     <UserProvider user={nobodyInParticular}>
+      <ProfileScreen />
+    </UserProvider>
+  ),
+}
+
+export const ManagementOfferedToImpersonate: Story = {
+  parameters: { api: { offered: true } satisfies ApiParameters },
+  render: (): ReactElement => (
+    <UserProvider user={admin}>
+      <ProfileScreen />
+    </UserProvider>
+  ),
+}
+
+export const ShowingCampfireAsSomebodyElse: Story = {
+  // The page's own memory of the impersonation it started, which is all that tells the
+  // profile page to offer the way back.
+  beforeEach: () => {
+    localStorage.setItem("campfire-impersonation", leader.memberNo)
+    return () => {
+      localStorage.removeItem("campfire-impersonation")
+    }
+  },
+  parameters: { api: { offered: true } satisfies ApiParameters },
+  render: (): ReactElement => (
+    <UserProvider user={leader}>
       <ProfileScreen />
     </UserProvider>
   ),

@@ -45,6 +45,9 @@ describe("saying who sees a case", () => {
     expect(whoSees({ ...opened, troop: "7", type: "avdelning" }, undefined, undefined)).toBe(
       "Alla ledare i avdelning 7 ser ärendet.",
     )
+    expect(whoSees({ ...opened, type: "säkerhet" }, undefined, undefined)).toBe(
+      "Hela gruppen Säkerhet ser ärendet.",
+    )
   })
 
   it("says that a level 4 case cannot be shared", () => {
@@ -107,6 +110,14 @@ describe("who sharing a case would let in", () => {
   it("offers any leader or member of CMT a health case", () => {
     expect(canBeSharedWith(opened, anders)).toBe(true)
     expect(canBeSharedWith(opened, karin)).toBe(true)
+  })
+
+  it("offers a case of a type it does not know as it offers a health case", () => {
+    const safety = { ...opened, type: "säkerhet" } as const
+
+    expect(canBeSharedWith(safety, anders)).toBe(true)
+    expect(canBeSharedWith(safety, karin)).toBe(true)
+    expect(canBeSharedWith(safety, ester)).toBe(false)
   })
 
   it("offers CMT a private CMT case, which they do not see", () => {

@@ -3,6 +3,21 @@ import { describe, expect, it } from "vitest"
 import { isSecrecyLevel, levelChoice, levelsFor, noteAudience, noteLevels } from "./SecrecyLevel"
 
 describe("offering a level", () => {
+  it("says under each level who sees the case and who it can be shared with", () => {
+    expect(levelChoice(3, { type: "cmt" }).description).toBe(
+      "Alla i CMT ser ärendet. Du kan också dela det med ledarna i personens avdelning.",
+    )
+    expect(levelChoice(4, { type: "hälsa" }).description).toBe(
+      "Alla i hälsoteamet ser ärendet, men det kan aldrig delas med någon annan.",
+    )
+    expect(levelChoice(5, { type: "avdelning", unitNumber: 7 }).description).toBe(
+      "Ingen annan ser ärendet förrän du delar det med en annan ledare i avdelningen.",
+    )
+    expect(levelChoice(3, { type: "säkerhet" }).description).toBe(
+      "Alla i gruppen Säkerhet ser ärendet. Du kan också dela det med enskilda ledare och CMT.",
+    )
+  })
+
   it("names who sees the case at each level, for the case's own group", () => {
     const unit = { type: "avdelning", unitNumber: 7 } as const
 
@@ -11,6 +26,14 @@ describe("offering a level", () => {
     expect(levelChoice(4, { type: "cmt" }).title).toBe("Bara CMT")
     expect(levelChoice(4, unit).title).toBe("Bara ledarna i avdelning 7")
     expect(levelChoice(5, unit).title).toBe("Bara du")
+  })
+
+  it("names a type it does not know by its group", () => {
+    const safety = { type: "säkerhet" }
+
+    expect(levelChoice(3, safety).title).toBe("Gruppen Säkerhet")
+    expect(levelChoice(4, safety).title).toBe("Bara gruppen Säkerhet")
+    expect(noteAudience(4, 3, safety)).toBe("Bara gruppen Säkerhet")
   })
 })
 
@@ -41,10 +64,10 @@ describe("the levels a note may be written at", () => {
   })
 
   it("names who reads a note at each level", () => {
-    expect(noteAudience(3, 3, { type: "hälsa" })).toBe("Alla")
+    expect(noteAudience(3, 3, { type: "hälsa" })).toBe("Alla som ser ärendet")
     expect(noteAudience(4, 3, { type: "hälsa" })).toBe("Bara hälsoteamet")
     expect(noteAudience(5, 3, { type: "hälsa" })).toBe("Bara du")
-    expect(noteAudience(4, 4, { type: "cmt" })).toBe("Alla")
+    expect(noteAudience(4, 4, { type: "cmt" })).toBe("Alla som ser ärendet")
   })
 })
 
@@ -53,5 +76,6 @@ describe("the levels a case may be opened at", () => {
     expect(levelsFor({ type: "hälsa" })).toEqual([3, 4, 5])
     expect(levelsFor({ type: "cmt" })).toEqual([3, 4, 5])
     expect(levelsFor({ type: "avdelning", unitNumber: 1 })).toEqual([3, 5])
+    expect(levelsFor({ type: "säkerhet" })).toEqual([3, 4, 5])
   })
 })

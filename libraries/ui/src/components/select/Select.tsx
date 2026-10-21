@@ -19,6 +19,13 @@ export interface SelectOption<T extends string> {
 }
 
 /**
+ * How a select stands among the controls beside it: filled in the theme's wash as a pill
+ * of its own, or plain – its answer and chevron alone – where the actions around it should
+ * carry the weight.
+ */
+export type SelectVariant = "filled" | "plain"
+
+/**
  * The choices, the one in force, and what choosing does.
  */
 export interface SelectProps<T extends string> {
@@ -39,6 +46,10 @@ export interface SelectProps<T extends string> {
    * The value in force.
    */
   readonly value: T
+  /**
+   * How it stands among the controls beside it, filled by default.
+   */
+  readonly variant?: SelectVariant | undefined
 }
 
 /**
@@ -50,7 +61,7 @@ export interface SelectProps<T extends string> {
  */
 export function Select<T extends string>(props: SelectProps<T>): ReactElement {
   return (
-    <span className="select">
+    <span className={props.variant === "plain" ? "select select-plain" : "select"}>
       <select
         aria-label={props.label}
         className="select-field"

@@ -1,4 +1,4 @@
-import { capitalized, holdersOf, type CaseScope } from "./CaseType"
+import { capitalized, profileOf, wordsOf, type CaseScope } from "./CaseType"
 
 /**
  * How far a case reaches beyond its creator, fixed when it is opened: 3 for everyone the
@@ -14,14 +14,13 @@ export type SecrecyLevel = 3 | 4 | 5
 export const secrecyLevels: readonly SecrecyLevel[] = [3, 4, 5]
 
 /**
- * The levels a case of a scope may be opened at, the widest first. A unit's case leaves
- * out its role alone, because a unit's leaders are few and all of them read the unit's
- * cases, so shutting out everyone else it could be shared with says nothing a leader needs.
+ * The levels a case of a scope may be opened at, the widest first, as its type's profile
+ * says.
  * @param scope The case's scope.
  * @returns The levels.
  */
 export function levelsFor(scope: CaseScope): readonly SecrecyLevel[] {
-  return scope.type === "avdelning" ? secrecyLevels.filter((level) => level !== 4) : secrecyLevels
+  return profileOf(scope.type).levels
 }
 
 /**
@@ -59,31 +58,22 @@ export interface LevelChoice {
  * @returns The heading and the sentence under it.
  */
 export function levelChoice(level: SecrecyLevel, scope: CaseScope): LevelChoice {
-  if (level === 3) {
-    return {
-      description: "Det vanliga. Ärendet kan också delas med enskilda personer.",
-      title: capitalized(holdersOf(scope)),
-    }
-  }
-  if (level === 4) {
-    return {
-      description: "Ärendet kan aldrig delas med någon annan.",
-      title: `Bara ${holdersOf(scope)}`,
-    }
-  }
-  return {
-    description: "Ingen annan ser ärendet, om du inte delar det.",
-    title: "Bara du",
-  }
+  const words = wordsOf(scope)
+  const titles = new Map<SecrecyLevel, string>([
+    [3, capitalized(words.group)],
+    [4, `Bara ${words.group}`],
+    [5, "Bara du"],
+  ])
+  return { description: words.described.get(level) ?? "", title: titles.get(level) ?? "" }
 }
 
 /**
  * The levels a note may be written at on a case, its own first: never below the case's,
- * the role alone only on a case open to more than its role, only to one of its role
- * holders, and never on a unit's case, and the author alone on any case not already that
+ * none its type does not offer, the role alone only on a case open to more than its role
+ * and only to one of its role holders, and the author alone on any case not already that
  * private.
  * @param caseLevel The case's level, which a note may not be below.
- * @param scope The case's scope, since a unit's case offers no level its own does not.
+ * @param scope The case's scope, whose type offers the levels.
  * @param isRoleHolder Whether the writer holds the case's role, since someone it is only
  * shared with may not shut the others out.
  * @returns The levels, from the case's own upward.
@@ -113,7 +103,7 @@ export function noteAudience(
   scope: CaseScope,
 ): string {
   if (level === caseLevel) {
-    return "Alla"
+    return "Alla som ser ärendet"
   }
-  return level === 4 ? `Bara ${holdersOf(scope)}` : "Bara du"
+  return level === 4 ? `Bara ${wordsOf(scope).group}` : "Bara du"
 }

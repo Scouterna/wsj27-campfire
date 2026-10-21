@@ -1,4 +1,11 @@
-import { allHoldersOf, capitalized, holdersOf, type CaseScope, type CaseType } from "./CaseType"
+import {
+  allHoldersOf,
+  capitalized,
+  holdersOf,
+  profileOf,
+  type CaseScope,
+  type ShareAudience,
+} from "./CaseType"
 import { nameOf, unitNumberOf, type People, type Person } from "./Person"
 import type { SecrecyLevel } from "./SecrecyLevel"
 
@@ -61,7 +68,7 @@ export interface Case {
   /**
    * What the case is kept for, which decides whose role reaches it.
    */
-  readonly type: CaseType
+  readonly type: string
 }
 
 /**
@@ -79,12 +86,12 @@ export function aboutName(item: Case, people: People | undefined): string {
 }
 
 /**
- * The scope a case was opened in – its type, and for a unit's case the unit.
+ * The scope a case was opened in – its type, and for a type bound to a unit the unit.
  * @param item The case.
  * @returns The scope.
  */
 export function scopeOf(item: Case): CaseScope {
-  return item.type === "avdelning" && /^\d+$/u.test(item.troop)
+  return profileOf(item.type).isUnitBound && /^\d+$/u.test(item.troop)
     ? { type: item.type, unitNumber: Number(item.troop) }
     : { type: item.type }
 }
@@ -126,31 +133,33 @@ export function unitOfCase(item: Case): number | undefined {
 }
 
 /**
+ * Who a case may be shared with as it stands – while it is private to its creator, or while
+ * it is open to its type's role – as its type's profile says.
+ * @param item The case.
+ * @returns The people it may go to, by who they are to it.
+ */
+export function shareAudiencesOf(item: Case): readonly ShareAudience[] {
+  const { sharesWith } = profileOf(item.type)
+  return item.secrecyLevel === 5 ? sharesWith.private : sharesWith.open
+}
+
+/**
  * Whether a case may be shared with someone, and would let them in – never anyone who sees
- * it already, and only the people the case is closest to:
- *
- * - A unit's case stays within its unit: the unit's other leaders, and only while it is
- *   private, since otherwise they see it already.
- * - A CMT case goes to the leaders of the unit its person is in, since all of CMT sees it
- *   already – and while it is private, to the rest of CMT as well.
- * - A health case goes to any leader or member of CMT, the only people the cases service
- *   lets open a case at all. Who holds the health team's role is not in the list of
- *   participants, so nobody offered can be known to see it already.
+ * it already, and only the people its type's profile names: any leader, a leader of the
+ * case's own unit, or anyone in CMT.
  * @param item The case.
  * @param person Someone it could be shared with.
  * @returns True when the case may be shared with them.
  */
 export function canBeSharedWith(item: Case, person: Person): boolean {
-  const scope = scopeOf(item)
-  const isUnitLeader =
-    person.role === "ledare" &&
-    unitOfCase(item) !== undefined &&
-    unitNumberOf(person) === unitOfCase(item)
-  if (scope.type === "avdelning") {
-    return item.secrecyLevel === 5 && isUnitLeader
-  }
-  if (scope.type === "cmt") {
-    return isUnitLeader || (item.secrecyLevel === 5 && person.role === "kontingentledning")
-  }
-  return person.role === "ledare" || person.role === "kontingentledning"
+  const unit = unitOfCase(item)
+  return shareAudiencesOf(item).some((audience) => {
+    if (audience === "cmt") {
+      return person.role === "kontingentledning"
+    }
+    if (audience === "leaders") {
+      return person.role === "ledare"
+    }
+    return person.role === "ledare" && unit !== undefined && unitNumberOf(person) === unit
+  })
 }

@@ -1,7 +1,14 @@
 import { BackIcon, Button, Chip, unitName } from "@scouterna/wsj27-campfire-ui"
 import { useCallback, useId, useMemo, useState, type ReactElement } from "react"
 
-import { canBeSharedWith, scopeOf, unitOfCase, whoSees, type Case } from "../../../model/Case"
+import {
+  canBeSharedWith,
+  scopeOf,
+  shareAudiencesOf,
+  unitOfCase,
+  whoSees,
+  type Case,
+} from "../../../model/Case"
 import { capitalized, scopeName } from "../../../model/CaseType"
 import { nameOf, placingLine, type People, type Person } from "../../../model/Person"
 import { PersonMark } from "../../components/personmark/PersonMark"
@@ -113,25 +120,22 @@ function PersonRow(props: PersonRowProps): ReactElement {
 
 /**
  * Who the case can be shared with, as the panel names them, matching who it may go to –
- * the leaders of its unit for a unit's case and a CMT case, CMT too for a private CMT
- * case, and leaders and CMT for a health case – always as people who do not see it, so
- * nobody offered looks as if they already did.
+ * always as people who do not see it, so nobody offered looks as if they already did.
  * @param item The case.
- * @returns The words.
+ * @returns The words – "Ledare och CMT som inte ser ärendet".
  */
 function offeredName(item: Case): string {
-  const type = scopeOf(item).type
-  if (type === "hälsa") {
-    return "Ledare och CMT som inte ser ärendet"
-  }
   const unit = unitOfCase(item)
-  const leaders = unit === undefined ? undefined : `ledare i avdelning ${String(unit)}`
-  if (type === "cmt" && item.secrecyLevel === 5) {
-    return leaders === undefined
-      ? "CMT som inte ser ärendet"
-      : `CMT och ${leaders} som inte ser ärendet`
-  }
-  return `${capitalized(leaders ?? "ledare")} som inte ser ärendet`
+  const named = shareAudiencesOf(item).flatMap((audience) => {
+    if (audience === "cmt") {
+      return ["CMT"]
+    }
+    if (audience === "leaders") {
+      return ["ledare"]
+    }
+    return unit === undefined ? [] : [`ledare i avdelning ${String(unit)}`]
+  })
+  return `${capitalized(named.join(" och "))} som inte ser ärendet`
 }
 
 interface SharePanelProps {
@@ -180,7 +184,7 @@ function SharePanel(props: SharePanelProps): ReactElement {
     <div aria-labelledby={id} className="access-card-panel" role="group">
       <div className="access-card-panel-head">
         <strong id={id}>Dela ärendet</strong>
-        <Button label="Klar" onPress={props.onClose} variant="plain" />
+        <Button label="Klar" onPress={props.onClose} variant="secondary" />
       </div>
       <p className="access-card-about">
         Den du delar med kan läsa och skriva i ärendet, men inte dela det vidare.
@@ -286,7 +290,7 @@ function SharedList(props: SharedListProps): ReactElement {
         ))}
       </ul>
       {props.onMore !== undefined && (
-        <Button label="Dela med fler" onPress={props.onMore} variant="plain" />
+        <Button label="Dela med fler" onPress={props.onMore} variant="secondary" />
       )}
     </div>
   )
@@ -361,7 +365,7 @@ export function AccessCard(props: AccessCardProps): ReactElement {
             </span>
           </button>
         )}
-        {count === 0 && canShareMore && <Button label="Dela" onPress={share} variant="plain" />}
+        {count === 0 && canShareMore && <Button label="Dela" onPress={share} variant="secondary" />}
       </div>
       {count > 0 && isOpen && (
         <SharedList

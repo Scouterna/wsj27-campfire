@@ -71,11 +71,14 @@
     --color-tone-positive-ink: #2e4b36;
     --color-tone-positive-wash: #dce8de;
 
-    /* The corners of a control, a default surface, a large surface, and the full pill. */
+    /* The corners of a control, a default surface, a large surface, the full pill, and a
+       tag – squarer than any pill, because a pill is something to press and a tag only
+       states a fact. */
     --border-radius-control: 12px;
     --border-radius-default: 16px;
     --border-radius-round: 999px;
     --border-radius-surface: 18px;
+    --border-radius-tag: 6px;
 
     /* The spaces between things, named for what they separate rather than for a size,
        so a step in the scale reads as a relationship. A screen's own tuned poster values

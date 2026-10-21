@@ -172,6 +172,25 @@ wait_for_backend() {
   echo " up ($code)"
 }
 
+# Like `wait_for`, but only an answer holding the given text will do – for a service that
+# answers before it is ready, and says in its health check when it is.
+wait_for_text() {
+  name=$1
+  url=$2
+  text=$3
+  limit=${4:-60}
+  printf '%s' "Waiting for $name at $url "
+  waited=0
+  while :; do
+    curl -s --max-time 2 "$url" 2>/dev/null | grep -qF -- "$text" && break
+    waited=$((waited + 1))
+    [ "$waited" -ge "$limit" ] && die "$name was not ready within ${limit}s – $url never said $text."
+    printf '.'
+    sleep 1
+  done
+  echo " ready"
+}
+
 # Stop everything `start_process` started: TERM to each group, a few seconds' grace,
 # then KILL for whatever ignored it. Runs from the trap, so it is idempotent and never
 # exits early.

@@ -1,7 +1,6 @@
 import { fetch } from "@scouterna/wsj27-campfire-utils"
 import { queryOptions, type UseQueryOptions } from "@tanstack/react-query"
 
-import type { CaseType } from "../model/CaseType"
 import { toCaseTypes } from "./dto/CaseTypesDto"
 
 /**
@@ -18,7 +17,7 @@ type CaseTypesQueryKey = readonly ["cases", "types"]
 export function fetchCaseTypesQuery(): UseQueryOptions<
   unknown,
   Error,
-  readonly CaseType[],
+  readonly string[],
   CaseTypesQueryKey
 > {
   return queryOptions({

@@ -343,6 +343,7 @@ test("keeps a note from some of those who see the case", async ({ browser, page 
   await expect(karin.getByText("Till hälsoteamet.")).toHaveCount(0)
   await expect(karin.getByText("Till mig själv.")).toHaveCount(0)
   // Nor may she write one only the health team reads, though she may keep one to herself.
+  await karin.getByRole("textbox", { name: "Ny anteckning" }).click()
   const karinsAudience = karin.getByRole("combobox", { name: "Vem ser anteckningen?" })
   await expect(karinsAudience.locator("option", { hasText: "Bara hälsoteamet" })).toHaveCount(0)
   await expect(karinsAudience.locator("option", { hasText: "Bara du" })).toHaveCount(1)
@@ -375,6 +376,9 @@ test("adds a note to an open case, newest first", async ({ page }, testInfo) => 
 
   const add = page.getByRole("button", { name: "Lägg till anteckning" })
   const field = page.getByRole("textbox", { name: "Ny anteckning" })
+  // The tools stay out of the way of a case only being read, until the field is used.
+  await expect(add).toHaveCount(0)
+  await field.click()
   await expect(add).toBeDisabled()
   await field.fill("Första besöket.")
   await add.click()
@@ -398,6 +402,7 @@ test("attaches a picture to a note, and opens it larger", async ({ page }, testI
   await openCase(page, healthCase, "Molly Sundqvist", uniqueTitle(testInfo))
 
   // Chosen, a picture waits under the field and can be taken back out.
+  await page.getByRole("textbox", { name: "Ny anteckning" }).click()
   const picker = page.locator('input[type="file"]')
   const chosen = page.getByRole("list", { name: "Bilder till anteckningen" })
   await picker.setInputFiles(photo)
@@ -431,6 +436,7 @@ test("keeps a picture that did not arrive, to send again to the same note", asyn
 
   // The first attempt is lost, as on a connection that drops.
   await page.route("**/attachments", (route) => route.abort())
+  await page.getByRole("textbox", { name: "Ny anteckning" }).click()
   await page.locator('input[type="file"]').setInputFiles(photo)
   await page.getByRole("textbox", { name: "Ny anteckning" }).fill("Svullnaden har lagt sig.")
   await page.getByRole("button", { name: "Lägg till anteckning" }).click()
@@ -582,6 +588,7 @@ test("keeps a leader to their own unit's cases", async ({ page }, testInfo) => {
   // Every leader he could share it with sees it already, so nothing offers to, and a note
   // cannot be kept from them either.
   await expect(access.getByRole("button", { name: "Dela", exact: true })).toHaveCount(0)
+  await page.getByRole("textbox", { name: "Ny anteckning" }).click()
   const audience = page.getByRole("combobox", { name: "Vem ser anteckningen?" })
   await expect(audience.locator("option", { hasText: "Bara ledarna" })).toHaveCount(0)
   await expect(audience.locator("option", { hasText: "Bara du" })).toHaveCount(1)

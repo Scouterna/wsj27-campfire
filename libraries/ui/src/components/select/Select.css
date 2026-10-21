@@ -42,4 +42,26 @@
     top: 50%;
     transform: translateY(-50%) rotate(-90deg);
   }
+
+  /* The plain select: its answer and chevron alone, filled only while it is touched, so
+     the actions beside it carry the weight. */
+  .select-plain .select-field {
+    background: transparent;
+    padding: 0 30px 0 12px;
+    transition: background 120ms ease;
+  }
+
+  .select-plain .select-chevron {
+    right: 10px;
+  }
+
+  @media (hover: hover) {
+    .select-plain .select-field:hover {
+      background: color-mix(in srgb, var(--color-theme-ink) 5%, transparent);
+    }
+  }
+
+  .select-plain .select-field:active {
+    background: color-mix(in srgb, var(--color-theme-ink) 11%, transparent);
+  }
 }

@@ -43,9 +43,11 @@
   }
 
   /* A badge states a fact – it takes no press, so it wears its tone's wash and none of
-     the filter's states. */
+     the filter's states, and a tag's corners rather than a pill's, so it never reads as
+     a button beside one. */
   .chip-badge {
     background: var(--color-theme-wash);
+    border-radius: var(--border-radius-tag);
     color: var(--color-theme-ink);
     cursor: default;
     font-size: var(--font-size-footnote);

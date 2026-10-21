@@ -71,11 +71,11 @@
     margin: 0 0 6px;
   }
 
-  /* Who alone an entry is for, a small chip after its heading in the theme's wash, so a
+  /* Who alone an entry is for, a small tag after its heading in the theme's wash, so a
      reader sees at a glance that not everyone reads it. */
   .timeline-audience {
     background: var(--color-theme-wash);
-    border-radius: var(--border-radius-round);
+    border-radius: var(--border-radius-tag);
     color: var(--color-theme-ink);
     display: inline-block;
     font-size: var(--font-size-caption);

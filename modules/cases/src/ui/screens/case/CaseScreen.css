@@ -8,6 +8,13 @@
     margin: 0;
   }
 
+  /* A note's pictures, a step under its text. The card keeps a note's line breaks as they
+     were written, which the pictures have none of. */
+  .case-note-pictures {
+    margin-top: var(--spacing-group);
+    white-space: normal;
+  }
+
   .case-failure {
     color: var(--color-tone-danger-ink);
     font-size: var(--font-size-footnote);

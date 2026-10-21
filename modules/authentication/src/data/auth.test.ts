@@ -1,7 +1,7 @@
 import { QueryClient } from "@tanstack/react-query"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { currentUser, keepSessionAlive, signInUrl, signOut } from "./auth"
+import { currentUser, keepSessionAlive, signBackInUrl, signInUrl, signOut } from "./auth"
 
 /**
  * A payload shaped exactly as the auth service answers, with the fields a test cares
@@ -106,6 +106,27 @@ describe("composing the sign-in address", () => {
 
     expect(query.get("redirect_uri")).toBe("http://localhost:8000/resa")
     expect(query.get("locale")).toBe("sv")
+  })
+})
+
+describe("composing the address to sign straight back in", () => {
+  it("is the sign-in address on the same origin, made absolute for the sign-out to return to", () => {
+    const url = new URL(signBackInUrl("http://localhost:8000/profile"))
+
+    expect(url.origin).toBe("http://localhost:8000")
+    expect(url.pathname).toBe("/api/auth/login")
+    expect(url.searchParams.get("redirect_uri")).toBe("http://localhost:8000/profile")
+    expect(url.searchParams.get("locale")).toBe("sv")
+  })
+
+  it("survives the sign-out's own encoding as one parameter", () => {
+    const visited = navigationAnswers()
+
+    signOut(signBackInUrl("http://localhost:8000/profile"))
+
+    const back = new URL(queryOf(visited[0]!, "/api/auth/logout").get("redirect_uri")!)
+    expect(back.pathname).toBe("/api/auth/login")
+    expect(back.searchParams.get("redirect_uri")).toBe("http://localhost:8000/profile")
   })
 })
 

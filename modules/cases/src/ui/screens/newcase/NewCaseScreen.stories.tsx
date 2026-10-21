@@ -43,6 +43,21 @@ export const Leader: Story = {
 }
 
 /**
+ * The service gives a type the module has never heard of, which is offered after the known
+ * ones by its own name, its levels naming its group.
+ */
+export const AnotherType: Story = {
+  parameters: { api: { people: peopleRows, types: ["hälsa", "säkerhet", "cmt"] } },
+}
+
+/**
+ * Someone whose roles give them no type to open a case of.
+ */
+export const NoType: Story = {
+  parameters: { api: { people: peopleRows, types: [] } },
+}
+
+/**
  * Opened from a person's own screen, with them already chosen.
  */
 export const ForAPerson: Story = {

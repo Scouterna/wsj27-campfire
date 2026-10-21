@@ -39,7 +39,7 @@ Credentials never enter the repository. The Keycloak client and the Scoutnet key
 
 Dev can skip ScoutID. `pnpm start:dev --user-id <memberNo>` signs every sign-in straight in as that member, with the roles still taken from the list of participants, so the session behaves as that person's would – only the identity screens are skipped. Adding `--roles` grants the named roles to a member the list of participants does not know, which is how to test a role nobody at hand holds. The faked member lasts only for the run that asked for it.
 
-On a cold start, a session made before the auth service has loaded the roles from the project API carries none, and the project API refuses it. Signing out and in heals it, and so does the next token refresh, which looks the roles up again.
+On a cold start, a session made before the auth service has loaded the roles from the project API would carry none, and read as a participant's. The start script reports the stack ready only once the auth service's health check says its roles are loaded. A session made before that still heals at the next token refresh, which looks the roles up again, or by signing out and in.
 
 ## Prod
 

@@ -1,25 +1,43 @@
-import { hasAnyRole, type Role } from "@scouterna/wsj27-campfire-utils"
+import type { Role } from "@scouterna/wsj27-campfire-utils"
 
 import { scopeOf, type Case } from "../model/Case"
+import { profileOf } from "../model/CaseType"
 import { leaderUnits } from "./use-people"
 
 /**
- * Whether a set of roles holds the role a case's type needs – the health team's for a
- * health case, any management role for a management case, and a leader of its unit for a
- * unit's case. Mirrors the cases service, which decides it again on every write.
- * @param item The case.
- * @param roles The reader's roles.
- * @returns True when the roles hold the type's role.
+ * Who is reading a case, as the rules about its role need them.
  */
-function hasTypeRole(item: Case, roles: readonly Role[]): boolean {
+export interface Reader {
+  /**
+   * Their member number, undefined until the session says.
+   */
+  readonly memberNo: string | undefined
+  /**
+   * Their roles.
+   */
+  readonly roles: readonly Role[]
+  /**
+   * The types the cases service says they may open cases of, undefined while that is on
+   * its way – which names the types whose role they hold.
+   */
+  readonly types: readonly string[] | undefined
+}
+
+/**
+ * Whether a reader holds the role a case's type needs: for a type bound to a unit, leading
+ * that unit, and for any other, the service listing the type among theirs – since the
+ * service lists exactly the types their roles give. Mirrors the cases service, which
+ * decides it again on every write.
+ * @param item The case.
+ * @param reader The reader.
+ * @returns True when they hold the type's role.
+ */
+function hasTypeRole(item: Case, reader: Reader): boolean {
   const scope = scopeOf(item)
-  if (scope.type === "hälsa") {
-    return hasAnyRole(roles, "health")
+  if (profileOf(scope.type).isUnitBound) {
+    return scope.unitNumber !== undefined && leaderUnits(reader.roles).includes(scope.unitNumber)
   }
-  if (scope.type === "cmt") {
-    return hasAnyRole(roles, "cmt")
-  }
-  return scope.unitNumber !== undefined && leaderUnits(roles).includes(scope.unitNumber)
+  return reader.types?.includes(scope.type) ?? false
 }
 
 /**
@@ -27,33 +45,23 @@ function hasTypeRole(item: Case, roles: readonly Role[]): boolean {
  * and on a private case they opened it, since nobody else counts as one there. Someone
  * the case is only shared with is not one.
  * @param item The case.
- * @param roles The reader's roles.
- * @param memberNo The reader's member number.
+ * @param reader The reader.
  * @returns True for a role holder.
  */
-export function isRoleHolder(
-  item: Case,
-  roles: readonly Role[],
-  memberNo: string | undefined,
-): boolean {
-  if (item.secrecyLevel === 5 && item.creatorMemberNo !== memberNo) {
+export function isRoleHolder(item: Case, reader: Reader): boolean {
+  if (item.secrecyLevel === 5 && item.creatorMemberNo !== reader.memberNo) {
     return false
   }
-  return hasTypeRole(item, roles)
+  return hasTypeRole(item, reader)
 }
 
 /**
  * Whether the reader may change who a case is shared with: one of its role holders, on an
  * open case at a level that can be shared. Someone it is shared with may not pass it on.
  * @param item The case.
- * @param roles The reader's roles.
- * @param memberNo The reader's member number.
+ * @param reader The reader.
  * @returns True when the service would take the reader's change.
  */
-export function canShare(
-  item: Case,
-  roles: readonly Role[],
-  memberNo: string | undefined,
-): boolean {
-  return !item.isClosed && item.secrecyLevel !== 4 && isRoleHolder(item, roles, memberNo)
+export function canShare(item: Case, reader: Reader): boolean {
+  return !item.isClosed && item.secrecyLevel !== 4 && isRoleHolder(item, reader)
 }

@@ -78,8 +78,13 @@ describe("reading one case", () => {
     expect(toCase(row({ title: 42 }))).toBeUndefined()
   })
 
-  it("drops a case of a type or at a level this module cannot say who it reaches", () => {
-    expect(toCase(row({ type: "admin" }))).toBeUndefined()
+  it("keeps a case of a type this module does not know, under the service's name for it", () => {
+    expect(toCase(row({ type: "säkerhet" }))).toMatchObject({ type: "säkerhet" })
+  })
+
+  it("drops a case with no type, or at a level this module cannot say who it reaches", () => {
+    expect(toCase(row({ type: "" }))).toBeUndefined()
+    expect(toCase(row({ type: 3 }))).toBeUndefined()
     expect(toCase(row({ secrecy_level: 2 }))).toBeUndefined()
     expect(toCase(row({ secrecy_level: "3" }))).toBeUndefined()
   })

@@ -1,0 +1,42 @@
+@layer screen {
+  .impersonation-confirm-screen-person {
+    align-items: center;
+    display: flex;
+    gap: var(--spacing-container);
+  }
+
+  .impersonation-confirm-screen-name {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-inline);
+    min-width: 0;
+  }
+
+  .impersonation-confirm-screen-name strong {
+    color: var(--color-ink);
+    font-size: var(--font-size-display-mini);
+    overflow-wrap: anywhere;
+  }
+
+  .impersonation-confirm-screen-name span {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-value);
+  }
+
+  .impersonation-confirm-screen-text {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-value);
+    margin: 0;
+  }
+
+  .impersonation-confirm-screen-failure {
+    color: var(--color-ink);
+    font-size: var(--font-size-value);
+    font-weight: var(--font-weight-strong);
+    margin: 0;
+  }
+
+  .impersonation-confirm-screen-actions {
+    margin-top: var(--spacing-section);
+  }
+}

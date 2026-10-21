@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useCallback, useMemo } from "react"
 
 import { fetchCaseTypesQuery } from "../../../data/fetch-case-types"
-import { caseTypes, type CaseScope } from "../../../model/CaseType"
+import { inFormOrder, profileOf, type CaseScope } from "../../../model/CaseType"
 import { leaderUnits } from "../../use-people"
 
 /**
@@ -40,14 +40,11 @@ export function useCaseScopes(): CaseScopesView {
   const { data, error, isPending, refetch } = useQuery(fetchCaseTypesQuery())
 
   const scopes = useMemo(() => {
-    const given = new Set(data)
-    return caseTypes
-      .filter((type) => given.has(type))
-      .flatMap((type): readonly CaseScope[] =>
-        type === "avdelning"
-          ? leaderUnits(roles).map((unitNumber) => ({ type, unitNumber }))
-          : [{ type }],
-      )
+    return inFormOrder(data ?? []).flatMap((type): readonly CaseScope[] =>
+      profileOf(type).isUnitBound
+        ? leaderUnits(roles).map((unitNumber) => ({ type, unitNumber }))
+        : [{ type }],
+    )
   }, [data, roles])
 
   const again = useCallback(() => {

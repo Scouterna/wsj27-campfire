@@ -30,6 +30,7 @@ import { PlusIcon } from "./set/PlusIcon"
 import { RotateLeftIcon } from "./set/RotateLeftIcon"
 import { RotateRightIcon } from "./set/RotateRightIcon"
 import { SearchIcon } from "./set/SearchIcon"
+import { SendIcon } from "./set/SendIcon"
 import { TextLargerIcon } from "./set/TextLargerIcon"
 import { TextSmallerIcon } from "./set/TextSmallerIcon"
 
@@ -68,6 +69,7 @@ const icons: readonly (readonly [string, (props: IconProps) => ReactElement])[] 
   ["Rotate left", RotateLeftIcon],
   ["Rotate right", RotateRightIcon],
   ["Search", SearchIcon],
+  ["Send", SendIcon],
   ["Text larger", TextLargerIcon],
   ["Text smaller", TextSmallerIcon],
 ]

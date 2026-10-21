@@ -87,6 +87,11 @@ function ScopeQuestion(props: ScopeQuestionProps): ReactElement | null {
           <Button label="Försök igen" onPress={offered.refetch} variant="plain" />
         </p>
       )}
+      {!offered.isPending && offered.error === null && options.length === 0 && (
+        <p className="newcase-status" role="status">
+          Du kan inte skapa ärenden.
+        </p>
+      )}
       {options.length > 1 && (
         <ChoiceGroup
           labelledBy={props.labelId}
@@ -190,7 +195,7 @@ function LevelQuestion(props: LevelQuestionProps): ReactElement {
   return (
     <div className="newcase-group">
       <p className="newcase-label" id={props.labelId}>
-        Vem ser ärendet?
+        Vem ska kunna se ärendet?
       </p>
       <ChoiceGroup
         labelledBy={props.labelId}
@@ -262,8 +267,8 @@ function AccessQuestions(props: AccessQuestionsProps): ReactElement {
 
       <p className="newcase-fixed">
         {props.offered.scopes.length === 1
-          ? "Vem som ser ärendet går inte att ändra när ärendet är skapat."
-          : "Typen och vem som ser ärendet går inte att ändra när ärendet är skapat."}
+          ? "Vem som ser ärendet går inte att ändra efteråt."
+          : "Typ och vem som ser ärendet går inte att ändra efteråt."}
       </p>
     </div>
   )

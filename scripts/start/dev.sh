@@ -174,6 +174,12 @@ wait_for_backend "the auth service through the ingress" http://localhost:8000/ap
 # while on a cold cache.
 wait_for_backend "the project API through the ingress" http://localhost:8000/api/project/ 300
 
+# The auth service puts a session's roles in its token from a map it fetches from the
+# project API, retrying every half minute until the first fetch lands. A sign-in before
+# that is a session with no roles at all, which the application reads as a participant
+# until the token is refreshed.
+wait_for_text "the auth service's roles" http://localhost:8000/api/auth/ '"stale":false' 120
+
 echo
 echo "Campfire $environment: http://localhost:8000"
 echo "Ctrl+C takes the containers down."
