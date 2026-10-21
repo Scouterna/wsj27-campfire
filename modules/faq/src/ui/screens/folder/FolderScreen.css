@@ -1,0 +1,8 @@
+/* One folder of the FAQ, read as one document. */
+
+@layer screen {
+  /* A question's card, which a search hit scrolls to – clear of the bar above it. */
+  .faq-question {
+    scroll-margin-top: calc(var(--spacing-section) * 2);
+  }
+}
