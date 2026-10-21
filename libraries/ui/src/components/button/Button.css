@@ -44,6 +44,24 @@
     opacity: 0.45;
   }
 
+  /* The chevron of a button that opens a panel under it, pointing down while the panel is
+     shut and up while it is open. */
+  .button-chevron {
+    display: flex;
+    transform: rotate(-90deg);
+    transition: transform 150ms ease;
+  }
+
+  .button[aria-expanded="true"] .button-chevron {
+    transform: rotate(90deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .button-chevron {
+      transition: none;
+    }
+  }
+
   .button:focus-visible {
     outline: 2px solid var(--color-theme-ink);
     outline-offset: 2px;

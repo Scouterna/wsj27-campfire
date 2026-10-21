@@ -1,0 +1,25 @@
+/* A short list of cases, row under row as a virtualized list lays them, filling its card's
+   height so the edge rows press to the radius. */
+
+@layer component {
+  .case-rows {
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* The card gives up its vertical padding so the list fills its height, and clips so a
+     pressed edge row is cut to the radius – as it does for a virtual list. */
+  .card:has(> .case-rows) {
+    overflow: clip;
+    padding-block: 0;
+  }
+
+  /* The divider belongs between rows, so the first one drops it – unless something sits
+     above the list in the card, which the divider then parts it from. */
+  .case-rows:first-child > li:first-child .row {
+    border-top: none;
+  }
+}

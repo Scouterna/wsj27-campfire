@@ -20,6 +20,11 @@ export interface Case {
    */
   readonly aboutMemberNo?: string
   /**
+   * The member number of whoever is responsible for following the case up, absent while
+   * nobody is.
+   */
+  readonly assigneeMemberNo?: string
+  /**
    * When the case was closed, absent while it is open.
    */
   readonly closedAt?: Date
@@ -83,6 +88,27 @@ export function aboutName(item: Case, people: People | undefined): string {
   return item.aboutMemberNo === undefined
     ? "Ingen person angiven"
     : nameOf(people, item.aboutMemberNo)
+}
+
+/**
+ * When something last happened on a case – its newest note, or its opening before the
+ * first – which is what a list of cases to act on orders by.
+ * @param item The case.
+ * @returns The moment.
+ */
+export function lastActivity(item: Case): Date {
+  return item.latestNoteAt ?? item.createdAt
+}
+
+/**
+ * Cases ordered by when something last happened on them, the latest first.
+ * @param cases The cases.
+ * @returns The same cases, ordered.
+ */
+export function byLastActivity(cases: readonly Case[]): readonly Case[] {
+  return cases.toSorted(
+    (left, right) => lastActivity(right).getTime() - lastActivity(left).getTime(),
+  )
 }
 
 /**

@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 
 import {
   addNote,
+  assignCase,
   attachPicture,
   closeCase,
   createCase,
@@ -253,5 +254,34 @@ describe("attaching a picture", () => {
     await expect(attachPicture("7", "3", new File(["x"], "x.jpg"))).rejects.toThrow(
       "/api/project/cases/7/notes/3/attachments answered with something that is not readable",
     )
+  })
+})
+
+/**
+ * The null the wire carries for nobody, parsed rather than written, because the code holds
+ * absence as undefined and the lint refuses a null literal.
+ */
+const wireNull: unknown = JSON.parse("null")
+
+describe("assigning a case", () => {
+  it("names who is responsible by number, and nobody as the wire's null", async () => {
+    const sent = networkAnswers(
+      Response.json(caseRow({ assigned_to_id: 1_200_001 })),
+      Response.json(caseRow()),
+    )
+
+    const assigned = await assignCase("7", "1200001")
+    const cleared = await assignCase("7", undefined)
+
+    expect(assigned.assigneeMemberNo).toBe("1200001")
+    expect(cleared).not.toHaveProperty("assigneeMemberNo")
+    expect(sent).toEqual([
+      { body: { assigned_to_id: 1_200_001 }, method: "PUT", url: "/api/project/cases/7/assignee" },
+      {
+        body: { assigned_to_id: wireNull },
+        method: "PUT",
+        url: "/api/project/cases/7/assignee",
+      },
+    ])
   })
 })

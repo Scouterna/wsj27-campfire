@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { aboutName, canBeSharedWith, scopeOf, whoSees, type Case } from "./Case"
+import { aboutName, byLastActivity, canBeSharedWith, scopeOf, whoSees, type Case } from "./Case"
 
 const opened = {
   createdAt: new Date(2027, 7, 1),
@@ -122,5 +122,24 @@ describe("who sharing a case would let in", () => {
 
   it("offers CMT a private CMT case, which they do not see", () => {
     expect(canBeSharedWith({ ...opened, secrecyLevel: 5, type: "cmt" }, karin)).toBe(true)
+  })
+})
+
+describe("ordering cases to act on", () => {
+  it("puts the case with the latest note first, and one without notes by its opening", () => {
+    const quiet = { ...opened, createdAt: new Date(2027, 7, 3), id: "quiet" }
+    const busy = {
+      ...opened,
+      createdAt: new Date(2027, 7, 1),
+      id: "busy",
+      latestNoteAt: new Date(2027, 7, 4),
+    }
+    const old = { ...opened, createdAt: new Date(2027, 7, 2), id: "old" }
+
+    expect(byLastActivity([old, quiet, busy]).map((item) => item.id)).toEqual([
+      "busy",
+      "quiet",
+      "old",
+    ])
   })
 })

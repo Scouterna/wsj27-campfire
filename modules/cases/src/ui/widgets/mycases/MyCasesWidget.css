@@ -1,0 +1,9 @@
+/* The reader's own cases on the start screen. */
+
+@layer component {
+  .my-cases-status {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-entry);
+    margin: 0;
+  }
+}

@@ -87,4 +87,20 @@
     outline: 2px solid var(--color-theme-ink);
     outline-offset: -2px;
   }
+
+  /* The small control, for beside a heading: a tighter track and shorter segments in the
+     footnote's size, so it sits on the heading's line without outweighing it. */
+  .segmented-small {
+    padding: 3px;
+  }
+
+  .segmented-small .segmented-pill {
+    inset-block: 3px;
+  }
+
+  .segmented-small button {
+    font-size: var(--font-size-footnote);
+    height: 28px;
+    padding: 0 var(--spacing-group);
+  }
 }

@@ -73,4 +73,51 @@
   a.row:active {
     background: color-mix(in srgb, var(--color-theme-ink) 11%, transparent);
   }
+
+  /* A row with a control at its end leads from its text, whose link stretches over the
+     whole row so a press anywhere but the control opens it, and lights up like any other
+     navigating row. */
+  .row-actionable {
+    position: relative;
+    transition: background 120ms ease;
+  }
+
+  .row-stretched {
+    color: inherit;
+    display: block;
+    min-width: 0;
+    text-decoration: none;
+  }
+
+  .row-stretched::after {
+    content: "";
+    inset: 0;
+    position: absolute;
+  }
+
+  .row-stretched:focus-visible {
+    outline: none;
+  }
+
+  .row-actionable:has(.row-stretched:focus-visible) {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: -2px;
+  }
+
+  @media (hover: hover) {
+    .row-actionable:has(.row-stretched:hover) {
+      background: color-mix(in srgb, var(--color-theme-ink) 5%, transparent);
+    }
+  }
+
+  .row-actionable:has(.row-stretched:active) {
+    background: color-mix(in srgb, var(--color-theme-ink) 11%, transparent);
+  }
+
+  /* The control rides above the stretched link, so it takes its own press. */
+  .row-action {
+    display: flex;
+    position: relative;
+    z-index: 1;
+  }
 }

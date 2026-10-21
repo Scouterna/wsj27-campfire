@@ -66,7 +66,10 @@ export type { RowProps } from "./components/row/Row"
 export { SearchField } from "./components/searchfield/SearchField"
 export type { SearchFieldProps } from "./components/searchfield/SearchField"
 export { SegmentedControl } from "./components/segmentedcontrol/SegmentedControl"
-export type { SegmentedControlProps } from "./components/segmentedcontrol/SegmentedControl"
+export type {
+  SegmentedControlProps,
+  SegmentedControlSize,
+} from "./components/segmentedcontrol/SegmentedControl"
 export { Select } from "./components/select/Select"
 export type { SelectOption, SelectProps, SelectVariant } from "./components/select/Select"
 export { SideMenu } from "./components/sidemenu/SideMenu"

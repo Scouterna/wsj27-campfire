@@ -2,6 +2,12 @@ import { useLayoutEffect, useRef, type ReactElement } from "react"
 
 import "./SegmentedControl.css"
 
+/**
+ * How large a segmented control stands: the default for the choice a screen turns on, and
+ * small for one tucked beside a heading, where the default would outweigh it.
+ */
+export type SegmentedControlSize = "default" | "small"
+
 export interface SegmentedControlProps {
   /**
    * Which segment is in force, by index.
@@ -20,6 +26,10 @@ export interface SegmentedControlProps {
    * Fires with the chosen segment's index.
    */
   readonly onPick: (index: number) => void
+  /**
+   * How large it stands, the default unless said.
+   */
+  readonly size?: SegmentedControlSize | undefined
 }
 
 /**
@@ -60,7 +70,12 @@ export function SegmentedControl(props: SegmentedControlProps): ReactElement {
   }, [current, entries])
 
   return (
-    <div className="segmented" ref={track} role="group" aria-label={props.label}>
+    <div
+      aria-label={props.label}
+      className={props.size === "small" ? "segmented segmented-small" : "segmented"}
+      ref={track}
+      role="group"
+    >
       <span className="segmented-pill" aria-hidden="true" />
       {entries.map((entry, index) => (
         <button

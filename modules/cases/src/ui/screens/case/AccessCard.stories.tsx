@@ -33,14 +33,18 @@ const meta: Meta<typeof AccessCard> = {
   component: AccessCard,
   decorators: [ApiDecorator],
   args: {
+    canAssign: true,
     canShare: true,
     isBusy: false,
     item: caseWith("3"),
+    onAssign: fn(),
     onShare: fn(),
     people,
     readerMemberNo: "1200001",
   },
-  parameters: { api: { people: peopleRows } },
+  parameters: {
+    api: { access: { "3": [1_100_101, 1_200_001, 1_200_002, 1_200_401] }, people: peopleRows },
+  },
 }
 
 export default meta
@@ -53,14 +57,18 @@ type Story = StoryObj<typeof AccessCard>
  * @param context.canvasElement The element the story is drawn in.
  */
 async function openSharing(context: { readonly canvasElement: HTMLElement }): Promise<void> {
-  await userEvent.click(await within(context.canvasElement).findByRole("button", { name: "Dela" }))
+  await userEvent.click(
+    await within(context.canvasElement).findByRole("button", { name: /^Dela/u }),
+  )
 }
 
 /**
- * Shared with the head of contingent, as its health team member sees it – with a way to
- * take it back from her and to share it with someone else.
+ * Shared with the head of contingent, as its health team member sees it, opened – with a
+ * way to take it back from her and to share it with someone else.
  */
-export const Shared: Story = {}
+export const Shared: Story = {
+  play: openSharing,
+}
 
 /**
  * The same case as the person it is shared with sees it: who else has it, and no way to
@@ -68,6 +76,7 @@ export const Shared: Story = {}
  */
 export const SharedAsSomeoneItIsSharedWith: Story = {
   args: { canShare: false, readerMemberNo: "1200401" },
+  play: openSharing,
 }
 
 /**
@@ -132,4 +141,35 @@ export const NeverShared: Story = {
 
 export const PrivateToTheReader: Story = {
   args: { item: caseWith("4") },
+}
+
+/**
+ * Followed up by the reader, named under who sees it, with the way to hand it on.
+ */
+export const Assigned: Story = {
+  args: { item: { ...caseWith("3"), assigneeMemberNo: "1200001" } },
+}
+
+/**
+ * Choosing who follows it up: everyone else who can open the case, since the reader takes
+ * it on from the card itself.
+ */
+export const Assigning: Story = {
+  play: async (context) => {
+    await userEvent.click(
+      await within(context.canvasElement).findByRole("button", { name: "Tilldela" }),
+    )
+  },
+}
+
+/**
+ * Handing it on from someone else, who can be taken off it.
+ */
+export const Reassigning: Story = {
+  args: { item: { ...caseWith("3"), assigneeMemberNo: "1200002" } },
+  play: async (context) => {
+    await userEvent.click(
+      await within(context.canvasElement).findByRole("button", { name: "Tilldela" }),
+    )
+  },
 }

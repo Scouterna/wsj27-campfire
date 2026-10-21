@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useCallback, useState } from "react"
 
-import { closeCase, renameCase, reopenCase, shareCase } from "../../../data/mutations"
+import { assignCase, closeCase, renameCase, reopenCase, shareCase } from "../../../data/mutations"
 import { refreshCases } from "../../../data/refresh-cases"
 import { useNoteWrites, type NoteWrites } from "./use-note-writes"
 
@@ -9,6 +9,11 @@ import { useNoteWrites, type NoteWrites } from "./use-note-writes"
  * What the case screen can do to a case, and how that is going.
  */
 export interface CaseActions extends Omit<NoteWrites, "isBusy"> {
+  /**
+   * Makes someone responsible for following the case up, or nobody, then calls
+   * `onAssigned`, when there is one, so the screen can put the choice away.
+   */
+  readonly assign: (memberNo: string | undefined, onAssigned?: () => void) => void
   /**
    * Closes the case.
    */
@@ -39,8 +44,8 @@ export interface CaseActions extends Omit<NoteWrites, "isBusy"> {
 
 /**
  * The writes the case screen makes – a note and its pictures, a new title, who it is
- * shared with, closing, and reopening – each followed by a fresh read of the case and its
- * notes. The read
+ * shared with, who is responsible for it, closing, and reopening – each followed by a fresh
+ * read of the case and its notes. The read
  * follows a failure too, because a 409 means the case changed under the reader, and what
  * it is now is worth showing.
  * @param caseId The case to act on.
@@ -58,6 +63,10 @@ export function useCaseActions(caseId: string): CaseActions {
     onSettled: refresh,
   })
   const reopening = useMutation({ mutationFn: async () => reopenCase(caseId), onSettled: refresh })
+  const assigning = useMutation({
+    mutationFn: async (memberNo: string | undefined) => assignCase(caseId, memberNo),
+    onSettled: refresh,
+  })
   const sharing = useMutation({
     mutationFn: async (memberNos: readonly string[]) => shareCase(caseId, memberNos),
     onSettled: refresh,
@@ -67,6 +76,20 @@ export function useCaseActions(caseId: string): CaseActions {
   const { mutate: retitle } = renaming
   const { mutate: reopen } = reopening
   const { mutate: shareWith } = sharing
+  const { mutate: assignTo } = assigning
+
+  const assignIt = useCallback(
+    (memberNo: string | undefined, onAssigned?: () => void): void => {
+      setFailure(undefined)
+      assignTo(memberNo, {
+        onError: () => {
+          setFailure("Ansvarig kunde inte ändras.")
+        },
+        ...(onAssigned !== undefined && { onSuccess: onAssigned }),
+      })
+    },
+    [assignTo],
+  )
 
   const closeIt = useCallback(() => {
     setFailure(undefined)
@@ -112,11 +135,13 @@ export function useCaseActions(caseId: string): CaseActions {
 
   return {
     addNote: notes.addNote,
+    assign: assignIt,
     attachPictures: notes.attachPictures,
     close: closeIt,
     failure,
     isBusy:
       notes.isBusy ||
+      assigning.isPending ||
       closing.isPending ||
       renaming.isPending ||
       reopening.isPending ||

@@ -8,6 +8,12 @@ import "./Row.css"
 
 export interface RowProps {
   /**
+   * A control at the row's end, before the trailing value, pressed on its own rather than
+   * opening the row – taking a case on from a list of them. A navigating row with one
+   * leads from its text, and keeps its chevron after the value.
+   */
+  readonly action?: ReactNode
+  /**
    * Where the row leads. A row without it does not react to a press.
    */
   readonly link?: LinkTarget
@@ -65,6 +71,24 @@ export function Row(props: RowProps): ReactElement {
   )
 
   const className = props.className === undefined ? "row" : `row ${props.className}`
+
+  // A control cannot sit inside a link, so a row with both leads from its text, whose link
+  // stretches over the whole row, with the control raised above it.
+  if (props.action !== undefined && props.link !== undefined) {
+    return (
+      <div className={`${className} row-actionable`}>
+        {props.leading}
+        <Link className="row-stretched" to={props.link.to} params={props.link.params ?? {}}>
+          {props.children}
+        </Link>
+        <span className="row-end">
+          <span className="row-action">{props.action}</span>
+          {props.trailing}
+          {chevron}
+        </span>
+      </div>
+    )
+  }
 
   return props.link ? (
     <Link className={className} to={props.link.to} params={props.link.params ?? {}}>

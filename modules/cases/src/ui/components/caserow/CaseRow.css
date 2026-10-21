@@ -21,16 +21,16 @@
     white-space: nowrap;
   }
 
-  /* A private case's mark: a small chip after its title in the theme's wash, as the
+  /* A private case's mark: a small tag after its title in the theme's wash, as the
      funktionsansvarig's is after a name, so it reads at a glance without shouting. */
   .case-row-mark {
     background: var(--color-theme-wash);
-    border-radius: var(--border-radius-round);
+    border-radius: var(--border-radius-tag);
     color: var(--color-theme-ink);
     font-size: var(--font-size-caption);
     font-weight: var(--font-weight-strong);
     letter-spacing: 0.04em;
-    margin-left: var(--spacing-stack);
+    margin-left: var(--spacing-inline);
     padding: 2px 8px;
     vertical-align: 2px;
     white-space: nowrap;

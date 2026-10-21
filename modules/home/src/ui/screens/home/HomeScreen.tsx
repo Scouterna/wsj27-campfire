@@ -1,5 +1,5 @@
 import { PageTitle, unitsReveal, useIsRevealed, Widget } from "@scouterna/wsj27-campfire-ui"
-import { leaderUnit, useRoles } from "@scouterna/wsj27-campfire-utils"
+import { hasAnyRole, leaderUnit, useRoles } from "@scouterna/wsj27-campfire-utils"
 import type { ReactElement } from "react"
 
 import { messages } from "../../../model/messages"
@@ -20,6 +20,9 @@ import "./HomeScreen.css"
  * because the welcome says what the reader can do here and none of that is true before
  * the curtain opens.
  *
+ * The countdown leads, under the messages, as the one thing everyone shares. Whoever
+ * follows cases up finds their own and the latest open ones under it.
+ *
  * The title is a static välkommen on purpose – no name, because names run long, and no
  * clock.
  *
@@ -29,6 +32,8 @@ export function HomeScreen(): ReactElement {
   const isUnitsRevealed = useIsRevealed(unitsReveal.id)
   const roles = useRoles()
   const isLeader = leaderUnit(roles) !== undefined
+  // The cases section's own rule for who has cases to follow up.
+  const hasCases = isLeader || hasAnyRole(roles, "cmt")
 
   return (
     <>
@@ -37,6 +42,8 @@ export function HomeScreen(): ReactElement {
         <RevealWidget reveal={unitsReveal} />
         {isUnitsRevealed && <MessagesWidget messages={messages} roles={roles} />}
         {isUnitsRevealed && <Widget id="journey:countdown" />}
+        {isUnitsRevealed && hasCases && <Widget id="cases:mine" />}
+        {isUnitsRevealed && hasCases && <Widget id="cases:open" />}
         {isUnitsRevealed && isLeader && <Widget id="participants:unit" />}
       </div>
     </>

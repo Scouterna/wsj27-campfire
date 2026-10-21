@@ -405,9 +405,11 @@ function CaseBody(props: CaseBodyProps): ReactElement {
       <SubjectCard about={about} name={name} />
 
       <AccessCard
+        canAssign={!item.isClosed}
         canShare={isSharable}
         isBusy={actions.isBusy}
         item={item}
+        onAssign={actions.assign}
         onShare={actions.share}
         people={people}
         readerMemberNo={user?.memberNo}

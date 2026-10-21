@@ -1,6 +1,7 @@
 import { queryDecorator, type NetworkParameters } from "@scouterna/wsj27-campfire-ui"
-import { RolesProvider, type Role } from "@scouterna/wsj27-campfire-utils"
+import { RolesProvider, UserProvider, type Role, type User } from "@scouterna/wsj27-campfire-utils"
 
+import { fetchAccessQuery } from "../../data/fetch-access"
 import { fetchCaseTypesQuery } from "../../data/fetch-case-types"
 import { fetchCasesQuery } from "../../data/fetch-cases"
 import { fetchNotesQuery } from "../../data/fetch-notes"
@@ -14,15 +15,42 @@ import { reachOf } from "../use-people"
 const healthTeam: readonly Role[] = [{ kind: "cmt" }, { kind: "health" }]
 
 /**
+ * The signed-in person a story reads as, by member number – only what the cases screens
+ * read of them.
+ * @param memberNo Their member number.
+ * @param roles Their roles.
+ * @returns The person.
+ */
+function storyUser(memberNo: string, roles: readonly Role[]): User {
+  return {
+    firstName: "Helena",
+    memberNo,
+    name: "Helena Hägg",
+    roleLine: "CMT",
+    roleLineWithUnit: "CMT",
+    roles,
+  }
+}
+
+/**
  * What a story says about the services behind it, under `parameters.api`. Every answer is
  * in the service's own wire shape, because that is what the cache holds.
  */
 export interface ApiParameters extends NetworkParameters {
   /**
+   * Who can open each case, by the case's identifier.
+   */
+  readonly access?: Readonly<Record<string, readonly number[]>>
+  /**
    * Every case, open and closed, newest first. The list without the closed ones is
    * derived from it.
    */
   readonly cases?: readonly Readonly<Record<string, unknown>>[]
+  /**
+   * The reader's member number, for a story that says which cases are theirs. Nobody is
+   * signed in when unsaid.
+   */
+  readonly memberNo?: string
   /**
    * The notes on each case, by the case's identifier.
    */
@@ -59,11 +87,26 @@ export const ApiDecorator = queryDecorator<ApiParameters>({
     if (api.people !== undefined) {
       client.setQueryData(fetchPeopleQuery(reachOf(api.roles ?? healthTeam)).queryKey, api.people)
     }
+    const accessByCase = Object.entries(api.access ?? {})
+    for (const [caseId, memberNos] of accessByCase) {
+      client.setQueryData(fetchAccessQuery(caseId).queryKey, memberNos)
+    }
     const notesByCase = Object.entries(api.notes ?? {})
     for (const [caseId, notes] of notesByCase) {
       client.setQueryData(fetchNotesQuery(caseId).queryKey, notes)
     }
   },
   service: "/api/project/",
-  wrap: (story, api) => <RolesProvider roles={api.roles ?? healthTeam}>{story}</RolesProvider>,
+  wrap: (story, api) => {
+    const roles = api.roles ?? healthTeam
+    return (
+      <RolesProvider roles={roles}>
+        {api.memberNo === undefined ? (
+          story
+        ) : (
+          <UserProvider user={storyUser(api.memberNo, roles)}>{story}</UserProvider>
+        )}
+      </RolesProvider>
+    )
+  },
 })

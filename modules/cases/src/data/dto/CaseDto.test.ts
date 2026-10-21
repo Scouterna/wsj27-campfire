@@ -59,6 +59,11 @@ describe("reading one case", () => {
     expect(closed?.closedByMemberNo).toBe("1200001")
   })
 
+  it("reads who is responsible for the case, and nobody when it names nobody", () => {
+    expect(toCase(row({ assigned_to_id: 1_200_001 }))?.assigneeMemberNo).toBe("1200001")
+    expect(toCase(row({ assigned_to_id: wireNull }))).not.toHaveProperty("assigneeMemberNo")
+  })
+
   it("leaves out whom a case is about when it names nobody", () => {
     expect(toCase(row({ about_person_id: wireNull }))).not.toHaveProperty("aboutMemberNo")
   })

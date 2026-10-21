@@ -34,6 +34,23 @@ export async function addNote(
 }
 
 /**
+ * Makes someone responsible for following an open case up, or nobody. Anyone who can open
+ * the case may, and only someone who can open it may be made responsible, or the service
+ * refuses with a 422 – a closed case with a 409.
+ * @param caseId The case.
+ * @param memberNo Who is to be responsible, or undefined for nobody.
+ * @returns The case with its new assignee.
+ */
+export async function assignCase(caseId: string, memberNo: string | undefined): Promise<Case> {
+  const url = `${caseUrl(caseId)}/assignee`
+  // The service clears the assignee on a JSON null, which is what an absent one is on the
+  // wire.
+  // eslint-disable-next-line unicorn/no-null -- the service's own shape for nobody
+  const body = { assigned_to_id: memberNo === undefined ? null : Number(memberNo) }
+  return read(toCase(await fetch<unknown>(url, { body, method: "PUT" })), url)
+}
+
+/**
  * Attaches a picture to a note the caller wrote, on an open case. The service stores it
  * as a JPEG of at most 2048 pixels either way, without its EXIF. It refuses with a 403 for
  * a note someone else wrote, a 409 for a closed case or a note that already has ten

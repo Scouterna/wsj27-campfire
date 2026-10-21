@@ -8,7 +8,12 @@ import {
   subscribeToSession,
   watchExpiry,
 } from "@scouterna/wsj27-campfire-authentication"
-import { casesPersonMenu, casesRoutes, casesSectionLabel } from "@scouterna/wsj27-campfire-cases"
+import {
+  casesPersonMenu,
+  casesRoutes,
+  casesSectionLabel,
+  casesWidgets,
+} from "@scouterna/wsj27-campfire-cases"
 import { faqRoutes, faqSectionLabel } from "@scouterna/wsj27-campfire-faq"
 import { handbookRoutes } from "@scouterna/wsj27-campfire-handbook"
 import { HomeScreen } from "@scouterna/wsj27-campfire-home"
@@ -111,7 +116,7 @@ declare module "@scouterna/wsj27-campfire-ui" {
  * Every widget a screen can place by id, gathered from the modules that fill them.
  * The placing screen names an id and never learns which module drew it (ADR 016).
  */
-const widgets = { ...journeyWidgets, ...participantsWidgets } satisfies Widgets
+const widgets = { ...casesWidgets, ...journeyWidgets, ...participantsWidgets } satisfies Widgets
 
 /**
  * Every screen this build answers at, gathered from the modules and wrapped in the

@@ -55,6 +55,7 @@ export function toCase(value: unknown): Case | undefined {
   }
 
   const aboutMemberNo = toId(dto.about_person_id)
+  const assigneeMemberNo = toId(dto.assigned_to_id)
   const closedAt = toDate(dto.closed_at)
   const closedByMemberNo = toId(dto.closed_by_id)
   const latestNoteAt = toDate(dto.latest_note_at)
@@ -66,6 +67,7 @@ export function toCase(value: unknown): Case | undefined {
 
   return {
     ...(aboutMemberNo !== undefined && { aboutMemberNo }),
+    ...(assigneeMemberNo !== undefined && { assigneeMemberNo }),
     ...(closedAt !== undefined && { closedAt }),
     ...(closedByMemberNo !== undefined && { closedByMemberNo }),
     createdAt,

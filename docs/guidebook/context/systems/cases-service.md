@@ -11,6 +11,7 @@ The cases service keeps follow-ups: a case about a person or a unit, and the not
 - **Sharing a case** with named leaders and members of the management team, by its type's role holders, and never with someone who sees it already – a unit's case only with the unit's other leaders while it is private, and a CMT case with the leaders of its person's unit.
 - **Reading and writing notes** – a case's thread, newest first, and a new note on an open case, kept from some of those who see the case where its writer chooses.
 - **Attaching pictures to a note** – up to ten, each sent by the note's author while the case is open, and read by whoever may read the note. The service keeps each as a JPEG of at most 2048 pixels with a thumbnail of at most 320, and drops its EXIF.
+- **Assigning a case** to someone responsible for following it up, by anyone who can open it, and only to someone who can – the service lists who that is.
 - **Closing and reopening** – closing records who did it and when, and reopening clears both.
 
 There is no read for one case, so Campfire finds a case in the list. Every read of a case's notes is logged by the service, with who read them and when, and a note can be neither edited nor deleted, nor can a picture. A picture is sent as a form rather than as JSON, after its note is written, so a note whose pictures did not all arrive already exists and takes them again later. The cases module is the only part of Campfire that calls it.

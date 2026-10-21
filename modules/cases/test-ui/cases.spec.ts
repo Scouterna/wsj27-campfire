@@ -263,7 +263,7 @@ test("shares a case with someone outside its group, and takes it back", async ({
   // Karin leads the contingent but is not in the health team, so only sharing lets her in.
   // Only leaders and CMT are offered, and choosing her shares the case at once.
   const access = page.getByRole("region", { name: "Vem ser ärendet" })
-  await expect(access.getByText(/^Också delat med/u)).toHaveCount(0)
+  await expect(access.getByRole("button", { name: /^Delat med/u })).toHaveCount(0)
   await access.getByRole("button", { name: "Dela", exact: true }).click()
   const add = page.getByRole("textbox", { name: "Ledare och CMT som inte ser ärendet" })
   await add.fill("Ester Dahl")
@@ -272,10 +272,10 @@ test("shares a case with someone outside its group, and takes it back", async ({
   ).toBeVisible()
   await add.fill("Karin Kron")
   await page.getByRole("button", { name: "Karin Kron" }).click()
-  // The search closes, and who it is shared with stands open, so she is seen added.
+  // The search closes, and the button that opened it counts her, where it always stood.
   await expect(add).toHaveCount(0)
-  await expect(access.getByText("Också delat med 1 person")).toBeVisible()
-  await expect(page.getByRole("list", { name: "Också delat med" })).toContainText("Karin Kron")
+  await access.getByRole("button", { name: "Delat med 1" }).click()
+  await expect(access.getByRole("list", { name: "Delat med" })).toContainText("Karin Kron")
 
   // She reaches it now, and may write on it, but neither pass it on nor take it from others.
   const karin = await secondReader(browser, "Karin Kron")
@@ -283,8 +283,8 @@ test("shares a case with someone outside its group, and takes it back", async ({
   await expect(karin.getByRole("heading", { level: 1, name: title })).toBeVisible()
   // Folded for her, and opened, with no way to take it from anyone.
   const herAccess = karin.getByRole("region", { name: "Vem ser ärendet" })
-  await herAccess.getByText("Också delat med 1 person").click()
-  await expect(karin.getByRole("list", { name: "Också delat med" })).toContainText("Karin Kron")
+  await herAccess.getByRole("button", { name: "Delat med 1" }).click()
+  await expect(herAccess.getByRole("list", { name: "Delat med" })).toContainText("Karin Kron")
   await expect(karin.getByRole("button", { name: "Ta bort Karin Kron" })).toHaveCount(0)
   await expect(herAccess.getByRole("button", { name: "Dela", exact: true })).toHaveCount(0)
   await karin.getByRole("button", { name: "Fler åtgärder" }).filter({ visible: true }).click()
@@ -293,7 +293,7 @@ test("shares a case with someone outside its group, and takes it back", async ({
 
   // Taking it back is one press, and she no longer reaches it.
   await page.getByRole("button", { name: "Ta bort Karin Kron" }).click()
-  await expect(access.getByText(/^Också delat med/u)).toHaveCount(0)
+  await expect(access.getByRole("button", { name: /^Delat med/u })).toHaveCount(0)
   await karin.goto("/cases")
   await expect(karin.getByRole("heading", { level: 1, name: "Ärenden" })).toBeVisible()
   await expect(karin.getByRole("link", { name: title })).toHaveCount(0)
@@ -311,7 +311,7 @@ test("keeps a note from some of those who see the case", async ({ browser, page 
     .getByRole("textbox", { name: "Ledare och CMT som inte ser ärendet" })
     .fill("Karin Kron")
   await page.getByRole("button", { name: "Karin Kron" }).click()
-  await expect(page.getByRole("list", { name: "Också delat med" })).toContainText("Karin Kron")
+  await expect(access.getByRole("button", { name: "Delat med 1" })).toBeVisible()
 
   // One note for everyone, one for the health team alone, and one for Helena alone – the
   // choice staying as it was between notes, and each secret one marked with who it is for.
@@ -366,7 +366,7 @@ test("offers a CMT case to the leaders of its person's unit alone", async ({ pag
   await expect(offered).toContainText("Hanna Hellström")
   await expect(offered).not.toContainText("Karin Kron")
   await access.getByRole("button", { name: "Dela med Lars Lindberg" }).click()
-  await expect(page.getByRole("list", { name: "Också delat med" })).toContainText("Lars Lindberg")
+  await expect(access.getByRole("list", { name: "Delat med" })).toContainText("Lars Lindberg")
 })
 
 test("adds a note to an open case, newest first", async ({ page }, testInfo) => {
@@ -452,6 +452,47 @@ test("keeps a picture that did not arrive, to send again to the same note", asyn
   await expect(note.getByRole("button", { name: "Bild" })).toBeVisible()
   await expect(timeline(page).filter({ hasText: "Svullnaden har lagt sig." })).toHaveCount(1)
   await expect(page.getByRole("textbox", { name: "Ny anteckning" })).toBeVisible()
+})
+
+test("assigns a case to the reader, who finds it on the start screen", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/")
+  await signInAs(page, "Helena Hägg")
+  const title = uniqueTitle(testInfo)
+  await openCase(page, healthCase, "Molly Sundqvist", title)
+
+  // Taken on straight from the card, she is named under who sees it.
+  const access = page.getByRole("region", { name: "Vem ser ärendet" })
+  await expect(access).toContainText("Ingen ansvarig")
+  await access.getByRole("button", { name: "Tilldela mig" }).click()
+  await expect(access).toContainText("Ansvarig: Helena Hägg (du)")
+  await expect(access.getByRole("button", { name: "Tilldela mig" })).toHaveCount(0)
+
+  // The start screen lists it as hers, and so not again among the other open cases.
+  await page.goto("/")
+  await expect(page.getByRole("list", { name: "Mina ärenden" })).toContainText(title)
+  await expect(page.getByRole("list", { name: "Öppna ärenden" })).not.toContainText(title)
+
+  // Narrowed to health, the start screen keeps the choice on the way back.
+  const types = page.getByRole("group", { name: "Typ av ärende" })
+  await types.getByRole("button", { name: "Hälsa" }).click()
+  await page.goto("/cases")
+  await page.goto("/")
+  await expect(types.getByRole("button", { name: "Hälsa" })).toHaveAttribute("aria-pressed", "true")
+
+  // Taken off it again, nobody is responsible and the way to take it on is back.
+  await page.getByRole("list", { name: "Mina ärenden" }).getByRole("link", { name: title }).click()
+  await access.getByRole("button", { name: "Tilldela", exact: true }).click()
+  await access.getByRole("button", { name: /^Ta bort ansvarig Helena Hägg/u }).click()
+  await expect(access).toContainText("Ingen ansvarig")
+  await expect(access.getByRole("button", { name: "Tilldela mig" })).toBeVisible()
+
+  // Taken on from its row on the start screen instead, it moves to her own.
+  await page.goto("/")
+  await page.getByRole("button", { name: `Tilldela mig ${title}` }).click()
+  await expect(page.getByRole("list", { name: "Mina ärenden" })).toContainText(title)
+  await expect(page.getByRole("list", { name: "Öppna ärenden" })).not.toContainText(title)
 })
 
 test("closes a case once asked, and reopens it", async ({ page }, testInfo) => {
@@ -611,7 +652,7 @@ test("lets a leader share a private case with the unit's other leaders, without 
   await expect(offered).toContainText("Hanna Hellström")
   await expect(access.getByRole("textbox")).toHaveCount(0)
   await access.getByRole("button", { name: "Dela med Hanna Hellström" }).click()
-  await expect(page.getByRole("list", { name: "Också delat med" })).toContainText("Hanna Hellström")
+  await expect(access.getByRole("list", { name: "Delat med" })).toContainText("Hanna Hellström")
   await expect(access.getByText("Det finns ingen mer att dela ärendet med.")).toBeVisible()
 })
 

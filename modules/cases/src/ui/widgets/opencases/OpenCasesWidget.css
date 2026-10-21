@@ -1,0 +1,14 @@
+/* The latest open cases on the start screen. */
+
+@layer component {
+  .open-cases-status {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-entry);
+    margin: 0;
+  }
+
+  /* Under the rows, where the card has given up its own padding to them. */
+  .case-rows ~ .open-cases-status {
+    padding-block: var(--spacing-group);
+  }
+}

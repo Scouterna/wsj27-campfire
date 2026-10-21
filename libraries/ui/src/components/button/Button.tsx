@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import type { ReactElement, ReactNode } from "react"
 
+import { BackIcon } from "../../foundations/icons/set/BackIcon"
 import type { LinkTarget } from "../../routing/routes"
 
 import "./Button.css"
@@ -24,6 +25,12 @@ export type ButtonProps = {
    * An icon before the label, for an action a picture says faster than its words.
    */
   readonly icon?: ReactNode
+  /**
+   * Whether what the button opens in place is open, for a button that opens and closes a
+   * panel under it. Given, the button says so to assistive technology and wears a chevron
+   * that turns with it, so the button stays where it is while the panel comes and goes.
+   */
+  readonly isExpanded?: boolean | undefined
   /**
    * The word or two on the control.
    */
@@ -78,9 +85,20 @@ export function Button(props: ButtonProps): ReactElement {
   }
 
   return (
-    <button className={className} disabled={props.disabled} onClick={props.onPress} type="button">
+    <button
+      aria-expanded={props.isExpanded}
+      className={className}
+      disabled={props.disabled}
+      onClick={props.onPress}
+      type="button"
+    >
       {props.icon}
       {props.label}
+      {props.isExpanded === undefined ? null : (
+        <span aria-hidden="true" className="button-chevron">
+          <BackIcon size={14} strokeWidth={2.4} />
+        </span>
+      )}
     </button>
   )
 }
