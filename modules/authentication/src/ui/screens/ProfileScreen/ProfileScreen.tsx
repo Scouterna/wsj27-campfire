@@ -3,11 +3,13 @@ import {
   Callout,
   Card,
   cmtAvatarNumber,
+  PageActions,
   PageTitle,
   PersonIcon,
   UnitAvatar,
   unitsReveal,
   useIsRevealed,
+  type PageActionsProps,
 } from "@scouterna/wsj27-campfire-ui"
 import { useUser } from "@scouterna/wsj27-campfire-utils"
 import type { ReactElement } from "react"
@@ -47,9 +49,19 @@ export function ProfileScreen(): ReactElement {
     return <PageTitle title="Profil" />
   }
 
+  // The way back and the way to somebody else never meet, because nobody shown Campfire
+  // as somebody else is offered to be shown it as a third.
+  let secondary: PageActionsProps["secondary"]
+  if (isImpersonating) {
+    secondary = { label: "Tillbaka till mitt konto", onPress: wayBack }
+  } else if (isOffered === true) {
+    secondary = { label: "Visa som någon annan", link: { to: "/profile/impersonate" } }
+  }
+
   return (
     <>
       <PageTitle title="Profil" />
+      <PageActions secondary={secondary} />
       <Card>
         <div className="profile-screen">
           {isUnitShown && user.mark !== undefined && (
@@ -73,21 +85,12 @@ export function ProfileScreen(): ReactElement {
         )}
       </Card>
       <div className="profile-screen-sign-out">
-        {isImpersonating && <Button label="Tillbaka till mitt konto" onPress={wayBack} />}
-        {isOffered === true && (
-          <Button
-            label="Visa som någon annan"
-            link={{ to: "/profile/impersonate" }}
-            variant="secondary"
-          />
-        )}
         <Button
           label="Logga ut"
           onPress={() => {
             forgetImpersonation()
             signOut(location.origin)
           }}
-          {...(isImpersonating && { variant: "secondary" })}
         />
       </div>
     </>
