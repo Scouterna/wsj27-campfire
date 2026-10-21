@@ -1,0 +1,48 @@
+/* The confirm dialog: a white sheet over a dimmed page, the question, what it leads to,
+   and the way back beside the way on. */
+
+@layer component {
+  .confirm-dialog {
+    background: var(--color-sheet);
+    border: none;
+    border-radius: var(--border-radius-surface);
+    color: var(--color-ink);
+    max-width: min(400px, calc(100vw - 2 * var(--spacing-container)));
+    padding: 0;
+    width: 100%;
+  }
+
+  .confirm-dialog::backdrop {
+    background: var(--color-scrim);
+  }
+
+  .confirm-dialog-body {
+    padding: var(--spacing-card);
+  }
+
+  .confirm-dialog-title {
+    font-size: var(--font-size-heading);
+    font-weight: var(--font-weight-strong);
+    margin: 0 0 var(--spacing-stack);
+  }
+
+  .confirm-dialog-description {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-value);
+    line-height: 1.45;
+    margin: 0;
+  }
+
+  .confirm-dialog-actions {
+    align-items: center;
+    display: flex;
+    gap: var(--spacing-stack);
+    justify-content: flex-end;
+    margin-top: var(--spacing-card);
+  }
+
+  /* The way on hugs its label beside the way back, rather than filling the row. */
+  .confirm-dialog-actions .button {
+    width: auto;
+  }
+}

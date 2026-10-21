@@ -8,6 +8,7 @@ import {
   subscribeToSession,
   watchExpiry,
 } from "@scouterna/wsj27-campfire-authentication"
+import { casesPersonMenu, casesRoutes, casesSectionLabel } from "@scouterna/wsj27-campfire-cases"
 import { HomeScreen } from "@scouterna/wsj27-campfire-home"
 import { host } from "@scouterna/wsj27-campfire-host"
 import { journeyWidgets } from "@scouterna/wsj27-campfire-journey"
@@ -16,11 +17,14 @@ import {
   participantsRoutes,
   participantsSectionLabel,
   participantsWidgets,
+  PersonActionsProvider,
   ViewerProvider,
   type Viewer,
 } from "@scouterna/wsj27-campfire-participants"
 import {
+  Button,
   Card,
+  ChatIcon,
   cmtAvatarNumber,
   cmtTheme,
   expectPop,
@@ -70,7 +74,7 @@ import {
 } from "@scouterna/wsj27-campfire-utils"
 import { QueryClientProvider } from "@tanstack/react-query"
 import { createRouter, Link, useRouterState, type RouteComponent } from "@tanstack/react-router"
-import { useEffect, useState, type ReactElement, type ReactNode } from "react"
+import { useCallback, useEffect, useState, type ReactElement, type ReactNode } from "react"
 
 import {
   historyIndex,
@@ -113,6 +117,7 @@ const widgets = { ...journeyWidgets, ...participantsWidgets } satisfies Widgets
 const screens = guardScreens({
   "/": { Component: HomeScreen, tab: "home" },
   ...authenticationRoutes,
+  ...casesRoutes,
   ...materialRoutes,
   ...participantsRoutes,
 } satisfies Routes)
@@ -146,7 +151,7 @@ interface AppSection {
 }
 
 /**
- * The sections, in menu order: home for everyone, and the participants and material
+ * The sections, in menu order: home for everyone, and the participants, material, and cases
  * sections for a leader and for any management function – for nobody else.
  */
 const sections: readonly AppSection[] = [
@@ -170,6 +175,15 @@ const sections: readonly AppSection[] = [
     isGranted: (roles) => hasAnyRole(roles, "leader", "cmt"),
     label: materialSectionLabel,
     path: "/material",
+  },
+  {
+    icon: <ChatIcon />,
+    id: "cases",
+    // Mirrors the cases service, which opens to whoever holds a case type: every
+    // management member, and a leader of a numbered unit. A bare leader role gives none.
+    isGranted: (roles) => hasAnyRole(roles, "cmt") || leaderUnit(roles) !== undefined,
+    label: () => casesSectionLabel,
+    path: "/cases",
   },
 ]
 
@@ -243,6 +257,34 @@ type SignedInProps = {
    * The routed screens.
    */
   readonly children: ReactNode
+}
+
+type PersonMenuProps = {
+  /**
+   * The signed-in person's roles, which decide what they may be offered.
+   */
+  readonly roles: readonly Role[]
+  /**
+   * The subtree whose person screens carry the entries.
+   */
+  readonly children: ReactNode
+}
+
+/**
+ * What other sections offer on a person's own screen, each only where the section itself
+ * is granted – the cases about them, and a new one. Composed here, because the person
+ * screen and the cases belong to different modules.
+ * @param props The roles, and the subtree that shows the entries.
+ * @returns The subtree, with the entries in scope.
+ */
+function PersonMenu(props: PersonMenuProps): ReactElement {
+  const isRevealed = useRevealLookup()
+  const { roles } = props
+  const actions = useCallback(
+    (memberNo: string) => (isGranted("cases", roles, isRevealed) ? casesPersonMenu(memberNo) : []),
+    [isRevealed, roles],
+  )
+  return <PersonActionsProvider actions={actions}>{props.children}</PersonActionsProvider>
 }
 
 /**
@@ -344,7 +386,7 @@ function viewerFor(user: User): Viewer {
   return {
     memberNo: user.memberNo,
     readsEveryone: hasAnyRole(user.roles, "cmt"),
-    readsHealth: hasAnyRole(user.roles, "health"),
+    readsHealth: hasAnyRole(user.roles, "health", "healthGrant"),
     ...(unitNumber !== undefined && { unitNumber }),
   }
 }
@@ -396,13 +438,15 @@ function SignedInChrome(props: SignedInProps): ReactElement {
                 everything under it. A new reveal is another catalog entry, not
                 another mechanism. */}
                 <RevealProvider reveals={reveals}>
-                  <WidgetsProvider widgets={widgets}>
-                    {host.tier === "shell" ? (
-                      <ShellChrome user={props.user}>{props.children}</ShellChrome>
-                    ) : (
-                      <BrowserChrome user={props.user}>{props.children}</BrowserChrome>
-                    )}
-                  </WidgetsProvider>
+                  <PersonMenu roles={props.user.roles}>
+                    <WidgetsProvider widgets={widgets}>
+                      {host.tier === "shell" ? (
+                        <ShellChrome user={props.user}>{props.children}</ShellChrome>
+                      ) : (
+                        <BrowserChrome user={props.user}>{props.children}</BrowserChrome>
+                      )}
+                    </WidgetsProvider>
+                  </PersonMenu>
                 </RevealProvider>
               </ViewerProvider>
             </QueryClientProvider>
@@ -585,12 +629,21 @@ function BrowserChrome(props: SignedInProps): ReactElement {
             title={title}
             trailing={
               <>
+                {declared?.secondary === undefined ? null : (
+                  <Button {...declared.secondary} variant="secondary" />
+                )}
                 {declared?.menu === undefined ? null : <OverflowMenu items={declared.menu} />}
                 {pill(true)}
               </>
             }
           />
-          <PageHeading title={title} back={back} action={declared?.action} menu={declared?.menu} />
+          <PageHeading
+            title={title}
+            back={back}
+            action={declared?.action}
+            menu={declared?.menu}
+            secondary={declared?.secondary}
+          />
           <div className="content">{props.children}</div>
         </main>
       </div>
@@ -606,13 +659,15 @@ function BrowserChrome(props: SignedInProps): ReactElement {
  * round trip starts, and the round trip leaves whichever way the wipe ended, because a
  * browser that refuses its own storage must not be able to hold somebody inside a
  * session.
+ * @param returnTo The absolute URL the round trip lands on, which the authentication
+ * module decides.
  * @returns Nothing – the sign-out navigates the document away.
  */
-async function signOutAndForget(): Promise<void> {
+async function signOutAndForget(returnTo: string): Promise<void> {
   try {
     await forgetCache()
   } finally {
-    signOut(location.origin)
+    signOut(returnTo)
   }
 }
 
@@ -635,9 +690,10 @@ async function endSession(setGate: (gate: Gate) => void): Promise<void> {
 /**
  * The way out as the profile page presses it – the same round trip, with nothing to
  * wait for, because it ends by leaving the document.
+ * @param returnTo The absolute URL the round trip lands on.
  */
-function leave(): void {
-  void signOutAndForget()
+function leave(returnTo: string): void {
+  void signOutAndForget(returnTo)
 }
 
 /**

@@ -72,7 +72,7 @@ A question named Accesstyp gives each person one of four access levels:
 - **Hälsa plus intern information** – health and internal information
 - **Avdelningsledare** – a unit leader's access
 
-It becomes the `wsj27:access:<level>` role, carried by everyone granted access. The participants service uses it, beside the other roles, to decide who reads what at which level.
+It becomes a role carried by everyone granted access – `wsj27:legacy-access:<level>` on the participants service's `dev` branch, `wsj27:access:<level>` on its `main`. On `dev`, the `wsj27:access:` namespace holds grants assigned by hand instead, which are meant to replace this question. The participants service uses the role, beside the others, to decide who reads what at which level.
 
 ## Drift
 

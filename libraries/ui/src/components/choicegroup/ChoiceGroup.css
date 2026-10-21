@@ -1,0 +1,92 @@
+/* The choice group: each choice a row with its own mark, label, and sentence, the one in
+   force outlined and washed in the theme's ink so it reads as chosen before its mark is
+   found. */
+
+@layer component {
+  .choices {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-stack);
+  }
+
+  /* Side by side, sharing the row evenly, and a choice whose label does not fit beside
+     the others wraps to a line of its own rather than running out of its box. */
+  .choices-row {
+    flex-flow: row wrap;
+  }
+
+  .choices-row .choice {
+    align-items: center;
+    flex: 1 1 0;
+    min-width: fit-content;
+    padding: 12px 14px;
+  }
+
+  .choice {
+    align-items: flex-start;
+    background: var(--color-sheet);
+    border: 1px solid color-mix(in srgb, var(--color-ink) 18%, transparent);
+    border-radius: var(--border-radius-control);
+    cursor: pointer;
+    display: flex;
+    gap: var(--spacing-group);
+    padding: 14px 16px;
+    transition:
+      background 120ms ease,
+      border-color 120ms ease;
+  }
+
+  .choice:has(.choice-input:checked) {
+    background: var(--color-theme-wash);
+    border-color: var(--color-theme-ink);
+  }
+
+  /* The ring every field in the product answers focus with, on the whole row, because
+     the row is what the reader sees as the control. */
+  .choice:has(.choice-input:focus-visible) {
+    outline: 2px solid var(--color-theme-bright);
+    outline-offset: 2px;
+  }
+
+  /* The platform's radio, redrawn in the theme's ink so it agrees with the row around
+     it, and kept a real input so the keyboard and assistive technology still reach it. */
+  .choice-input {
+    appearance: none;
+    border: 2px solid color-mix(in srgb, var(--color-ink) 35%, transparent);
+    border-radius: var(--border-radius-round);
+    flex: none;
+    height: 20px;
+    margin: 1px 0 0;
+    width: 20px;
+  }
+
+  .choices-row .choice-input {
+    margin: 0;
+  }
+
+  .choice-input:checked {
+    background: var(--color-sheet);
+    border: 6px solid var(--color-theme-ink);
+  }
+
+  .choice-input:focus-visible {
+    outline: none;
+  }
+
+  .choice-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .choice-text strong {
+    font-weight: var(--font-weight-strong);
+  }
+
+  .choice-text small {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-entry);
+    line-height: 1.4;
+  }
+}

@@ -1,0 +1,189 @@
+/* The access card: the case's kind as a badge, who sees it in a sentence beside it, and at
+   the top right who else it is shared with or the way to share it; who else it is shared
+   with opened under a rule; and the sharing panel set into the card while it is open. */
+
+@layer component {
+  .access-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-group);
+  }
+
+  .access-card-head {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-stack) var(--spacing-group);
+  }
+
+  .access-card-who {
+    color: var(--color-ink-secondary);
+    flex: 1 1 10rem;
+    font-size: var(--font-size-value);
+    margin: 0;
+  }
+
+  /* Whichever comes next at the head's end – the count that opens who else sees the case,
+     or the way to share it – pushed to the right edge, and to a line of its own, still at
+     the right, on a screen too narrow for the sentence beside it. */
+  .access-card-head > .button,
+  .access-card-toggle {
+    flex: none;
+    margin-left: auto;
+  }
+
+  .access-card-head > .button {
+    margin-right: calc(-1 * var(--spacing-container));
+  }
+
+  .access-card-shares {
+    border-top: 1px solid var(--color-divider);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-stack);
+    padding-top: var(--spacing-group);
+  }
+
+  /* The sharing panel: an inset on a faint tint of the ink, so it reads as a place opened
+     for a moment inside the card rather than one more section of it. */
+  .access-card-panel {
+    background: color-mix(in srgb, var(--color-ink) 4%, var(--color-sheet));
+    border-radius: var(--border-radius-control);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-stack);
+    padding: var(--spacing-group) var(--spacing-container);
+  }
+
+  .access-card-panel-head {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .access-card-panel-head > .button {
+    margin-right: calc(-1 * var(--spacing-container));
+  }
+
+  /* What the panel offers, over the people it names. */
+  .access-card-label {
+    color: var(--color-ink-tertiary);
+    font-size: var(--font-size-detail);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.16em;
+    margin: var(--spacing-stack) 0 0;
+    text-transform: uppercase;
+  }
+
+  /* The count that opens who else sees the case: quiet, with a chevron that turns as the
+     list opens. */
+  .access-card-toggle {
+    align-items: center;
+    background: none;
+    border: none;
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    cursor: pointer;
+    display: flex;
+    font-family: inherit;
+    font-size: var(--font-size-entry);
+    font-weight: var(--font-weight-strong);
+    gap: var(--spacing-inline);
+    min-height: 44px;
+    padding: 0;
+  }
+
+  .access-card-toggle:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: 2px;
+  }
+
+  .access-card-chevron {
+    display: flex;
+    transform: rotate(-90deg);
+    transition: transform 150ms ease;
+  }
+
+  .access-card-toggle[aria-expanded="true"] .access-card-chevron {
+    transform: rotate(90deg);
+  }
+
+  /* The way to share with more stands at its own width under the people, its word in line
+     with the rows and only its pressed fill reaching past. */
+  .access-card-shares > .button {
+    align-self: flex-start;
+    margin-left: calc(-1 * var(--spacing-container));
+    margin-top: var(--spacing-stack);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .access-card-chevron {
+      transition: none;
+    }
+  }
+
+  .access-card-about {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-entry);
+    line-height: 1.4;
+    margin: 0;
+  }
+
+  .access-card-people {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-group);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .access-card-person {
+    align-items: center;
+    display: flex;
+    gap: var(--spacing-group);
+  }
+
+  .access-card-name {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .access-card-name small {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-entry);
+  }
+
+  /* Quiet, the label alone at the row's end, with a pill's padding so its focus ring is
+     round like every other control's. */
+  .access-card-action {
+    background: none;
+    border: none;
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--font-size-entry);
+    font-weight: var(--font-weight-strong);
+    margin-right: calc(-1 * var(--spacing-container));
+    min-height: 44px;
+    padding: 0 var(--spacing-container);
+  }
+
+  /* In the danger ink rather than the theme's, because it takes a case back from someone. */
+  .access-card-remove {
+    color: var(--color-tone-danger-ink);
+  }
+
+  .access-card-action:disabled {
+    cursor: default;
+    opacity: 0.45;
+  }
+
+  .access-card-action:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: 2px;
+  }
+}

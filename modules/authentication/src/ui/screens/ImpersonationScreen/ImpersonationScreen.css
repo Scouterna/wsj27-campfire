@@ -1,0 +1,15 @@
+@layer screen {
+  .impersonation-screen-intro {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-value);
+    margin: 0;
+  }
+
+  /* The count, and every other thing the screen has to say in its place. Quiet, because
+     it labels the list rather than competing with it. */
+  .impersonation-screen-status {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+  }
+}
