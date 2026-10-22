@@ -4,7 +4,7 @@ import { useId, useMemo, type ReactElement } from "react"
 import { fetchAccessQuery } from "../../../data/fetch-access"
 import { nameOf, type People, type Person } from "../../../model/Person"
 import { PersonPicker } from "../../components/personpicker/PersonPicker"
-import { PersonRow } from "./PersonRow"
+import { PersonRow } from "../../components/personrow/PersonRow"
 
 // Constructed once, because a collator is expensive to build and every candidate is
 // sorted with it.
@@ -135,7 +135,7 @@ function Candidates(props: CandidatesProps): ReactElement {
     )
   }
   return (
-    <ul aria-labelledby={props.labelId} className="access-card-people">
+    <ul aria-labelledby={props.labelId} className="case-person-rows">
       {offered.map((memberNo) => (
         <PersonRow
           action={{
@@ -192,7 +192,7 @@ export function AssignPanel(props: AssignPanelProps): ReactElement {
         </p>
       )}
       {assigneeMemberNo !== undefined && (
-        <ul aria-labelledby={`${id}-now`} className="access-card-people">
+        <ul aria-labelledby={`${id}-now`} className="case-person-rows">
           <PersonRow
             action={{
               isTaking: true,

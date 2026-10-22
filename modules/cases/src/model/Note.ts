@@ -26,6 +26,11 @@ export interface Note {
    */
   readonly id: string
   /**
+   * Who the service's own note on changing who the case is about added and removed,
+   * undefined for a note somebody wrote.
+   */
+  readonly peopleChange?: PeopleChange
+  /**
    * Who may read the note – its case's level, or a higher one that hides it from some of
    * those who reach the case.
    */
@@ -39,4 +44,18 @@ export interface Note {
    * and the service takes any.
    */
   readonly title: string
+}
+
+/**
+ * A change to who a case is about, by member number, in the order the service listed them.
+ */
+export interface PeopleChange {
+  /**
+   * The people the case came to be about.
+   */
+  readonly added: readonly string[]
+  /**
+   * The people it stopped being about.
+   */
+  readonly removed: readonly string[]
 }

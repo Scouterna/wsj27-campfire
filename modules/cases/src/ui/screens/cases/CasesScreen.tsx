@@ -34,7 +34,8 @@ const filters: readonly (readonly [Filter, string])[] = [
 ]
 
 /**
- * Whether a case holds the search – in who it is about, its title, or who opened it.
+ * Whether a case holds the search – in anyone it is about, its unit, its title, or who
+ * opened it.
  * @param item The case to test.
  * @param people Everyone the module knows, undefined while the names are loading.
  * @param needle What the reader typed, trimmed and lower-cased.
@@ -44,7 +45,13 @@ function isMatch(item: Case, people: People | undefined, needle: string): boolea
   if (needle === "") {
     return true
   }
-  const haystack = [aboutName(item, people), item.title, nameOf(people, item.creatorMemberNo)]
+  // The short line names only the first of several people, so each is searched by name.
+  const haystack = [
+    aboutName(item, people),
+    ...item.aboutMemberNos.map((memberNo) => nameOf(people, memberNo)),
+    item.title,
+    nameOf(people, item.creatorMemberNo),
+  ]
   return haystack.join(" ").toLocaleLowerCase("sv").includes(needle)
 }
 

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { fn } from "storybook/test"
 
 import { toPeople } from "../../../data/dto/PersonDto"
 import { peopleRows } from "../../storybook/fixtures"
@@ -34,4 +35,21 @@ export const BeyondTheUnits: Story = {
  */
 export const Unknown: Story = {
   args: { about: undefined, name: "Medlem 42" },
+}
+
+/**
+ * One of several people a case is about, with the way to take them off it.
+ */
+export const Removable: Story = {
+  args: {
+    action: { isTaking: true, label: "Ta bort", onPress: fn() },
+    label: "Ester Dahl",
+  },
+}
+
+/**
+ * A unit as a whole, for a case about nobody in it.
+ */
+export const WholeUnit: Story = {
+  args: { about: undefined, name: "Avdelning 1", unitNumber: 1 },
 }

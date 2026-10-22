@@ -7,10 +7,9 @@ import {
   type ChoiceGroupOption,
 } from "@scouterna/wsj27-campfire-ui"
 import { useCanGoBack, useNavigate, useRouter } from "@tanstack/react-router"
-import { useId, useMemo, useState, type ReactElement } from "react"
+import { useId, useState, type ReactElement } from "react"
 
 import { canBeAbout, scopeName, type CaseScope } from "../../../model/CaseType"
-import type { Person } from "../../../model/Person"
 import {
   defaultSecrecyLevel,
   isSecrecyLevel,
@@ -18,8 +17,8 @@ import {
   levelsFor,
   type SecrecyLevel,
 } from "../../../model/SecrecyLevel"
-import { PersonPicker } from "../../components/personpicker/PersonPicker"
 import { usePeople } from "../../use-people"
+import { AboutQuestion, type AboutChoice } from "./AboutQuestion"
 import { useCaseScopes, type CaseScopesView } from "./use-case-scopes"
 import { useCreateCase } from "./use-create-case"
 
@@ -101,63 +100,6 @@ function ScopeQuestion(props: ScopeQuestionProps): ReactElement | null {
           value={props.scope === undefined ? undefined : scopeKey(props.scope)}
         />
       )}
-    </div>
-  )
-}
-
-interface PersonQuestionProps {
-  /**
-   * The id the question's eyebrow carries, which names the search.
-   */
-  readonly labelId: string
-  /**
-   * Fires with the person chosen, or undefined when the reader asks to choose again.
-   */
-  readonly onPick: (person: Person | undefined) => void
-  /**
-   * The person chosen, once there is one.
-   */
-  readonly person: Person | undefined
-  /**
-   * The case's scope, which decides who it can be about. Undefined while none is chosen,
-   * when anyone within reach may be.
-   */
-  readonly scope: CaseScope | undefined
-}
-
-/**
- * Who the case is about: a person within the reader's reach, and for a unit's case one of
- * the unit's deltagare.
- * @param props The person chosen, what choosing does, and the scope to keep to.
- * @returns The question.
- */
-function PersonQuestion(props: PersonQuestionProps): ReactElement {
-  const { scope } = props
-  const unitNumber = scope?.unitNumber
-  const isOffered = useMemo(
-    () =>
-      scope === undefined
-        ? undefined
-        : (candidate: Person): boolean => canBeAbout(scope, candidate),
-    [scope],
-  )
-
-  return (
-    <div aria-labelledby={props.labelId} className="newcase-group" role="group">
-      <p className="newcase-label" id={props.labelId}>
-        Vem gäller det?
-      </p>
-      <PersonPicker
-        isOffered={isOffered}
-        labelId={props.labelId}
-        nobodyText={
-          unitNumber === undefined
-            ? undefined
-            : `Ingen deltagare i avdelning ${String(unitNumber)} heter så.`
-        }
-        onPick={props.onPick}
-        picked={props.person}
-      />
     </div>
   )
 }
@@ -274,6 +216,24 @@ function AccessQuestions(props: AccessQuestionsProps): ReactElement {
   )
 }
 
+/**
+ * What a new case is about, with whatever its scope cannot be about set aside.
+ * @param given What the reader chose, or the address named.
+ * @param scope The case's scope, undefined while none is chosen.
+ * @returns What the case would be about.
+ */
+function keptFor(given: AboutChoice, scope: CaseScope | undefined): AboutChoice {
+  if (scope === undefined) {
+    return given
+  }
+  if (given.kind === "people") {
+    return { kind: "people", people: given.people.filter((person) => canBeAbout(scope, person)) }
+  }
+  return scope.unitNumber === undefined || scope.unitNumber === given.unitNumber
+    ? given
+    : { kind: "people", people: [] }
+}
+
 export interface NewCaseScreenProps {
   /**
    * The person to have chosen already, by member number – from their own screen's menu.
@@ -283,9 +243,9 @@ export interface NewCaseScreenProps {
 }
 
 /**
- * The form for a new case, on one card: who it is about and its title, then – together,
- * because they decide one thing – what kind of case it is and who sees it. The kind is
- * asked outright rather than defaulted where there is a choice, because neither can be
+ * The form for a new case, on one card: who it is about – some people, or a unit as a
+ * whole – and its title, then, together because they decide one thing, what kind of case
+ * it is and who sees it. The kind is asked outright rather than defaulted where there is a choice, because neither can be
  * changed once the case exists, and a case filed with the wrong people cannot be taken
  * back from them. The reader lands on the case in place of the form, so back leads to the
  * list rather than to a form already sent.
@@ -301,10 +261,9 @@ export function NewCaseScreen(props: NewCaseScreenProps): ReactElement {
   const offered = useCaseScopes()
   const [chosenScope, setChosenScope] = useState<string | undefined>(undefined)
   const [level, setLevel] = useState<SecrecyLevel>(defaultSecrecyLevel)
-  const [picked, setPicked] = useState<Person | undefined>(undefined)
-  // The person the address names stays chosen until the reader changes them, and
-  // arrives with the names rather than being copied into state before they have.
-  const [isPresetDropped, setIsPresetDropped] = useState(false)
+  // Untouched, the form is about the person the address names, who arrives with the names
+  // rather than being copied into state before they have.
+  const [answer, setAnswer] = useState<AboutChoice | undefined>(undefined)
   const [title, setTitle] = useState("")
   const id = useId()
 
@@ -313,25 +272,21 @@ export function NewCaseScreen(props: NewCaseScreenProps): ReactElement {
   const onlyScope = offered.scopes.length === 1 ? offered.scopes[0] : undefined
   const scope = onlyScope ?? offered.scopes.find((candidate) => scopeKey(candidate) === chosenScope)
 
-  const preset =
-    props.memberNo === undefined || isPresetDropped ? undefined : people?.get(props.memberNo)
-  const chosen = picked ?? preset
+  const preset = props.memberNo === undefined ? undefined : people?.get(props.memberNo)
+  const given = answer ?? { kind: "people", people: preset === undefined ? [] : [preset] }
   // Someone the scope does not offer – a leader, or someone outside the unit, for a unit's
   // case – is set aside rather than kept, whether they came with the address or were
-  // chosen before the scope changed.
-  const isNotOffered = chosen !== undefined && scope !== undefined && !canBeAbout(scope, chosen)
-  const person = isNotOffered ? undefined : chosen
-  const setPerson = (next: Person | undefined): void => {
-    setIsPresetDropped(true)
-    setPicked(next)
-  }
+  // chosen before the scope changed, and so is another unit than a unit's case's own.
+  const about = keptFor(given, scope)
+  const unitNumber = about.kind === "unit" ? about.unitNumber : undefined
+  const isAboutSomeone = about.kind === "unit" || about.people.length > 0
 
   // A level chosen for one scope and not offered for the one chosen since falls back to
   // the default, so no case is ever sent at a level the reader was not shown.
   const offeredLevel =
     scope === undefined || levelsFor(scope).includes(level) ? level : defaultSecrecyLevel
 
-  const isComplete = scope !== undefined && person !== undefined && title.trim() !== ""
+  const isComplete = scope !== undefined && isAboutSomeone && title.trim() !== ""
 
   // Canceling is going back, not onward, so it returns to wherever the form was opened
   // from – the list, a person, or a case – and leaves no form behind in the history. A
@@ -348,12 +303,16 @@ export function NewCaseScreen(props: NewCaseScreenProps): ReactElement {
   }
 
   const submit = (): void => {
-    if (scope === undefined || person === undefined) {
+    if (scope === undefined || !isAboutSomeone) {
       return
     }
-    create({ level: offeredLevel, person, scope, title: title.trim() }, (created) => {
-      void navigate({ params: { caseId: created.id }, replace: true, to: "/cases/$caseId" })
-    })
+    const chosen = about.kind === "people" ? about.people : []
+    create(
+      { level: offeredLevel, people: chosen, scope, title: title.trim(), unitNumber },
+      (created) => {
+        void navigate({ params: { caseId: created.id }, replace: true, to: "/cases/$caseId" })
+      },
+    )
   }
 
   return (
@@ -361,7 +320,13 @@ export function NewCaseScreen(props: NewCaseScreenProps): ReactElement {
       <PageTitle title="Nytt ärende" />
 
       <section aria-label="Nytt ärende" className="card newcase-form">
-        <PersonQuestion labelId={`${id}-who`} onPick={setPerson} person={person} scope={scope} />
+        <AboutQuestion
+          about={about}
+          labelId={`${id}-who`}
+          onChange={setAnswer}
+          people={people}
+          scope={scope}
+        />
 
         <div className="newcase-group">
           <label className="newcase-label" htmlFor={`${id}-title`}>

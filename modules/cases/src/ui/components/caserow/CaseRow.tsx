@@ -1,8 +1,8 @@
-import { formatRowMoment, Row } from "@scouterna/wsj27-campfire-ui"
+import { formatRowMoment, Row, UnitAvatar } from "@scouterna/wsj27-campfire-ui"
 import { useUser } from "@scouterna/wsj27-campfire-utils"
 import type { ReactElement, ReactNode } from "react"
 
-import { aboutName, scopeOf, type Case } from "../../../model/Case"
+import { aboutName, isAboutUnit, scopeOf, unitOfCase, type Case } from "../../../model/Case"
 import { scopeName } from "../../../model/CaseType"
 import { nameOf, unitTag, type People } from "../../../model/Person"
 import { PersonMark } from "../personmark/PersonMark"
@@ -45,9 +45,12 @@ export interface CaseRowProps {
  */
 export function CaseRow(props: CaseRowProps): ReactElement {
   const { item, people } = props
-  const about = item.aboutMemberNo === undefined ? undefined : people?.get(item.aboutMemberNo)
+  const [first] = item.aboutMemberNos
+  const about = first === undefined ? undefined : people?.get(first)
   const name = aboutName(item, people)
-  const unit = unitTag(about)
+  // A unit's tag only beside one person, since several may be from several units.
+  const unit = item.aboutMemberNos.length === 1 ? unitTag(about) : undefined
+  const unitAbout = isAboutUnit(item) ? unitOfCase(item) : undefined
   const reader = useUser()
   // Only its creator and those it is shared with see a private case, so to its creator it
   // is theirs alone, and to anyone else it is someone else's.
@@ -60,7 +63,13 @@ export function CaseRow(props: CaseRowProps): ReactElement {
     <Row
       action={props.action}
       className="case-row"
-      leading={<PersonMark name={name} person={about} />}
+      leading={
+        unitAbout === undefined ? (
+          <PersonMark name={name} person={about} />
+        ) : (
+          <UnitAvatar unitNumber={unitAbout} />
+        )
+      }
       link={{ params: { caseId: item.id }, to: "/cases/$caseId" }}
       trailing={
         <time className="case-row-time" dateTime={(props.moment ?? item.createdAt).toISOString()}>

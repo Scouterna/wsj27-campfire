@@ -7,6 +7,7 @@ import {
   ParticipantsIcon,
   PencilIcon,
   PersonIcon,
+  PersonPlusIcon,
   Timeline,
   TimelineEntry,
   type GalleryPicture,
@@ -18,13 +19,14 @@ import { useCallback, useId, useState, type ReactElement } from "react"
 
 import { fetchCaseTypesQuery } from "../../../data/fetch-case-types"
 import type { Attachment } from "../../../model/Attachment"
-import { aboutName, scopeOf, type Case } from "../../../model/Case"
+import { isAboutUnit, scopeOf, unitOfCase, type Case } from "../../../model/Case"
 import type { Note } from "../../../model/Note"
-import { nameOf, type People, type Person } from "../../../model/Person"
-import { noteAudience, noteLevels } from "../../../model/SecrecyLevel"
+import { nameOf, type People } from "../../../model/Person"
+import { noteLevels } from "../../../model/SecrecyLevel"
 import { canShare, isRoleHolder } from "../../case-roles"
-import { SubjectCard } from "../../components/subjectcard/SubjectCard"
+import { AboutCard } from "./AboutCard"
 import { AccessCard } from "./AccessCard"
+import { historyOf } from "./case-history"
 import { Composer } from "./Composer"
 import { useCase } from "./use-case"
 import { useCaseActions } from "./use-case-actions"
@@ -45,45 +47,6 @@ export interface CaseScreenProps {
 const pendingTitle = "Ärende"
 
 /**
- * One entry of the case's history – a note, or a moment something happened to the case.
- */
-interface HistoryEntry {
-  /**
-   * Who alone a note is for, when it is more secret than its case.
-   */
-  readonly audience?: string
-  /**
-   * When it happened, which orders the history.
-   */
-  readonly at: Date
-  /**
-   * The entry's body – the note's text, or the sentence telling the event.
-   */
-  readonly body: string
-  /**
-   * Whether the entry is an event rather than a note.
-   */
-  readonly isEvent: boolean
-  /**
-   * A key unique within the history.
-   */
-  readonly key: string
-  /**
-   * The heading a note was written under, where it is one of its own rather than its
-   * case's title.
-   */
-  readonly noteTitle?: string
-  /**
-   * The pictures attached to a note, oldest first.
-   */
-  readonly pictures?: readonly Attachment[]
-  /**
-   * The entry's heading – who wrote the note, or what happened.
-   */
-  readonly title: string
-}
-
-/**
  * A note's pictures as a gallery, each named by its place, since a picture carries no
  * caption of its own.
  * @param attachments The pictures, oldest first.
@@ -101,64 +64,6 @@ function galleryOf(attachments: readonly Attachment[]): readonly GalleryPicture[
         : `Bild ${String(index + 1)} av ${String(attachments.length)}`,
     width: attachment.width,
   }))
-}
-
-/**
- * The case's history, newest first: its notes, the moment it was opened, and – while it
- * is closed – the moment it was closed. The service keeps no record of a reopening, so a
- * reopened case's history reads as if it had never closed.
- * @param item The case.
- * @param notes The case's notes.
- * @param people Everyone the history names, undefined while the names are loading.
- * @param memberNo The reader's own member number, so their notes are marked as theirs.
- * @returns The entries, newest first.
- */
-function historyOf(
-  item: Case,
-  notes: readonly Note[],
-  people: People | undefined,
-  memberNo: string | undefined,
-): readonly HistoryEntry[] {
-  const who = (author: string): string => {
-    const name = nameOf(people, author)
-    return author === memberNo ? `${name} (du)` : name
-  }
-
-  const entries: HistoryEntry[] = notes.map((note) => ({
-    at: note.createdAt,
-    body: note.text,
-    isEvent: false,
-    key: `note-${note.id}`,
-    ...(note.attachments.length > 0 && { pictures: note.attachments }),
-    // A note under its case's own title says nothing by repeating it, so only a note
-    // under a title of its own leads with one.
-    ...(note.title !== "" && note.title !== item.title && { noteTitle: note.title }),
-    // Only a note more secret than its case is marked, since the case already says who
-    // sees everything else on it.
-    ...(note.secrecyLevel > item.secrecyLevel && {
-      audience: noteAudience(note.secrecyLevel, item.secrecyLevel, scopeOf(item)),
-    }),
-    title: who(note.authorMemberNo),
-  }))
-  entries.push({
-    at: item.createdAt,
-    body: `${nameOf(people, item.creatorMemberNo)} skapade ärendet.`,
-    isEvent: true,
-    key: "created",
-    title: "Ärendet skapades",
-  })
-  if (item.isClosed && item.closedAt !== undefined) {
-    const closer =
-      item.closedByMemberNo === undefined ? "Någon" : nameOf(people, item.closedByMemberNo)
-    entries.push({
-      at: item.closedAt,
-      body: `${closer} avslutade ärendet.`,
-      isEvent: true,
-      key: "closed",
-      title: "Ärendet avslutades",
-    })
-  }
-  return entries.toSorted((left, right) => right.at.getTime() - left.at.getTime())
 }
 
 interface TitleEditorProps {
@@ -292,6 +197,7 @@ function CaseHistory(
             audience={entry.audience}
             isEvent={entry.isEvent}
             key={entry.key}
+            subtitle={entry.subtitle}
             title={entry.title}
           >
             {entry.noteTitle !== undefined && <strong>{entry.noteTitle}</strong>}
@@ -309,18 +215,33 @@ function CaseHistory(
 }
 
 /**
- * The case's menu: renaming while it is open, and the way to the person it is about and
- * to their unit. Sharing is not here, because the card that says who sees the case offers
- * it where the reader is already looking.
+ * What the case's menu opens on the page.
+ */
+interface MenuActions {
+  /**
+   * Opens the card for adding someone to the case, undefined for a reader who may not.
+   */
+  readonly onAddPerson: (() => void) | undefined
+  /**
+   * Opens the title for a new one.
+   */
+  readonly onRename: () => void
+}
+
+/**
+ * The case's menu: renaming, and adding someone to a case about people, while it is open,
+ * and the way to each person it is about and to its unit. Adding someone is here rather
+ * than on the cards, because a case is usually about one person. Sharing is not, because
+ * the card that says who sees the case offers it where the reader is already looking.
  * @param item The case.
- * @param about The person it is about, undefined while the names are loading.
- * @param onRename Opens the title for a new one.
+ * @param people Everyone the module knows, which names each of several people.
+ * @param actions What the entries open.
  * @returns The entries, empty when there are none.
  */
 function menuFor(
   item: Case,
-  about: Person | undefined,
-  onRename: () => void,
+  people: People | undefined,
+  actions: MenuActions,
 ): readonly OverflowMenuItem[] {
   const menu: OverflowMenuItem[] = []
   // A closed case cannot be changed until it is reopened, so only an open one offers it.
@@ -328,24 +249,67 @@ function menuFor(
     menu.push({
       icon: <PencilIcon size={20} />,
       label: "Byt rubrik",
-      onSelect: onRename,
+      onSelect: actions.onRename,
     })
   }
-  if (item.aboutMemberNo !== undefined) {
+  if (!item.isClosed && actions.onAddPerson !== undefined) {
+    menu.push({
+      icon: <PersonPlusIcon size={20} />,
+      label: "Lägg till person",
+      onSelect: actions.onAddPerson,
+    })
+  }
+  // One person is the deltagare the case is about, and each of several is named.
+  const about = item.aboutMemberNos
+  for (const memberNo of about) {
     menu.push({
       icon: <PersonIcon size={20} />,
-      label: "Visa deltagaren",
-      link: { params: { memberNo: item.aboutMemberNo }, to: "/participants/$memberNo" },
+      label: about.length === 1 ? "Visa deltagaren" : `Visa ${nameOf(people, memberNo)}`,
+      link: { params: { memberNo }, to: "/participants/$memberNo" },
     })
   }
-  if (about?.troop !== undefined && /^\d+$/u.test(about.troop)) {
+  const unit = unitOfCase(item)
+  if (unit !== undefined) {
     menu.push({
       icon: <ParticipantsIcon size={20} />,
       label: "Visa avdelningen",
-      link: { params: { group: about.troop }, to: "/participants/groups/$group" },
+      link: { params: { group: String(unit) }, to: "/participants/groups/$group" },
     })
   }
   return menu
+}
+
+interface ClosingDialogProps {
+  /**
+   * Whether the question is being asked.
+   */
+  readonly isOpen: boolean
+  /**
+   * Leaves the case open.
+   */
+  readonly onCancel: () => void
+  /**
+   * Closes the case.
+   */
+  readonly onClose: () => void
+}
+
+/**
+ * The question asked before a case is closed, saying it can be opened again.
+ * @param props Whether it is asked, and what each answer does.
+ * @returns The dialog.
+ */
+function ClosingDialog(props: ClosingDialogProps): ReactElement {
+  return (
+    <ConfirmDialog
+      confirmLabel="Avsluta ärendet"
+      description="Ärendet flyttas till Avslutade. Du kan öppna det igen senare."
+      isOpen={props.isOpen}
+      onCancel={props.onCancel}
+      onConfirm={props.onClose}
+      title="Avsluta ärendet?"
+    />
+  )
 }
 
 /**
@@ -362,15 +326,26 @@ function CaseBody(props: CaseBodyProps): ReactElement {
   const actions = useCaseActions(item.id)
   const [isConfirming, setIsConfirming] = useState(false)
   const [isRenaming, setIsRenaming] = useState(false)
+  const [isAdding, setIsAdding] = useState(false)
   const roles = useRoles()
   const { data: types } = useQuery(fetchCaseTypesQuery())
   const reader = { memberNo: user?.memberNo, roles, types }
   const isSharable = canShare(item, reader)
-  const about = item.aboutMemberNo === undefined ? undefined : people?.get(item.aboutMemberNo)
-  const name = aboutName(item, people)
-
-  const menu = menuFor(item, about, () => {
-    setIsRenaming(true)
+  const canChangePeople = !item.isClosed && isRoleHolder(item, reader)
+  const askToClose = (): void => {
+    setIsConfirming(true)
+  }
+  const menu = menuFor(item, people, {
+    // A case about a unit as a whole stays about the whole unit, so nobody is added to it.
+    onAddPerson:
+      canChangePeople && !isAboutUnit(item)
+        ? () => {
+            setIsAdding(true)
+          }
+        : undefined,
+    onRename: () => {
+      setIsRenaming(true)
+    },
   })
 
   return (
@@ -378,17 +353,11 @@ function CaseBody(props: CaseBodyProps): ReactElement {
       <PageTitle title={item.title} />
       <PageActions
         menu={menu.length > 0 ? menu : undefined}
-        secondary={
-          item.isClosed
-            ? { disabled: actions.isBusy, label: "Återöppna", onPress: actions.reopen }
-            : {
-                disabled: actions.isBusy,
-                label: "Avsluta",
-                onPress: () => {
-                  setIsConfirming(true)
-                },
-              }
-        }
+        secondary={{
+          disabled: actions.isBusy,
+          label: item.isClosed ? "Återöppna" : "Avsluta",
+          onPress: item.isClosed ? actions.reopen : askToClose,
+        }}
       />
 
       {isRenaming && !item.isClosed && (
@@ -402,7 +371,17 @@ function CaseBody(props: CaseBodyProps): ReactElement {
         />
       )}
 
-      <SubjectCard about={about} name={name} />
+      <AboutCard
+        canChange={canChangePeople}
+        isAdding={isAdding}
+        isBusy={actions.isBusy}
+        item={item}
+        onChange={actions.changePeople}
+        onDoneAdding={() => {
+          setIsAdding(false)
+        }}
+        people={people}
+      />
 
       <AccessCard
         canAssign={!item.isClosed}
@@ -428,18 +407,15 @@ function CaseBody(props: CaseBodyProps): ReactElement {
         />
       )}
 
-      <ConfirmDialog
-        confirmLabel="Avsluta ärendet"
-        description="Ärendet flyttas till Avslutade. Du kan öppna det igen senare."
+      <ClosingDialog
         isOpen={isConfirming}
         onCancel={() => {
           setIsConfirming(false)
         }}
-        onConfirm={() => {
+        onClose={() => {
           setIsConfirming(false)
           actions.close()
         }}
-        title="Avsluta ärendet?"
       />
 
       {actions.failure !== undefined && (

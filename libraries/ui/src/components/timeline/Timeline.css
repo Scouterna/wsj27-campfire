@@ -71,6 +71,17 @@
     margin: 0 0 6px;
   }
 
+  /* What whoever wrote the entry is, quiet under their name and tucked up against it. */
+  .timeline-title:has(+ .timeline-subtitle) {
+    margin-bottom: 2px;
+  }
+
+  .timeline-subtitle {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-entry);
+    margin: 0 0 6px;
+  }
+
   /* Who alone an entry is for, a small tag after its heading in the theme's wash, so a
      reader sees at a glance that not everyone reads it. */
   .timeline-audience {

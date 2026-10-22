@@ -1,14 +1,15 @@
 # Cases service
 
-The cases service keeps follow-ups: a case about a person or a unit, and the notes written on it over time. It is a service of its own beside the [participants service](./participants-service), built and released outside this repository ([ADR 013](/decisions/013-keep-the-back-end-services-in-their-own-repositories)), and it accepts the same session the [auth service](./auth-service) issues. Campfire reaches it under `/api/project/cases` on its one origin ([ADR 012](/decisions/012-run-campfire-in-three-environments-on-one-origin)). It keeps its cases in a database of its own, which the [dev environment](../../development/environments) runs beside it.
+The cases service keeps follow-ups: a case about some people or a unit as a whole, and the notes written on it over time. It is a service of its own beside the [participants service](./participants-service), built and released outside this repository ([ADR 013](/decisions/013-keep-the-back-end-services-in-their-own-repositories)), and it accepts the same session the [auth service](./auth-service) issues. Campfire reaches it under `/api/project/cases` on its one origin ([ADR 012](/decisions/012-run-campfire-in-three-environments-on-one-origin)). It keeps its cases in a database of its own, which the [dev environment](../../development/environments) runs beside it.
 
 ## What Campfire uses it for
 
 - **Listing cases** – the open ones newest first, and the closed ones on request.
-- **Opening a case** about a person, under a title, of a type and at a secrecy level the creator chooses.
+- **Opening a case** about one or more people or a unit as a whole, under a title, of a type and at a secrecy level the creator chooses – a unit's case only about the unit's deltagare.
+- **Changing who a case is about**, by its type's role holders while it is open. The service writes the change into the case's thread as a note of its own, which Campfire shows as an event in the history.
 - **Learning which types a person may open** – the service's own answer, because it follows their roles.
 - **Renaming an open case.**
-- **Sharing a case** with named leaders and members of the management team, by its type's role holders, and never with someone who sees it already – a unit's case only with the unit's other leaders while it is private, and a CMT case with the leaders of its person's unit.
+- **Sharing a case** with named leaders and members of the management team, by its type's role holders, and never with someone who sees it already – a unit's case only with the unit's other leaders while it is private, and a CMT case with the leaders of its unit.
 - **Reading and writing notes** – a case's thread, newest first, and a new note on an open case, kept from some of those who see the case where its writer chooses.
 - **Attaching pictures to a note** – up to ten, each sent by the note's author while the case is open, and read by whoever may read the note. The service keeps each as a JPEG of at most 2048 pixels with a thumbnail of at most 320, and drops its EXIF.
 - **Assigning a case** to someone responsible for following it up, by anyone who can open it, and only to someone who can – the service lists who that is.

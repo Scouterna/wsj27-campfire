@@ -28,7 +28,7 @@ interface Sent {
 }
 
 interface WireCase {
-  readonly about_person_id: number | null
+  readonly about_person_ids: number[]
   readonly assigned_to_id: number | null
   readonly closed: boolean
   readonly closed_at: string | null
@@ -119,6 +119,11 @@ async function json<T>(response: Response, status = 200): Promise<T> {
   return (await response.json()) as T
 }
 
+// The listing's filter for the cases a member is among those a case is about.
+function aboutQuery(memberNo: number): string {
+  return `?about_person_id=${String(memberNo)}`
+}
+
 async function listedIds(mock: Mock, query = "", token = mock.token): Promise<number[]> {
   const records = await json<WireCase[]>(await get(mock, `/cases${query}`, token))
   return records.map((record) => record.id)
@@ -130,7 +135,13 @@ async function noteTitles(mock: Mock, caseId: number, token = mock.token): Promi
 }
 
 async function openCase(mock: Mock, fields: object = {}, token = mock.token): Promise<WireCase> {
-  const body = { about_person_id: 1_300_077, title: "Feber", troop: "1", type: "hälsa", ...fields }
+  const body = {
+    about_person_ids: [1_300_077],
+    title: "Feber",
+    troop: "1",
+    type: "hälsa",
+    ...fields,
+  }
   return json<WireCase>(await post(mock, "/cases", body, token), 201)
 }
 
@@ -152,7 +163,7 @@ describe("the seeded cases", () => {
     expect(response.status).toBe(200)
     expect(response.headers.get("Content-Type")).toBe("application/json")
     expect(await response.text()).toBe(
-      `[{"id":4,"created_at":"2026-09-20T19:00:00Z","creator_id":1200401,"secrecy_level":3,"title":"Tidig hemresa","type":"cmt","about_person_id":1300252,"assigned_to_id":null,"troop":"2","latest_note_at":"2026-09-21T05:30:00Z","closed":false,"closed_at":null,"closed_by_id":null,"extra_access":[],"tags":[]},{"id":3,"created_at":"2026-09-20T12:45:00Z","creator_id":1200001,"secrecy_level":3,"title":"Feber","type":"hälsa","about_person_id":1300140,"assigned_to_id":null,"troop":"2","latest_note_at":"2026-09-20T18:00:00Z","closed":false,"closed_at":null,"closed_by_id":null,"extra_access":[],"tags":[]},{"id":2,"created_at":"2026-09-20T07:30:00Z","creator_id":1200001,"secrecy_level":3,"title":"Allergisk reaktion","type":"hälsa","about_person_id":1300035,"assigned_to_id":null,"troop":"1","latest_note_at":"2026-09-20T11:00:00Z","closed":false,"closed_at":null,"closed_by_id":null,"extra_access":[],"tags":[]}]`,
+      `[{"id":4,"created_at":"2026-09-20T19:00:00Z","creator_id":1200401,"secrecy_level":3,"title":"Tidig hemresa","type":"cmt","about_person_ids":[1300252],"assigned_to_id":null,"troop":"2","latest_note_at":"2026-09-21T05:30:00Z","closed":false,"closed_at":null,"closed_by_id":null,"extra_access":[],"tags":[]},{"id":3,"created_at":"2026-09-20T12:45:00Z","creator_id":1200001,"secrecy_level":3,"title":"Feber","type":"hälsa","about_person_ids":[1300140],"assigned_to_id":null,"troop":"2","latest_note_at":"2026-09-20T18:00:00Z","closed":false,"closed_at":null,"closed_by_id":null,"extra_access":[],"tags":[]},{"id":2,"created_at":"2026-09-20T07:30:00Z","creator_id":1200001,"secrecy_level":3,"title":"Allergisk reaktion","type":"hälsa","about_person_ids":[1300035],"assigned_to_id":null,"troop":"1","latest_note_at":"2026-09-20T11:00:00Z","closed":false,"closed_at":null,"closed_by_id":null,"extra_access":[],"tags":[]}]`,
     )
   })
 
@@ -174,7 +185,7 @@ describe("the seeded cases", () => {
     const response = await get(mock, "/cases", await tokenFor(mock, "hoc@wsj.se"))
 
     expect(await response.text()).toBe(
-      `[{"id":4,"created_at":"2026-09-20T19:00:00Z","creator_id":1200401,"secrecy_level":3,"title":"Tidig hemresa","type":"cmt","about_person_id":1300252,"assigned_to_id":null,"troop":"2","latest_note_at":"2026-09-21T05:30:00Z","closed":false,"closed_at":null,"closed_by_id":null,"extra_access":[],"tags":[]}]`,
+      `[{"id":4,"created_at":"2026-09-20T19:00:00Z","creator_id":1200401,"secrecy_level":3,"title":"Tidig hemresa","type":"cmt","about_person_ids":[1300252],"assigned_to_id":null,"troop":"2","latest_note_at":"2026-09-21T05:30:00Z","closed":false,"closed_at":null,"closed_by_id":null,"extra_access":[],"tags":[]}]`,
     )
   })
 
@@ -183,7 +194,7 @@ describe("the seeded cases", () => {
     const response = await get(mock, "/cases", await tokenFor(mock, "leader-1@wsj.se"))
 
     expect(await response.text()).toBe(
-      `[{"id":5,"created_at":"2026-09-21T07:00:00Z","creator_id":1100101,"secrecy_level":3,"title":"Hemlängtan","type":"avdelning","about_person_id":1300084,"assigned_to_id":null,"troop":"1","latest_note_at":"2026-09-21T07:00:00Z","closed":false,"closed_at":null,"closed_by_id":null,"extra_access":[],"tags":[]}]`,
+      `[{"id":5,"created_at":"2026-09-21T07:00:00Z","creator_id":1100101,"secrecy_level":3,"title":"Hemlängtan","type":"avdelning","about_person_ids":[1300084],"assigned_to_id":null,"troop":"1","latest_note_at":"2026-09-21T07:00:00Z","closed":false,"closed_at":null,"closed_by_id":null,"extra_access":[],"tags":[]}]`,
     )
   })
 
@@ -299,7 +310,7 @@ describe("opening a case", () => {
     const mock = await start()
     mock.time.advance(250)
     const response = await post(mock, "/cases", {
-      about_person_id: 1_300_077,
+      about_person_ids: [1_300_077],
       title: "Feber",
       troop: "1",
       type: "hälsa",
@@ -307,7 +318,7 @@ describe("opening a case", () => {
 
     expect(response.status).toBe(201)
     expect(await response.text()).toBe(
-      `{"id":6,"created_at":"2027-07-30T08:00:00.250000Z","creator_id":1200001,"secrecy_level":3,"title":"Feber","type":"hälsa","about_person_id":1300077,"assigned_to_id":null,"troop":"1","latest_note_at":null,"closed":false,"closed_at":null,"closed_by_id":null,"extra_access":[],"tags":[]}`,
+      `{"id":6,"created_at":"2027-07-30T08:00:00.250000Z","creator_id":1200001,"secrecy_level":3,"title":"Feber","type":"hälsa","about_person_ids":[1300077],"assigned_to_id":null,"troop":"1","latest_note_at":null,"closed":false,"closed_at":null,"closed_by_id":null,"extra_access":[],"tags":[]}`,
     )
   })
 
@@ -325,12 +336,12 @@ describe("opening a case", () => {
   it("keeps the optional fields it is given, and lax integers become integers", async () => {
     const mock = await start()
     const response = await send(mock, "POST", "/cases", {
-      body: '{"about_person_id": " 12 ", "extra_access": [1, "2", true, 3.0], "secrecy_level": "5", "tags": ["akut"], "title": "t", "troop": "", "type": "cmt"}',
+      body: '{"about_person_ids": [" 12 ", 13], "extra_access": [1, "2", true, 3.0], "secrecy_level": "5", "tags": ["akut"], "title": "t", "troop": "", "type": "cmt"}',
       token: mock.token,
     })
 
     expect(await json(response, 201)).toMatchObject({
-      about_person_id: 12,
+      about_person_ids: [12, 13],
       extra_access: [1, 2, 1, 3],
       secrecy_level: 5,
       tags: ["akut"],
@@ -350,7 +361,7 @@ describe("opening a case", () => {
     const unknownWithout = await post(mock, "/cases", { title: "t", type: "x" }, leader)
 
     const opened = await json<WireCase & { troop: string }>(unitless, 201)
-    expect(opened.about_person_id).toBeNull()
+    expect(opened.about_person_ids).toEqual([])
     expect(opened.troop).toBe("")
     expect(await textOf(Promise.resolve(unitCaseWithout))).toBe(
       '{"detail":"An avdelning case needs a troop"}',
@@ -393,11 +404,11 @@ describe("opening a case", () => {
     const mock = await start()
     const leader = await tokenFor(mock, "leader-1@wsj.se")
     const about = await openCase(mock, { type: "avdelning" }, leader)
-    // Left out of the body, which the service reads as its null.
-    const unit = await openCase(mock, { about_person_id: undefined, type: "avdelning" }, leader)
+    // Left out of the body, which the service reads as nobody.
+    const unit = await openCase(mock, { about_person_ids: undefined, type: "avdelning" }, leader)
 
-    expect(about).toMatchObject({ about_person_id: 1_300_077, creator_id: 1_100_101 })
-    expect(unit.about_person_id).toBeNull()
+    expect(about).toMatchObject({ about_person_ids: [1_300_077], creator_id: 1_100_101 })
+    expect(unit.about_person_ids).toEqual([])
   })
 
   it.each([
@@ -409,7 +420,7 @@ describe("opening a case", () => {
     const mock = await start()
     const leader = await tokenFor(mock, "leader-1@wsj.se")
     const response = await send(mock, "POST", "/cases", {
-      body: `{"about_person_id": ${member}, "secrecy_level": 1, "title": "t", "troop": "1", "type": "avdelning"}`,
+      body: `{"about_person_ids": [1300084, ${member}], "secrecy_level": 1, "title": "t", "troop": "1", "type": "avdelning"}`,
       token: leader,
     })
 
@@ -541,7 +552,7 @@ describe("opening a case", () => {
       await send(mock, "POST", "/cases", { body: "NaN", token: mock.token }),
       await send(mock, "POST", "/cases", { body: String.raw`{"a":"\ud800"}`, token: mock.token }),
       await send(mock, "POST", "/cases", {
-        body: '{"title": "t", "type": "hälsa", "troop": "1", "about_person_id": 99999999999999999999}',
+        body: '{"title": "t", "type": "hälsa", "troop": "1", "about_person_ids": [99999999999999999999]}',
         token: mock.token,
       }),
       await post(mock, "/cases", { ...valid, title: "a\u{0}b" }),
@@ -1082,6 +1093,66 @@ describe("the listing", () => {
 
     expect(await statusOf(tooLarge)).toBe(500)
     expect(await statusOf(large)).toBe(200)
+  })
+})
+
+describe("who a case is about", () => {
+  it("replaces the list whole, and writes a note of who was added and who removed", async () => {
+    const mock = await start()
+    const created = await openCase(mock)
+    mock.time.advance(60_000)
+    const path = `/cases/${String(created.id)}`
+    const changed = await json<WireCase>(
+      await put(mock, `${path}/about_person_ids`, { about_person_ids: [1_300_035, 1_300_049] }),
+    )
+    const notes = await json<(WireNote & { note: string })[]>(await get(mock, `${path}/notes`))
+
+    expect(changed.about_person_ids).toEqual([1_300_035, 1_300_049])
+    expect(changed.latest_note_at).toBe("2027-07-30T08:01:00Z")
+    expect(notes.map(({ note, secrecy_level, title }) => [title, note, secrecy_level])).toEqual([
+      ["Changed who the case is about", "Added: 1300035, 1300049\nRemoved: 1300077", 3],
+    ])
+  })
+
+  it("changes nothing, and writes no note, for the same people again", async () => {
+    const mock = await start()
+    const created = await openCase(mock)
+    const path = `/cases/${String(created.id)}`
+    const same = await put(mock, `${path}/about_person_ids`, { about_person_ids: [1_300_077] })
+
+    expect(await json(same)).toMatchObject({ about_person_ids: [1_300_077] })
+    expect(await noteTitles(mock, created.id)).toEqual([])
+  })
+
+  it("finds a case by anyone it is about", async () => {
+    const mock = await start()
+    const created = await openCase(mock, { about_person_ids: [1_300_035, 1_300_049] })
+
+    expect(await listedIds(mock, aboutQuery(1_300_049))).toContain(created.id)
+    expect(await listedIds(mock, aboutQuery(1_300_077))).not.toContain(created.id)
+  })
+
+  it("leaves the change to the type's role holders, not to someone it is shared with", async () => {
+    const mock = await start()
+    const leader = await tokenFor(mock, "leader-1@wsj.se")
+    await put(mock, "/cases/2/extra_access", { extra_access: [1_100_101] })
+    const refused = await put(mock, "/cases/2/about_person_ids", { about_person_ids: [] }, leader)
+
+    expect(refused.status).toBe(403)
+    expect(await refused.text()).toBe(`{"detail":"Only the case type's own roles may do this"}`)
+  })
+
+  it("keeps a unit's case to its troop for those added, and refuses a closed case first", async () => {
+    const mock = await start()
+    const leader = await tokenFor(mock, "leader-1@wsj.se")
+    const unit = `/cases/${String(unitCase)}/about_person_ids`
+    const outside = await put(mock, unit, { about_person_ids: [1_300_084, 1_300_140] }, leader)
+    const missing = await put(mock, unit, {}, leader)
+    const closed = await put(mock, "/cases/1/about_person_ids", { about_person_ids: [] })
+
+    expect(await outside.text()).toBe('{"detail":"Member 1300140 is not in troop 1"}')
+    expect(missing.status).toBe(422)
+    expect(await closed.text()).toBe('{"detail":"Case is closed"}')
   })
 })
 

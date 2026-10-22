@@ -1,7 +1,7 @@
 import type { Case } from "../../model/Case"
 import { isCaseType } from "../../model/CaseType"
 import { isSecrecyLevel } from "../../model/SecrecyLevel"
-import { isRecord, toDate, toId } from "./validation"
+import { isRecord, toDate, toId, toIds } from "./validation"
 
 /**
  * One case as the cases service sends it. Every field is `unknown`, because the service
@@ -9,7 +9,7 @@ import { isRecord, toDate, toId } from "./validation"
  * usable.
  */
 export interface CaseDto {
-  readonly about_person_id?: unknown
+  readonly about_person_ids?: unknown
   readonly assigned_to_id?: unknown
   readonly closed?: unknown
   readonly closed_at?: unknown
@@ -54,25 +54,19 @@ export function toCase(value: unknown): Case | undefined {
     return undefined
   }
 
-  const aboutMemberNo = toId(dto.about_person_id)
   const assigneeMemberNo = toId(dto.assigned_to_id)
   const closedAt = toDate(dto.closed_at)
   const closedByMemberNo = toId(dto.closed_by_id)
   const latestNoteAt = toDate(dto.latest_note_at)
-  // A member number that cannot be read is left out rather than making the case
-  // unreadable, because the rest of who sees it can still be said.
-  const extraAccess = Array.isArray(dto.extra_access)
-    ? dto.extra_access.flatMap((value: unknown) => toId(value) ?? [])
-    : []
 
   return {
-    ...(aboutMemberNo !== undefined && { aboutMemberNo }),
+    aboutMemberNos: toIds(dto.about_person_ids),
     ...(assigneeMemberNo !== undefined && { assigneeMemberNo }),
     ...(closedAt !== undefined && { closedAt }),
     ...(closedByMemberNo !== undefined && { closedByMemberNo }),
     createdAt,
     creatorMemberNo,
-    extraAccess,
+    extraAccess: toIds(dto.extra_access),
     id,
     isClosed: dto.closed === true,
     ...(latestNoteAt !== undefined && { latestNoteAt }),

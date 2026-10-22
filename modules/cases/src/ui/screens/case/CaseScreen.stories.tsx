@@ -25,9 +25,27 @@ const seeded = { api: { cases: caseRows, notes: noteRows, people: peopleRows } }
 /**
  * An open case: who it is about, what kind of case it is and who sees it, the field for a
  * new note, the action that closes it, and its history newest first. "Byt rubrik" in the
- * menu opens the title for a new one.
+ * menu opens the title for a new one, and "Lägg till person" a card for someone more.
  */
 export const Open: Story = {
+  parameters: seeded,
+}
+
+/**
+ * A case about two people, a card each with the way to take them off it, and in its
+ * history the moment the second was added. "Lägg till person" in the menu opens a card for
+ * one more under them.
+ */
+export const SeveralPeople: Story = {
+  args: { caseId: "6" },
+  parameters: seeded,
+}
+
+/**
+ * A case about a unit as a whole rather than anyone in it.
+ */
+export const WholeUnit: Story = {
+  args: { caseId: "7" },
   parameters: seeded,
 }
 

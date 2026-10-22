@@ -4,6 +4,7 @@ import type { Case } from "../model/Case"
 import { canShare, type Reader } from "./case-roles"
 
 const health: Case = {
+  aboutMemberNos: [],
   createdAt: new Date(2027, 7, 1),
   creatorMemberNo: "1200001",
   extraAccess: [],

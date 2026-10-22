@@ -66,7 +66,7 @@ services:
   # service as ingress:8001.
   project:
     build:
-      context: https://github.com/Scouterna/wsj27-project-api.git#dev
+      context: https://github.com/Scouterna/wsj27-project-api.git#feat/case-people
     network_mode: service:ingress
     environment:
       # 8001, because the ingress already holds 8000 in the shared namespace.

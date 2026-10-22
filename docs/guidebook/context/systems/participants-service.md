@@ -9,7 +9,7 @@ The participants service holds the contingent's list of participants: who is in 
 - **Knowing the signed-in person** – their own unit and how they travel.
 - **Deciding the roles** – every WSJ27 role is minted here, and the [auth service](./auth-service) puts them in each session.
 
-The service has no "everyone I may see" listing, so Campfire builds the list of participants from the unit and group listings: a leader asks for their own unit, and the management team walks every unit. The participants module composes the list from it, and the cases module walks the same listings for the names it shows a case with.
+The service has no "everyone I may see" listing, so Campfire builds the list of participants from the unit and group listings: a leader asks for their own unit and the names of every leader and the management team, and the management team walks every unit. The participants module composes the list from it, and the cases module walks the same listings for the names it shows a case with.
 
 ## Who may see what
 
@@ -17,11 +17,11 @@ The service decides what each caller gets, so the front-end never filters what i
 
 | Caller                         | Sees                                                                                                |
 | ------------------------------ | --------------------------------------------------------------------------------------------------- |
-| A unit leader                  | Their own unit                                                                                      |
+| A unit leader                  | Their own unit, and the name of every leader and member of the management team                      |
 | The contingent management team | Everyone's contact details, and health answers only with the health team's role or a personal grant |
 | Anyone else                    | Nobody                                                                                              |
 
-A person the caller may not see answers exactly as someone who does not exist, so nobody can learn who is in the contingent by asking. A caller who may see a person but not at the level asked for is refused outright rather than handed less.
+Any leader or member of the management team may read every adult's name, because those are the people on cases. A person the caller may not see answers exactly as someone who does not exist, so nobody can learn who is in the contingent by asking. A caller who may see a person but not at the level asked for is refused outright rather than handed less.
 
 The contingent management team's functions are not in Scoutnet, so the service reads them from the contingent's own roster. What leaves the service is decided by a template in its repository – a form question the template does not carry never reaches Campfire.
 

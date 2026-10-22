@@ -12,8 +12,8 @@ import {
 import { capitalized, scopeName } from "../../../model/CaseType"
 import type { People, Person } from "../../../model/Person"
 import { PersonPicker } from "../../components/personpicker/PersonPicker"
+import { PersonRow } from "../../components/personrow/PersonRow"
 import { AssigneeLine, AssignPanel } from "./AssignPanel"
-import { PersonRow } from "./PersonRow"
 
 import "./AccessCard.css"
 
@@ -166,7 +166,7 @@ function Offered(props: OfferedProps): ReactElement {
     )
   }
   return (
-    <ul aria-labelledby={props.labelId} className="access-card-people">
+    <ul aria-labelledby={props.labelId} className="case-person-rows">
       {offered.map((person) => (
         <PersonRow
           action={{
@@ -206,7 +206,7 @@ function SharePanel(props: SharePanelProps): ReactElement {
           <p className="access-card-label" id={`${id}-shared`}>
             Delat med
           </p>
-          <ul aria-labelledby={`${id}-shared`} className="access-card-people">
+          <ul aria-labelledby={`${id}-shared`} className="case-person-rows">
             {shared.map((memberNo) => (
               <PersonRow
                 action={

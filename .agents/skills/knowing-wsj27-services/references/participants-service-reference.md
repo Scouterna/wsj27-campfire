@@ -29,7 +29,7 @@ Served at the service's root; the ingress adds and strips `/api/project`.
 
 `infolevel` is `name`, `basic`, or `full`:
 
-- **`name`** – the name and member number. It needs basic access, so a caller with none cannot use it to learn that someone exists.
+- **`name`** – the name and member number. It needs basic access, so a caller with none cannot use it to learn that someone exists – except for an adult's name, below.
 - **`basic`** – the decoded basic fields and the contact details.
 - **`full`** – adds the form answers, including health.
 
@@ -50,12 +50,13 @@ Segments are slugified – accents folded, anything else collapsed to a dash –
 
 ## Access
 
-| Caller              | `name` and `basic`  | `full`                                                                                               |
-| ------------------- | ------------------- | ---------------------------------------------------------------------------------------------------- |
-| A unit leader       | Their own unit only | Their own unit only                                                                                  |
-| The management team | Everyone            | Only with the health team's role, `wsj27:cmt:support:halsa`, or the form's health-and-internal grant |
-| Anyone else         | Nothing             | Nothing                                                                                              |
+| Caller              | `name` and `basic`                          | `full`                                                                                               |
+| ------------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| A unit leader       | Their own unit only, and any adult's `name` | Their own unit only                                                                                  |
+| The management team | Everyone                                    | Only with the health team's role, `wsj27:cmt:support:halsa`, or the form's health-and-internal grant |
+| Anyone else         | Nothing                                     | Nothing                                                                                              |
 
+- **An adult's name is open to every leader and management member.** Anyone holding `wsj27:al:<unit>` or `wsj27:cmt` may read the `name` level of any Avdelningsledare or Kontingentledning – one by member number, or the `al` and `cmt` listings – because those are the people who create, are assigned to, and write on cases. Every other level, every young participant, and the `ist` listing still follow the unit rules. A bare `wsj27:al` or a service account does not count.
 - **No access answers 404**, with the same body as a record that does not exist, so a refusal never confirms membership. Access at too low a level answers 403.
 - **A unit's own leaders are names only to each other.** A unit leader's contact details and answers go only to management with health access, so a leader reading their unit sees its young people in full and its other leaders by name.
 - **The management team's own answers** are held back more tightly still, from everyone without the form's personal grant – and on `dev`, for now, from everyone.

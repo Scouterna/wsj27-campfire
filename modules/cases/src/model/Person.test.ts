@@ -49,6 +49,16 @@ describe("writing the line under a name", () => {
     expect(placingLine(ist, () => "Ankan")).toBe("IST")
   })
 
+  it("names a management member's function after their role", () => {
+    const helena: Person = {
+      funktion: "Hälsosupport",
+      memberNo: "1200001",
+      name: "Helena Hägg",
+      role: "kontingentledning",
+    }
+    expect(placingLine(helena, () => "Ankan")).toBe("CMT · Hälsosupport")
+  })
+
   it("says nothing for somebody the module does not know", () => {
     expect(placingLine(undefined, () => "Ankan")).toBeUndefined()
   })

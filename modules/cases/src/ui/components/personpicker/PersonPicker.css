@@ -50,6 +50,19 @@
     white-space: nowrap;
   }
 
+  /* The heading over the units and over the people, where the search found both, so the
+     two kinds read apart – small capitals on a rule, like the form's own eyebrows. */
+  .person-picker-section {
+    border-top: 1px solid var(--color-divider);
+    color: var(--color-ink-tertiary);
+    font-size: var(--font-size-detail);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.16em;
+    margin: 0;
+    padding: var(--spacing-stack) var(--spacing-container) var(--spacing-inline);
+    text-transform: uppercase;
+  }
+
   .person-picker-none {
     border-top: 1px solid var(--color-divider);
     color: var(--color-ink-secondary);

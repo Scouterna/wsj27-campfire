@@ -19,7 +19,7 @@ function row(overrides: Record<string, unknown> = {}): Record<string, unknown> {
     secrecy_level: 4,
     title: "Feber",
     type: "hälsa",
-    about_person_id: 1_100_111,
+    about_person_ids: [1_100_111],
     assigned_to_id: wireNull,
     troop: "1",
     latest_note_at: "2026-09-26T12:05:01+00:00",
@@ -35,7 +35,7 @@ function row(overrides: Record<string, unknown> = {}): Record<string, unknown> {
 describe("reading one case", () => {
   it("reads the service's shape into the domain's", () => {
     expect(toCase(row())).toEqual({
-      aboutMemberNo: "1100111",
+      aboutMemberNos: ["1100111"],
       createdAt: new Date("2026-09-26T12:05:00.123Z"),
       creatorMemberNo: "1100101",
       extraAccess: ["1200401"],
@@ -64,8 +64,10 @@ describe("reading one case", () => {
     expect(toCase(row({ assigned_to_id: wireNull }))).not.toHaveProperty("assigneeMemberNo")
   })
 
-  it("leaves out whom a case is about when it names nobody", () => {
-    expect(toCase(row({ about_person_id: wireNull }))).not.toHaveProperty("aboutMemberNo")
+  it("reads who a case is about as a list, dropping what names nobody", () => {
+    expect(toCase(row({ about_person_ids: [] }))?.aboutMemberNos).toEqual([])
+    expect(toCase(row({ about_person_ids: wireNull }))?.aboutMemberNos).toEqual([])
+    expect(toCase(row({ about_person_ids: [1, "x", 2] }))?.aboutMemberNos).toEqual(["1", "2"])
   })
 
   it("leaves out the newest note's moment before the first note", () => {

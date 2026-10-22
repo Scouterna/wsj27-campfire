@@ -4,6 +4,7 @@ import {
   addNote,
   assignCase,
   attachPicture,
+  changeCasePeople,
   closeCase,
   createCase,
   renameCase,
@@ -22,7 +23,7 @@ function caseRow(overrides: Record<string, unknown> = {}): Record<string, unknow
     secrecy_level: 3,
     title: "Feber",
     type: "hälsa",
-    about_person_id: 1_100_111,
+    about_person_ids: [1_100_111],
     troop: "1",
     closed: false,
     ...overrides,
@@ -84,14 +85,14 @@ describe("opening a case", () => {
   it("opens a case of the chosen type, leaving the default level to the service", async () => {
     const sent = networkAnswers(Response.json(caseRow(), { status: 201 }))
 
-    const opened = await createCase({ level: 3, person, scope: health, title: "Feber" })
+    const opened = await createCase({ level: 3, people: [person], scope: health, title: "Feber" })
 
     expect(opened.id).toBe("7")
     expect(sent).toEqual([
       {
         url: "/api/project/cases",
         method: "POST",
-        body: { about_person_id: 1_100_111, title: "Feber", troop: "1", type: "hälsa" },
+        body: { about_person_ids: [1_100_111], title: "Feber", troop: "1", type: "hälsa" },
       },
     ])
   })
@@ -99,7 +100,7 @@ describe("opening a case", () => {
   it("sends a level only when it is not the default", async () => {
     const sent = networkAnswers(Response.json(caseRow({ secrecy_level: 5 }), { status: 201 }))
 
-    await createCase({ level: 5, person, scope: health, title: "Feber" })
+    await createCase({ level: 5, people: [person], scope: health, title: "Feber" })
 
     expect(sent[0]?.body).toMatchObject({ secrecy_level: 5 })
   })
@@ -108,7 +109,7 @@ describe("opening a case", () => {
     const sent = networkAnswers(Response.json(caseRow({ type: "avdelning" }), { status: 201 }))
     const scope = { type: "avdelning", unitNumber: 7 } as const
 
-    await createCase({ level: 3, person, scope, title: "Hemlängtan" })
+    await createCase({ level: 3, people: [person], scope, title: "Hemlängtan" })
 
     expect(sent[0]?.body).toMatchObject({ troop: "7", type: "avdelning" })
   })
@@ -117,17 +118,25 @@ describe("opening a case", () => {
     const sent = networkAnswers(Response.json(caseRow({ troop: "", type: "cmt" }), { status: 201 }))
     const nobody = { memberNo: "41", name: "Pernilla Palm" }
 
-    await createCase({ level: 3, person: nobody, scope: { type: "cmt" }, title: "Pass" })
+    await createCase({ level: 3, people: [nobody], scope: { type: "cmt" }, title: "Pass" })
 
-    expect(sent[0]?.body).toMatchObject({ about_person_id: 41, troop: "", type: "cmt" })
+    expect(sent[0]?.body).toMatchObject({ about_person_ids: [41], troop: "", type: "cmt" })
+  })
+
+  it("opens a case about a unit as a whole, filed under that unit with nobody in it", async () => {
+    const sent = networkAnswers(Response.json(caseRow({ about_person_ids: [] }), { status: 201 }))
+
+    await createCase({ level: 3, people: [], scope: health, title: "Magsjuka", unitNumber: 4 })
+
+    expect(sent[0]?.body).toMatchObject({ about_person_ids: [], troop: "4", type: "hälsa" })
   })
 
   it("fails when the service's answer is not a case", async () => {
     networkAnswers(Response.json({ id: 7 }, { status: 201 }))
 
-    await expect(createCase({ level: 3, person, scope: health, title: "Feber" })).rejects.toThrow(
-      "/api/project/cases answered with something that is not readable",
-    )
+    await expect(
+      createCase({ level: 3, people: [person], scope: health, title: "Feber" }),
+    ).rejects.toThrow("/api/project/cases answered with something that is not readable")
   })
 })
 
@@ -281,6 +290,25 @@ describe("assigning a case", () => {
         body: { assigned_to_id: wireNull },
         method: "PUT",
         url: "/api/project/cases/7/assignee",
+      },
+    ])
+  })
+})
+
+describe("changing who a case is about", () => {
+  it("replaces the whole list, by number", async () => {
+    const sent = networkAnswers(
+      Response.json(caseRow({ about_person_ids: [1_300_035, 1_300_049] })),
+    )
+
+    const changed = await changeCasePeople("7", ["1300035", "1300049"])
+
+    expect(changed.aboutMemberNos).toEqual(["1300035", "1300049"])
+    expect(sent).toEqual([
+      {
+        body: { about_person_ids: [1_300_035, 1_300_049] },
+        method: "PUT",
+        url: "/api/project/cases/7/about_person_ids",
       },
     ])
   })

@@ -2,7 +2,7 @@ import { fetch } from "@scouterna/wsj27-campfire-utils"
 import { queryOptions, type UseQueryOptions } from "@tanstack/react-query"
 
 import { caseUrl } from "./case-urls"
-import { toId } from "./dto/validation"
+import { toIds } from "./dto/validation"
 
 type AccessQueryKey = readonly ["cases", "access", string]
 
@@ -20,7 +20,6 @@ export function fetchAccessQuery(
   return queryOptions({
     queryFn: async (): Promise<unknown> => fetch<unknown>(`${caseUrl(caseId)}/access`),
     queryKey: ["cases", "access", caseId] as const,
-    select: (value: unknown): readonly string[] =>
-      Array.isArray(value) ? value.flatMap((memberNo: unknown) => toId(memberNo) ?? []) : [],
+    select: toIds,
   })
 }

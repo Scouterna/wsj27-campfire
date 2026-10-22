@@ -1,0 +1,31 @@
+/* Who a case is about: a card each, stacked as the page's cards are, and the card for
+   adding someone under them while it is open. */
+
+@layer component {
+  .about-cards {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-group);
+  }
+
+  .about-card-adding {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-stack);
+  }
+
+  .about-card-adding-head {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .about-card-label {
+    color: var(--color-ink-tertiary);
+    font-size: var(--font-size-detail);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.16em;
+    margin: 0;
+    text-transform: uppercase;
+  }
+}

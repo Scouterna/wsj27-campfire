@@ -12,6 +12,13 @@ function troopinfo(key: string): string {
 }
 
 /**
+ * Where one member type's names are asked for.
+ */
+function names(key: string): string {
+  return `/api/project/participants/troopinfo/${key}?infolevel=name`
+}
+
+/**
  * A listing row as the participants service sends it at the basic level.
  */
 function row(memberNo: number, name: string, memberType: string, troop: string): unknown {
@@ -62,6 +69,14 @@ afterEach(() => {
 })
 
 const contingent = { kind: "contingent" } as const
+
+/**
+ * The service's answer to a listing nobody is in, or one it does not offer.
+ * @returns The 404.
+ */
+function notFound(): Response {
+  return Response.json({ detail: "Troop not found in project." }, { status: 404 })
+}
 
 describe("everyone in the contingent", () => {
   it("walks the leaders' listing, then every unit it names, the IST, and the management", async () => {
@@ -173,13 +188,43 @@ describe("everyone in the contingent", () => {
 describe("a leader's own units", () => {
   const unitOne = { kind: "units", unitNumbers: [1] } as const
 
-  it("reads only the leader's own units' listings", async () => {
-    const asked = networkAnswers(contingentAnswers())
+  it("reads the leader's own units, and the names alone of every leader and the management", async () => {
+    const asked = networkAnswers({
+      ...contingentAnswers(),
+      [names("al")]: () =>
+        Response.json([
+          { member_no: 1, name: "Lars Lindberg" },
+          { member_no: 2, name: "Hanna Hellström" },
+        ]),
+      [names("cmt")]: () => Response.json([{ member_no: 41, name: "Pernilla Palm" }]),
+    })
 
     const people = await testClient().query(fetchPeopleQuery(unitOne))
 
-    expect(asked).toEqual([troopinfo("1")])
-    expect(people.keys().toArray()).toEqual(["1", "11"])
+    expect(asked).toHaveLength(3)
+    expect(asked).toEqual(expect.arrayContaining([names("al"), names("cmt"), troopinfo("1")]))
+    expect(people.get("1")).toEqual({
+      memberNo: "1",
+      name: "Lars Lindberg",
+      role: "ledare",
+      troop: "1",
+    })
+    expect(people.get("2")).toEqual({ memberNo: "2", name: "Hanna Hellström", role: "ledare" })
+    expect(people.get("41")).toEqual({
+      memberNo: "41",
+      name: "Pernilla Palm",
+      role: "kontingentledning",
+    })
+    expect(people.has("21")).toBe(false)
+  })
+
+  it("reads only the leader's own units where the service gives no adults' names", async () => {
+    networkAnswers({ ...contingentAnswers(), [names("al")]: notFound, [names("cmt")]: notFound })
+
+    const people = await testClient().query(fetchPeopleQuery(unitOne))
+
+    expect(people.size).toBe(2)
+    expect(people.keys().toArray()).toEqual(expect.arrayContaining(["1", "11"]))
   })
 
   it("caches apart from the contingent, by the units it holds", () => {

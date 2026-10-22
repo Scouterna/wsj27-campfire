@@ -1,8 +1,17 @@
 import { describe, expect, it } from "vitest"
 
-import { aboutName, byLastActivity, canBeSharedWith, scopeOf, whoSees, type Case } from "./Case"
+import {
+  aboutName,
+  byLastActivity,
+  canBeSharedWith,
+  isAboutUnit,
+  scopeOf,
+  whoSees,
+  type Case,
+} from "./Case"
 
 const opened = {
+  aboutMemberNos: [],
   createdAt: new Date(2027, 7, 1),
   creatorMemberNo: "1200001",
   extraAccess: [],
@@ -15,14 +24,36 @@ const opened = {
 } as const
 
 describe("naming who a case is about", () => {
+  const people = new Map([
+    ["1100101", { memberNo: "1100101", name: "Lars Lindberg" }],
+    ["1300035", { memberNo: "1300035", name: "Ester Dahl" }],
+    ["1300049", { memberNo: "1300049", name: "Ivar Forsberg" }],
+  ])
+
   it("names the person the case is about", () => {
-    const item: Case = { ...opened, aboutMemberNo: "1100101" }
-    const people = new Map([["1100101", { memberNo: "1100101", name: "Lars Lindberg" }]])
+    const item: Case = { ...opened, aboutMemberNos: ["1100101"] }
     expect(aboutName(item, people)).toBe("Lars Lindberg")
   })
 
+  it("joins two people, and names the first of more with how many besides", () => {
+    const two: Case = { ...opened, aboutMemberNos: ["1300035", "1300049"] }
+    const three: Case = { ...opened, aboutMemberNos: ["1300035", "1300049", "1100101"] }
+
+    expect(aboutName(two, people)).toBe("Ester Dahl och Ivar Forsberg")
+    expect(aboutName(three, people)).toBe("Ester Dahl och 2 till")
+  })
+
+  it("names the unit of a case about a unit as a whole", () => {
+    expect(aboutName(opened, people)).toBe("Avdelning 1")
+    expect(isAboutUnit(opened)).toBe(true)
+    expect(isAboutUnit({ ...opened, aboutMemberNos: ["1300035"] })).toBe(false)
+  })
+
   it("says so for a case about nobody in particular", () => {
-    expect(aboutName(opened, undefined)).toBe("Ingen person angiven")
+    const nobody: Case = { ...opened, troop: "" }
+
+    expect(aboutName(nobody, undefined)).toBe("Ingen person angiven")
+    expect(isAboutUnit(nobody)).toBe(false)
   })
 })
 

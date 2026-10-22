@@ -2,7 +2,9 @@ import { unitName } from "@scouterna/wsj27-campfire-ui"
 import type { ReactElement } from "react"
 
 import { nameOf, placingLine, type People } from "../../../model/Person"
-import { PersonMark } from "../../components/personmark/PersonMark"
+import { PersonMark } from "../personmark/PersonMark"
+
+import "./PersonRow.css"
 
 /**
  * What a person's row offers at its end – sharing the case with them, taking it back,
@@ -65,9 +67,9 @@ export function PersonRow(props: PersonRowProps): ReactElement {
   const { action } = props
 
   return (
-    <li className="access-card-person">
+    <li className="case-person-row">
       <PersonMark name={name} person={person} />
-      <span className="access-card-name">
+      <span className="case-person-row-name">
         <strong>{props.memberNo === props.readerMemberNo ? `${name} (du)` : name}</strong>
         {placing !== undefined && <small>{placing}</small>}
       </span>
@@ -76,8 +78,8 @@ export function PersonRow(props: PersonRowProps): ReactElement {
           aria-label={`${action.spoken ?? action.label} ${name}`}
           className={
             action.isTaking === true
-              ? "access-card-action access-card-remove"
-              : "access-card-action"
+              ? "case-person-row-action case-person-row-remove"
+              : "case-person-row-action"
           }
           disabled={props.isBusy}
           onClick={action.onPress}

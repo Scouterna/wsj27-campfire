@@ -353,6 +353,56 @@ describe("a participant's patrol", () => {
   })
 })
 
+describe("an adult's name", () => {
+  it("is open to a leader by member number, wherever the adult is", async () => {
+    const adults: readonly (readonly [string, string])[] = [
+      ["1100201", '{"name":"Anders Andersson"}'],
+      ["1200001", '{"name":"Helena Hägg"}'],
+    ]
+    for (const [memberNo, name] of adults) {
+      const response = await get(
+        `/participants/individual/${memberNo}?infolevel=name`,
+        as("leader-1@wsj.se"),
+      )
+      expect(response.status).toBe(200)
+      expect(await response.text()).toBe(name)
+    }
+  })
+
+  it("goes no further than the name, and no further than the adults", async () => {
+    const basic = await get("/participants/individual/1200001", as("leader-1@wsj.se"))
+    // Molly Sundqvist, a deltagare of the other unit.
+    const molly = String(1_300_140)
+    const young = await get(
+      `/participants/individual/${molly}?infolevel=name`,
+      as("leader-1@wsj.se"),
+    )
+
+    expect(basic.status).toBe(404)
+    expect(young.status).toBe(404)
+  })
+
+  it("lists the leaders and the management to a leader by name, and the IST to nobody but CMT", async () => {
+    const leaders = await listing("/participants/troopinfo/al?infolevel=name", "leader-1@wsj.se")
+    const cmt = await listing("/participants/troopinfo/cmt?infolevel=name", "leader-1@wsj.se")
+    const ist = await get("/participants/troopinfo/ist?infolevel=name", as("leader-1@wsj.se"))
+
+    expect(leaders.map((row) => row.name)).toContain("Lars Lindberg")
+    expect(cmt.map((row) => row.name)).toContain("Helena Hägg")
+    expect(
+      [...leaders, ...cmt].every((row) => Object.keys(row).join(",") === "member_no,name"),
+    ).toBe(true)
+    expect(ist.status).toBe(404)
+  })
+
+  it("lists the leaders to a leader by name alone, as any other level of another troop", async () => {
+    const basic = await get("/participants/troopinfo/al", as("leader-1@wsj.se"))
+
+    expect(basic.status).toBe(404)
+    expect(await basic.text()).toBe('{"detail":"Troop not found in project."}')
+  })
+})
+
 describe("the role map", () => {
   it("serves every role-holder's roles to the administration, sorted and hashed as the service hashes them", async () => {
     const response = await get("/participants/roles", as("admin@wsj.se"))

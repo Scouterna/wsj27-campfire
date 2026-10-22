@@ -1,5 +1,5 @@
-import { Button, unitName } from "@scouterna/wsj27-campfire-ui"
-import { useCallback, useRef, useState, type ReactElement } from "react"
+import { Button, UnitAvatar, unitName } from "@scouterna/wsj27-campfire-ui"
+import { useCallback, useId, useRef, useState, type ReactElement } from "react"
 
 import { placingLine, type Person } from "../../../model/Person"
 import { PersonMark } from "../personmark/PersonMark"
@@ -22,10 +22,12 @@ function countOf(search: PeopleSearchView, query: string): string {
   if (search.error !== null || query.trim() === "") {
     return ""
   }
-  if (search.total > search.matches.length) {
-    return `${String(search.matches.length)} av ${String(search.total)}`
+  const shown = search.units.length + search.matches.length
+  const total = search.units.length + search.total
+  if (total > shown) {
+    return `${String(shown)} av ${String(total)}`
   }
-  return search.total === 1 ? "1 träff" : `${String(search.total)} träffar`
+  return total === 1 ? "1 träff" : `${String(total)} träffar`
 }
 
 interface PickedPersonProps {
@@ -73,6 +75,117 @@ function PickedPerson(props: PickedPersonProps): ReactElement {
   )
 }
 
+interface UnitOptionsProps {
+  /**
+   * The id of the heading that names the list.
+   */
+  readonly labelId: string
+  /**
+   * Chooses one of them, as a whole.
+   */
+  readonly onPick: (unitNumber: number) => void
+  /**
+   * The units the search named.
+   */
+  readonly units: readonly number[]
+}
+
+/**
+ * The units the search named, under a heading of their own ahead of the people, each a
+ * row to choose the unit as a whole from.
+ * @param props The units, and what choosing one does.
+ * @returns The heading and the list.
+ */
+function UnitOptions(props: UnitOptionsProps): ReactElement {
+  return (
+    <>
+      <p className="person-picker-section" id={props.labelId}>
+        Avdelningar
+      </p>
+      <ul aria-labelledby={props.labelId} className="person-picker-options">
+        {props.units.map((unit) => {
+          const name = unitName(unit)
+          return (
+            <li key={unit}>
+              <button
+                className="person-picker-option"
+                onClick={() => {
+                  props.onPick(unit)
+                }}
+                type="button"
+              >
+                <UnitAvatar unitNumber={unit} />
+                <span className="person-picker-person">
+                  <strong>Avdelning {unit}</strong>
+                  <small>
+                    {name === undefined ? "Hela avdelningen" : `${name} · Hela avdelningen`}
+                  </small>
+                </span>
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+    </>
+  )
+}
+
+interface PersonOptionsProps {
+  /**
+   * The id of the heading that sets the people apart from the units ahead of them,
+   * undefined where no units were found.
+   */
+  readonly labelId: string | undefined
+  /**
+   * Chooses one of them.
+   */
+  readonly onPick: (person: Person) => void
+  /**
+   * The people the search found.
+   */
+  readonly people: readonly Person[]
+}
+
+/**
+ * The people the search found, each a row to choose from – under a heading of their own
+ * where units were found ahead of them.
+ * @param props The people, and what choosing one does.
+ * @returns The list.
+ */
+function PersonOptions(props: PersonOptionsProps): ReactElement {
+  return (
+    <>
+      {props.labelId !== undefined && (
+        <p className="person-picker-section" id={props.labelId}>
+          Personer
+        </p>
+      )}
+      <ul aria-labelledby={props.labelId} className="person-picker-options">
+        {props.people.map((person) => {
+          const placing = placingLine(person, unitName)
+          return (
+            <li key={person.memberNo}>
+              <button
+                className="person-picker-option"
+                onClick={() => {
+                  props.onPick(person)
+                }}
+                type="button"
+              >
+                <PersonMark name={person.name} person={person} />
+                <span className="person-picker-person">
+                  <strong>{person.name}</strong>
+                  {placing !== undefined && <small>{placing}</small>}
+                </span>
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+    </>
+  )
+}
+
 export interface PersonPickerProps {
   /**
    * The id of the text that names the picker, which labels the search field.
@@ -94,10 +207,19 @@ export interface PersonPickerProps {
    */
   readonly nobodyText?: string | undefined
   /**
+   * Fires with a unit chosen as a whole, from among `units`.
+   */
+  readonly onPickUnit?: ((unitNumber: number) => void) | undefined
+  /**
    * The chosen person, or undefined while nobody is – a picker that adds people to a list
    * leaves it undefined, so it stays a search.
    */
   readonly picked: Person | undefined
+  /**
+   * The units that may be chosen as a whole, lowest first, found by their exact number or
+   * their name and shown ahead of the people. Left out, none may.
+   */
+  readonly units?: readonly number[] | undefined
 }
 
 /**
@@ -110,7 +232,9 @@ export function PersonPicker(props: PersonPickerProps): ReactElement {
   const [query, setQuery] = useState("")
   const [isChanging, setIsChanging] = useState(false)
   const field = useRef<HTMLInputElement | null>(null)
-  const search = usePeopleSearch(query, props.isOffered)
+  const search = usePeopleSearch(query, props.isOffered, props.units)
+  const id = useId()
+  const { onPickUnit } = props
   const { onPick, picked } = props
 
   // Byt replaces itself with the search, so focus follows to what took its place rather
@@ -148,7 +272,7 @@ export function PersonPicker(props: PersonPickerProps): ReactElement {
           onChange={(event) => {
             setQuery(event.target.value)
           }}
-          placeholder="Sök namn"
+          placeholder={props.units === undefined ? "Sök namn" : "Sök namn eller avdelning"}
           enterKeyHint="search"
           ref={focusSearchOnMount}
           type="text"
@@ -166,37 +290,30 @@ export function PersonPicker(props: PersonPickerProps): ReactElement {
         </p>
       )}
 
-      {query.trim() !== "" && !search.isPending && search.error === null && search.total === 0 && (
-        <p className="person-picker-none">{props.nobodyText ?? "Ingen heter så."}</p>
+      {query.trim() !== "" &&
+        !search.isPending &&
+        search.error === null &&
+        search.total === 0 &&
+        search.units.length === 0 && (
+          <p className="person-picker-none">{props.nobodyText ?? "Ingen heter så."}</p>
+        )}
+
+      {onPickUnit !== undefined && search.units.length > 0 && (
+        <UnitOptions labelId={`${id}-units`} onPick={onPickUnit} units={search.units} />
       )}
 
       {search.matches.length > 0 && (
-        <ul className="person-picker-options">
-          {search.matches.map((person) => {
-            const placing = placingLine(person, unitName)
-            return (
-              <li key={person.memberNo}>
-                <button
-                  className="person-picker-option"
-                  onClick={() => {
-                    onPick(person)
-                    // A picker that adds to a list stays a search, so it starts over and
-                    // keeps focus for the next name rather than losing it with the row.
-                    setQuery("")
-                    field.current?.focus()
-                  }}
-                  type="button"
-                >
-                  <PersonMark name={person.name} person={person} />
-                  <span className="person-picker-person">
-                    <strong>{person.name}</strong>
-                    {placing !== undefined && <small>{placing}</small>}
-                  </span>
-                </button>
-              </li>
-            )
-          })}
-        </ul>
+        <PersonOptions
+          labelId={search.units.length > 0 ? `${id}-people` : undefined}
+          onPick={(person) => {
+            onPick(person)
+            // A picker that adds to a list stays a search, so it starts over and keeps
+            // focus for the next name rather than losing it with the row.
+            setQuery("")
+            field.current?.focus()
+          }}
+          people={search.matches}
+        />
       )}
     </div>
   )

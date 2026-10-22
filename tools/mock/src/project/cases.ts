@@ -41,6 +41,7 @@ import {
   type Route,
   type Service,
 } from "./case-dependencies.ts"
+import { refuseOutsideTroop, replacePeople } from "./case-people.ts"
 import { caseJson, newestFirst, noteJson, seededStore, type CaseRecord } from "./case-store.ts"
 import type { ProjectDependencies } from "./participants.ts"
 
@@ -74,17 +75,6 @@ function onlyRoleHolders(context: Context): Response {
   return detail(context, "Only the case type's own roles may do this", 403)
 }
 
-// The participants dictionary is keyed by member number, so a number past what it can hold is
-// simply nobody.
-function participantOf(
-  { participantsList }: Service,
-  memberNo: bigint,
-): { readonly troop: string } | undefined {
-  return memberNo <= BigInt(Number.MAX_SAFE_INTEGER) && memberNo >= 0n
-    ? participantsList.get(Number(memberNo))
-    : undefined
-}
-
 function createCase(service: Service, context: Context, caller: Person, body: PyValue): Response {
   const errors: FieldError[] = []
   const fields = modelOf(body, errors)
@@ -94,7 +84,7 @@ function createCase(service: Service, context: Context, caller: Person, body: Py
   const secrecyLevel = Number(bodyField(fields, "secrecy_level", errors, secrecy, false) ?? 3n)
   const title = bodyField(fields, "title", errors, toText, true) ?? ""
   const type = bodyField(fields, "type", errors, toText, true) ?? ""
-  const aboutPersonId = bodyField(fields, "about_person_id", errors, toNullableInteger, false)
+  const aboutPersonIds = bodyField(fields, "about_person_ids", errors, integers, false) ?? []
   const troop = bodyField(fields, "troop", errors, toText, false) ?? ""
   const extraAccess = bodyField(fields, "extra_access", errors, integers, false) ?? []
   const tags = bodyField(fields, "tags", errors, texts, false) ?? []
@@ -110,14 +100,9 @@ function createCase(service: Service, context: Context, caller: Person, body: Py
   if (!hasCaseRole(caller, type, troop)) {
     return detail(context, `No access to ${type} cases for ${troop}`, 403)
   }
-  // The same answer for someone missing and someone in another troop, so a leader cannot use it
-  // to find out who is in the contingent.
-  const isOutsideTroop =
-    type === "avdelning" &&
-    aboutPersonId !== undefined &&
-    participantOf(service, aboutPersonId)?.troop !== troop
-  if (isOutsideTroop) {
-    return detail(context, `Member ${String(aboutPersonId)} is not in troop ${troop}`, 422)
+  const outside = refuseOutsideTroop(service, context, [type, troop], aboutPersonIds)
+  if (outside !== undefined) {
+    return outside
   }
   if (secrecyLevel < 3) {
     return detail(context, "Secrecy levels 1 and 2 are not in use yet", 422)
@@ -127,9 +112,9 @@ function createCase(service: Service, context: Context, caller: Person, body: Py
     return refused
   }
   const creatorId = caller.userId()
-  storable(creatorId, title, type, aboutPersonId, troop, extraAccess, tags)
+  storable(creatorId, title, type, aboutPersonIds, troop, extraAccess, tags)
   const record = service.store.addCase({
-    aboutPersonId,
+    aboutPersonIds,
     assignedToId: undefined,
     createdAt: service.now(),
     creatorId,
@@ -159,7 +144,7 @@ function listCases({ store }: Service, context: Context, caller: Person): Respon
   // the same rule as for a single case.
   const listed = store.cases.filter(
     (record) =>
-      (aboutPersonId === undefined || record.aboutPersonId === aboutPersonId) &&
+      (aboutPersonId === undefined || record.aboutPersonIds.includes(aboutPersonId)) &&
       (troop === undefined || record.troop === troop) &&
       (type === undefined || record.type === type) &&
       (notOlderThan === undefined || record.createdAt * 1000 >= notOlderThan) &&
@@ -317,6 +302,14 @@ function changeAssignee(
   ])
 }
 
+function changePeople(service: Service, context: Context, caller: Person, body: PyValue): Response {
+  return changeCase(service, context, caller, body, [
+    "about_person_ids",
+    integers,
+    (record, aboutPersonIds) => replacePeople(service, context, caller, [record, aboutPersonIds]),
+  ])
+}
+
 function changeExtraAccess(
   service: Service,
   context: Context,
@@ -424,6 +417,7 @@ const declared: readonly (readonly [string, readonly Method[]])[] = [
   ["/cases/:caseId/reopen", ["POST"]],
   ["/cases/:caseId/notes", ["POST", "GET"]],
   ["/cases/:caseId/access", ["GET"]],
+  ["/cases/:caseId/about_person_ids", ["PUT"]],
   ["/cases/:caseId/extra_access", ["PUT"]],
   ["/cases/:caseId/assignee", ["PUT"]],
   ["/cases/:caseId/title", ["PUT"]],
@@ -511,6 +505,7 @@ export function caseRoutes(dependencies: ProjectDependencies): Hono {
     "/cases/:caseId/access",
     route(false, (context, caller) => listAccess(service, context, caller)),
   )
+  router.put("/cases/:caseId/about_person_ids", change(changePeople))
   router.put("/cases/:caseId/extra_access", change(changeExtraAccess))
   router.put("/cases/:caseId/assignee", change(changeAssignee))
   router.put("/cases/:caseId/title", change(changeTitle))

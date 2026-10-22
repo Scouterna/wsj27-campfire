@@ -1,19 +1,15 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useCallback, useState } from "react"
 
-import { assignCase, closeCase, renameCase, reopenCase, shareCase } from "../../../data/mutations"
+import { closeCase, renameCase, reopenCase } from "../../../data/mutations"
 import { refreshCases } from "../../../data/refresh-cases"
 import { useNoteWrites, type NoteWrites } from "./use-note-writes"
+import { usePeopleWrites, type PeopleWrites } from "./use-people-writes"
 
 /**
  * What the case screen can do to a case, and how that is going.
  */
-export interface CaseActions extends Omit<NoteWrites, "isBusy"> {
-  /**
-   * Makes someone responsible for following the case up, or nobody, then calls
-   * `onAssigned`, when there is one, so the screen can put the choice away.
-   */
-  readonly assign: (memberNo: string | undefined, onAssigned?: () => void) => void
+export interface CaseActions extends Omit<NoteWrites, "isBusy">, Omit<PeopleWrites, "isBusy"> {
   /**
    * Closes the case.
    */
@@ -35,19 +31,13 @@ export interface CaseActions extends Omit<NoteWrites, "isBusy"> {
    * Opens a closed case again.
    */
   readonly reopen: () => void
-  /**
-   * Shares the case with exactly these people, then calls `onShared`, when there is one,
-   * so the screen can put the search away.
-   */
-  readonly share: (memberNos: readonly string[], onShared?: () => void) => void
 }
 
 /**
- * The writes the case screen makes – a note and its pictures, a new title, who it is
- * shared with, who is responsible for it, closing, and reopening – each followed by a fresh
- * read of the case and its notes. The read
- * follows a failure too, because a 409 means the case changed under the reader, and what
- * it is now is worth showing.
+ * The writes the case screen makes – a note and its pictures, the people it names, a new
+ * title, closing, and reopening – each followed by a fresh read of the case and its notes.
+ * The read follows a failure too, because a 409 means the case changed under the reader,
+ * and what it is now is worth showing.
  * @param caseId The case to act on.
  * @returns The actions, and how they are going.
  */
@@ -56,6 +46,7 @@ export function useCaseActions(caseId: string): CaseActions {
   const [failure, setFailure] = useState<string | undefined>(undefined)
   const refresh = useCallback(async () => refreshCases(client), [client])
   const notes = useNoteWrites(caseId, refresh, setFailure)
+  const named = usePeopleWrites(caseId, refresh, setFailure)
 
   const closing = useMutation({ mutationFn: async () => closeCase(caseId), onSettled: refresh })
   const renaming = useMutation({
@@ -63,33 +54,9 @@ export function useCaseActions(caseId: string): CaseActions {
     onSettled: refresh,
   })
   const reopening = useMutation({ mutationFn: async () => reopenCase(caseId), onSettled: refresh })
-  const assigning = useMutation({
-    mutationFn: async (memberNo: string | undefined) => assignCase(caseId, memberNo),
-    onSettled: refresh,
-  })
-  const sharing = useMutation({
-    mutationFn: async (memberNos: readonly string[]) => shareCase(caseId, memberNos),
-    onSettled: refresh,
-  })
-
   const { mutate: close } = closing
   const { mutate: retitle } = renaming
   const { mutate: reopen } = reopening
-  const { mutate: shareWith } = sharing
-  const { mutate: assignTo } = assigning
-
-  const assignIt = useCallback(
-    (memberNo: string | undefined, onAssigned?: () => void): void => {
-      setFailure(undefined)
-      assignTo(memberNo, {
-        onError: () => {
-          setFailure("Ansvarig kunde inte ändras.")
-        },
-        ...(onAssigned !== undefined && { onSuccess: onAssigned }),
-      })
-    },
-    [assignTo],
-  )
 
   const closeIt = useCallback(() => {
     setFailure(undefined)
@@ -120,34 +87,21 @@ export function useCaseActions(caseId: string): CaseActions {
     })
   }, [reopen])
 
-  const shareIt = useCallback(
-    (memberNos: readonly string[], onShared?: () => void): void => {
-      setFailure(undefined)
-      shareWith(memberNos, {
-        onError: () => {
-          setFailure("Delningen kunde inte sparas.")
-        },
-        ...(onShared !== undefined && { onSuccess: onShared }),
-      })
-    },
-    [shareWith],
-  )
-
   return {
     addNote: notes.addNote,
-    assign: assignIt,
+    assign: named.assign,
     attachPictures: notes.attachPictures,
+    changePeople: named.changePeople,
     close: closeIt,
     failure,
     isBusy:
       notes.isBusy ||
-      assigning.isPending ||
+      named.isBusy ||
       closing.isPending ||
       renaming.isPending ||
-      reopening.isPending ||
-      sharing.isPending,
+      reopening.isPending,
     rename: renameIt,
     reopen: reopenIt,
-    share: shareIt,
+    share: named.share,
   }
 }

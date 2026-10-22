@@ -17,7 +17,7 @@ export interface PersonCasesScreenProps {
 }
 
 /**
- * Every case about one person, open and closed, newest first, under a card saying who
+ * Every case about one person – alone or among others – open and closed, newest first, under a card saying who
  * they are – and the way to open another about them.
  * @param props Whose cases to show.
  * @returns The screen.
@@ -27,7 +27,7 @@ export function PersonCasesScreen(props: PersonCasesScreenProps): ReactElement {
   const about = people?.get(props.memberNo)
   const name = nameOf(people, props.memberNo)
 
-  const theirs = cases.filter((item) => item.aboutMemberNo === props.memberNo)
+  const theirs = cases.filter((item) => item.aboutMemberNos.includes(props.memberNo))
   const open = theirs.filter((item) => !item.isClosed)
   const closed = theirs.filter((item) => item.isClosed)
 

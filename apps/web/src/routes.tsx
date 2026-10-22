@@ -163,7 +163,7 @@ interface AppSection {
 
 /**
  * The sections, in menu order. Home is for everyone, the food section for a leader and
- * the health team, and the participants, material, handbook, cases, and FAQ sections
+ * the health team, and the participants, cases, material, handbook, and FAQ sections
  * for a leader and for any management function – for nobody else.
  */
 const sections: readonly AppSection[] = [
@@ -178,6 +178,15 @@ const sections: readonly AppSection[] = [
       hasAnyRole(roles, "leader", "cmt") && isRevealed(unitsReveal.id),
     label: participantsSectionLabel,
     path: "/participants",
+  },
+  {
+    icon: <ChatIcon />,
+    id: "cases",
+    // Mirrors the cases service, which opens to whoever holds a case type: every
+    // management member, and a leader of a numbered unit. A bare leader role gives none.
+    isGranted: (roles) => hasAnyRole(roles, "cmt") || leaderUnit(roles) !== undefined,
+    label: () => casesSectionLabel,
+    path: "/cases",
   },
   {
     icon: <LeafIcon />,
@@ -207,15 +216,6 @@ const sections: readonly AppSection[] = [
     isGranted: (roles) => hasAnyRole(roles, "leader", "cmt"),
     label: () => "Handbok",
     path: "/handbook",
-  },
-  {
-    icon: <ChatIcon />,
-    id: "cases",
-    // Mirrors the cases service, which opens to whoever holds a case type: every
-    // management member, and a leader of a numbered unit. A bare leader role gives none.
-    isGranted: (roles) => hasAnyRole(roles, "cmt") || leaderUnit(roles) !== undefined,
-    label: () => casesSectionLabel,
-    path: "/cases",
   },
   {
     icon: <ChatIcon />,

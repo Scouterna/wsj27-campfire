@@ -10,6 +10,12 @@ export type PersonRole = "deltagare" | "ist" | "kontingentledning" | "ledare"
  */
 export interface Person {
   /**
+   * The function of the contingent management they serve in, in the product's words –
+   * "Hälsosupport" – absent for everyone else, and for a member whose function the reader
+   * is not shown.
+   */
+  readonly funktion?: string
+  /**
    * The Scoutnet member number, which cases and notes name people by.
    */
   readonly memberNo: string
@@ -55,8 +61,9 @@ const roleNames: ReadonlyMap<PersonRole, string> = new Map([
 ])
 
 /**
- * The line under a person's name in full – their role, then their unit by number and
- * name – such as "Deltagare · Avdelning 1 · Ankan".
+ * The line under a person's name in full – their role and, in the contingent management,
+ * their function, then their unit by number and name – such as "Deltagare · Avdelning 1 ·
+ * Ankan" or "CMT · Hälsosupport".
  * @param person The person to place.
  * @param unitName What a unit is called, or undefined for a number the contingent has not named.
  * @returns The line, or undefined for somebody the module knows nothing about.
@@ -65,7 +72,9 @@ export function placingLine(
   person: Person | undefined,
   unitName: (unitNumber: number) => string | undefined,
 ): string | undefined {
-  const role = person?.role === undefined ? undefined : roleNames.get(person.role)
+  const named = person?.role === undefined ? undefined : roleNames.get(person.role)
+  const role =
+    named !== undefined && person?.funktion !== undefined ? `${named} · ${person.funktion}` : named
   const unit = unitNumberOf(person)
   if (unit === undefined) {
     return role

@@ -47,6 +47,18 @@ describe("reading one listing row", () => {
     expect(toPerson(row({ troop: "" }))).not.toHaveProperty("troop")
   })
 
+  it("reads the function of the management a member serves in from their roles", () => {
+    const cmt = { member_type: "Kontingentledning", troop: "" }
+
+    expect(toPerson(row({ ...cmt, roles: ["wsj27:cmt:support:halsa"] }))?.funktion).toBe(
+      "Hälsosupport",
+    )
+    expect(toPerson(row({ ...cmt, roles: ["wsj27:cmt:support:fa"] }))?.funktion).toBe("Support")
+    expect(toPerson(row({ ...cmt, roles: ["wsj27:cmt:program:medlem"] }))?.funktion).toBe("Program")
+    expect(toPerson(row({ ...cmt, roles: ["wsj27:cmt"] }))?.funktion).toBeUndefined()
+    expect(toPerson(row({ roles: ["wsj27:cmt:program:medlem"] }))?.funktion).toBeUndefined()
+  })
+
   it("drops a row without a member number or a name", () => {
     expect(toPerson(row({ member_no: undefined }))).toBeUndefined()
     expect(toPerson(row({ name: "  " }))).toBeUndefined()
@@ -60,6 +72,15 @@ describe("reading everyone", () => {
 
     expect(people.keys().toArray()).toEqual(["1100101", "42"])
     expect(people.get("42")?.name).toBe("Eva Ek")
+  })
+
+  it("keeps a unit one row gave when another row of the same person has none", () => {
+    const people = toPeople([
+      row({ troop: "1" }),
+      row({ member_type: undefined, troop: undefined }),
+    ])
+
+    expect(people.get("1100101")?.troop).toBe("1")
   })
 
   it("drops the unreadable rows, and reads anything that is not a list as nobody", () => {

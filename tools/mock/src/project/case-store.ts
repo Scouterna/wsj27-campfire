@@ -5,7 +5,7 @@ import { seededAt, cases as seededCases } from "../../seed/cases.ts"
  * member numbers are integers of the table's BIGINT size.
  */
 export interface CaseRecord {
-  readonly aboutPersonId: bigint | undefined
+  aboutPersonIds: readonly bigint[]
   assignedToId: bigint | undefined
   closed: boolean
   closedAt: number | undefined
@@ -189,7 +189,7 @@ export function seededStore(): CaseStore {
   for (const seeded of seededCases) {
     const creatorId = BigInt(seeded.creatorMemberNo)
     const record = store.addCase({
-      aboutPersonId: BigInt(seeded.aboutMemberNo),
+      aboutPersonIds: [BigInt(seeded.aboutMemberNo)],
       assignedToId: undefined,
       createdAt: seededTime(seeded.minute),
       creatorId,
@@ -242,7 +242,7 @@ export function caseJson(record: CaseRecord): Record<string, unknown> {
     secrecy_level: record.secrecyLevel,
     title: record.title,
     type: record.type,
-    about_person_id: record.aboutPersonId,
+    about_person_ids: record.aboutPersonIds,
     assigned_to_id: record.assignedToId,
     troop: record.troop,
     latest_note_at: timestamp(record.latestNoteAt),

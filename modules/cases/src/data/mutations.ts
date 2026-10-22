@@ -86,7 +86,8 @@ export async function closeCase(caseId: string): Promise<Case> {
 }
 
 /**
- * A case about one person, under a title, in the scope and at the level its creator chose.
+ * A case about some people or about a unit as a whole, under a title, in the scope and at
+ * the level its creator chose.
  */
 export interface NewCase {
   /**
@@ -94,10 +95,10 @@ export interface NewCase {
    */
   readonly level: SecrecyLevel
   /**
-   * Who the case is about. For a unit's case, someone in that unit, or the service
-   * refuses it with a 422.
+   * Who the case is about, in the order they were chosen – none for a case about a unit as
+   * a whole. For a unit's case, everyone in that unit, or the service refuses it with a 422.
    */
-  readonly person: Person
+  readonly people: readonly Person[]
   /**
    * The type, and for a unit's case the unit, which must be one the caller's roles give,
    * or the service refuses it with a 403.
@@ -107,31 +108,63 @@ export interface NewCase {
    * What the case is about, in a line.
    */
   readonly title: string
+  /**
+   * The unit a case about a unit as a whole is about, for a scope that names none of its
+   * own.
+   */
+  readonly unitNumber?: number | undefined
 }
 
 /**
- * Opens a case about a person. It opens without a note, so a case can be opened the
- * moment it is needed and written on as things happen. The level is sent only when it is
- * not the service's own default, which the service asks of its clients.
+ * Opens a case about some people or a unit. It opens without a note, so a case can be
+ * opened the moment it is needed and written on as things happen. The level is sent only
+ * when it is not the service's own default, which the service asks of its clients.
  * @param input Who the case is about, its title, its scope, and its level.
  * @returns The case as the service opened it.
  */
 export async function createCase(input: NewCase): Promise<Case> {
   const created = await fetch<unknown>("/api/project/cases", {
     body: {
-      about_person_id: Number(input.person.memberNo),
+      about_person_ids: input.people.map((person) => Number(person.memberNo)),
       ...(input.level !== defaultSecrecyLevel && { secrecy_level: input.level }),
       title: input.title,
-      // A unit's case is kept for its unit, and any other is filed under its person's.
-      troop:
-        input.scope.unitNumber === undefined
-          ? (input.person.troop ?? "")
-          : String(input.scope.unitNumber),
+      troop: troopOf(input),
       type: input.scope.type,
     },
     method: "POST",
   })
   return read(toCase(created), "/api/project/cases")
+}
+
+/**
+ * The unit a new case is filed under: a unit's case its own unit, a case about a unit as a
+ * whole that unit, and any other the first person's, so the leaders of that unit can be
+ * offered it.
+ * @param input The new case.
+ * @returns The troop, empty for a case about nobody with a unit.
+ */
+function troopOf(input: NewCase): string {
+  const unit = input.scope.unitNumber ?? input.unitNumber
+  return unit === undefined ? (input.people[0]?.troop ?? "") : String(unit)
+}
+
+/**
+ * Changes who an open case is about, replacing the whole list – the service replaces it
+ * rather than merging into it. The service writes a note saying who was added and who
+ * removed, so the change keeps its place in the case's history. Only the type's own role
+ * holders may, or the service refuses with a 403; on a unit's case, someone added from
+ * outside the unit with a 422, and a closed case with a 409.
+ * @param caseId The case.
+ * @param memberNos Everyone the case is to be about, by member number.
+ * @returns The case as it now stands.
+ */
+export async function changeCasePeople(
+  caseId: string,
+  memberNos: readonly string[],
+): Promise<Case> {
+  const url = `${caseUrl(caseId)}/about_person_ids`
+  const body = { about_person_ids: memberNos.map(Number) }
+  return read(toCase(await fetch<unknown>(url, { body, method: "PUT" })), url)
 }
 
 /**

@@ -51,6 +51,11 @@ export interface TimelineEntryProps {
    */
   readonly isEvent?: boolean
   /**
+   * A quiet line under the heading – what whoever wrote the entry is. Left out, the entry
+   * goes straight from its heading to itself.
+   */
+  readonly subtitle?: string | undefined
+  /**
    * The heading of the entry – who wrote it, or what happened.
    */
   readonly title: string
@@ -58,8 +63,8 @@ export interface TimelineEntryProps {
 
 /**
  * One entry on the rail: the avatar, the moment in small capitals, the heading – marked
- * with who alone it is for, when it is not for everyone – and the entry on its card, or,
- * for an event, a quiet line.
+ * with who alone it is for, when it is not for everyone – with a quiet line under it where
+ * there is one, and the entry on its card, or, for an event, a quiet line.
  * @param props The entry, and when and by whom it happened.
  * @returns The entry.
  */
@@ -79,6 +84,7 @@ export function TimelineEntry(props: TimelineEntryProps): ReactElement {
             <span className="timeline-audience">{props.audience}</span>
           )}
         </p>
+        {props.subtitle !== undefined && <p className="timeline-subtitle">{props.subtitle}</p>}
         <div className={props.isEvent === true ? "timeline-event" : "timeline-card"}>
           {props.children}
         </div>

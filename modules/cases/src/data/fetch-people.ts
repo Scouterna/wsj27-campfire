@@ -3,11 +3,13 @@ import { queryOptions, type UseQueryOptions } from "@tanstack/react-query"
 
 import type { People } from "../model/Person"
 import { toPeople, toPerson } from "./dto/PersonDto"
+import { isRecord } from "./dto/validation"
 
 /**
  * Whose names a reader may be shown – the whole contingent for the contingent
- * management, who read everyone at the basic level, and their own units for a leader,
- * whom the participants service refuses every other listing.
+ * management, who read everyone at the basic level, and for a leader their own units and
+ * the names alone of every leader and member of the management, who are the people a case
+ * shared with them names.
  */
 export type PeopleReach =
   | { readonly kind: "contingent" }
@@ -31,7 +33,8 @@ const staleTime = 60 * 60 * 1000
  * The participants service lists one troop or one member type at a time, so the
  * contingent is walked here: the leaders' listing, every unit it names, the IST, and the
  * contingent management, all at the basic level. A leader's reach is their own units'
- * listings and nothing else. A listing that
+ * listings, and the leaders' and the management's at the name level – which the service
+ * answers 404 to where it does not offer adults' names, read as nobody. A listing that
  * fails for anything but a refusal is asked once more, and one that fails again fails the
  * whole query, because a contingent missing a unit looks complete, and nobody searching
  * for a person in it could tell. A 401 is never asked again and is thrown ahead of any
@@ -48,7 +51,10 @@ export function fetchPeopleQuery(
 ): UseQueryOptions<unknown, Error, People, PeopleQueryKey> {
   const units = reach.kind === "units" ? reach.unitNumbers.map(String) : undefined
   return queryOptions({
-    queryFn: async () => (units === undefined ? wholeContingent() : listings(units)),
+    queryFn: async () =>
+      units === undefined
+        ? wholeContingent()
+        : listings([...adultNames, ...units.map((key) => ({ key }))]),
     queryKey: ["cases", "people", units === undefined ? "contingent" : units.join(",")] as const,
     // Only when stale, rather than the application's every mount, since the stale time
     // is what spares the walk.
@@ -69,19 +75,50 @@ function isRefusal(error: unknown): error is HttpError {
 }
 
 /**
+ * One listing to read – a unit or a member type at the basic level, or a member type at
+ * the name level.
+ */
+interface Listing {
+  /**
+   * The listing – a unit number, `al`, `ist`, or `cmt`.
+   */
+  readonly key: string
+  /**
+   * The member type a name-level listing holds, which its rows do not carry and so are
+   * given, undefined for a listing read at the basic level.
+   */
+  readonly namesOf?: string
+}
+
+/**
+ * The listings of adults a leader reads the names of beyond their own units.
+ */
+const adultNames: readonly Listing[] = [
+  { key: "al", namesOf: "Avdelningsledare" },
+  { key: "cmt", namesOf: "Kontingentledning" },
+]
+
+/**
  * One listing's rows. An empty listing answers 404 – the service's shape for "nothing
  * here" – which for the contingent means no rows, not a failure.
- * @param key The listing to read – a unit number, `al`, `ist`, or `cmt`.
- * @returns The rows as they arrived, empty when the listing holds none.
+ * @param read The listing to read.
+ * @returns The rows as they arrived, a name-level row given its member type, and empty when
+ * the listing holds none.
  */
-async function listing(key: string): Promise<readonly unknown[]> {
+async function listing(read: Listing): Promise<readonly unknown[]> {
+  const { key, namesOf } = read
   try {
     // Encoded because a unit number read from a service payload must not be able to
     // rewrite the path or the query it is asked on.
     const rows = await fetch<unknown>(
-      `/api/project/participants/troopinfo/${encodeURIComponent(key)}?infolevel=basic`,
+      `/api/project/participants/troopinfo/${encodeURIComponent(key)}?infolevel=${namesOf === undefined ? "basic" : "name"}`,
     )
-    return Array.isArray(rows) ? (rows as readonly unknown[]) : []
+    if (!Array.isArray(rows)) {
+      return []
+    }
+    return namesOf === undefined
+      ? (rows as readonly unknown[])
+      : rows.map((row: unknown) => (isRecord(row) ? { ...row, member_type: namesOf } : row))
   } catch (error) {
     if (error instanceof HttpError && error.status === 404) {
       return []
@@ -97,7 +134,7 @@ interface Round {
   /**
    * The listings that failed for anything but a refusal, worth asking again.
    */
-  readonly failed: readonly string[]
+  readonly failed: readonly Listing[]
   /**
    * Why the first of them failed, undefined when none did.
    */
@@ -118,9 +155,9 @@ interface Round {
  * @param keys The listings to read.
  * @returns The rows that came back, the keys worth asking again, and why the round failed.
  */
-async function round(keys: readonly string[]): Promise<Round> {
+async function round(keys: readonly Listing[]): Promise<Round> {
   const settled = await Promise.allSettled(keys.map(async (key) => listing(key)))
-  const failed: string[] = []
+  const failed: Listing[] = []
   const rows: unknown[] = []
   let reason: unknown
   let refusal: HttpError | undefined
@@ -151,7 +188,7 @@ async function round(keys: readonly string[]): Promise<Round> {
  * @returns The rows, one listing after the other, with a leader appearing twice.
  */
 async function wholeContingent(): Promise<unknown> {
-  const leaders = await listing("al")
+  const leaders = await listing({ key: "al" })
   const units = new Set<string>()
   for (const row of leaders) {
     const troop = toPerson(row)?.troop
@@ -159,7 +196,8 @@ async function wholeContingent(): Promise<unknown> {
       units.add(troop)
     }
   }
-  return [...leaders, ...(await listings([...units, "ist", "cmt"]))]
+  const rest = [...units, "ist", "cmt"].map((key) => ({ key }))
+  return [...leaders, ...(await listings(rest))]
 }
 
 /**
@@ -167,7 +205,7 @@ async function wholeContingent(): Promise<unknown> {
  * @param keys The listings to read.
  * @returns The rows, one listing after the other.
  */
-async function listings(keys: readonly string[]): Promise<readonly unknown[]> {
+async function listings(keys: readonly Listing[]): Promise<readonly unknown[]> {
   const first = await round(keys)
   const second = first.failed.length > 0 ? await round(first.failed) : undefined
 

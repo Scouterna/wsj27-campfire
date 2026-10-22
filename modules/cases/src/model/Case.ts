@@ -15,10 +15,10 @@ import type { SecrecyLevel } from "./SecrecyLevel"
  */
 export interface Case {
   /**
-   * The member number of the person the case is about, absent for a case about nobody in
-   * particular.
+   * The member numbers of the people the case is about, in the order they were added –
+   * none for a case about a unit as a whole, or about nobody in particular.
    */
-  readonly aboutMemberNo?: string
+  readonly aboutMemberNos: readonly string[]
   /**
    * The member number of whoever is responsible for following the case up, absent while
    * nobody is.
@@ -77,17 +77,35 @@ export interface Case {
 }
 
 /**
- * Who a case is about, by name – the member number while the names are loading or for
- * somebody the list of participants does not hold, and a sentence of its own for a case
- * the service holds about nobody in particular.
+ * Who a case is about, by name in a short line – one person, two joined, more as the first
+ * and how many besides, the unit for a case about a unit as a whole, and a line of its own
+ * for one about nobody in particular. A member number stands in while the names are
+ * loading, or for somebody the list of participants does not hold.
  * @param item The case to name the subject of.
  * @param people Everyone the module knows, undefined while they are still loading.
  * @returns The words to show for the case's subject.
  */
 export function aboutName(item: Case, people: People | undefined): string {
-  return item.aboutMemberNo === undefined
-    ? "Ingen person angiven"
-    : nameOf(people, item.aboutMemberNo)
+  const [first, second, ...rest] = item.aboutMemberNos
+  if (first === undefined) {
+    const unit = unitOfCase(item)
+    return unit === undefined ? "Ingen person angiven" : `Avdelning ${String(unit)}`
+  }
+  if (second === undefined) {
+    return nameOf(people, first)
+  }
+  return rest.length === 0
+    ? `${nameOf(people, first)} och ${nameOf(people, second)}`
+    : `${nameOf(people, first)} och ${String(rest.length + 1)} till`
+}
+
+/**
+ * Whether a case is about a unit as a whole – its unit named, and nobody in it.
+ * @param item The case.
+ * @returns True for a case about a whole unit.
+ */
+export function isAboutUnit(item: Case): boolean {
+  return item.aboutMemberNos.length === 0 && unitOfCase(item) !== undefined
 }
 
 /**

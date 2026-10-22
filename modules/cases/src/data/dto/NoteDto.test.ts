@@ -52,6 +52,23 @@ describe("reading one note", () => {
     expect(toNote(row({ note: wireNull }))).toBeUndefined()
   })
 
+  it("reads who the service's own note on a change of people added and removed", () => {
+    const changed = { title: "Changed who the case is about" }
+    expect(toNote(row({ ...changed, note: "Added: 1100102, 1100103\nRemoved: 1100104" }))).toEqual(
+      expect.objectContaining({
+        peopleChange: { added: ["1100102", "1100103"], removed: ["1100104"] },
+      }),
+    )
+    expect(toNote(row({ ...changed, note: "Removed: 1100104" }))?.peopleChange).toEqual({
+      added: [],
+      removed: ["1100104"],
+    })
+  })
+
+  it("reads a note somebody wrote as no change of people, whatever it says", () => {
+    expect(toNote(row({ note: "Added: 1100102" }))?.peopleChange).toBeUndefined()
+  })
+
   it("drops a note at a level this module cannot say who reads", () => {
     expect(toNote(row({ secrecy_level: 2 }))).toBeUndefined()
     expect(toNote(row({ secrecy_level: wireNull }))).toBeUndefined()

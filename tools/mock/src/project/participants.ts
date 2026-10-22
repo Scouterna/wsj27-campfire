@@ -50,6 +50,11 @@ const noAccess = 0
 const basicAccess = 1
 const fullAccess = 2
 
+// Whose name any leader or CMT member may read, wherever they are – the people who create, are
+// assigned to, and write notes on cases. Only the name: every other level still follows the
+// troop rules.
+const adultMemberTypes: ReadonlySet<string> = new Set(["Avdelningsledare", "Kontingentledning"])
+
 // Either one unlocks health answers: the Support function's health people, and the per-person
 // grant from the Scoutnet form.
 const healthRoles = ["wsj27:legacy-access:Hälsa plus intern information", "wsj27:cmt:support:halsa"]
@@ -108,15 +113,26 @@ function infolevelOf(context: Context): InfoLevel | ValidationError {
 }
 
 // No access answers 404 with the same body a missing record gets, so a refusal cannot reveal who
-// exists; some access but not this much answers 403 rather than a quietly smaller 200.
+// exists; some access but not this much answers 403 rather than a quietly smaller 200. The member
+// type is the participant's, or the listing's, where there is one, because an adult's name is
+// open to every leader and CMT member, troop or not.
 function refusal(
   context: Context,
   user: AuthUser,
-  troop: string | undefined,
+  [troop, memberType]: readonly [troop: string | undefined, memberType: string | undefined],
   infolevel: InfoLevel,
   notFound: string,
 ): Response | undefined {
-  const granted = troopAccess(user, troop)
+  let granted = troopAccess(user, troop)
+  // Any troop at all, or CMT – not any project role, which a service account would pass.
+  const isAdultName =
+    infolevel === "name" && memberType !== undefined && adultMemberTypes.has(memberType)
+  if (
+    isAdultName &&
+    (roleSuffixes(user.roles, "wsj27:al").size > 0 || hasRole(user.roles, "wsj27:cmt"))
+  ) {
+    granted = Math.max(granted, basicAccess)
+  }
   if (granted === noAccess) {
     return context.json({ detail: notFound }, 404)
   }
@@ -147,7 +163,7 @@ function troopinfo(
   const refused = refusal(
     context,
     user,
-    isNumbered ? troopId : undefined,
+    isNumbered ? [troopId, undefined] : [undefined, troopId],
     infolevel,
     "Troop not found in project.",
   )
@@ -199,7 +215,7 @@ function individual(
   const refused = refusal(
     context,
     user,
-    record.troop,
+    [record.troop, record.member_type],
     infolevel,
     "Participant not found in project.",
   )

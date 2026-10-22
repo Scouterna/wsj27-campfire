@@ -9,9 +9,9 @@ import {
 import { fileURLToPath } from "node:url"
 
 // The cases section, walked as its readers use it: the open cases and the closed ones
-// behind their segment, the list narrowed and searched, a case opened about a person in
-// the kind and at the level its creator chose, renamed, written on with pictures, closed,
-// and reopened.
+// behind their segment, the list narrowed and searched, a case opened about a person or
+// a unit in the kind and at the level its creator chose, given someone more, renamed,
+// written on with pictures, closed, and reopened.
 // Who reaches what is the service's: a private case stays with its creator, a management
 // member sees no health case, a leader keeps to their own unit, and someone with no case
 // type at all has no section, its address answering exactly as one that matches nothing.
@@ -74,8 +74,9 @@ async function openCase(page: Page, kind: Kind, person: string, title: string): 
   const search = page.getByRole("textbox", { name: "Vem gäller det?" })
   await search.fill(person)
   await page.getByRole("button", { name: person }).click()
-  // Chosen, the person stands alone with a way to choose again, and the search is gone.
-  await expect(page.getByRole("button", { name: `Byt från ${person}` })).toBeFocused()
+  // Chosen, the person takes the search's place, with a way to take them off – a new case
+  // is about one person, and more are added on the case itself.
+  await expect(page.getByRole("button", { name: `Ta bort ${person}` })).toBeVisible()
   await expect(search).toHaveCount(0)
 
   const submit = page.getByRole("button", { name: "Skapa ärende" })
@@ -208,6 +209,78 @@ test("opens a case about a person, of a kind and seen by whom the form asked", a
   await expect(page.getByRole("heading", { level: 1, name: "Ärenden" })).toBeVisible()
   await expect(
     page.getByRole("link", { name: "Molly Sundqvist" }).filter({ hasText: title }),
+  ).toBeVisible()
+})
+
+test("adds a second person to a case from its menu, and takes them off again", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/")
+  await signInAs(page, "Helena Hägg")
+  const title = uniqueTitle(testInfo)
+  await openCase(page, healthCase, "Molly Sundqvist", title)
+
+  // One person, so nothing offers to take her off.
+  const about = page.getByRole("region", { name: "Gäller" })
+  await expect(about.getByRole("button", { name: "Ta bort Molly Sundqvist" })).toHaveCount(0)
+
+  // Someone more is added from the menu, on a card of their own under her.
+  const menu = page.getByRole("button", { name: "Fler åtgärder" }).filter({ visible: true })
+  await menu.click()
+  await page.getByRole("menuitem", { name: "Lägg till person" }).click()
+  await page.getByRole("textbox", { name: "Lägg till person" }).fill("Ester Dahl")
+  await page.getByRole("button", { name: "Ester Dahl" }).click()
+  await expect(about.getByRole("region", { name: "Ester Dahl" })).toBeVisible()
+  await expect(page.getByRole("textbox", { name: "Lägg till person" })).toHaveCount(0)
+  await expect(timeline(page).first()).toContainText("Helena Hägg lade till Ester Dahl.")
+
+  // Both are on it, so the menu leads to each of them by name.
+  await menu.click()
+  await expect(page.getByRole("menuitem", { name: "Visa deltagaren" })).toHaveCount(0)
+  await expect(page.getByRole("menuitem", { name: "Visa Molly Sundqvist" })).toBeVisible()
+  await page.getByRole("menuitem", { name: "Visa Ester Dahl" }).click()
+  await expect(page.getByRole("heading", { level: 1, name: "Ester Dahl" })).toBeVisible()
+  await page.goBack()
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible()
+
+  // Taken off again, the change takes its place in the history.
+  await about.getByRole("button", { name: "Ta bort Ester Dahl" }).click()
+  await expect(about).not.toContainText("Ester Dahl")
+  await expect(timeline(page).first()).toContainText("Helena Hägg tog bort Ester Dahl.")
+})
+
+test("opens a case about a unit as a whole", async ({ page }, testInfo) => {
+  await page.goto("/")
+  await signInAs(page, "Helena Hägg")
+  await page.goto("/cases/new")
+  await page.getByRole("radio", { name: /^Hälsa/u }).check()
+
+  // Its number finds the unit alone, ahead of its people, who are set apart under a
+  // heading of their own.
+  await page.getByRole("textbox", { name: "Vem gäller det?" }).fill("1")
+  await expect(page.getByRole("list", { name: "Avdelningar" }).getByRole("listitem")).toHaveCount(1)
+  await expect(page.getByRole("list", { name: "Personer" })).toContainText("Ester Dahl")
+  await page.getByRole("button", { name: /^Avdelning 1/u }).click()
+  await expect(page.getByRole("button", { name: "Ta bort Avdelning 1" })).toBeVisible()
+
+  const title = uniqueTitle(testInfo)
+  await page.getByRole("textbox", { name: "Rubrik" }).fill(title)
+  await page.getByRole("button", { name: "Skapa ärende" }).click()
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible()
+  const about = page.getByRole("region", { name: "Gäller" })
+  await expect(about).toContainText("Avdelning 1")
+  await expect(about).toContainText("Hela avdelningen")
+
+  // The list names it by its unit, and the menu leads there – but adds nobody, since it
+  // is about the unit as a whole.
+  await page.getByRole("button", { name: "Fler åtgärder" }).filter({ visible: true }).click()
+  await expect(page.getByRole("menuitem", { name: "Visa deltagaren" })).toHaveCount(0)
+  await expect(page.getByRole("menuitem", { name: "Lägg till person" })).toHaveCount(0)
+  await expect(page.getByRole("menuitem", { name: "Visa avdelningen" })).toBeVisible()
+  await page.keyboard.press("Escape")
+  await page.goto("/cases")
+  await expect(
+    page.getByRole("link", { name: "Avdelning 1" }).filter({ hasText: title }),
   ).toBeVisible()
 })
 
@@ -350,7 +423,10 @@ test("keeps a note from some of those who see the case", async ({ browser, page 
   await karin.context().close()
 })
 
-test("offers a CMT case to the leaders of its person's unit alone", async ({ page }, testInfo) => {
+test("offers a CMT case to the leaders of its person's unit alone", async ({
+  browser,
+  page,
+}, testInfo) => {
   await page.goto("/")
   await signInAs(page, "Pernilla Palm")
   const title = uniqueTitle(testInfo)
@@ -367,6 +443,16 @@ test("offers a CMT case to the leaders of its person's unit alone", async ({ pag
   await expect(offered).not.toContainText("Karin Kron")
   await access.getByRole("button", { name: "Dela med Lars Lindberg" }).click()
   await expect(access.getByRole("list", { name: "Delat med" })).toContainText("Lars Lindberg")
+
+  // Lars reads only his own unit, yet the case names the management member who opened it,
+  // since every leader may read an adult's name.
+  const lars = await secondReader(browser, "Lars Lindberg")
+  await lars.getByRole("searchbox", { name: "Sök ärenden" }).fill(title)
+  await lars
+    .getByRole("link", { name: /Ester Dahl/u })
+    .filter({ hasText: title })
+    .click()
+  await expect(timeline(lars).last()).toContainText("Pernilla Palm skapade ärendet.")
 })
 
 test("adds a note to an open case, newest first", async ({ page }, testInfo) => {
@@ -578,7 +664,7 @@ test("offers the health team a person's cases from their own screen", async ({
   // A new case about her starts with her chosen, so its kind and a title are all it takes.
   await menu.click()
   await page.getByRole("menuitem", { name: "Nytt ärende" }).click()
-  await expect(page.getByRole("button", { name: "Byt från Molly Sundqvist" })).toBeVisible()
+  await expect(page.getByRole("button", { name: "Ta bort Molly Sundqvist" })).toBeVisible()
   await page.getByRole("radio", { name: /^Hälsa/u }).check()
   const title = uniqueTitle(testInfo)
   await page.getByRole("textbox", { name: "Rubrik" }).fill(title)

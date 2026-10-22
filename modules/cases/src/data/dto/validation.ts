@@ -22,6 +22,17 @@ export function toId(value: unknown): string | undefined {
 }
 
 /**
+ * A list of identifiers the service sent, such as member numbers. One that cannot be read
+ * is left out rather than making the whole record unreadable, because the rest of the list
+ * still says what it says.
+ * @param value The untyped value the list arrived in.
+ * @returns The identifiers, empty when the value is not a list.
+ */
+export function toIds(value: unknown): readonly string[] {
+  return Array.isArray(value) ? value.flatMap((item: unknown) => toId(item) ?? []) : []
+}
+
+/**
  * A moment the service sent as an ISO 8601 timestamp.
  * @param value The untyped value the timestamp arrived in.
  * @returns The moment, or undefined when the value is not a readable timestamp.
