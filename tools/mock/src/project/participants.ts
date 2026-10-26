@@ -127,6 +127,31 @@ function refusal(
   return undefined
 }
 
+// The whole contingent is nobody's troop, so only the contingent-wide grant opens it, and a
+// leader gets the 404 a troop that is not theirs gets. Unlike a troop, an empty project answers an
+// empty array rather than 404.
+function allinfo(context: Context, { key, now, participantsList }: ProjectDependencies): Response {
+  const user = requireAuthUser(context, key, now())
+  if (user instanceof Response) {
+    return user
+  }
+  const infolevel = infolevelOf(context)
+  if (typeof infolevel !== "string") {
+    return validationFailed(context, [infolevel])
+  }
+  const refused = refusal(context, user, undefined, infolevel, "Troop not found in project.")
+  if (refused !== undefined) {
+    return refused
+  }
+  const canSeeLeaderDetails = troopAccess(user, undefined) === fullAccess
+  return context.json(
+    participantsList
+      .values()
+      .map((record) => projectRecord(record, infolevel, canSeeLeaderDetails))
+      .toArray(),
+  )
+}
+
 function troopinfo(
   context: Context,
   { key, now, participantsList }: ProjectDependencies,
@@ -213,20 +238,21 @@ function individual(
 }
 
 /**
- * Builds `/participants`: one troop or member type at a time, one person, and the role map –
- * each gated exactly as `participants.py` and `roles.py` gate them.
+ * Builds `/participants`: the whole contingent, one troop or member type, one person, and the
+ * role map – each gated exactly as `participants.py` and `roles.py` gate them.
  * @param dependencies The auth service's key, the clock, and the list of participants.
  * @returns The routes, ready to be mounted at `/participants`.
  */
 export function participantRoutes(dependencies: ProjectDependencies): Hono {
   const router = new Hono()
+  router.get("/troopinfo", (context) => allinfo(context, dependencies))
   router.get("/troopinfo/:troopId", (context) => troopinfo(context, dependencies))
   router.get("/individual/:memberId", (context) => individual(context, dependencies))
   router.get("/roles", (context) => {
     const user = requireAuthUser(context, dependencies.key, dependencies.now())
     return user instanceof Response ? user : roleMap(context, user, dependencies.participantsList)
   })
-  for (const path of ["/troopinfo/:troopId", "/individual/:memberId", "/roles"]) {
+  for (const path of ["/troopinfo", "/troopinfo/:troopId", "/individual/:memberId", "/roles"]) {
     refuseOtherMethods(router, path, "GET")
   }
   return router

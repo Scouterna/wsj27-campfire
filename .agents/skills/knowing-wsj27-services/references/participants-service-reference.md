@@ -17,6 +17,7 @@ Served at the service's root; the ingress adds and strips `/api/project`.
 
 | Route                                      | What it does                                                                                                                                                                                     |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET /participants/troopinfo`              | Every participant in the project at once, for the management team only. Takes `infolevel`.                                                                                                       |
 | `GET /participants/troopinfo/{troop}`      | The participants in one unit, or in one member type – `al`, `ist`, or `cmt`. Takes `infolevel`.                                                                                                  |
 | `GET /participants/individual/{member_no}` | One participant. Takes `infolevel`.                                                                                                                                                              |
 | `GET /participants/roles`                  | The whole role map – member number to roles – for callers holding `wsj27:bulkread`, `wsj27:rolereader`, or `wsj27:cmt:admin`. Answers 304 on a matching `If-None-Match`, and 404 to anyone else. |
@@ -57,7 +58,9 @@ Segments are slugified – accents folded, anything else collapsed to a dash –
 - **A unit's own leaders are names only to each other.** A unit leader's contact details and answers go only to management with health access, so a leader reading their unit sees its young people in full and its other leaders by name.
 - **The management team's own answers** are held back more tightly still, from everyone without the personal grant.
 - **Access adds up.** Someone who is both a leader and on the management team gets full access to their own unit and management's access everywhere else.
-- For a unit listing, access is decided before the lookup. For one person it is decided after, because their unit decides it – with the same 404 either way.
+- For a listing, access is decided before the lookup. The whole project is nobody's unit, so only the management team's access opens it, and a leader gets the 404 another unit gets.
+- For one person it is decided after, because their unit decides it – with the same 404 either way.
+- An empty whole-project listing answers an empty array, where a unit or member type with nobody in it answers 404.
 - Fields are withheld from a row rather than the whole row refused, because one listing mixes kinds of participant.
 
 ## Scoutnet data
