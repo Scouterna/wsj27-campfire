@@ -7,6 +7,7 @@ import { Browser, origin, signIn } from "../testing/browser.ts"
 import { clock } from "../testing/clock.ts"
 import type { AuthUser } from "./authentication.ts"
 import { troopAccess } from "./participants.ts"
+import { projectRoutes } from "./routes.ts"
 
 const key = generateSigningKey()
 const app = createApp({ key })
@@ -218,6 +219,83 @@ describe("the troop listing", () => {
     expect(await unknown.text()).toBe(
       `{"detail":[{"type":"literal_error","loc":["query","infolevel"],"msg":"Input should be 'name', 'basic' or 'full'","input":"xyz","ctx":{"expected":"'name', 'basic' or 'full'"}}]}`,
     )
+  })
+})
+
+describe("the whole contingent", () => {
+  it("lists the management every seeded record once, each as the troop and member-type listings give it", async () => {
+    const whole = await listing("/participants/troopinfo", "cmt@wsj.se")
+    const byListing = new Map<number, WireRecord>()
+    for (const path of ["1", "2", "ist", "cmt"]) {
+      const records = await listing(`/participants/troopinfo/${path}`, "cmt@wsj.se")
+      for (const record of records) {
+        byListing.set(record.member_no, record)
+      }
+    }
+
+    expect(whole).toHaveLength(60)
+    expect(new Set(whole.map((record) => record.member_no)).size).toBe(whole.length)
+    expect(whole.toSorted((left, right) => left.member_no - right.member_no)).toEqual(
+      byListing
+        .values()
+        .toArray()
+        .toSorted((left, right) => left.member_no - right.member_no),
+    )
+    expect(whole.every((record) => record.forms_data === undefined)).toBe(true)
+  })
+
+  it("gives the health function everyone in full, leaders' details included", async () => {
+    const whole = await listing("/participants/troopinfo?infolevel=full", "health@wsj.se")
+    const basic = await listing("/participants/troopinfo", "health@wsj.se")
+
+    expect(whole).toHaveLength(basic.length)
+    const leaders = whole.filter((record) => record.member_type === "Avdelningsledare")
+    expect(leaders.length).toBeGreaterThan(0)
+    expect(
+      leaders.every(
+        (record) => record.contact_info !== undefined && record.forms_data !== undefined,
+      ),
+    ).toBe(true)
+  })
+
+  it("refuses a leader with the 404 a troop that is not theirs gets", async () => {
+    const response = await get("/participants/troopinfo", as("leader-1@wsj.se"))
+
+    expect(response.status).toBe(404)
+    expect(await response.text()).toBe('{"detail":"Troop not found in project."}')
+  })
+
+  it("refuses the management full without a health role – 403, as for a troop", async () => {
+    for (const email of ["program@wsj.se", "cmt@wsj.se"]) {
+      const response = await get("/participants/troopinfo?infolevel=full", as(email))
+      expect(response.status).toBe(403)
+      expect(await response.text()).toBe(
+        `{"detail":"Info level 'full' requires authorisation for health and internal information."}`,
+      )
+    }
+  })
+
+  it("answers an empty project with an empty array rather than 404", async () => {
+    const now = Date.now()
+    const empty = projectRoutes({ key, now: () => now, participantsList: new Map() })
+    const { token } = mintAccessToken({ sub: "cmt" }, ["wsj27:cmt"], "1", key, now)
+
+    const response = await empty.request(`${origin}/participants/troopinfo`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+
+    expect(response.status).toBe(200)
+    expect(await response.text()).toBe("[]")
+  })
+
+  it("answers another method the way Starlette does", async () => {
+    const response = await app.request(`${origin}/api/project/participants/troopinfo`, {
+      method: "POST",
+    })
+
+    expect(response.status).toBe(405)
+    expect(response.headers.get("Allow")).toBe("GET")
+    expect(await response.text()).toBe('{"detail":"Method Not Allowed"}')
   })
 })
 

@@ -2,7 +2,7 @@
 name: knowing-wsj27-services
 description: Provides reference facts on the WSJ27 project's back-end services and the platform they run on – wsj27-auth-api (sign-in through ScoutID and the project's own signed tokens), the participants service (the list of participants from Scoutnet, WSJ27 roles, and who may read what) and the cases service (follow-ups about a person or a unit), both part of wsj27-project-api, the wsj27-cms handbook, and the contingent's Discord. Covers routes, cookies and tokens, role strings such as wsj27:al:<unit> and wsj27:cmt:<function>:<role>, the 404-versus-403 access rules, the /api/auth and /api/project paths on one origin, and the Kubernetes cluster in Azure. Use when calling, debugging, or writing about these services, or when a question involves WSJ27 roles, access levels, or sign-in.
 metadata:
-  version: "1.1"
+  version: "1.2"
 ---
 
 # Knowing WSJ27 Services
