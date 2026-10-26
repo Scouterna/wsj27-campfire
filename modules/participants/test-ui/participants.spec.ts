@@ -266,6 +266,27 @@ test("lets the management search the contingent and narrow it by roll", async ({
   await expect(page.getByRole("searchbox", { name: "Sök deltagare" })).toBeVisible()
 })
 
+test("reads the management the whole contingent in one request", async ({ page }) => {
+  const listings: string[] = []
+  page.on("request", (request) => {
+    const { pathname, search } = new URL(request.url())
+    if (pathname.startsWith("/api/project/participants/troopinfo")) {
+      listings.push(`${pathname}${search}`)
+    }
+  })
+  await page.goto("/participants")
+  await signInAs(page, "Anna Almgren")
+  await expect(page.getByRole("status")).toHaveText("60 personer i kontingenten")
+
+  // One answer holds every unit, the IST, and the management.
+  const search = page.getByRole("searchbox", { name: "Sök deltagare" })
+  for (const name of ["Ester Dahl", "Hanna Hellström", "Nils Söderberg", "Pernilla Palm"]) {
+    await search.fill(name)
+    await expect(page.getByRole("listitem").getByRole("link", { name })).toBeVisible()
+  }
+  expect(listings).toEqual(["/api/project/participants/troopinfo?infolevel=basic"])
+})
+
 test("returns from a person to the list exactly as it was left", async ({ page }) => {
   await page.goto("/")
   await signInAs(page, "Anna Almgren")

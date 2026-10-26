@@ -22,11 +22,11 @@ Returning `undefined` rather than throwing lets the caller decide what a bad rec
 
 ## Who is asking
 
-The participants service lists one unit or one member type at a time and refuses what the caller may not read. It has no "everyone I may see" read, so the client asks for exactly what the caller may read, and for that it has to know who is reading.
+The participants service lists one unit, one member type, or the whole contingent, and refuses what the caller may not read. It has no "everyone I may see" read, so the client asks for the listing that matches the caller, and for that it has to know who is reading.
 
-The composition root distills that once from the session – the member number, the unit a leader leads, and whether the whole contingent and the health answers are theirs – and mounts it above every screen as the viewer the factories take. A leader asks for their own unit. The contingent management team walks the leaders' listing to learn every unit, then fetches each unit, the IST, and the management, and merges them by member number.
+The composition root distills that once from the session – the member number, the unit a leader leads, and whether the whole contingent and the health answers are theirs – and mounts it above every screen as the viewer the factories take. A leader asks for their own unit, and the contingent management team for the whole contingent, one request either way.
 
-A unit's listing that fails is asked once more, and if it still fails the whole list fails, because a partial contingent looks complete to whoever reads it. The list carries its scope – everyone, one unit, or nobody – so a screen can say what it shows rather than guess from a row count.
+The list carries its scope – everyone, one unit, or nobody – so a screen can say what it shows rather than guess from a row count.
 
 ## An ended session
 
