@@ -6,10 +6,12 @@ import { fetchParticipantsQuery } from "./fetch-participants"
 import type { Viewer } from "./viewer"
 
 /**
- * Where one listing is asked for, spelled the way the module spells it.
+ * Where one listing is asked for, spelled the way the module spells it – the whole
+ * contingent without a key, one unit with its number.
  */
-function troopinfo(key: string): string {
-  return `/api/project/participants/troopinfo/${key}?infolevel=basic`
+function troopinfo(key?: string): string {
+  const path = key === undefined ? "" : `/${key}`
+  return `/api/project/participants/troopinfo${path}?infolevel=basic`
 }
 
 /**
@@ -25,26 +27,14 @@ function row(
 }
 
 const lars = row(1, "Lars Lindberg", "Avdelningsledare", "1")
-const hanna = row(2, "Hanna Hellström", "Avdelningsledare", "2")
-
-const leaders = [lars, hanna]
 const unitOne = [lars, row(11, "Ester Dahl", "Deltagare", "1")]
-const unitTwo = [hanna, row(21, "Vilgot Berg", "Deltagare", "2")]
-const ist = [row(31, "Ivar Ek", "IST", "")]
-const cmt = [row(41, "Pernilla Palm", "Kontingentledning", "")]
-
-/**
- * The whole contingent as its listings answer it, ready to be queued per address.
- */
-function contingentAnswers(): Record<string, Response[]> {
-  return {
-    [troopinfo("al")]: [Response.json(leaders)],
-    [troopinfo("1")]: [Response.json(unitOne)],
-    [troopinfo("2")]: [Response.json(unitTwo)],
-    [troopinfo("ist")]: [Response.json(ist)],
-    [troopinfo("cmt")]: [Response.json(cmt)],
-  }
-}
+const contingent = [
+  ...unitOne,
+  row(2, "Hanna Hellström", "Avdelningsledare", "2"),
+  row(21, "Vilgot Berg", "Deltagare", "2"),
+  row(31, "Ivar Ek", "IST", ""),
+  row(41, "Pernilla Palm", "Kontingentledning", ""),
+]
 
 /**
  * Stands in for the platform's `fetch`: each address answers from its own queue, and an
@@ -112,146 +102,62 @@ describe("what the viewer is allowed to ask for", () => {
   it("reads the whole contingent for someone who is a leader as well", async () => {
     // The wider answer contains the narrower one, so the management branch wins.
     const both: Viewer = { memberNo: "1", unitNumber: 1, readsEveryone: true, readsHealth: false }
-    const asked = networkAnswers(contingentAnswers())
+    const asked = networkAnswers({ [troopinfo()]: [Response.json(contingent)] })
 
     const list = await testClient().query(fetchParticipantsQuery(both))
 
     expect(list.scope).toEqual({ kind: "all" })
-    expect(asked).toContain(troopinfo("al"))
+    expect(asked).toEqual([troopinfo()])
   })
 })
 
-describe("assembling the whole contingent", () => {
-  it("walks the leaders' listing, then every unit it names, the IST, and the management", async () => {
-    const asked = networkAnswers(contingentAnswers())
+describe("reading the whole contingent", () => {
+  it("asks once at basic, and keeps every row as a person", async () => {
+    const asked = networkAnswers({ [troopinfo()]: [Response.json(contingent)] })
 
     const list = await testClient().query(fetchParticipantsQuery(management))
 
     expect(list.scope).toEqual({ kind: "all" })
-    expect(asked).toEqual([
-      troopinfo("al"),
-      troopinfo("1"),
-      troopinfo("2"),
-      troopinfo("ist"),
-      troopinfo("cmt"),
-    ])
+    expect(list.people.map((person) => person.memberNo)).toEqual(["1", "11", "2", "21", "31", "41"])
+    expect(asked).toEqual([troopinfo()])
   })
 
-  it("holds each person once, however many listings named them", async () => {
-    // Both leaders appear in the leaders' listing and again in their own unit's.
-    networkAnswers(contingentAnswers())
+  it("reads an empty answer as an empty list", async () => {
+    networkAnswers({ [troopinfo()]: [Response.json([])] })
 
     const list = await testClient().query(fetchParticipantsQuery(management))
 
-    const found = list.people.map((person) => person.memberNo)
-
-    expect(found.toSorted((left, right) => left.localeCompare(right))).toEqual([
-      "1",
-      "11",
-      "2",
-      "21",
-      "31",
-      "41",
-    ])
+    expect(list).toEqual({ people: [], scope: { kind: "all" } })
   })
 
-  it("reads a listing nobody is in as empty rather than as a failure", async () => {
-    // 404 is the service's shape for "nothing here".
-    const answers = contingentAnswers()
-    answers[troopinfo("ist")] = [new Response("{}", { status: 404 })]
-    networkAnswers(answers)
+  it("reads a 404 as an empty list rather than as a failure", async () => {
+    // The service refuses a caller it does not count as the management with a 404.
+    networkAnswers({ [troopinfo()]: [new Response("{}", { status: 404 })] })
 
     const list = await testClient().query(fetchParticipantsQuery(management))
 
-    expect(list.people.map((person) => person.memberNo)).not.toContain("31")
-    expect(list.people).toHaveLength(5)
+    expect(list).toEqual({ people: [], scope: { kind: "all" } })
   })
 
-  it("asks a failed listing once more, and completes when the second answer comes", async () => {
-    const answers = contingentAnswers()
-    answers[troopinfo("2")] = [new Response("{}", { status: 500 }), Response.json(unitTwo)]
-    const asked = networkAnswers(answers)
+  it.each([
+    ["a 503", [new Response("{}", { status: 503 })], /answered 503/u],
+    ["a dead network", [], /Could not reach/u],
+  ] as const)(
+    "fails after one request on %s, leaving the retry to the client",
+    async (_, answers, reason) => {
+      const asked = networkAnswers({ [troopinfo()]: answers })
 
-    const list = await testClient().query(fetchParticipantsQuery(management))
+      await expect(testClient().query(fetchParticipantsQuery(management))).rejects.toThrow(reason)
+      expect(asked).toEqual([troopinfo()])
+    },
+  )
 
-    expect(list.people).toHaveLength(6)
-    expect(asked.filter((url) => url === troopinfo("2"))).toHaveLength(2)
-    // Only the listing that failed is asked again.
-    expect(asked.filter((url) => url === troopinfo("1"))).toHaveLength(1)
-  })
-
-  it("fails the whole query when a listing still refuses the second time", async () => {
-    // A partial contingent looks exactly like a complete one to whoever reads it.
-    const answers = contingentAnswers()
-    answers[troopinfo("2")] = [
-      new Response("{}", { status: 500 }),
-      new Response("{}", { status: 500 }),
-    ]
-    const asked = networkAnswers(answers)
-
-    await expect(testClient().query(fetchParticipantsQuery(management))).rejects.toThrow(
-      /answered 500/u,
-    )
-    expect(asked.filter((url) => url === troopinfo("2"))).toHaveLength(2)
-  })
-
-  it("asks a listing that answered 503 once more, as it would any failure but a 401", async () => {
-    const answers = contingentAnswers()
-    answers[troopinfo("2")] = [new Response("{}", { status: 503 }), Response.json(unitTwo)]
-    const asked = networkAnswers(answers)
-
-    const list = await testClient().query(fetchParticipantsQuery(management))
-
-    expect(list.people).toHaveLength(6)
-    expect(asked.filter((url) => url === troopinfo("2"))).toHaveLength(2)
-  })
-
-  it("never asks a listing refused with 401 again, and fails with the refusal", async () => {
-    // Whether to ask again is the query client's call, once it knows who is signed in.
-    const answers = contingentAnswers()
-    answers[troopinfo("2")] = [new Response("{}", { status: 401 }), Response.json(unitTwo)]
-    const asked = networkAnswers(answers)
+  it("fails with the refusal on a 401, for the query client to act on", async () => {
+    networkAnswers({ [troopinfo()]: [new Response("{}", { status: 401 })] })
 
     const refused = testClient().query(fetchParticipantsQuery(management))
 
     await expect(refused).rejects.toBeInstanceOf(HttpError)
     await expect(refused).rejects.toMatchObject({ message: /answered 401/u, status: 401 })
-    expect(asked.filter((url) => url === troopinfo("2"))).toHaveLength(1)
-  })
-
-  it("fails with the refusal ahead of a failure that came first, and still asks that one again", async () => {
-    const answers = contingentAnswers()
-    answers[troopinfo("1")] = []
-    answers[troopinfo("2")] = [new Response("{}", { status: 401 })]
-    const asked = networkAnswers(answers)
-
-    await expect(testClient().query(fetchParticipantsQuery(management))).rejects.toThrow(
-      /answered 401/u,
-    )
-    expect(asked.filter((url) => url === troopinfo("1"))).toHaveLength(2)
-    expect(asked.filter((url) => url === troopinfo("2"))).toHaveLength(1)
-  })
-
-  it("fails with the refusal when a listing asked again is refused the second time", async () => {
-    const answers = contingentAnswers()
-    answers[troopinfo("2")] = [
-      new Response("{}", { status: 500 }),
-      new Response("{}", { status: 401 }),
-    ]
-    networkAnswers(answers)
-
-    await expect(testClient().query(fetchParticipantsQuery(management))).rejects.toThrow(
-      /answered 401/u,
-    )
-  })
-
-  it("fails the whole query when the leaders' listing itself refuses", async () => {
-    const answers = contingentAnswers()
-    answers[troopinfo("al")] = [new Response("{}", { status: 500 })]
-    networkAnswers(answers)
-
-    await expect(testClient().query(fetchParticipantsQuery(management))).rejects.toThrow(
-      /answered 500/u,
-    )
   })
 })

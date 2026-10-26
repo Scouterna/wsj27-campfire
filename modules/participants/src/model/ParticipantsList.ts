@@ -16,7 +16,7 @@ export type ListScope =
  */
 export interface ParticipantsList {
   /**
-   * The people the viewer may see, in the order the listings arrived.
+   * The people the viewer may see, in the order the service listed them.
    */
   readonly people: readonly Participant[]
   /**

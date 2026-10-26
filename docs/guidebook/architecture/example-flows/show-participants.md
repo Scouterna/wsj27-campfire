@@ -4,7 +4,7 @@ A leader opens the participants section and sees the people in their unit. Every
 
 ## What the viewer may ask for
 
-The participants service lists one unit at a time and refuses what the caller may not read. It has no way to ask for "everyone I may see", so the client has to know who is reading before it can ask anything.
+The participants service lists one unit, or the whole contingent, and refuses what the caller may not read. It has no way to ask for "everyone I may see", so the client has to know who is reading before it can ask anything.
 
 That is settled once, at the session gate. The signed-in person is distilled into a viewer – their member number, the unit a leader leads, whether the whole contingent is theirs to read, and whether health answers are – and mounted above every screen ([Data layer](../layers/data)). A leader's viewer names one unit. The contingent management team's names none, and reads everyone.
 
@@ -49,11 +49,9 @@ Nothing above the converter sees a wire field name, and nothing below the hook s
 
 ## The whole contingent
 
-The contingent management team reads everyone, which the service offers only one listing at a time. The leaders' listing names every unit, and then each unit, the IST, and the management are fetched and merged by member number. An empty listing is no rows, not a failure. Fetching the contingent this way costs many requests where a leader's unit costs one – the price of a service with no single listing for it.
+The contingent management team reads everyone through the same flow, with the whole contingent's listing in place of the unit's. One request holds every unit, the IST, and the management, and the service answers it only for the management.
 
-A unit, IST, or management listing that fails is asked once more on its own. If it still fails, or the leaders' listing fails at all, the whole list fails with a way to try again. The list's first job is answering whether a person exists, and a list quietly missing a unit answers that wrongly with full confidence. A visible failure can be retried; a silent gap cannot.
-
-The management also browses by group, for when the question is about a unit rather than a person. The groups view sorts the same assembled list into the units, the IST patrols with the IST outside every patrol, and the management by function, so opening it costs no request, and an entry opens as a list of its own. An IST patrol is numbered in the same series as the units but kept apart from them, so nobody in a patrol shows in the unit with the same number. A filter narrows the view to one of the three, and lives in the address like the list's own.
+The management also browses by group, for when the question is about a unit rather than a person. The groups view sorts the same list into the units, the IST patrols with the IST outside every patrol, and the management by function, so opening it costs no request, and an entry opens as a list of its own. An IST patrol is numbered in the same series as the units but kept apart from them, so nobody in a patrol shows in the unit with the same number. A filter narrows the view to one of the three, and lives in the address like the list's own.
 
 ## Narrowing and coming back
 
@@ -69,10 +67,10 @@ The service answers a person outside the viewer's scope exactly as one who does 
 
 Opening the section again draws the cached list at once and asks for a fresh one behind it. If the fresh read fails, the cached list stays. Answers are kept for thirty days, so a phone with no connection opens on the list it had ([Data layer](../layers/data)).
 
-| Failure                           | What the reader sees                                                   |
-| --------------------------------- | ---------------------------------------------------------------------- |
-| A row does not convert            | The rest of the list                                                   |
-| No connection                     | The cached list, or a failure with a way to try again if there is none |
-| A listing still fails after retry | That the list could not be read, never that it is empty                |
-| The person is outside the scope   | The same as a person who does not exist                                |
-| The session has ended             | The sign-in screen, in place ([Sign in](./sign-in))                    |
+| Failure                             | What the reader sees                                                   |
+| ----------------------------------- | ---------------------------------------------------------------------- |
+| A row does not convert              | The rest of the list                                                   |
+| No connection                       | The cached list, or a failure with a way to try again if there is none |
+| The listing still fails after retry | That the list could not be read, never that it is empty                |
+| The person is outside the scope     | The same as a person who does not exist                                |
+| The session has ended               | The sign-in screen, in place ([Sign in](./sign-in))                    |

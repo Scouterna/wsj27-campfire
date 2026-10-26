@@ -4,12 +4,12 @@ The participants service holds the contingent's list of participants: who is in 
 
 ## What Campfire uses it for
 
-- **Listing people** – the members of one unit, or of a group such as the leaders, the IST, or the contingent management team.
+- **Listing people** – the members of one unit, or the whole contingent at once.
 - **Showing one person** – their contact details and, for those allowed, their health and dietary answers.
 - **Knowing the signed-in person** – their own unit and how they travel.
 - **Deciding the roles** – every WSJ27 role is minted here, and the [auth service](./auth-service) puts them in each session.
 
-The service has no "everyone I may see" listing, so Campfire builds the list of participants from the unit and group listings: a leader asks for their own unit, and the management team walks every unit. The participants module is the only part of Campfire that calls it.
+A leader asks for their own unit's listing, and the contingent management team for the whole contingent's, which the service answers only for them. The participants module is the only part of Campfire that calls it.
 
 ## Who may see what
 
