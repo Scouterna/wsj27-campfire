@@ -344,7 +344,7 @@ function viewerFor(user: User): Viewer {
   return {
     memberNo: user.memberNo,
     readsEveryone: hasAnyRole(user.roles, "cmt"),
-    readsHealth: hasAnyRole(user.roles, "health"),
+    readsHealth: hasAnyRole(user.roles, "health", "healthGrant"),
     ...(unitNumber !== undefined && { unitNumber }),
   }
 }
