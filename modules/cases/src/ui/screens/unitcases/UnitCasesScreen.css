@@ -1,0 +1,14 @@
+/* One unit's cases: which unit, then its cases as a whole, its people's, and the closed ones. */
+
+@layer screen {
+  .unit-cases-status {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+  }
+
+  .unit-cases-empty {
+    color: var(--color-ink-secondary);
+    margin: 0;
+  }
+}

@@ -1,9 +1,17 @@
-import { Button, Card, cmtTheme, PageJumps, PageTitle } from "@scouterna/wsj27-campfire-ui"
-import type { ReactElement } from "react"
+import {
+  Button,
+  Card,
+  cmtTheme,
+  PageActions,
+  PageJumps,
+  PageTitle,
+} from "@scouterna/wsj27-campfire-ui"
+import { useMemo, type ReactElement } from "react"
 
 import { istPatrolNumbered } from "../../../model/IstPatrol"
 import { unitNumbered } from "../../../model/Unit"
 import { istPatrolOf, unitNumberOf } from "../../../model/groups"
+import { useUnitActions } from "../../actions"
 import { UnitCard } from "../../components/unitcard/UnitCard"
 import { counted, personCount } from "../../counted"
 import { PeopleList } from "../participants/PeopleList"
@@ -54,8 +62,17 @@ export interface GroupScreenProps {
  */
 export function GroupScreen(props: GroupScreenProps): ReactElement {
   const { error, group, isPending, refetch } = useGroup(props.groupKey)
+  const unitActions = useUnitActions()
   const title = group?.label ?? groupLabel(props.groupKey)
   const jumps = useLetterJumps(group?.people ?? [])
+  const unitNumber = unitNumberOf(props.groupKey)
+  // Only a unit carries what other sections offer, since the IST and the management are
+  // no avdelning. Kept across renders, because the list re-renders the screen as it
+  // scrolls and new entries would declare the page's actions again on every step.
+  const menu = useMemo(
+    () => (unitNumber === undefined ? [] : unitActions(unitNumber)),
+    [unitActions, unitNumber],
+  )
 
   if (isPending) {
     return (
@@ -91,11 +108,10 @@ export function GroupScreen(props: GroupScreenProps): ReactElement {
     )
   }
 
-  const unitNumber = unitNumberOf(props.groupKey)
-
   return (
     <>
       <PageTitle title={title} />
+      {menu.length > 0 && <PageActions menu={menu} />}
       <p className="group-status group-status-spoken" role="status">
         {countOf(group.people.length, props.groupKey)}
       </p>

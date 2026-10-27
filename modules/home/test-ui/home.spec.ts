@@ -156,14 +156,17 @@ test("lists the page's own headings in the outline, and moves between them", asy
   await expect(page.getByRole("heading", { level: 1, name: "Välkommen" })).toBeVisible()
 
   const outline = page.locator(".outline")
-  // The countdown card's heading, read from the page as rendered.
-  await expect(outline.getByRole("button")).toHaveText(["Resan"])
+  // The countdown's heading and the cases that wait for someone – none are hers, so that
+  // card is left out – read from the page as rendered. It holds while no walk assigns her
+  // a case, since every project shares one mock.
+  await expect(outline.getByRole("button")).toHaveText(["Resan", "Ärenden som väntar"])
 
   await giveThePageSections(page, ["Maten", "Avdelningen", "Packning"])
 
   // Read from the page as rendered – no module declared any of this.
   await expect(outline.getByRole("button")).toHaveText([
     "Resan",
+    "Ärenden som väntar",
     "Maten",
     "Avdelningen",
     "Packning",
@@ -263,15 +266,19 @@ test("places a leader's unit on the start screen, and nobody else's", async ({ p
   // pill carrying a gender, and the scouts' ages too, the leaders' none.
   await expect(page.getByRole("heading", { level: 2, name: "Min avdelning" })).toBeVisible()
   await expect(page.getByText("Avdelning 1", { exact: true })).toBeVisible()
-  const scout = page.getByRole("link", { name: /Ester Dahl/ })
+  // Led by the name, because the cases above name her in their rows too.
+  const scout = page.getByRole("link", { name: /^Ester Dahl/u })
   await expect(scout).toContainText(/\d år/)
   await expect(scout.getByRole("img", { name: "Kvinna" })).toBeVisible()
-  const leader = page.getByRole("link", { name: /Hanna Hellström/ })
+  const leader = page.getByRole("link", { name: /^Hanna Hellström/u })
   // The pattern, not the word: the kår under every name ends in "år" too.
   await expect(leader).not.toContainText(/\d år/)
   await expect(leader.getByRole("img", { name: "Kvinna" })).toBeVisible()
 
-  // A pill is a doorway into the person.
+  // A pill is a doorway into the person. Pressed once the cases card above has arrived,
+  // because its arrival moves the pills down, and a press that lands mid-move falls on a
+  // case's row instead – and takes the case.
+  await expect(page.getByRole("heading", { level: 2, name: "Ärenden som väntar" })).toBeVisible()
   await scout.click()
   await expect(page).toHaveTitle("Ester Dahl – Campfire")
 })

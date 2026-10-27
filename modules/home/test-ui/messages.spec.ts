@@ -175,11 +175,13 @@ test("shows the welcome to a leader, over the journey and their unit", async ({ 
   await expect(closeControl(page, leaderWelcome)).toHaveText("Stäng")
 
   // In the flow with the other widgets, and first among them: a plate per unread
-  // message, then the journey's countdown and the unit – the sections' headings, in
+  // message, then the journey's countdown, the cases that wait for someone – none are
+  // his, so that card is left out – and the unit, which are the sections' headings in
   // document order. Only up to the unit, because how many cards the unit widget draws
-  // is the participants module's business.
+  // is the participants module's business. It holds while no walk assigns him a case,
+  // since every project shares one mock.
   await expect(page.getByRole("heading", { level: 2, name: "Min avdelning" })).toBeVisible()
-  const expected = [...titlesFor("leader"), "Resan", "Min avdelning"]
+  const expected = [...titlesFor("leader"), "Resan", "Ärenden som väntar", "Min avdelning"]
   const sections = await page.locator("main .content h2").allTextContents()
   expect(sections.slice(0, expected.length)).toEqual(expected)
 })
@@ -219,10 +221,11 @@ test("leaves no trace once every message is closed", async ({ page }) => {
     await closeControls(page).first().click()
   }
 
-  // For the management, whose start screen holds the journey and nothing else, no
-  // second section at all.
+  // For the management, whose start screen holds the journey and their cases, nothing
+  // of the messages is left among them. The list holds while no walk assigns her a case,
+  // since every project shares one mock.
   await expect(closeControls(page)).toHaveCount(0)
-  await expect(page.locator("main .content h2")).toHaveText(["Resan"])
+  await expect(page.locator("main .content h2")).toHaveText(["Resan", "Ärenden som väntar"])
 })
 
 test("leaves no trace once every message has ended, whatever the device closed", async ({
@@ -233,7 +236,8 @@ test("leaves no trace once every message has ended, whatever the device closed",
   await signInAs(page, "Anna Almgren")
 
   await expect(closeControls(page)).toHaveCount(0)
-  await expect(page.locator("main .content h2")).toHaveText(["Resan"])
+  // Holds while no walk assigns her a case, since every project shares one mock.
+  await expect(page.locator("main .content h2")).toHaveText(["Resan", "Ärenden som väntar"])
 })
 
 test("keeps a message whose end passes on screen until the start screen opens again", async ({

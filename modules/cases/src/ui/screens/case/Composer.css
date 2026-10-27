@@ -1,0 +1,179 @@
+/* The composer: one box holding the field a note is written in, the pictures that go
+   with it, and the row of tools along its foot. */
+
+@layer screen {
+  /* The field is its own label's target, but the card says what it is by the
+     placeholder, so the label is spoken rather than shown. Clipped rather than hidden,
+     because a display of none is read by nobody either. */
+  .case-compose-label {
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+
+  /* The card is the box, so the field draws nothing of its own. One line until something
+     is written, then growing with it, so a long note never scrolls inside a little box,
+     up to most of a phone's height. */
+  .case-compose-field {
+    background: transparent;
+    border: none;
+    color: var(--color-ink);
+    display: block;
+    field-sizing: content;
+    font-family: inherit;
+    font-size: var(--font-size-body);
+    line-height: 1.45;
+    max-height: 60dvh;
+    outline: none;
+    padding: 0;
+    resize: none;
+    width: 100%;
+  }
+
+  .case-compose-field::placeholder {
+    color: var(--color-ink-tertiary);
+  }
+
+  /* The field draws no ring of its own, so the card it fills wears it while the field is
+     typed in. */
+  .case-compose:has(.case-compose-field:focus-visible) {
+    outline: 2px solid var(--color-theme-bright);
+    outline-offset: 2px;
+  }
+
+  /* The tools along the field's foot, under a line that comes with them: a picture, who
+     reads the note, and at the far end adding it – on one line at any phone's width,
+     because only the choice of reader has words, and it is the one that may shrink. The
+     line keeps the card's padding on both sides, so the row sits as far from it as from
+     the card's edge below. */
+  .case-compose-tools {
+    align-items: center;
+    border-top: 1px solid var(--color-divider);
+    display: flex;
+    gap: var(--spacing-stack);
+    margin-top: var(--card-padding);
+    min-width: 0;
+    padding-top: var(--card-padding);
+  }
+
+  .case-compose-tools .select {
+    min-width: 0;
+  }
+
+  .case-compose-send {
+    margin-left: auto;
+  }
+
+  /* The choices for a note whose pictures did not all arrive, at the card's end. */
+  .case-compose-actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-stack);
+    justify-content: flex-end;
+    margin-top: var(--card-padding);
+  }
+
+  .case-compose-actions .button {
+    width: auto;
+  }
+}
+
+/* The pictures chosen for the note, as small tiles under the field, each marked with how
+   far it has come once the note is on its way. */
+@layer screen {
+  .case-compose-pictures {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-stack);
+    list-style: none;
+    margin: var(--spacing-group) 0 0;
+    padding: 0;
+  }
+
+  .case-compose-picture {
+    border-radius: var(--border-radius-control);
+    height: 64px;
+    overflow: hidden;
+    position: relative;
+    width: 64px;
+  }
+
+  .case-compose-thumbnail {
+    display: block;
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+  }
+
+  /* Dimmed while it waits its turn or is on its way, so the one being sent and the ones
+     that have arrived stand out. */
+  .case-compose-picture-waiting .case-compose-thumbnail,
+  .case-compose-picture-sending .case-compose-thumbnail {
+    opacity: 0.55;
+  }
+
+  /* The picture on its way breathes, unless the reader asked for stillness. */
+  @media (prefers-reduced-motion: no-preference) {
+    .case-compose-picture-sending .case-compose-thumbnail {
+      animation: case-compose-sending 1.1s ease-in-out infinite alternate;
+    }
+  }
+
+  @keyframes case-compose-sending {
+    to {
+      opacity: 0.9;
+    }
+  }
+
+  .case-compose-picture-failed {
+    outline: 2px solid var(--color-tone-danger-mark);
+    outline-offset: -2px;
+  }
+
+  /* Its own control in the corner, round and on glass so it reads over any picture. */
+  .case-compose-remove,
+  .case-compose-badge {
+    align-items: center;
+    backdrop-filter: blur(22px) saturate(1.7);
+    background: var(--color-glass);
+    border: none;
+    border-radius: var(--border-radius-round);
+    color: var(--color-ink);
+    display: flex;
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-strong);
+    height: 22px;
+    justify-content: center;
+    padding: 0;
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    width: 22px;
+  }
+
+  .case-compose-remove {
+    cursor: pointer;
+  }
+
+  .case-compose-picture-failed .case-compose-badge {
+    background: var(--color-tone-danger-mark);
+    color: var(--color-sheet);
+  }
+
+  .case-compose-status,
+  .case-compose-stranded {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: var(--spacing-stack) 0 0;
+  }
+
+  .case-compose-stranded {
+    color: var(--color-ink);
+    font-size: var(--font-size-body);
+    margin: 0;
+  }
+}
