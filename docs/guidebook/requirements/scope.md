@@ -6,26 +6,26 @@ Campfire is for the people running Scouterna's contingent to WSJ27 – the leade
 
 The first feature is that **leaders see the participants in their unit**. A leader signs in with ScoutID and gets their own unit's people – who they are, how to reach them, and what a leader needs to know about each of them, from diet to health. It comes first because everything after it reads from it: a status report is about a unit, and an issue is usually about a person.
 
-Version 1 is made of three areas:
+Version 1 is made of these areas:
 
-| Area         | What a person can do                                                                                                                                                                  |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Sign-in      | Sign in with ScoutID, see their own profile, and sign out                                                                                                                             |
-| Home         | Read the contingent's messages meant for their role, count down to the start of their own journey to Gdansk, and – for a leader – see their unit at a glance                          |
-| Participants | Search the people they may read, open one person in full – contact details, diet, health, and readiness – and browse by unit, the International Service Team, and the management team |
+| Area         | What a person can do                                                                                                                                                                                                                                               |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Sign-in      | Sign in with ScoutID, see their own profile, and sign out                                                                                                                                                                                                          |
+| Home         | Read the contingent's messages meant for their role, count down to the start of their own journey to Gdansk, and – for a leader – see their unit at a glance                                                                                                       |
+| Participants | Search the people they may read, open one person in full – contact details, diet, health, and readiness – and browse by unit, the International Service Team, and the management team                                                                              |
+| Cases        | Keep follow-ups about people or a unit – for the health team, the management team, or a unit's leaders – with who sees each one chosen when it is opened and shared with others as needed, notes written on it, and the cases about a person found from their page |
 
-The participants section is offered only to leaders and the management team. What each may read is decided by the participants service from their WSJ27 roles: a leader reads their own unit, the management team reads the whole contingent, and only a health grant opens the health answers beyond a leader's own unit. A person outside the reader's scope answers exactly like a person who does not exist.
+The participants section is offered only to leaders and the management team. What each may read is decided by the participants service from their WSJ27 roles: a leader reads their own unit, the management team reads the whole contingent, and only a health grant opens the health answers beyond a leader's own unit. A person outside the reader's scope answers exactly like a person who does not exist. The cases section is offered to the management team and to the leaders of a unit, and the cases service decides who reaches each case from its type, its secrecy level, and who it is shared with. A unit's case can only be about someone in the unit.
 
 The home screen's content and the participants section wait behind a reveal – a set moment when the units are announced – and until then the home screen shows only a countdown to it. The areas are built from feature modules that the web application composes, and none of them imports another ([Modules](../architecture/modules)).
 
 ## Where it goes next
 
-Two directions follow version 1. Neither is specified: each gets its requirements from an issue when it is picked up ([Process](../process/)).
+One direction follows version 1. It is not specified, and gets its requirements from an issue when it is picked up ([Process](../process/)).
 
 - **Status reporting.** During camp the management team needs to know how each unit is doing without walking the camp or chasing every leader in a chat. A leader answers for their unit from their phone, the answers land in one place, and the picture is current instead of reconstructed at the evening meeting.
-- **Lightweight issue tracking.** Something comes up – a scout with a fever, a bag on the wrong bus, a leader who needs relief – and it needs an owner and a state, not a chat thread that scrolls away. The health team is the clearest user.
 
-What Campfire grows into beyond those is decided the same way, one issue at a time.
+What Campfire grows into beyond that is decided the same way, one issue at a time.
 
 ## Out of scope
 
