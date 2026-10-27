@@ -77,10 +77,10 @@ describe("translating a provider spelling into roles", () => {
     expect(toRoles("wsj27:cmt:support:specialsupport")).toEqual(supportAlone)
   })
 
-  it("reads the personal health grant as health under either namespace, and nothing else", () => {
-    expect(toRoles("wsj27:access:Hälsa plus intern information")).toEqual([{ kind: "health" }])
+  it("reads the personal health grant as a grant of its own under either namespace", () => {
+    expect(toRoles("wsj27:access:Hälsa plus intern information")).toEqual([{ kind: "healthGrant" }])
     expect(toRoles("wsj27:legacy-access:Hälsa plus intern information")).toEqual([
-      { kind: "health" },
+      { kind: "healthGrant" },
     ])
   })
 
