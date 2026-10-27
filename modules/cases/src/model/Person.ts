@@ -1,0 +1,111 @@
+/**
+ * What somebody is in the contingent, from the closed set the list of participants
+ * places people in.
+ */
+export type PersonRole = "deltagare" | "ist" | "kontingentledning" | "ledare"
+
+/**
+ * Somebody in the contingent as the cases module names them – enough to say who a case is
+ * about and who wrote a note.
+ */
+export interface Person {
+  /**
+   * The function of the contingent management they serve in, in the product's words –
+   * "Hälsosupport" – absent for everyone else, and for a member whose function the reader
+   * is not shown.
+   */
+  readonly funktion?: string
+  /**
+   * The Scoutnet member number, which cases and notes name people by.
+   */
+  readonly memberNo: string
+  /**
+   * The whole name, as the list of participants spells it.
+   */
+  readonly name: string
+  /**
+   * What they are in the contingent, absent when the list of participants says
+   * something this module does not know.
+   */
+  readonly role?: PersonRole
+  /**
+   * The troop the list of participants places them in – a unit's number, or a name such as
+   * the IST's – absent where it gives none.
+   */
+  readonly troop?: string
+}
+
+/**
+ * Everyone in the contingent, keyed by member number.
+ */
+export type People = ReadonlyMap<string, Person>
+
+/**
+ * What to call somebody a case or a note names by member number.
+ * @param people Everyone the module knows, undefined while they are still loading.
+ * @param memberNo The member number to name.
+ * @returns The person's name, or "Medlem" and the number for somebody the list of
+ * participants does not hold, so a row always names somebody.
+ */
+export function nameOf(people: People | undefined, memberNo: string): string {
+  return people?.get(memberNo)?.name ?? `Medlem ${memberNo}`
+}
+
+/**
+ * The words for a role, as the rest of the product writes them.
+ */
+const roleNames: ReadonlyMap<PersonRole, string> = new Map([
+  ["deltagare", "Deltagare"],
+  ["ist", "IST"],
+  ["kontingentledning", "CMT"],
+  ["ledare", "Ledare"],
+])
+
+/**
+ * The line under a person's name in full – their role and, in the contingent management,
+ * their function, then their unit by number and name – such as "Deltagare · Avdelning 1 ·
+ * Ankan" or "CMT · Hälsosupport".
+ * @param person The person to place.
+ * @param unitName What a unit is called, or undefined for a number the contingent has not named.
+ * @param ownUnit The one unit the reader leads, which the line leaves out.
+ * @returns The line, or undefined for somebody the module knows nothing about.
+ */
+export function placingLine(
+  person: Person | undefined,
+  unitName: (unitNumber: number) => string | undefined,
+  ownUnit?: number,
+): string | undefined {
+  const named = person?.role === undefined ? undefined : roleNames.get(person.role)
+  const role =
+    named !== undefined && person?.funktion !== undefined ? `${named} · ${person.funktion}` : named
+  const unit = unitNumberOf(person)
+  if (unit === undefined || unit === ownUnit) {
+    return role
+  }
+  const name = unitName(unit)
+  const unitWords =
+    name === undefined ? `Avdelning ${String(unit)}` : `Avdelning ${String(unit)} · ${name}`
+  return role === undefined ? unitWords : `${role} · ${unitWords}`
+}
+
+/**
+ * The unit a person belongs to. Only a troop of digits names one, because the IST and
+ * the management are troops to the list of participants and no unit to Campfire.
+ * @param person The person to place.
+ * @returns The unit number, or undefined.
+ */
+export function unitNumberOf(person: Person | undefined): number | undefined {
+  const troop = person?.troop
+  return troop !== undefined && /^\d+$/u.test(troop) ? Number(troop) : undefined
+}
+
+/**
+ * The short tag a list row puts after a name – "Avd 7" – so the unit reads at a glance.
+ * @param person The person to place.
+ * @param ownUnit The one unit the reader leads, whose people need no tag.
+ * @returns The tag, or undefined for somebody without a unit or in the reader's own.
+ */
+export function unitTag(person: Person | undefined, ownUnit?: number): string | undefined {
+  const unit = unitNumberOf(person)
+  return unit === undefined || unit === ownUnit ? undefined : `Avd ${String(unit)}`
+}

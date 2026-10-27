@@ -1,0 +1,39 @@
+/* The latest cases that wait for someone, on the start screen. */
+
+@layer component {
+  .waiting-cases-status {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-entry);
+    margin: 0;
+  }
+
+  /* Under the rows, where the card has given up its own padding to them. */
+  .case-rows ~ .waiting-cases-status {
+    padding-block: var(--spacing-group);
+  }
+
+  /* The way to every case that waits, at the card's end under the last row, in the
+     theme's ink so it reads as the way on. */
+  .waiting-cases-more {
+    border-top: 1px solid var(--color-divider);
+    margin: 0 calc(-1 * var(--card-padding, var(--spacing-section)));
+    padding: var(--spacing-group) var(--spacing-container);
+    text-align: end;
+  }
+
+  .waiting-cases-more a {
+    align-items: center;
+    color: var(--color-theme-ink);
+    display: inline-flex;
+    font-size: var(--font-size-entry);
+    font-weight: var(--font-weight-strong);
+    gap: var(--spacing-stack);
+    text-decoration: none;
+  }
+
+  /* The back glyph mirrored into "onward", as a row's chevron is. */
+  .waiting-cases-chevron {
+    display: flex;
+    transform: scaleX(-1);
+  }
+}

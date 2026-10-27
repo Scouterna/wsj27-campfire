@@ -1,0 +1,59 @@
+/* The subject card: the person's mark, then their name over where they belong, and what
+   the reader may do about them at the card's end. */
+
+@layer component {
+  .subject-card {
+    align-items: flex-start;
+    display: flex;
+    gap: 14px;
+  }
+
+  .subject-card-text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .subject-card-text strong {
+    font-size: var(--font-size-heading);
+    font-weight: var(--font-weight-strong);
+  }
+
+  .subject-card-text small {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-value);
+  }
+
+  /* Quiet, the label alone at the card's end, as a person row's action is. */
+  .subject-card-action {
+    align-self: center;
+    background: none;
+    border: none;
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--font-size-entry);
+    font-weight: var(--font-weight-strong);
+    margin-right: calc(-1 * var(--spacing-container));
+    min-height: 44px;
+    padding: 0 var(--spacing-container);
+  }
+
+  /* In the danger ink, because it takes the person off the case. */
+  .subject-card-remove {
+    color: var(--color-tone-danger-ink);
+  }
+
+  .subject-card-action:disabled {
+    cursor: default;
+    opacity: 0.45;
+  }
+
+  .subject-card-action:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: 2px;
+  }
+}

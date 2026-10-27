@@ -1,0 +1,62 @@
+/* A person the case names, in a list of them: their mark, their name and where they
+   belong, and what the reader may do about them at the row's end. */
+
+@layer component {
+  .case-person-rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-group);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .case-person-row {
+    align-items: center;
+    display: flex;
+    gap: var(--spacing-group);
+  }
+
+  .case-person-row-name {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .case-person-row-name small {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-entry);
+  }
+
+  /* Quiet, the label alone at the row's end, with a pill's padding so its focus ring is
+     round like every other control's. */
+  .case-person-row-action {
+    background: none;
+    border: none;
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--font-size-entry);
+    font-weight: var(--font-weight-strong);
+    margin-right: calc(-1 * var(--spacing-container));
+    min-height: 44px;
+    padding: 0 var(--spacing-container);
+  }
+
+  /* In the danger ink rather than the theme's, because it takes a case back from someone. */
+  .case-person-row-remove {
+    color: var(--color-tone-danger-ink);
+  }
+
+  .case-person-row-action:disabled {
+    cursor: default;
+    opacity: 0.45;
+  }
+
+  .case-person-row-action:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: 2px;
+  }
+}

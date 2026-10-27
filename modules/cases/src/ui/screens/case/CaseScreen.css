@@ -1,0 +1,66 @@
+/* One case: the title opened for a new one, and the lines the screen says in place of its
+   history. */
+
+@layer screen {
+  .case-notes-status {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+  }
+
+  /* A note's pictures, a step under its text. The card keeps a note's line breaks as they
+     were written, which the pictures have none of. */
+  .case-note-pictures {
+    margin-top: var(--spacing-group);
+    white-space: normal;
+  }
+
+  .case-failure {
+    color: var(--color-tone-danger-ink);
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-strong);
+    margin: 0;
+  }
+
+  /* The title opened for a new one: the field across the card, the buttons under it at
+     their own widths. */
+  .case-rename {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-stack);
+  }
+
+  .case-rename-label {
+    color: var(--color-ink-tertiary);
+    font-size: var(--font-size-detail);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .case-rename-field {
+    background: var(--color-sheet);
+    border: 1px solid color-mix(in srgb, var(--color-ink) 18%, transparent);
+    border-radius: var(--border-radius-control);
+    color: var(--color-ink);
+    font-family: inherit;
+    font-size: var(--font-size-body);
+    padding: 14px 16px;
+    width: 100%;
+  }
+
+  .case-rename-field:focus-visible {
+    outline: 2px solid var(--color-theme-bright);
+    outline-offset: 2px;
+  }
+
+  .case-rename-actions {
+    display: flex;
+    gap: var(--spacing-stack);
+    justify-content: flex-end;
+  }
+
+  .case-rename-actions .button {
+    width: auto;
+  }
+}

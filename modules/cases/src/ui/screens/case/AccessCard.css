@@ -1,0 +1,185 @@
+/* The access card: a summary of who follows the case up and who sees it, side by side
+   where the card is wide and stacked where it is narrow, and under it the panel the
+   summary opens while it is open. In the screen layer, because the card restyles the
+   design system's plain button and marks, which the layer order settles rather than the
+   order the sheets load in. */
+
+@layer screen {
+  /* A panel stands a step further from the summary than the card's own gap, so it reads
+     as opened under it rather than as the summary's next line. */
+  .access-card {
+    container-type: inline-size;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-card);
+  }
+
+  /* The two halves, side by side where the card holds them. */
+  .access-card-summary {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-group) var(--spacing-card);
+  }
+
+  .access-card-part {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-inline);
+    min-width: 0;
+  }
+
+  /* Who sees the case, and at its end the button that opens all of it. */
+  .access-card-sees {
+    align-items: center;
+    display: flex;
+    flex: 1 1 14rem;
+    gap: var(--spacing-group);
+    min-width: 0;
+  }
+
+  .access-card-sees > .access-card-part {
+    flex: 1;
+  }
+
+  .access-card-sees > .button {
+    flex: none;
+    width: auto;
+  }
+
+  /* A hairline between the halves, which only means something while they stand side by
+     side. */
+  .access-card-rule {
+    align-self: stretch;
+    background: var(--color-divider);
+    width: 1px;
+  }
+
+  .access-card-value .button {
+    width: auto;
+  }
+
+  /* Stacked, each half takes the whole width and the rule between them goes. */
+  @container (width < 36rem) {
+    .access-card-rule {
+      display: none;
+    }
+
+    .access-card-summary > .access-card-part,
+    .access-card-sees {
+      flex-basis: 100%;
+    }
+  }
+
+  /* What each half and the panel's lists are, over what they hold. */
+  .access-card-label {
+    color: var(--color-ink-tertiary);
+    font-size: var(--font-size-detail);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.16em;
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  .access-card-value {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    font-size: var(--font-size-value);
+    gap: var(--spacing-stack) 10px;
+    min-height: 44px;
+  }
+
+  /* The responsible person as a quiet button: their mark and name, and the chevron the
+     button wears while it opens the choice of someone else – no fill, because it is the
+     summary's value first and a control second. Pulled into the column's edge, its
+     padding out in the margin. */
+  .access-card-value .button-plain {
+    color: var(--color-ink);
+    margin-inline-start: calc(-1 * var(--spacing-stack));
+    padding: 0 var(--spacing-stack);
+  }
+
+  .access-card-person {
+    align-items: center;
+    display: inline-flex;
+    font-weight: var(--font-weight-strong);
+    gap: 10px;
+  }
+
+  /* The marks in the summary are a size down from a list row's, so the line holds its
+     height – set on a leader's wrapper too, whose star takes its size from there. */
+  .access-card-value .unit-avatar,
+  .access-card-value .unit-avatar-leader {
+    --unit-avatar-size: 28px;
+  }
+
+  .access-card-value .initials {
+    font-size: var(--font-size-caption);
+    height: 28px;
+    width: 28px;
+  }
+
+  /* Nobody responsible: an empty place where a mark would be. */
+  .access-card-nobody {
+    border: 2px dashed color-mix(in srgb, var(--color-ink) 35%, transparent);
+    border-radius: var(--border-radius-round);
+    display: block;
+    flex: none;
+    height: 28px;
+    width: 28px;
+  }
+
+  /* A panel – who sees the case, or who could be responsible: an inset on a faint tint of
+     the ink, so it reads as a place opened for a moment inside the card rather than one
+     more section of it. */
+  .access-card-panel {
+    background: color-mix(in srgb, var(--color-ink) 4%, var(--color-sheet));
+    border-radius: var(--border-radius-control);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-stack);
+    padding: var(--spacing-group) var(--spacing-container);
+  }
+
+  .access-card-panel .access-card-label {
+    margin-top: var(--spacing-stack);
+  }
+
+  /* The whole group a case's level lets in, drawn as a person would be, its mark the
+     people icon on the theme's wash. */
+  .access-card-group {
+    align-items: center;
+    background: var(--color-theme-wash);
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    display: flex;
+    flex: none;
+    height: 44px;
+    justify-content: center;
+    width: 44px;
+  }
+
+  /* What someone is to the case, at their row's end. */
+  .access-card-role {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-entry);
+  }
+
+  .access-card-about {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-entry);
+    line-height: 1.4;
+    margin: 0;
+  }
+
+  /* What the level means, set apart at the panel's foot. */
+  .access-card-note {
+    border-top: 1px solid var(--color-divider);
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-entry);
+    line-height: 1.4;
+    margin: var(--spacing-stack) 0 0;
+    padding-top: var(--spacing-group);
+  }
+}

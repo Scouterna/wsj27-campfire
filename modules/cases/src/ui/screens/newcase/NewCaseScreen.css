@@ -1,0 +1,127 @@
+/* The new-case form on one card: who the case is about and its title, then its kind and
+   who sees it set off by space, and the form's actions under a rule. */
+
+@layer screen {
+  .newcase-form {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  .newcase-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-stack);
+  }
+
+  /* The eyebrow over each part of the form. */
+  .newcase-label {
+    color: var(--color-ink-tertiary);
+    font-size: var(--font-size-detail);
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.16em;
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  /* A white field inside the white card, told apart by its outline alone – a tinted
+     fill reads as a field that cannot be written in. */
+  .newcase-input {
+    background: var(--color-sheet);
+    border: 1px solid color-mix(in srgb, var(--color-ink) 18%, transparent);
+    border-radius: var(--border-radius-control);
+    color: var(--color-ink);
+    font-family: inherit;
+    font-size: var(--font-size-body);
+    padding: 14px 16px;
+    width: 100%;
+  }
+
+  /* The way to add someone more, beside the last person chosen – tighter than a pill on its
+     own, so it fits the row at a phone's width. */
+  .newcase-more .button {
+    padding: 0 var(--spacing-group);
+    width: auto;
+  }
+
+  /* Read by assistive technology and drawn nowhere. */
+  .newcase-hidden {
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+
+  /* The search for someone more stands a little apart from the people chosen above it, so
+     the person and the box read as two things rather than one. */
+  .newcase-group .case-person-rows + .person-picker-results {
+    margin-top: var(--spacing-stack);
+  }
+
+  .newcase-input::placeholder {
+    color: var(--color-ink-tertiary);
+  }
+
+  /* The ring the design system's search field wears, so every field in the product
+     answers focus alike. */
+  .newcase-input:focus-visible {
+    outline: 2px solid var(--color-theme-bright);
+    outline-offset: 2px;
+  }
+
+  /* What the form says in place of the kinds of case while they are on their way or could
+     not be read, with the way to ask again at its end. */
+  .newcase-status {
+    align-items: center;
+    color: var(--color-ink-secondary);
+    display: flex;
+    gap: var(--spacing-stack);
+    justify-content: space-between;
+    margin: 0;
+  }
+
+  .newcase-status .button {
+    width: auto;
+  }
+
+  /* What kind of case it is and who sees it, set off by space because together they
+     decide who reads every note written on the case. */
+  .newcase-access {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    margin-top: var(--spacing-section);
+  }
+
+  /* The consequence of the two choices above it, said once beside them rather than on
+     each, quiet because it is a fact rather than a warning. */
+  .newcase-fixed {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+  }
+
+  .newcase-failure {
+    color: var(--color-tone-danger-ink);
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-strong);
+    margin: 0;
+  }
+
+  /* The form's actions under a rule, as a note's are under its field: the quiet way out,
+     then the one that opens the case, each at its own width. */
+  .newcase-actions {
+    align-items: center;
+    border-top: 1px solid var(--color-divider);
+    display: flex;
+    gap: var(--spacing-stack);
+    justify-content: flex-end;
+    padding-top: 20px;
+  }
+
+  .newcase-actions .button {
+    width: auto;
+  }
+}

@@ -1,9 +1,10 @@
-import { PageTitle } from "@scouterna/wsj27-campfire-ui"
-import type { ReactElement } from "react"
+import { PageActions, PageTitle } from "@scouterna/wsj27-campfire-ui"
+import { useMemo, type ReactElement } from "react"
 
 import type { Experience } from "../../../model/Experience"
 import { fullName } from "../../../model/Participant"
 import type { Readiness } from "../../../model/Readiness"
+import { usePersonActions } from "../../actions"
 import { ContactSection } from "./ContactSection"
 import { DietSection } from "./DietSection"
 import { ExperienceSection } from "./ExperienceSection"
@@ -62,6 +63,9 @@ function hasFacts(experience: Experience): boolean {
  */
 export function ParticipantScreen(props: ParticipantScreenProps): ReactElement {
   const { error, isPending, participant } = useParticipant(props.memberNo)
+  const actions = usePersonActions()
+  // Kept across renders, because new entries would declare the page's actions again.
+  const menu = useMemo(() => actions(props.memberNo), [actions, props.memberNo])
 
   if (isPending) {
     return (
@@ -102,6 +106,7 @@ export function ParticipantScreen(props: ParticipantScreenProps): ReactElement {
   return (
     <>
       <PageTitle title={fullName(participant)} />
+      {menu.length > 0 && <PageActions menu={menu} />}
 
       <div className="person">
         <ProfileSection participant={participant} />

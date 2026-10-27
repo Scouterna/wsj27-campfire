@@ -8,11 +8,21 @@ import {
   subscribeToSession,
   watchExpiry,
 } from "@scouterna/wsj27-campfire-authentication"
+import {
+  casesPersonMenu,
+  casesRoutes,
+  casesSectionLabel,
+  casesUnitMenu,
+  casesWidgets,
+  useCasesAccess,
+  type CasesAccess,
+} from "@scouterna/wsj27-campfire-cases"
 import { HomeScreen } from "@scouterna/wsj27-campfire-home"
 import { host } from "@scouterna/wsj27-campfire-host"
 import { journeyWidgets } from "@scouterna/wsj27-campfire-journey"
 import { materialRoutes, materialSectionLabel } from "@scouterna/wsj27-campfire-material"
 import {
+  ActionsProvider,
   participantsRoutes,
   participantsSectionLabel,
   participantsWidgets,
@@ -20,7 +30,9 @@ import {
   type Viewer,
 } from "@scouterna/wsj27-campfire-participants"
 import {
+  Button,
   Card,
+  ChatIcon,
   cmtAvatarNumber,
   cmtTheme,
   expectPop,
@@ -38,6 +50,7 @@ import {
   RevealProvider,
   reveals,
   rootRoute,
+  SectionsProvider,
   setNavDirection,
   SideMenu,
   storedTheme,
@@ -49,6 +62,7 @@ import {
   usePageActions,
   usePageTitle,
   useRevealLookup,
+  useSectionLookup,
   WidgetsProvider,
   type Address,
   type AppPath,
@@ -70,7 +84,7 @@ import {
 } from "@scouterna/wsj27-campfire-utils"
 import { QueryClientProvider } from "@tanstack/react-query"
 import { createRouter, Link, useRouterState, type RouteComponent } from "@tanstack/react-router"
-import { useEffect, useState, type ReactElement, type ReactNode } from "react"
+import { useCallback, useEffect, useState, type ReactElement, type ReactNode } from "react"
 
 import {
   historyIndex,
@@ -103,7 +117,7 @@ declare module "@scouterna/wsj27-campfire-ui" {
  * Every widget a screen can place by id, gathered from the modules that fill them.
  * The placing screen names an id and never learns which module drew it (ADR 016).
  */
-const widgets = { ...journeyWidgets, ...participantsWidgets } satisfies Widgets
+const widgets = { ...casesWidgets, ...journeyWidgets, ...participantsWidgets } satisfies Widgets
 
 /**
  * Every screen this build answers at, gathered from the modules and wrapped in the
@@ -113,6 +127,7 @@ const widgets = { ...journeyWidgets, ...participantsWidgets } satisfies Widgets
 const screens = guardScreens({
   "/": { Component: HomeScreen, tab: "home" },
   ...authenticationRoutes,
+  ...casesRoutes,
   ...materialRoutes,
   ...participantsRoutes,
 } satisfies Routes)
@@ -130,10 +145,9 @@ interface AppSection {
    */
   readonly id: string
   /**
-   * Whether the roles grant the section, under the reveals as they stand – the
-   * lookup answers by a reveal's id.
+   * Whether the section is granted, by what is known of the signed-in person.
    */
-  readonly isGranted: (roles: readonly Role[], isRevealed: (id: string) => boolean) => boolean
+  readonly isGranted: (grants: Grants) => boolean
   /**
    * The menu label, given the roles – a leader's participants section wears their own
    * unit's name.
@@ -146,8 +160,20 @@ interface AppSection {
 }
 
 /**
- * The sections, in menu order: home for everyone, and the participants and material
- * sections for a leader and for any management function – for nobody else.
+ * What a section can be granted by: the roles, the reveals as they stand – the lookup
+ * answers by a reveal's id – and what the cases service lets the person do, which it
+ * alone decides.
+ */
+interface Grants {
+  readonly cases: CasesAccess
+  readonly isRevealed: (id: string) => boolean
+  readonly roles: readonly Role[]
+}
+
+/**
+ * The sections, in menu order: home for everyone, the participants and material sections
+ * for a leader and for any management function, and the cases section for whoever the
+ * cases service lets in.
  */
 const sections: readonly AppSection[] = [
   { icon: <HomeIcon />, id: "home", isGranted: () => true, label: () => "Hem", path: "/" },
@@ -157,40 +183,67 @@ const sections: readonly AppSection[] = [
     // The reveal gates the section for everyone, so until the moment the contingent's
     // people are offered to nobody and the address answers as not found. A curtain,
     // not a lock – the service's own gates scope the data itself.
-    isGranted: (roles, isRevealed) =>
+    isGranted: ({ isRevealed, roles }) =>
       hasAnyRole(roles, "leader", "cmt") && isRevealed(unitsReveal.id),
     label: participantsSectionLabel,
     path: "/participants",
+  },
+  {
+    icon: <ChatIcon />,
+    id: "cases",
+    // Whoever the cases service offers a type to open, or lists a case for.
+    isGranted: ({ cases }) => cases.isGranted,
+    label: () => casesSectionLabel,
+    path: "/cases",
   },
   {
     icon: <FolderIcon />,
     id: "material",
     // No reveal, because the material is not part of the surprise – only the card naming
     // a reader's own unit waits for it.
-    isGranted: (roles) => hasAnyRole(roles, "leader", "cmt"),
+    isGranted: ({ roles }) => hasAnyRole(roles, "leader", "cmt"),
     label: materialSectionLabel,
     path: "/material",
   },
 ]
 
 /**
- * Whether the roles grant the section a screen belongs to – the one predicate the
- * menus filter with, the chrome resolves title, marked section, and back with, and the
- * guard mounts with. Fail closed on purpose – a screen whose tab names no
- * section is granted to nobody, so a typo hides a screen loudly in development rather
- * than publishing it to everyone.
+ * Whether the section a screen belongs to is granted – the one predicate the menus
+ * filter with, the chrome resolves title, marked section, and back with, and the guard
+ * mounts with, handed to them all through `SectionsProvider`. Fail closed on purpose – a
+ * screen whose tab names no section is granted to nobody, so a typo hides a screen
+ * loudly in development rather than publishing it to everyone.
  * @param tab The screen's declared section id.
- * @param roles The signed-in person's roles.
- * @param isRevealed Which reveals are open, by id, from the nearest provider.
- * @returns True when the roles grant the named section.
+ * @param grants What is known of the signed-in person.
+ * @returns True when the named section is granted.
  */
-function isGranted(
-  tab: string | undefined,
-  roles: readonly Role[],
-  isRevealed: (id: string) => boolean,
-): boolean {
+function isGranted(tab: string | undefined, grants: Grants): boolean {
   const section = sections.find((candidate) => candidate.id === tab)
-  return section?.isGranted(roles, isRevealed) ?? false
+  return section?.isGranted(grants) ?? false
+}
+
+type SectionGrantsProps = {
+  /**
+   * The subtree that asks which sections are granted.
+   */
+  readonly children: ReactNode
+}
+
+/**
+ * Hands the section rule down, live – a reveal opening or the cases service answering
+ * changes every menu and guard under it at once.
+ * @param props The subtree.
+ * @returns The subtree, with the rule in scope.
+ */
+function SectionGrants(props: SectionGrantsProps): ReactElement {
+  const roles = useRoles()
+  const isRevealed = useRevealLookup()
+  const cases = useCasesAccess()
+  const lookup = useCallback(
+    (id: string) => isGranted(id, { cases, isRevealed, roles }),
+    [cases, isRevealed, roles],
+  )
+  return <SectionsProvider isGranted={lookup}>{props.children}</SectionsProvider>
 }
 
 /**
@@ -209,8 +262,9 @@ function guardScreens<const TRoutes extends Routes>(routes: TRoutes): TRoutes {
 }
 
 /**
- * The guard around one screen: the real component when the roles grant its section,
- * the not-found page otherwise.
+ * The guard around one screen: the real component when its section is granted, nothing
+ * while the cases service has yet to say for one of its screens, and the not-found page
+ * otherwise.
  * @param spec The screen to guard.
  * @returns The guarded component.
  */
@@ -220,9 +274,14 @@ function withGuard(spec: ScreenSpec): RouteComponent {
     // Ambient below the gate, which always resolves before any screen mounts. The
     // curtain is live, so a screen the reveal ungates replaces its not-found the
     // moment the application opens – nobody reloads their way in.
-    const roles = useRoles()
-    const isRevealed = useRevealLookup()
-    return isGranted(spec.tab, roles, isRevealed) ? <Component /> : <NotFoundRoute />
+    const isSectionGranted = useSectionLookup()
+    const { isPending } = useCasesAccess()
+    if (isSectionGranted(spec.tab ?? "")) {
+      return <Component />
+    }
+    // The cases section waits on the service's answer, so an address opened straight
+    // into it shows nothing until then rather than not found and then the screen.
+    return spec.tab === "cases" && isPending ? <></> : <NotFoundRoute />
   }
   return GuardedScreen
 }
@@ -243,6 +302,39 @@ type SignedInProps = {
    * The routed screens.
    */
   readonly children: ReactNode
+}
+
+type ParticipantMenusProps = {
+  /**
+   * The subtree whose person and unit screens carry the entries.
+   */
+  readonly children: ReactNode
+}
+
+/**
+ * What other sections offer on a person's and a unit's own screens, each only where the
+ * section itself is granted – the cases about them, and a new one. Composed here, because
+ * those screens and the cases belong to different modules.
+ * @param props The subtree that shows the entries.
+ * @returns The subtree, with the entries in scope.
+ */
+function ParticipantMenus(props: ParticipantMenusProps): ReactElement {
+  const isSectionGranted = useSectionLookup()
+  const { canOpen } = useCasesAccess()
+  const hasCases = isSectionGranted("cases")
+  const person = useCallback(
+    (memberNo: string) => (hasCases ? casesPersonMenu(memberNo, canOpen) : []),
+    [canOpen, hasCases],
+  )
+  const unit = useCallback(
+    (unitNumber: number) => (hasCases ? casesUnitMenu(unitNumber, canOpen) : []),
+    [canOpen, hasCases],
+  )
+  return (
+    <ActionsProvider person={person} unit={unit}>
+      {props.children}
+    </ActionsProvider>
+  )
 }
 
 /**
@@ -396,13 +488,17 @@ function SignedInChrome(props: SignedInProps): ReactElement {
                 everything under it. A new reveal is another catalog entry, not
                 another mechanism. */}
                 <RevealProvider reveals={reveals}>
-                  <WidgetsProvider widgets={widgets}>
-                    {host.tier === "shell" ? (
-                      <ShellChrome user={props.user}>{props.children}</ShellChrome>
-                    ) : (
-                      <BrowserChrome user={props.user}>{props.children}</BrowserChrome>
-                    )}
-                  </WidgetsProvider>
+                  <SectionGrants>
+                    <ParticipantMenus>
+                      <WidgetsProvider widgets={widgets}>
+                        {host.tier === "shell" ? (
+                          <ShellChrome user={props.user}>{props.children}</ShellChrome>
+                        ) : (
+                          <BrowserChrome user={props.user}>{props.children}</BrowserChrome>
+                        )}
+                      </WidgetsProvider>
+                    </ParticipantMenus>
+                  </SectionGrants>
                 </RevealProvider>
               </ViewerProvider>
             </QueryClientProvider>
@@ -435,23 +531,32 @@ function ShellChrome(props: SignedInProps): ReactElement {
 }
 
 /**
+ * Goes back one entry, as a back the application asked for, so it slides back rather than
+ * leaving the move to the platform.
+ */
+function popBack(): void {
+  setNavDirection("back")
+  expectPop()
+  router.history.back()
+}
+
+/**
  * The back control above a detail page's title: the parent's name, and a history pop so
  * the page returns to where it was left – except on a cold deep link, where there is no
- * history and the parent is navigated to instead. Undefined at a section root, and at a
- * screen reached by a section switch, which is a start however deep its declared parent
- * chain. Not a hook – it reads the trails, never React state.
+ * history and the parent is navigated to instead. At a section root, the page whose link
+ * led there, when the trail still names it. Undefined at a screen reached by a section
+ * switch, which is a start however deep its declared parent chain. Not a hook – it reads
+ * the trails, never React state.
+ * @param pathname The address the screen stands at.
  * @param parent The address the screen declares above itself.
  * @param roles The signed-in person's roles, for the section labels.
  * @returns The label and the action, or undefined when no back applies.
  */
 function backControlFor(
+  pathname: string,
   parent: AppPath | undefined,
   roles: readonly Role[],
 ): { readonly label: string; readonly onBack: () => void } | undefined {
-  if (parent === undefined) {
-    return undefined
-  }
-
   const index = historyIndex()
 
   // The trail is written by an effect after this render, so the switch that has not
@@ -462,16 +567,33 @@ function backControlFor(
 
   const isCold = index === 0 || index === undefined
 
+  // A section's start has nothing above it, so back leads only to the page whose link
+  // brought the reader here – known by its title on the trail, which a reload empties,
+  // so a start reached before one offers no back rather than a nameless one. Home and a
+  // screen of its own, such as the profile, are where a reader starts over, so they
+  // offer none.
+  if (parent === undefined) {
+    const isSectionStart = sections.some(
+      (section) => section.path !== "/" && section.path === pathname,
+    )
+    const previous = isCold || !isSectionStart ? undefined : titleTrail.get(index - 1)
+    return previous === undefined ? undefined : { label: previous, onBack: popBack }
+  }
+
   const onBack = (): void => {
-    setNavDirection("back")
     if (isCold) {
-      // No click for the capture-phase listener to see, so the push is declared here.
+      setNavDirection("back")
+      // No click for the capture-phase listener to see, so the push is declared here –
+      // and a parent that is a section's start lands as one, so it does not offer back to
+      // the page just left.
       markPush()
+      if (sections.some((section) => section.path === parent)) {
+        sectionSwitch.pending = true
+      }
       void router.navigate({ to: parent })
       return
     }
-    expectPop()
-    router.history.back()
+    popBack()
   }
 
   // The trail knows what the previous entry called itself. Cold – or where the trail
@@ -516,7 +638,8 @@ function BrowserChrome(props: SignedInProps): ReactElement {
   const isRevealed = useRevealLookup()
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   const found = matchScreen(pathname, screens)
-  const isGrantedScreen = found !== undefined && isGranted(found.spec.tab, user.roles, isRevealed)
+  const isSectionGranted = useSectionLookup()
+  const isGrantedScreen = found !== undefined && isSectionGranted(found.spec.tab ?? "")
 
   // The page names itself – the not-found page included – and a hidden screen never
   // mounts, so an ungranted address is named exactly as one that matches nothing.
@@ -532,9 +655,9 @@ function BrowserChrome(props: SignedInProps): ReactElement {
 
   useNavigationBookkeeping(pathname, title)
 
-  const back = isGrantedScreen ? backControlFor(found.spec.parent, user.roles) : undefined
+  const back = isGrantedScreen ? backControlFor(pathname, found.spec.parent, user.roles) : undefined
   const items: readonly SideMenuItem[] = sections
-    .filter((section) => section.isGranted(user.roles, isRevealed))
+    .filter((section) => isSectionGranted(section.id))
     .map((section) => ({
       icon: section.icon,
       id: section.id,
@@ -585,12 +708,21 @@ function BrowserChrome(props: SignedInProps): ReactElement {
             title={title}
             trailing={
               <>
+                {declared?.secondary === undefined ? null : (
+                  <Button {...declared.secondary} variant="secondary" />
+                )}
                 {declared?.menu === undefined ? null : <OverflowMenu items={declared.menu} />}
                 {pill(true)}
               </>
             }
           />
-          <PageHeading title={title} back={back} action={declared?.action} menu={declared?.menu} />
+          <PageHeading
+            title={title}
+            back={back}
+            action={declared?.action}
+            menu={declared?.menu}
+            secondary={declared?.secondary}
+          />
           <div className="content">{props.children}</div>
         </main>
       </div>
