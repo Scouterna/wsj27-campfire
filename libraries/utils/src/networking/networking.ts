@@ -24,7 +24,22 @@ export class HttpError extends Error {
 }
 
 /**
- * Asks a service for JSON – the request, the status check, and the parse.
+ * What a request sends beside its address: the method, and the body to send.
+ */
+interface Outgoing {
+  /**
+   * The value to send – a form as a multipart upload, and anything else encoded as JSON.
+   */
+  readonly body?: unknown
+  /**
+   * The method, for a request that changes something.
+   */
+  readonly method: "POST" | "PUT"
+}
+
+/**
+ * Asks a service for JSON, or sends it JSON and reads the answer – the request, the
+ * status check, and the parse.
  *
  * The type parameter is cast onto the parsed body, not checked, so the caller still
  * validates what arrived.
@@ -40,13 +55,17 @@ export class HttpError extends Error {
  * @param url Where to ask. Origin-relative for the back-end, so the same call works
  * against the mock, the local back-end, and the deployed one; absolute only for a public
  * service that is the same in every environment.
+ * @param init What to send, left out for a plain GET. A form is sent as a multipart
+ * upload, and any other body as JSON.
  * @returns The body, parsed as JSON and typed as the caller asked.
  */
-export async function fetch<T>(url: string): Promise<T> {
+export async function fetch<T>(url: string, init?: Outgoing): Promise<T> {
   let response: Response
   try {
     // The global, because this function's own name shadows it.
-    response = await globalThis.fetch(url)
+    response = await (init === undefined
+      ? globalThis.fetch(url)
+      : globalThis.fetch(url, toRequestInit(init)))
   } catch (error) {
     // No network, a refused connection, or a DNS failure never reached a server, and a
     // caller in a field with no signal must tell that apart from a refusal – one means
@@ -64,5 +83,27 @@ export async function fetch<T>(url: string): Promise<T> {
     // A dev server with no API behind it answers a request for `/api/…` with the
     // application's own `index.html`, and an error page in production does the same.
     throw new Error(`${url} answered with something that is not JSON`, { cause: error })
+  }
+}
+
+/**
+ * The platform's request options for what the caller asked to send.
+ * @param init The method and the body the caller asked for.
+ * @returns The options, with a form as it is and any other body encoded and labeled as
+ * JSON.
+ */
+function toRequestInit(init: Outgoing): RequestInit {
+  if (init.body === undefined) {
+    return { method: init.method }
+  }
+  // The platform labels a form itself, because the label carries the boundary between its
+  // parts.
+  if (init.body instanceof FormData) {
+    return { body: init.body, method: init.method }
+  }
+  return {
+    body: JSON.stringify(init.body),
+    headers: { "content-type": "application/json" },
+    method: init.method,
   }
 }
