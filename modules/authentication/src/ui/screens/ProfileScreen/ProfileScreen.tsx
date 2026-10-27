@@ -31,7 +31,8 @@ import "./ProfileScreen.css"
  * follows – and arrive live when it opens.
  *
  * While Campfire is shown as somebody else the page says so and offers the way back to
- * the person's own account, because nothing else in the application does.
+ * the person's own account, because nothing else in the application does, and that way
+ * back is the only way out.
  *
  * @returns The screen.
  */
@@ -84,15 +85,20 @@ export function ProfileScreen(): ReactElement {
           </div>
         )}
       </Card>
-      <div className="profile-screen-sign-out">
-        <Button
-          label="Logga ut"
-          onPress={() => {
-            forgetImpersonation()
-            signOut(location.origin)
-          }}
-        />
-      </div>
+      {/* Not while shown as somebody else, because that session holds no ID token to end
+          ScoutID's with, so the next person to sign in on the phone would pass straight
+          through as the one who started it. The way back is the way out. */}
+      {!isImpersonating && (
+        <div className="profile-screen-sign-out">
+          <Button
+            label="Logga ut"
+            onPress={() => {
+              forgetImpersonation()
+              signOut(location.origin)
+            }}
+          />
+        </div>
+      )}
     </>
   )
 }
