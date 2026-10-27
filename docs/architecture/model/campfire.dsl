@@ -51,6 +51,12 @@ campfire = softwareSystem "Campfire" {
       tags "module"
     }
 
+    casesModule = container "Cases" {
+      description "Follow-ups about some people or a unit, and the notes written on them."
+      technology "TypeScript, React 19, TanStack Query"
+      tags "module"
+    }
+
     homeModule = container "Home" {
       description "The start screen, and what it shows to whom and from when."
       technology "TypeScript, React 19"
@@ -125,10 +131,10 @@ campfire = softwareSystem "Campfire" {
 
   # Each audience is drawn to the product, and the context view rolls the arrow up to the
   # system on its own.
-  leaders -> campfireApp "Know and reach their unit"
+  leaders -> campfireApp "Know, reach, and follow up their unit"
   cmtAdministration -> campfireApp "Look up and reach anyone"
   cmtCommunication -> campfireApp "Reach the people a message is for"
-  cmtHealth -> campfireApp "Read a participant's health answers"
+  cmtHealth -> campfireApp "Read health answers and keep cases"
   cmtIstSupport -> campfireApp "See and reach the IST"
   cmtProgram -> campfireApp "Plan around the units and leaders"
   cmtSupport -> campfireApp "See and reach the whole function"
@@ -144,15 +150,17 @@ campfire = softwareSystem "Campfire" {
   # round trip once they arrive.
   this -> authService "Signs members in and out through"
   this -> participantsService "Reads the contingent's list of participants from"
+  this -> casesService "Keeps the cases in"
   this -> scoutid "Sends members to sign in at"
   authService -> scoutid "Runs the OpenID round trip with"
   scoutid -> scoutnet "Verifies sign-ins against"
   participantsService -> scoutnet "Reads the contingent's member data from"
   developers -> github "Build, check, and publish through"
 
-  developers -> mock "Run in place of both services, locally"
+  developers -> mock "Run in place of the back-end services, locally"
   mock -> authService "Stands in for, locally"
   mock -> participantsService "Stands in for, locally"
+  mock -> casesService "Stands in for, locally"
 
   # A shell opens sign-in in a modal, because the main webview refuses to walk the round
   # trip itself.
@@ -165,6 +173,7 @@ campfire = softwareSystem "Campfire" {
 
   # An edge from the front-end to a service starts at the module that owns it.
   webApp -> authenticationModule "Signs the member in through"
+  webApp -> casesModule "Shows the cases through"
   webApp -> homeModule "Shows the start screen through"
   webApp -> journeyModule "Shows the countdown through"
   webApp -> materialModule "Shows the contingent's material through"
@@ -172,18 +181,22 @@ campfire = softwareSystem "Campfire" {
   webApp -> uiLibrary "Draws its chrome with"
   webApp -> hostLibrary "Reports the screen and the session through"
   authenticationModule -> uiLibrary "Builds its screens from"
+  casesModule -> uiLibrary "Builds its screens from"
   homeModule -> uiLibrary "Builds its screens from"
   journeyModule -> uiLibrary "Builds its widget from"
   materialModule -> uiLibrary "Builds its screens from"
   participantsModule -> uiLibrary "Builds its screens from"
   webApp -> utilsLibrary "Mounts the session through"
   authenticationModule -> utilsLibrary "Calls the service with"
+  casesModule -> utilsLibrary "Calls the services with"
   homeModule -> utilsLibrary "Reads the session's roles from"
   journeyModule -> utilsLibrary "Reads the signed-in person from"
   materialModule -> utilsLibrary "Reads Drive with"
   participantsModule -> utilsLibrary "Calls the service with"
   authenticationModule -> authService "Signs in and reads the session over /api/auth"
   authenticationModule -> participantsService "Reads the member's unit and travel over /api/project"
+  casesModule -> casesService "Reads and writes cases over /api/project"
+  casesModule -> participantsService "Reads the contingent's names over /api/project"
   participantsModule -> participantsService "Reads the list of participants over /api/project"
   participantsModule -> openFreeMap "Draws unit maps over tiles from"
   materialModule -> googleDrive "Lists, previews, and downloads the material from"

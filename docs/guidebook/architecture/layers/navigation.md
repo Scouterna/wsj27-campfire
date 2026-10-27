@@ -36,7 +36,7 @@ Registration is invisible machinery: an address exists only because a module dec
 
 ## Sections decide who opens what
 
-A section is a top-level destination in the menus – home for everyone, and the participants section for leaders and the contingent management team once the units reveal has opened. Sections are the application's, derived from the session's roles and the reveals, so a screen names the section it belongs to and never decides who may see it.
+A section is a top-level destination in the menus – home for everyone, the participants section for leaders and the contingent management team once the units reveal has opened, and the cases section for whoever the cases service offers a type of case to open or lists a case for. Sections are the application's, derived from the session's roles, the reveals, and the cases service's answers, so a screen names the section it belongs to and never decides who may see it. A screen that places another section's pieces asks the application whether that section is granted rather than repeating its rule.
 
 One predicate grants a section, and everything that needs the answer asks it, so they cannot drift apart:
 
@@ -50,7 +50,7 @@ The guard is what keeps an address honest. An address outside the person's secti
 
 ## Back and transitions
 
-Back leads to the declared `parent`, never to whatever `history.length` suggests, because history lies after a deep link or a restored tab, and a back control has to mean "up one screen" however the person arrived. A screen with no parent is a section root and offers no back.
+Back leads to the declared `parent`, never to whatever `history.length` suggests, because history lies after a deep link or a restored tab, and a back control has to mean "up one screen" however the person arrived. A screen with no parent is a section root. It offers back only when a link on another page led there – the start screen's way to every case that waits, say – and leads back to that page. Reached from the menu, the tab bar, or an address of its own, it offers none.
 
 Going back pops history, so a page returns to where it was left, scrolled as it was. On a cold deep link there is no history to pop, so the parent is navigated to instead.
 
