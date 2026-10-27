@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import type { ReactElement, ReactNode } from "react"
 
-import type { LinkTarget } from "../../routing/routes"
+import { linkPropsOf, type LinkTarget } from "../../routing/routes"
 
 import "./ProfilePill.css"
 
@@ -62,8 +62,7 @@ export function ProfilePill(props: ProfilePillProps): ReactElement {
       aria-label={props.label}
       className={props.compact ? "profile-compact" : "profile"}
       data-nav="fade"
-      to={props.link.to}
-      params={props.link.params ?? {}}
+      {...linkPropsOf(props.link)}
       onClick={(event) => {
         if (props.isCurrent) {
           event.preventDefault()

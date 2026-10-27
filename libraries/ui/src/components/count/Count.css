@@ -1,0 +1,38 @@
+/* The count: a few figures on a small rounded pill, beside the label of what they count. */
+
+@layer component {
+  /* In the theme's wash, its figures all one width so a count that changes does not shift
+     what stands beside it, and always strong, so a label turning strong does not widen
+     it. */
+  .count {
+    background: color-mix(in srgb, var(--color-theme-ink) 12%, transparent);
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    display: inline-block;
+    font-size: var(--font-size-entry);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--font-weight-strong);
+    line-height: 22px;
+    min-width: 22px;
+    padding: 0 8px;
+    text-align: center;
+  }
+
+  /* The small count, for inside a control, where the default would outweigh the label. */
+  .count-small {
+    font-size: var(--font-size-detail);
+    line-height: 18px;
+    min-width: 18px;
+    padding: 0 5px;
+  }
+
+  /* The words read in the figures' place by assistive technology, drawn nowhere. */
+  .count-said {
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+}

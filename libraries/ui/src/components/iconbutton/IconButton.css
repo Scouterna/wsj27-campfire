@@ -1,0 +1,71 @@
+/* The icon button: an action as its icon alone, in a circle the size of a fingertip. */
+
+@layer component {
+  .icon-button {
+    align-items: center;
+    border: none;
+    border-radius: var(--border-radius-round);
+    cursor: pointer;
+    display: inline-flex;
+    flex: none;
+    height: 44px;
+    justify-content: center;
+    padding: 0;
+    transition: background 120ms ease;
+    width: 44px;
+  }
+
+  /* A smaller circle for beside a row's text, whose press still reaches a fingertip's
+     width, because the target is what a thumb needs, not the drawing. */
+  .icon-button-small {
+    height: 32px;
+    position: relative;
+    width: 32px;
+  }
+
+  .icon-button-small::before {
+    content: "";
+    inset: -6px;
+    position: absolute;
+  }
+
+  .icon-button:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: 2px;
+  }
+
+  /* Dimmed and still while unavailable, because the hover and press steps exclude it. */
+  .icon-button:disabled {
+    cursor: default;
+    opacity: 0.45;
+  }
+
+  .icon-button-primary {
+    background: var(--color-theme-ink);
+    color: var(--color-theme-on-ink);
+  }
+
+  .icon-button-secondary {
+    background: var(--color-theme-wash);
+    color: var(--color-theme-ink);
+  }
+
+  /* Only where a pointer can hover, so a touch never leaves a hover state stuck on. */
+  @media (hover: hover) {
+    .icon-button-primary:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--color-theme-ink) 85%, black);
+    }
+
+    .icon-button-secondary:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--color-theme-ink) 18%, var(--color-sheet));
+    }
+  }
+
+  .icon-button-primary:active:not(:disabled) {
+    background: color-mix(in srgb, var(--color-theme-ink) 72%, black);
+  }
+
+  .icon-button-secondary:active:not(:disabled) {
+    background: color-mix(in srgb, var(--color-theme-ink) 24%, var(--color-sheet));
+  }
+}

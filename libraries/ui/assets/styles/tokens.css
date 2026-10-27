@@ -26,8 +26,8 @@
        the overflow trigger – always over a backdrop blur. */
     --color-glass: rgb(255 255 255 / 62%);
 
-    /* The dimming over the page behind a modal, the ink at a little over half. */
-    --color-scrim: rgb(26 26 26 / 55%);
+    /* The shade a modal lays over the page behind it, the ink at two fifths. */
+    --color-scrim: rgb(26 26 26 / 40%);
 
     /* The unit colors – the exact outer-ring values from the badge marks, which are the
        authoritative artwork for the color identities. */
@@ -71,11 +71,14 @@
     --color-tone-positive-ink: #2e4b36;
     --color-tone-positive-wash: #dce8de;
 
-    /* The corners of a control, a default surface, a large surface, and the full pill. */
+    /* The corners of a control, a default surface, a large surface, the full pill, and a
+       tag – squarer than any pill, because a pill is something to press and a tag only
+       states a fact. */
     --border-radius-control: 12px;
     --border-radius-default: 16px;
     --border-radius-round: 999px;
     --border-radius-surface: 18px;
+    --border-radius-tag: 6px;
 
     /* The spaces between things, named for what they separate rather than for a size,
        so a step in the scale reads as a relationship. A screen's own tuned poster values
@@ -93,8 +96,9 @@
        text and a card's heading, caption the uppercase label over a list, detail the
        quiet line under a name, display the page title in the display face – full on a
        desktop, small on a phone, mini in the condensed bar – entry a menu or outline
-       entry and a button's label, footnote an aside or the eyebrow over a title, name
-       the profile control's name, tab the tab strip's labels, title a plain heading,
+       entry and a button's label, footnote an aside or the eyebrow over a title, heading
+       the line over one piece of content – a dialog's question, who wrote an entry –
+       name the profile control's name, tab the tab strip's labels, title a plain heading,
        and value the strong line one fact is stated in – a value lifted out of a card,
        a contact's name, an address to reach them at. */
     --font-size-body: calc(17rem / 17);
@@ -105,6 +109,7 @@
     --font-size-display-small: calc(30rem / 17);
     --font-size-entry: calc(14rem / 17);
     --font-size-footnote: calc(13rem / 17);
+    --font-size-heading: calc(19rem / 17);
     --font-size-name: calc(13.5rem / 17);
     --font-size-tab: calc(10.5rem / 17);
     --font-size-title: calc(28rem / 17);

@@ -11,13 +11,20 @@ import { FolderIcon } from "./set/FolderIcon"
 import { GenderFemaleIcon } from "./set/GenderFemaleIcon"
 import { GenderMaleIcon } from "./set/GenderMaleIcon"
 import { GenderOtherIcon } from "./set/GenderOtherIcon"
+import { HandIcon } from "./set/HandIcon"
 import { HomeIcon } from "./set/HomeIcon"
 import { IdCardIcon } from "./set/IdCardIcon"
 import { MailIcon } from "./set/MailIcon"
 import { MoreIcon } from "./set/MoreIcon"
 import { ParticipantsIcon } from "./set/ParticipantsIcon"
+import { PencilIcon } from "./set/PencilIcon"
+import { PersonIcon } from "./set/PersonIcon"
+import { PersonPlusIcon } from "./set/PersonPlusIcon"
 import { PhoneIcon } from "./set/PhoneIcon"
+import { PictureIcon } from "./set/PictureIcon"
+import { PlusIcon } from "./set/PlusIcon"
 import { SearchIcon } from "./set/SearchIcon"
+import { SendIcon } from "./set/SendIcon"
 
 const meta: Meta = {
   title: "Foundations/Icons",
@@ -35,13 +42,20 @@ const icons: readonly (readonly [string, (props: IconProps) => ReactElement])[] 
   ["Gender female", GenderFemaleIcon],
   ["Gender male", GenderMaleIcon],
   ["Gender other", GenderOtherIcon],
+  ["Hand", HandIcon],
   ["Home", HomeIcon],
   ["Id card", IdCardIcon],
   ["Mail", MailIcon],
   ["More", MoreIcon],
   ["Participants", ParticipantsIcon],
+  ["Pencil", PencilIcon],
+  ["Person", PersonIcon],
+  ["Person plus", PersonPlusIcon],
   ["Phone", PhoneIcon],
+  ["Picture", PictureIcon],
+  ["Plus", PlusIcon],
   ["Search", SearchIcon],
+  ["Send", SendIcon],
 ]
 
 /**

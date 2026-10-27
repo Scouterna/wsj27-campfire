@@ -1,0 +1,52 @@
+/* The gallery: pictures as tiles that open a preview – one in its own shape, several as
+   squares in a wrapping row. */
+
+@layer component {
+  .gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-stack);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .gallery-item {
+    display: contents;
+  }
+
+  /* A square, whatever the picture's own shape, so a set lines up. A lone picture brings
+     its own shape and width instead. */
+  .gallery-tile {
+    aspect-ratio: 1;
+    background: var(--color-divider);
+    border: none;
+    border-radius: var(--border-radius-control);
+    cursor: zoom-in;
+    display: grid;
+    max-width: 100%;
+    overflow: hidden;
+    padding: 0;
+    place-items: center;
+    width: 88px;
+  }
+
+  .gallery-tile:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: 2px;
+  }
+
+  .gallery-image {
+    display: block;
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+  }
+
+  .gallery-placeholder {
+    color: var(--color-ink-tertiary);
+    font-size: var(--font-size-footnote);
+    padding: var(--spacing-stack);
+    text-align: center;
+  }
+}
