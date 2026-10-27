@@ -48,8 +48,9 @@ export function signBackInUrl(returnTo: string): string {
 }
 
 /**
- * Leaves for the sign-out round trip – out of this session and of ScoutID's. Landing
- * back on the sign-in screen is the confirmation that it worked; sign-out is a full-page
+ * Leaves for the sign-out round trip – out of this session, and out of ScoutID's when
+ * the session came through ScoutID rather than from an impersonation. Landing back on
+ * the sign-in screen is the confirmation that it worked; sign-out is a full-page
  * navigation through the auth service, so there is no path where the screen shows
  * signed-out while the session lives on.
  * @param returnTo The absolute URL to land on afterwards.
