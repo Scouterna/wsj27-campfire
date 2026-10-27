@@ -80,6 +80,12 @@ export const closedMessagesKey = "campfire.messages.closed"
  * The contact note goes to both roles, because both write to the addresses it is
  * about. It says what was wrong rather than how the reading works, because a leader
  * cannot act on which source we prefer.
+ *
+ * The cases note comes once per role, as the welcome does, because who sees a case is
+ * said differently to each – the management team chooses among its whole team, a part
+ * of it, or only the writer, and a leader between the unit's leaders and only the
+ * writer. It shows for a week rather than the usual five days, because it introduces a
+ * whole section.
  */
 export const messages: readonly Message[] = [
   {
@@ -122,6 +128,41 @@ export const messages: readonly Message[] = [
     ],
     start: new Date("2026-09-20T21:00:00+02:00"),
     title: "Vi har rättat kontaktuppgifterna",
+  },
+  {
+    audience: ["cmt"],
+    date: "2026-10-27",
+    end: new Date("2026-11-03T01:00:00+01:00"),
+    id: "cases-cmt-2026-10",
+    kind: "news",
+    paragraphs: [
+      "När något behöver följas upp kring en deltagare eller en avdelning kan du nu skapa " +
+        "ett ärende under Ärenden, eller direkt från personens sida. Skriv anteckningar " +
+        "allteftersom, bifoga bilder vid behov och avsluta ärendet när det är klart.",
+      "Du väljer vem som ser ärendet – hela CMT, bara CMT utan möjlighet att dela, eller " +
+        "bara du. Hälsoteamet har dessutom egna hälsoärenden. Ärenden som behöver någons " +
+        "uppmärksamhet hamnar under Väntar, och de du är ansvarig för syns på startsidan.",
+    ],
+    start: new Date("2026-10-27T01:00:00+01:00"),
+    title: "Nu finns ärenden i Campfire",
+  },
+  {
+    audience: ["leader"],
+    date: "2026-10-27",
+    end: new Date("2026-11-03T01:00:00+01:00"),
+    id: "cases-leader-2026-10",
+    kind: "news",
+    paragraphs: [
+      "När något behöver följas upp i avdelningen – sjukdom, hemlängtan eller något " +
+        "som gäller hela avdelningen – kan du nu skapa ett ärende under " +
+        "Ärenden eller direkt från deltagarens sida. Skriv anteckningar allteftersom och " +
+        "avsluta ärendet när det är klart.",
+      "Alla ledare i avdelningen ser ärendet, om du inte väljer att bara du ska se det. " +
+        "Ärenden som behöver någons uppmärksamhet hamnar under Väntar, och de du är " +
+        "ansvarig för syns på startsidan.",
+    ],
+    start: new Date("2026-10-27T01:00:00+01:00"),
+    title: "Nu finns ärenden för din avdelning",
   },
 ]
 
