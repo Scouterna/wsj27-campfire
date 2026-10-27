@@ -55,9 +55,9 @@ export function authRoutes(dependencies: AuthDependencies): Hono {
     "/.well-known/openid-configuration",
     "/static/refresh.js",
   ]) {
-    refuseOtherMethods(router, path, "GET")
+    refuseOtherMethods(router, path, ["GET"])
   }
-  refuseOtherMethods(router, "/token", "POST")
+  refuseOtherMethods(router, "/token", ["POST"])
 
   return router
 }
