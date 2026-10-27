@@ -13,7 +13,7 @@
 	# Everything the back-end owns goes to the mock: the auth service, the project API,
 	# and under /__mock__ its ScoutID stand-in and control surface. Anything not listed
 	# here is the web application's. handle rather than handle_path, because the mock
-	# mounts both services at these full paths – the prefixes the deployed ingress
+	# mounts every service at these full paths – the prefixes the deployed ingress
 	# serves.
 	#
 	# Each matcher names the bare prefix beside the subtree, because `/api/auth/*`
