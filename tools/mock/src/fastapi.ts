@@ -137,21 +137,31 @@ export const noCache: MiddlewareHandler = async (context, next) => {
   context.res.headers.set("Expires", "0")
 }
 
-// The methods a path answers with a 405 when it is declared for another.
+// The methods a path answers with a 405 when it is declared for others.
 const methods = ["DELETE", "GET", "PATCH", "POST", "PUT"] as const
 
 /**
- * Answers a path's other methods the way Starlette does – 405, with the one it allows.
+ * A method a route can be declared for.
+ */
+export type Method = (typeof methods)[number]
+
+/**
+ * Answers a path's other methods the way Starlette does – 405, allowing the first route that
+ * matched the path.
  * @param router The router the path is declared on.
  * @param path The path.
- * @param allowed The method the path is declared for.
+ * @param allowed The methods the path is declared for, in declaration order.
  */
-export function refuseOtherMethods(router: Hono, path: string, allowed: "GET" | "POST"): void {
+export function refuseOtherMethods(
+  router: Hono,
+  path: string,
+  allowed: readonly [Method, ...Method[]],
+): void {
   router.on(
-    methods.filter((method) => method !== allowed),
+    methods.filter((method) => !allowed.includes(method)),
     path,
     (context) => {
-      context.header("Allow", allowed)
+      context.header("Allow", allowed[0])
       return context.json({ detail: "Method Not Allowed" }, 405)
     },
   )
