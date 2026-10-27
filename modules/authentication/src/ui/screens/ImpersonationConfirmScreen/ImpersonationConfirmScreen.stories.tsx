@@ -31,3 +31,7 @@ export const Management: Story = {
 export const NobodyToBe: Story = {
   args: { memberNo: "1400001" },
 }
+
+export const Failed: Story = {
+  parameters: { api: { offered: true, state: "error" } satisfies ApiParameters },
+}

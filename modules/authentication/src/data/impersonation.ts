@@ -40,10 +40,11 @@ const targetsStaleTime = 60 * 60 * 1000
  * never knows its environment, so it asks the service: the route answers a GET with 405
  * where it exists and with 404 where it is switched off, and only the 405 is an offer.
  *
- * Any other refusal settles as no offer, while a request that reached nothing, or an
- * answer that was not the service's – a bare dev server's own page – throws, so it is
- * never remembered as an answer. A 401 is rethrown for the session to act on. The answer
- * changes only with a deploy, so it is asked once per cache rather than on every mount.
+ * Any other refusal by the service settles as no offer, while a server error, a request
+ * that reached nothing, or an answer that was not the service's – a bare dev server's own
+ * page – throws, so it is never remembered as an answer and the next load asks again. A
+ * 401 is rethrown for the session to act on. The answer changes only with a deploy, so it
+ * is asked once per cache rather than on every mount.
  * @returns Options for `useQuery`, `useSuspenseQuery`, or the client's `query`.
  */
 export function fetchImpersonationOfferQuery(): UseQueryOptions<
@@ -57,7 +58,7 @@ export function fetchImpersonationOfferQuery(): UseQueryOptions<
       try {
         await fetch<unknown>(address)
       } catch (error) {
-        if (error instanceof HttpError && error.status !== 401) {
+        if (error instanceof HttpError && error.status !== 401 && error.status < 500) {
           return error.status === 405
         }
         throw error
