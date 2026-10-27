@@ -11,6 +11,17 @@
 #   prod/Caddyfile        this one – `pnpm start:prod`, the built image against the real back-end
 #   prod/image.Caddyfile  inside the image, wherever it is deployed
 :8000 {
+	# The web waits for the back-end. A session signed in before the auth service has its
+	# roles carries none, and reads as a participant's until its token is next refreshed,
+	# so until the auth service's health check says its roles are loaded the page answers
+	# 503 and nobody can start a sign-in. The roles arrive only from the project API,
+	# which answers only once its database and Scoutnet are read, so this one check waits
+	# for every service.
+	handle_errors 503 {
+		header Content-Type "text/html; charset=utf-8"
+		respond `<!doctype html><meta http-equiv="refresh" content="3"><title>Campfire is starting</title><p>Campfire is starting – the back-end services are not ready yet. This page reloads itself.</p>` 503
+	}
+
 	# The prefix is stripped before proxying, because the real service serves its endpoints
 	# at its root, and the deployed ingress strips it too. The matcher names the bare prefix
 	# beside the subtree, because the ingress answers both – so `/api/auth` reaches the
@@ -33,6 +44,11 @@
 	# The image runs its own Caddy on 8080 (prod/image.Caddyfile), which is what
 	# serves the built files and falls back to index.html for a deep link.
 	handle {
-		reverse_proxy web:8080
+		reverse_proxy web:8080 {
+			health_upstream auth:8000
+			health_uri /
+			health_body `"stale":false`
+			health_interval 2s
+		}
 	}
 }

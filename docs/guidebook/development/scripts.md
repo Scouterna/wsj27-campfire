@@ -102,6 +102,6 @@ Each port is strict, so a server that cannot have its port fails instead of quie
 
 The shell scripts live in `scripts/`, grouped by what they start or build. The Structurizr runner and the version rule behind `pnpm version:next` are Node rather than shell, so they run on any machine, and a missing Docker fails the Structurizr runner with a message that names it.
 
-The start scripts share one set of helpers that make them trustworthy: a port is freed before it is taken, a server is reported only once it actually answers rather than once its process exists, and everything a script started stops together on Ctrl+C or when any one of them dies. Waiting comes in three kinds – any answer, a 2xx, and any status the back-end produced itself rather than a proxy's 502 – because a stack reported as up before it is up costs more than the wait.
+The start scripts share one set of helpers that make them trustworthy: a port is freed before it is taken, a server is reported only once it actually answers rather than once its process exists, and everything a script started stops together on Ctrl+C or when any one of them dies. Waiting comes in several kinds – any answer, a 2xx, any status the back-end produced itself rather than a proxy's 502, and an answer that says the service is ready – because a stack reported as up before it is up costs more than the wait.
 
 Shell scripts are the one kind of source nothing formats. Prettier has no parser for them and no shell formatter is in the toolchain, so they are held to review instead.

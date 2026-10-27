@@ -13,8 +13,9 @@
 # stays real, because it exists to prove the artifact as deployed.
 #
 # Whatever holds port 8000 is stopped and named. The stack is reported as up only once
-# the web application and the back-end services answer through the ingress, and Ctrl+C
-# takes the containers down rather than leaving them stopped.
+# the web application and the back-end services answer through the ingress and the auth
+# service has the roles it puts in a session, and Ctrl+C takes the containers down rather
+# than leaving them stopped.
 #
 # The credentials live in the environment's own gitignored .env, which you write and this
 # never overwrites or prints. On a machine that has none, the first run says what to write.
@@ -159,20 +160,24 @@ trap 'exit 143' TERM
 docker compose up --build --detach
 
 wait_for ingress http://localhost:8000/ 60
-# In dev the web container installs the workspace before it serves, which is a while on
-# the first run; in prod the image is already built. Only a 2xx through the ingress
-# means the application is really there.
-wait_for_ok "the web through the ingress" http://localhost:8000/ 600
 
-# The auth service boots on its own schedule and answers 401 without a session. Without
-# this wait, prod reports ready the moment the image serves, and the first sign-in meets
-# the ingress's 502.
+# The auth service boots on its own schedule and answers 401 without a session.
 wait_for_backend "the auth service through the ingress" http://localhost:8000/api/auth/user 120
 
 # The project API answers its health check without authentication, so any status it
 # produced means it is up – it fetches Scoutnet data during startup, which takes a
 # while on a cold cache.
 wait_for_backend "the project API through the ingress" http://localhost:8000/api/project/ 300
+
+# The auth service puts a session's roles in its token from a map it fetches from the
+# participants service, retrying every half minute until the first fetch lands. The
+# ingress holds the web back until then, so this is also the wait for the page to open.
+wait_for_text "the auth service's roles" http://localhost:8000/api/auth/ '"stale":false' 120
+
+# In dev the web container installs the workspace before it serves, which is a while on
+# the first run; in prod the image is already built. Only a 2xx through the ingress
+# means the application is really there.
+wait_for_ok "the web through the ingress" http://localhost:8000/ 600
 
 echo
 echo "Campfire $environment: http://localhost:8000"

@@ -5,9 +5,9 @@
 #
 # `pnpm start:dev` generates the signing key the auth service reads and brings this up;
 # the credentials in the .env beside this file are yours to write. The prod environment
-# has its own copy of this file, differing in what serves the web and in the fake
-# sign-in only dev offers – duplicated on purpose, so each environment can be read on
-# its own.
+# has its own copy of this file, differing in what serves the web, in the branch each
+# back-end service is built from, and in the fake sign-in only dev offers – duplicated
+# on purpose, so each environment can be read on its own.
 services:
   ingress:
     image: caddy:2-alpine
@@ -19,14 +19,15 @@ services:
     # its back-end is up, and the start script waits for a status the back-end itself
     # produced before it reports the environment ready.
 
-  # The real auth service, built from its repository's main – the one exception to
-  # pinning every dependency (ADR 005). The back-end services are part of this system
-  # rather than dependencies held at arm's length: what they ship is what the application
-  # is meant to work against, so an environment takes whatever main holds. The stack comes
-  # up with `--build`, so the ref is resolved fresh every start.
+  # The real auth service, built from its repository's dev branch – the one the deployed
+  # dev site runs, and the one exception to pinning every dependency (ADR 005). The
+  # back-end services are part of this system rather than dependencies held at arm's
+  # length: what they ship is what the application is meant to work against, so this
+  # environment reads what the dev site reads before it reaches main. The stack comes up
+  # with `--build`, so the ref is resolved fresh every start.
   auth:
     build:
-      context: https://github.com/Scouterna/wsj27-auth-api.git#main
+      context: https://github.com/Scouterna/wsj27-auth-api.git#dev
     # The credentials come from the gitignored .env beside this file, which you write and
     # nothing overwrites: OIDC_SERVER, OIDC_CLIENT_ID, and OIDC_CLIENT_SECRET. Everything
     # else is the same on every machine, so it is here where it can be read rather than in
@@ -56,14 +57,12 @@ services:
       PROJECT_API_URL: http://ingress:8001
       SERVICE_CLIENT_ROLES: '{"wsj27-auth": ["wsj27:bulkread"]}'
 
-  # The real project API, built fresh like the auth service above, but from its
-  # repository's dev branch – the one the deployed dev site runs, so this environment
-  # reads what the dev site reads before it reaches main. It verifies a token by
-  # fetching the JWKS at the auth service's public URL,
-  # http://localhost:8000/api/auth/certs – an address that reaches the front door only
-  # from inside the ingress's own network namespace, which is why this container shares
-  # it instead of getting its own. The ingress reaches it as localhost:8001, and the auth
-  # service as ingress:8001.
+  # The real project API, built fresh from its repository's dev branch like the auth
+  # service above. It verifies a token by fetching the JWKS at the auth service's public
+  # URL, http://localhost:8000/api/auth/certs – an address that reaches the front door
+  # only from inside the ingress's own network namespace, which is why this container
+  # shares it instead of getting its own. The ingress reaches it as localhost:8001, and
+  # the auth service as ingress:8001.
   project:
     build:
       context: https://github.com/Scouterna/wsj27-project-api.git#dev
@@ -75,6 +74,9 @@ services:
       # default builds the discovery URL from the incoming request and lands outside
       # /api/auth.
       OIDC_SERVER_PATH: http://localhost:8000/api/auth/
+      # Where the ingress serves the service, whose prefix it strips, so the docs page asks
+      # for its schema there rather than at the origin's root, where the web answers.
+      ROOT_PATH: /api/project
       # The Scoutnet credentials live in the gitignored .env beside this file, with
       # the Keycloak client's. Without them the service runs and serves nobody.
       SCOUTNET_PROJECTS: "${SCOUTNET_PROJECTS:-[]}"
@@ -83,7 +85,15 @@ services:
       # file is gitignored – real people – and the service logs a warning and keeps
       # the plain role when the mount holds nothing.
       CMT_ROLES_FILE: /app/cmt-roles.csv
-      # Without POSTGRES_DSN the cases feature stays off, and everything else works.
+      # The cases service is only mounted when a database is named, so the dev
+      # environment brings its own below. Reached by its service name, because this
+      # container shares the ingress's namespace and so the default network's DNS.
+      POSTGRES_DSN: postgresql://wsj27:wsj27@db:5432/wsj27
+    # Healthy rather than started, because the service opens its connection pool as it
+    # starts and a database still initializing would take the cases routes down with it.
+    depends_on:
+      db:
+        condition: service_healthy
     volumes:
       # The fetched Scoutnet data survives a restart, so the service can start from
       # its disk cache when Scoutnet is slow or unreachable.
@@ -91,6 +101,26 @@ services:
       # On a machine without the roster Docker mounts an empty directory in its
       # place, which the service reads as the file being absent.
       - ./cmt-roles.csv:/app/cmt-roles.csv:ro
+
+  # The database the cases service keeps its cases and notes in, as the project API's
+  # own compose file runs it. The service creates its tables on start. No port is
+  # published, because nothing outside the stack needs it, and 5432 is often taken.
+  db:
+    image: docker.io/library/postgres:17-alpine
+    environment:
+      POSTGRES_USER: wsj27
+      POSTGRES_PASSWORD: wsj27
+      POSTGRES_DB: wsj27
+    volumes:
+      # Cases survive a restart of the stack, as they would on the dev site.
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      # Over TCP, because on a fresh volume the image first runs a socket-only server
+      # to create the database, and a socket probe would call that one ready.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U wsj27 -d wsj27"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
 
   # The web application's dev server, hot reload included: the repository is
   # bind-mounted, so an edit on the host reaches Vite in the container and HMR flows
@@ -126,6 +156,7 @@ services:
       - web_mock_modules:/campfire/tools/mock/node_modules
 
 volumes:
+  db_data:
   project_persist:
   web_root_modules:
   web_app_modules:
