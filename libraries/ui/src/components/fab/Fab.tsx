@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import type { ReactElement } from "react"
 
-import type { LinkTarget } from "../../routing/routes"
+import { linkPropsOf, type LinkTarget } from "../../routing/routes"
 
 import "./Fab.css"
 
@@ -52,12 +52,7 @@ export type FabProps = {
 export function Fab(props: FabProps): ReactElement {
   if (props.link !== undefined) {
     return (
-      <Link
-        aria-label={props.label}
-        className="fab"
-        to={props.link.to}
-        params={props.link.params ?? {}}
-      >
+      <Link aria-label={props.label} className="fab" {...linkPropsOf(props.link)}>
         <span aria-hidden="true" className="fab-icon">
           {props.icon}
         </span>

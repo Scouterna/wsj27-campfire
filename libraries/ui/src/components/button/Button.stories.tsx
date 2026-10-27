@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
 
+import { PictureIcon } from "../../foundations/icons/set/PictureIcon"
 import { ColumnDecorator } from "../../storybook/ColumnDecorator"
 import { Button } from "./Button"
 
@@ -27,4 +28,20 @@ export const Default: Story = {
  */
 export const Disabled: Story = {
   args: { disabled: true, label: "Signing in…" },
+}
+
+export const Secondary: Story = {
+  args: { label: "Avsluta", variant: "secondary" },
+}
+
+export const SecondaryDisabled: Story = {
+  args: { disabled: true, label: "Avsluta", variant: "secondary" },
+}
+
+export const Plain: Story = {
+  args: { label: "Avbryt", variant: "plain" },
+}
+
+export const PlainWithIcon: Story = {
+  args: { icon: <PictureIcon size={18} />, label: "Bifoga bild", variant: "plain" },
 }

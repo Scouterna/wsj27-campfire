@@ -10,6 +10,7 @@
     font-family: inherit;
     font-size: var(--font-size-entry);
     font-weight: var(--font-weight-strong);
+    gap: 7px;
     height: 44px;
     justify-content: center;
     padding: 0 var(--spacing-card);
@@ -43,8 +44,89 @@
     opacity: 0.45;
   }
 
+  /* The chevron of a button that opens a panel under it, pointing down while the panel is
+     shut and up while it is open. */
+  .button-chevron {
+    display: flex;
+    transform: rotate(-90deg);
+    transition: transform 150ms ease;
+  }
+
+  .button[aria-expanded="true"] .button-chevron {
+    transform: rotate(90deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .button-chevron {
+      transition: none;
+    }
+  }
+
   .button:focus-visible {
     outline: 2px solid var(--color-theme-ink);
     outline-offset: 2px;
+  }
+
+  /* The secondary pill wears the menu trigger's glass, so beside it the two read as one
+     group of controls floating over the page. Two classes, so it outranks the anchor
+     rule and the primary's hover and press steps. */
+  .button.button-secondary {
+    backdrop-filter: blur(22px) saturate(1.7);
+    background: var(--color-glass);
+    color: var(--color-theme-ink);
+    flex: none;
+    padding: 0 18px;
+    white-space: nowrap;
+    width: auto;
+  }
+
+  @media (hover: hover) {
+    .button.button-secondary:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--color-theme-ink) 8%, var(--color-sheet));
+    }
+  }
+
+  .button.button-secondary:active:not(:disabled) {
+    background: color-mix(in srgb, var(--color-theme-ink) 14%, var(--color-sheet));
+  }
+
+  /* On a card the glass would be white on white, so the secondary pill takes the theme's
+     wash there instead, as the select beside it does. Seen at rest, its edge is what lines
+     up with the card's other content, and a hover only deepens what is already there. */
+  .card .button.button-secondary {
+    backdrop-filter: none;
+    background: var(--color-theme-wash);
+  }
+
+  @media (hover: hover) {
+    .card .button.button-secondary:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--color-theme-ink) 18%, var(--color-sheet));
+    }
+  }
+
+  .card .button.button-secondary:active:not(:disabled) {
+    background: color-mix(in srgb, var(--color-theme-ink) 24%, var(--color-sheet));
+  }
+
+  /* The plain pill: no fill until it is touched, so it stands back from the primary
+     beside it. Its padding and radius stay, so the focus ring and the press are round
+     like every other control's. */
+  .button.button-plain {
+    background: none;
+    color: var(--color-theme-ink);
+    flex: none;
+    padding: 0 var(--spacing-container);
+    white-space: nowrap;
+    width: auto;
+  }
+
+  @media (hover: hover) {
+    .button.button-plain:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--color-theme-ink) 5%, transparent);
+    }
+  }
+
+  .button.button-plain:active:not(:disabled) {
+    background: color-mix(in srgb, var(--color-theme-ink) 11%, transparent);
   }
 }

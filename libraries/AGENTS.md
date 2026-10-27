@@ -48,8 +48,8 @@ libraries/ui/
     ├── assets.d.ts    a .css or .svg import and a glob import are Vite's business, told to TypeScript
     ├── behavior/      the view-transition direction contract
     ├── components/    one directory per component
-    ├── foundations/   the icons, the themes, the reveals, and the units' names and glyphs
-    ├── routing/       RouteRegistry, Address, matchScreen, mountRoutes, and the root route
+    ├── foundations/   the icons, the themes, the reveals, the moments as a row and a timeline write them, and the units' names and glyphs
+    ├── routing/       RouteRegistry, Address, matchScreen, mountRoutes, the root route, and the section lookup
     ├── storybook/     the decorators, stories.css, and Introduction.mdx
     └── widgets/       WidgetRegistry, WidgetFrom, WidgetsProvider, and Widget
 ```

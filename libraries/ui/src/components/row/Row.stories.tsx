@@ -1,7 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import type { ReactElement } from "react"
+import { fn } from "storybook/test"
 
+import { HandIcon } from "../../foundations/icons/set/HandIcon"
 import { Card } from "../card/Card"
+import { IconButton } from "../iconbutton/IconButton"
 import { Row } from "./Row"
 
 const meta: Meta<typeof Row> = {
@@ -76,6 +79,27 @@ export const WithTrailing: Story = {
         <Row leading={tile("ED")} link={{ to: "/" }} trailing={<small>14 år</small>}>
           <strong>Ester Dahl</strong>
           <small>Deltagare · Mockåsens scoutkår · Kungsbacka</small>
+        </Row>
+      </Card>
+    </div>
+  ),
+}
+
+/**
+ * A control at the row's end, pressed on its own – the rest of the row still opens it.
+ */
+export const WithAction: Story = {
+  render: (): ReactElement => (
+    <div className="story-column">
+      <Card>
+        <Row
+          action={<IconButton icon={<HandIcon size={18} />} label="Jag tar det" onPress={fn()} />}
+          leading={tile("ED")}
+          link={{ to: "/" }}
+          trailing={<small>i går</small>}
+        >
+          <strong>Allergisk reaktion</strong>
+          <small>Ester Dahl · Avd 1</small>
         </Row>
       </Card>
     </div>

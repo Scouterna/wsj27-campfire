@@ -9,7 +9,7 @@ import {
 } from "react"
 
 import { MoreIcon } from "../../foundations/icons/set/MoreIcon"
-import type { LinkTarget } from "../../routing/routes"
+import { linkPropsOf, type LinkTarget } from "../../routing/routes"
 
 import "./OverflowMenu.css"
 
@@ -469,8 +469,7 @@ function MenuEntry(props: MenuEntryProps): ReactElement {
         className="overflow-item"
         role="menuitem"
         tabIndex={-1}
-        to={item.link.to}
-        params={item.link.params ?? {}}
+        {...linkPropsOf(item.link)}
         onClick={afterNavigating(props.onChoose)}
       >
         {content}

@@ -56,6 +56,19 @@ export interface LinkTarget {
 }
 
 /**
+ * A link target as the router's link takes it, every part filled, so a component passes
+ * one object rather than each part with its default.
+ * @param target Where the link leads.
+ * @returns The address and its parameters.
+ */
+export function linkPropsOf(target: LinkTarget): {
+  readonly params: Readonly<Record<string, string>>
+  readonly to: AppPath
+} {
+  return { params: target.params ?? {}, to: target.to }
+}
+
+/**
  * One screen: the component that answers at an address, and what the chrome needs to
  * place it – which section lights up, and where back leads. What the screen is called,
  * and the actions its bar carries, are the screen's own to declare with `PageTitle` and
