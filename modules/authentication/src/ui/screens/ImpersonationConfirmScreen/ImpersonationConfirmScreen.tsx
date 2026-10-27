@@ -57,7 +57,12 @@ export interface ImpersonationConfirmScreenProps {
 export function ImpersonationConfirmScreen(props: ImpersonationConfirmScreenProps): ReactElement {
   const isUnitShown = useIsRevealed(unitsReveal.id)
   const isOffered = useImpersonationOffer()
-  const { isPending: isListPending, targets } = useImpersonationTargets(isOffered === true)
+  const {
+    error,
+    isPending: isListPending,
+    refetch,
+    targets,
+  } = useImpersonationTargets(isOffered === true)
   const { failure, impersonate, isPending } = useImpersonate()
   const wayBack = useWayBack()
 
@@ -65,12 +70,22 @@ export function ImpersonationConfirmScreen(props: ImpersonationConfirmScreenProp
 
   if (target === undefined) {
     const isWaiting = isOffered === undefined || isListPending
+    // A list that could not be read says nothing about the person, so it is not worded as
+    // a refusal of them.
+    const isFailed = !isWaiting && error !== null
+    let text = "Den här personen går inte att visa Campfire som."
+    if (isWaiting) {
+      text = "Hämtar …"
+    } else if (isFailed) {
+      text = "Listan kunde inte hämtas."
+    }
     return (
       <>
         <PageTitle title="Visa som någon annan" />
         <p className="impersonation-confirm-screen-text" role="status">
-          {isWaiting ? "Hämtar …" : "Den här personen går inte att visa Campfire som."}
+          {text}
         </p>
+        {isFailed && <Button label="Försök igen" onPress={refetch} variant="plain" />}
         {!isWaiting && (
           <Button
             label="Tillbaka till listan"

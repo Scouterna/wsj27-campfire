@@ -48,8 +48,7 @@ function networkAnswers(queues: Readonly<Record<string, readonly Response[]>>): 
 }
 
 /**
- * An answer with no body, the way FastAPI's refusals arrive as far as the client reads
- * them.
+ * A refusal as FastAPI sends one – a status and a detail body the client never reads.
  */
 function status(code: number): Response {
   return Response.json({ detail: "refused" }, { status: code })
@@ -124,6 +123,17 @@ describe("asking whether impersonation is offered", () => {
       HttpError,
     )
   })
+
+  it.each([502, 503])(
+    "throws rather than answers when the server fails with %i, so no answer is remembered",
+    async (code) => {
+      networkAnswers({ [offer]: [status(code)] })
+
+      await expect(testClient().query(fetchImpersonationOfferQuery())).rejects.toBeInstanceOf(
+        HttpError,
+      )
+    },
+  )
 
   it("throws rather than answers when nothing answered, so no answer is remembered", async () => {
     networkAnswers({})
