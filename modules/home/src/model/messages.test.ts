@@ -12,7 +12,7 @@ import {
 const leader: readonly Role[] = [{ kind: "leader", unitNumber: 1 }]
 const management: readonly Role[] = [{ kind: "cmt" }, { kind: "health" }]
 
-// A moment every shipped message is showing at, and one every fixture below is.
+// A moment every message shipped at launch is showing at, and one every fixture below is.
 const launch = new Date("2026-09-20T21:00:00+02:00")
 const during = new Date("2026-09-02T12:00:00+02:00")
 
@@ -205,5 +205,27 @@ describe("reading the closed ids from storage", () => {
 
   it("keeps only the strings in a mixed array", () => {
     expect([...parseClosedMessages('["a", 1, null, {"id":"x"}, "b"]')]).toEqual(["a", "b"])
+  })
+})
+
+describe("the cases notes", () => {
+  const first = new Date("2026-10-27T01:00:00+01:00")
+  const last = new Date("2026-11-03T00:59:59+01:00")
+  const after = new Date("2026-11-03T01:00:00+01:00")
+  const ids = (roles: readonly Role[], at: Date): readonly string[] =>
+    unreadMessages(messages, roles, new Set(), at)
+      .filter((message) => message.id.startsWith("cases-"))
+      .map((message) => message.id)
+
+  it("go to each role for a week from the release, and to nobody after", () => {
+    expect(ids(leader, first)).toEqual(["cases-leader-2026-10"])
+    expect(ids(management, first)).toEqual(["cases-cmt-2026-10"])
+    expect(ids(leader, last)).toEqual(["cases-leader-2026-10"])
+    expect(ids(leader, after)).toEqual([])
+    expect(ids(management, after)).toEqual([])
+  })
+
+  it("show neither a minute before the release", () => {
+    expect(ids(leader, new Date("2026-10-27T00:59:00+01:00"))).toEqual([])
   })
 })
