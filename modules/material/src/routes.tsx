@@ -2,6 +2,7 @@ import type { Address, Routes } from "@scouterna/wsj27-campfire-ui"
 
 import { FolderRoute } from "./ui/screens/material/FolderRoute"
 import { MaterialScreen } from "./ui/screens/material/MaterialScreen"
+import { SocialScreen } from "./ui/screens/social/SocialScreen"
 
 declare module "@scouterna/wsj27-campfire-ui" {
   interface RouteRegistry {
@@ -14,6 +15,10 @@ declare module "@scouterna/wsj27-campfire-ui" {
      * One folder of it, by Drive id.
      */
     "/material/$folder": Address<"material">
+    /**
+     * A photo in one of the contingent's frames, for social media.
+     */
+    "/social": Address<"material">
   }
 }
 
@@ -30,6 +35,11 @@ export const materialRoutes = {
   },
   "/material/$folder": {
     Component: FolderRoute,
+    parent: "/material",
+    tab: "material",
+  },
+  "/social": {
+    Component: SocialScreen,
     parent: "/material",
     tab: "material",
   },

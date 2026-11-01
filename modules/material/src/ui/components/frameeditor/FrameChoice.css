@@ -1,0 +1,86 @@
+/* The frames to choose from, each drawn as the image it would make. */
+
+@layer component {
+  /* One row of every option, each an equal share of the width, so all of them show at
+     once on a phone without scrolling. */
+  .frame-choice {
+    display: grid;
+    gap: var(--spacing-group);
+    grid-auto-columns: calc(
+      (100% - (var(--frame-count) - 1) * var(--spacing-group)) / var(--frame-count)
+    );
+    grid-auto-flow: column;
+  }
+
+  .frame-thumbnail {
+    background: none;
+    border: none;
+    color: var(--color-ink-secondary);
+    cursor: pointer;
+    display: grid;
+    font: inherit;
+    font-size: var(--font-size-caption);
+    gap: 0.4rem;
+    padding: 0;
+    text-align: center;
+  }
+
+  /* A set line height, so the column beside the picture knows how much of each frame's
+     share the name takes. */
+  .frame-thumbnail-name {
+    line-height: 1.25;
+  }
+
+  /* The sheet the frame is drawn on, which shows where there is no photo yet, and the ring
+     around the one in use. */
+  .frame-thumbnail-picture {
+    background: var(--color-sheet);
+    border-radius: var(--border-radius-control);
+    display: block;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+
+  /* Drawn at the finished image's own size and shown small, keeping its 4:5. */
+  .frame-thumbnail-canvas {
+    aspect-ratio: 4 / 5;
+    border-radius: var(--border-radius-control);
+    display: block;
+    height: auto;
+    width: 100%;
+  }
+
+  /* The one in use, ringed in the theme's ink. */
+  .frame-thumbnail[aria-pressed="true"] {
+    color: var(--color-theme-ink);
+    font-weight: var(--font-weight-strong);
+  }
+
+  .frame-thumbnail[aria-pressed="true"] .frame-thumbnail-picture {
+    outline-color: var(--color-theme-ink);
+  }
+
+  /* Shown for what is coming, but faint until there is a photo to put in it: the frame
+     barely there on a sheet only a little dimmed, and its name quiet but readable. */
+  .frame-thumbnail:disabled {
+    color: var(--color-ink-tertiary);
+    cursor: default;
+  }
+
+  .frame-thumbnail:disabled .frame-thumbnail-picture {
+    background: color-mix(in srgb, var(--color-sheet) 98%, var(--color-ink));
+    outline-color: transparent;
+  }
+
+  .frame-thumbnail:disabled .frame-thumbnail-canvas {
+    opacity: 0.2;
+  }
+
+  .frame-thumbnail:focus-visible {
+    outline: none;
+  }
+
+  .frame-thumbnail:focus-visible .frame-thumbnail-picture {
+    outline: 2px solid var(--color-theme-ink);
+  }
+}

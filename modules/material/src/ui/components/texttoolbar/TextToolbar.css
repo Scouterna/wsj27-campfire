@@ -1,0 +1,137 @@
+/* The tools for the text on the picture. */
+
+@layer component {
+  /* The tools over the picture: adding a text, and sizing, turning, and coloring the
+     selected one, as one row of the same quiet buttons, grouped by what they change. A
+     row that wraps on a phone keeps to the far edge, under the tools it continues. */
+  .text-toolbar {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-group);
+    justify-content: flex-end;
+  }
+
+  .text-tool-group {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .text-tool {
+    align-items: center;
+    background: var(--color-sheet);
+    border: none;
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    cursor: pointer;
+    display: inline-flex;
+    font: inherit;
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-strong);
+    height: 40px;
+    justify-content: center;
+    min-width: 40px;
+    padding: 0 0.6rem;
+  }
+
+  /* Adding a text leads, and the tools for the selected one keep to the far edge. */
+  .text-tool-add {
+    margin-right: auto;
+    padding: 0 var(--spacing-group);
+  }
+
+  .text-tool:disabled {
+    cursor: default;
+    opacity: 0.45;
+  }
+
+  .text-tool:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: 2px;
+  }
+
+  .text-tool-icon {
+    display: flex;
+  }
+
+  /* The colors a text can be set in, each a dot of itself, the one in use ringed. */
+  /* Square, as tall as the other tools, so the round button around the dot is round. */
+  .text-tool-color {
+    padding: 0;
+    width: 40px;
+  }
+
+  .text-tool-swatch {
+    border-radius: var(--border-radius-round);
+    box-shadow: inset 0 0 0 1px var(--color-divider);
+    display: block;
+    height: 1.25rem;
+    width: 1.25rem;
+  }
+
+  .text-tool-color-white .text-tool-swatch {
+    background: #fff;
+  }
+
+  .text-tool-color-black .text-tool-swatch {
+    background: #000;
+  }
+
+  .text-tool-color-theme .text-tool-swatch {
+    background: var(--color-theme-bright);
+  }
+
+  .text-tool-color[aria-pressed="true"] {
+    box-shadow: inset 0 0 0 2px var(--color-theme-ink);
+  }
+
+  /* The color tool, which fans its colors out under itself. */
+  .color-tool {
+    display: inline-flex;
+    position: relative;
+  }
+
+  /* The fan opens down along an arc, evenly either side of the button, with its middle
+     color straight under it. Each color starts folded behind the button and swings out
+     to its place a moment after the one before. */
+  .color-tool-fan {
+    --fan-reach: 4.25rem;
+    --fan-spread: -34deg;
+    --fan-start: 34deg;
+
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+    z-index: 2;
+  }
+
+  .color-tool-fan > .text-tool {
+    box-shadow: 0 2px 8px rgb(26 26 26 / 20%);
+    inset: 0;
+    opacity: 0;
+    position: absolute;
+    transform: scale(0.4);
+    transition:
+      opacity 120ms ease,
+      transform 200ms cubic-bezier(0.2, 0.8, 0.3, 1.2);
+    transition-delay: calc(var(--fan-index) * 30ms);
+  }
+
+  .color-tool-fan-open {
+    pointer-events: auto;
+  }
+
+  .color-tool-fan-open > .text-tool {
+    --fan-turn: calc(var(--fan-start) + var(--fan-index) * var(--fan-spread));
+
+    opacity: 1;
+    transform: rotate(var(--fan-turn)) translateY(var(--fan-reach))
+      rotate(calc(var(--fan-turn) * -1));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .color-tool-fan > .text-tool {
+      transition: none;
+    }
+  }
+}

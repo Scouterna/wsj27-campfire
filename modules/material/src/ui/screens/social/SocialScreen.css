@@ -1,0 +1,24 @@
+/* The social media image maker. */
+
+@layer screen {
+  /* The real file input, kept out of sight: the design system's buttons are what the
+     reader presses, and they open it from code. It takes no presses of its own, because
+     Safari draws a file input's button outside the input's box, where it would catch
+     presses meant for the toolbar it sits under. Clipped rather than `display: none`,
+     which some browsers refuse to open a picker for. */
+  .social-input {
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    pointer-events: none;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+
+  .social-status {
+    color: var(--color-tone-danger-ink);
+    font-size: var(--font-size-footnote);
+    margin: 0 0 var(--spacing-group);
+  }
+}
