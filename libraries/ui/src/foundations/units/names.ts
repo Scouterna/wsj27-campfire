@@ -65,3 +65,9 @@ const unitNames: ReadonlyMap<number, string> = new Map([
 export function unitName(unitNumber: number): string | undefined {
   return unitNames.get(unitNumber)
 }
+
+/**
+ * Every unit by number, in order, for the rare caller that offers a choice of units rather
+ * than looking one up.
+ */
+export const unitNumbers: readonly number[] = unitNames.keys().toArray()
