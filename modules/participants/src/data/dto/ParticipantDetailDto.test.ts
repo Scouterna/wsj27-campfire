@@ -348,7 +348,7 @@ describe("reading the funktion out of the minted roles", () => {
     expect(toParticipantDetail(record({}))?.funktion).toBeUndefined()
   })
 
-  it("marks the funktionsansvarig, in both of the roster's spellings", () => {
+  it("marks the funktionsansvarig, in both of the answer's spellings", () => {
     expect(
       toParticipantDetail(record({ roles: ["wsj27:cmt:program:fa"] }))?.isFunktionsansvarig,
     ).toBe(true)

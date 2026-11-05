@@ -62,7 +62,7 @@ export interface Group {
 // The IST outside every patrol, which is no numbered entry.
 const istKey = "ist"
 
-// The management members the roster has not detailed, who close the management's part.
+// The management members whose funktion is not filled in, who close the management's part.
 const undetailed = "ovriga"
 
 // The head of contingent leads, then the funktioner alphabetically by their labels, and

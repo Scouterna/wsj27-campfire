@@ -6,7 +6,7 @@ import type { Persona, PersonaGroup } from "../types.ts"
 type Page = HtmlEscapedString | Promise<HtmlEscapedString>
 
 /**
- * How the roster's Funktion and Roll segments read to a person. The roster writes the
+ * How the seed's Funktion and Roll segments read to a person. The seed's answers write the
  * labels; these are the same words, keyed by the segment `roles.py` slugifies them to.
  */
 const roleLabels = new Map<string, string>([
@@ -23,7 +23,7 @@ const roleLabels = new Map<string, string>([
 /**
  * What a persona is, read from the very roles their token will carry, so a row promises exactly
  * what the session holds rather than a description written beside it. A Roll
- * names the audience where the roster has one (Support's do), and the Funktion names it
+ * names the audience where the seed gives one (Support's do), and the Funktion names it
  * otherwise. A personal Accesstyp follows with a plus, because a grant is held on top of a
  * function rather than being one. The real ScoutID says none of this, since the line is a
  * developer's aid.
@@ -56,7 +56,7 @@ function belongingOf(role: string): string | undefined {
   }
   if (segments[1] === "cmt") {
     // Roll first, Funktion second – and the fallback works only because no Roll in the
-    // roster shares a slug with a Funktion. A Roll that did would be read as the
+    // seed shares a slug with a Funktion. A Roll that did would be read as the
     // Funktion of the same name and describe the person wrongly.
     const label = roleLabels.get(segments[3] ?? "") ?? roleLabels.get(segments[2] ?? "")
     return label === undefined ? "CMT" : `CMT · ${label}`

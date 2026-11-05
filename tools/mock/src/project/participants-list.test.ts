@@ -1,10 +1,9 @@
 import { describe, expect, it } from "vitest"
 
-import { forms, participants, readCmtRoles } from "../../seed/participants/index.ts"
+import { forms, participants } from "../../seed/participants/index.ts"
 import { decodeParticipantsList, type ParticipantRecord } from "./participants-list.ts"
-import { loadCmtRoles } from "./roles.ts"
 
-const participantsList = decodeParticipantsList(participants, forms, loadCmtRoles(readCmtRoles()))
+const participantsList = decodeParticipantsList(participants, forms)
 
 function decoded(memberNo: number): ParticipantRecord {
   const record = participantsList.get(memberNo)
@@ -157,16 +156,12 @@ describe("the decoded list of participants", () => {
     if (tove === undefined) {
       throw new Error("No seeded Tove")
     }
-    const [record] = decodeParticipantsList(
-      [{ ...tove, unitNumber: 12 }],
-      forms,
-      loadCmtRoles(readCmtRoles()),
-    ).values()
+    const [record] = decodeParticipantsList([{ ...tove, unitNumber: 12 }], forms).values()
 
     expect(record).toMatchObject({ patrol: "12", troop: "" })
   })
 
-  it("mints each participant's roles once, from their fields and the roster", () => {
+  it("mints each participant's roles once, from their fields and their management answer", () => {
     expect(decoded(1_300_035).roles).toEqual([])
     expect(decoded(1_200_001).roles).toEqual(["wsj27:cmt:support:halsa"])
     expect(decoded(1_200_302).roles).toEqual(["wsj27:cmt:support:ist-support"])

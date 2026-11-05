@@ -126,7 +126,7 @@ describe("the people behind an entry's key", () => {
     })
   })
 
-  it("answers a funktion of the management, and the members the roster has not detailed", () => {
+  it("answers a funktion of the management, and the members whose funktion is not filled in", () => {
     expect(findGroup(contingent, "cmt-program")).toEqual({
       label: "Program",
       people: [contingent[8]],

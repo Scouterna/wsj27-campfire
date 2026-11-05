@@ -25,7 +25,7 @@ const rolesByMemberType: ReadonlyMap<unknown, PersonRole> = new Map([
 
 // The function segment of a `wsj27:cmt:<function>:<roll>` role, in the product's words. The
 // support function is split by its roll into its subgroups, and a support roll that names
-// none is the support function itself. A segment a later roster invents maps to nothing
+// none is the support function itself. A segment the answer gains later maps to nothing
 // rather than a guess.
 const funktionsBySegment: ReadonlyMap<string, string> = new Map([
   ["admin", "Admin"],

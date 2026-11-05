@@ -25,9 +25,9 @@ export function travelName(travel: Travel): string {
 
 /**
  * The function a contingent management member serves in, or for the support function the
- * subgroup they serve in, with `support` for a member no subgroup names. The contingent's
- * own roster maps member numbers to these, the participants service mints them into the
- * record's roles, and the participant converter reads them back out.
+ * subgroup they serve in, with `support` for a member no subgroup names. A project admin
+ * answers these on the member's registration, the participants service mints them into
+ * the record's roles, and the participant converter reads them back out.
  */
 export type CmtFunktion =
   | "administration"

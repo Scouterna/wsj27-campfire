@@ -1,6 +1,6 @@
 import { field } from "../json.ts"
 import type { Answer, Form, FormSection, FormTab, Participant } from "../types.ts"
-import { rolesForParticipant, type CmtDetails } from "./roles.ts"
+import { rolesForParticipant } from "./roles.ts"
 
 /**
  * One participant as the project API holds and sends them, after `scoutnet_forms.py` decodes the
@@ -71,13 +71,11 @@ const contactTabs: ReadonlySet<string> = new Set(["Grundläggande information"])
  * `contact_info` and `forms_data`.
  * @param participants The raw list of participants.
  * @param forms The form template.
- * @param cmtDetails The CMT roster, read.
  * @returns The list of participants, keyed by member number.
  */
 export function decodeParticipantsList(
   participants: readonly Participant[],
   forms: readonly Form[],
-  cmtDetails: CmtDetails,
 ): ParticipantsList {
   const participantsList = new Map<number, ParticipantRecord>()
   for (const participant of participants) {
@@ -110,7 +108,12 @@ export function decodeParticipantsList(
         memberType,
         field(participant.answers, "travel") as Answer | undefined,
       ),
-      roles: rolesForParticipant({ accessLevel, memberNo, memberType, troop }, cmtDetails),
+      roles: rolesForParticipant({
+        accessLevel,
+        cmtRole: participant.cmtRole ?? "",
+        memberType,
+        troop,
+      }),
       troop,
       patrol: patrolOf(participant),
       contact_info: contactInfo,
