@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
 
+import { CloseIcon } from "../../foundations/icons/set/CloseIcon"
 import { HandIcon } from "../../foundations/icons/set/HandIcon"
 import { PictureIcon } from "../../foundations/icons/set/PictureIcon"
 import { SendIcon } from "../../foundations/icons/set/SendIcon"
@@ -18,6 +19,10 @@ type Story = StoryObj<typeof meta>
 
 export const Secondary: Story = {
   args: { icon: <PictureIcon size={20} />, label: "Bifoga bild" },
+}
+
+export const Glass: Story = {
+  args: { icon: <CloseIcon size={20} strokeWidth={2.2} />, label: "Stäng", variant: "glass" },
 }
 
 export const Primary: Story = {

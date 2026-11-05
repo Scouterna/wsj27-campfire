@@ -1,0 +1,32 @@
+/* The copy of a chip that follows the pointer. */
+
+@layer screen {
+  /* The copy that follows the pointer, placed by a transform set on every move. */
+  .patrols-carried {
+    background: var(--color-theme-ink);
+    border-radius: var(--border-radius-control);
+    box-shadow: var(--shadow-raised);
+    color: var(--color-theme-on-ink);
+    font-size: var(--font-size-value);
+    font-weight: var(--font-weight-strong);
+    left: 0;
+    overflow: hidden;
+    padding: var(--spacing-group);
+    pointer-events: none;
+    position: fixed;
+    rotate: -2deg;
+    text-overflow: ellipsis;
+    top: 0;
+    white-space: nowrap;
+    z-index: 20;
+  }
+
+  .patrols-carried-more {
+    background: var(--color-theme-on-ink);
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    font-size: var(--font-size-footnote);
+    margin-inline-start: var(--spacing-stack);
+    padding: 1px 8px;
+  }
+}

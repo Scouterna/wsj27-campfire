@@ -8,6 +8,18 @@
     gap: 14px;
   }
 
+  /* Another module's piece, centered on the card as the action is. Gone where the piece
+     draws nothing, so it leaves no gap behind. */
+  .subject-card-end {
+    align-self: center;
+    display: flex;
+    flex: none;
+  }
+
+  .subject-card-end:empty {
+    display: none;
+  }
+
   .subject-card-text {
     display: flex;
     flex: 1;
@@ -19,6 +31,7 @@
   .subject-card-text strong {
     font-size: var(--font-size-heading);
     font-weight: var(--font-weight-strong);
+    overflow-wrap: anywhere;
   }
 
   .subject-card-text small {

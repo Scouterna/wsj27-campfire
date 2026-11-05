@@ -45,11 +45,6 @@ export interface SideMenuProps {
    */
   readonly onReselect?: (() => void) | undefined
   /**
-   * A line under the sections saying what is on its way, so a short menu reads as a
-   * beginning rather than the whole app. Nothing renders without it.
-   */
-  readonly teaser?: string
-  /**
    * What sits at the foot of the column, under the sections – the profile control.
    */
   readonly footer?: ReactNode
@@ -94,7 +89,6 @@ export function SideMenu(props: SideMenuProps): ReactElement {
           </Link>
         ))}
       </div>
-      {props.teaser === undefined ? null : <p className="sidemenu-teaser">{props.teaser}</p>}
       <div className="sidemenu-footer">{props.footer}</div>
     </nav>
   )

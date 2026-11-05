@@ -9,11 +9,14 @@ import {
 import { useMemo, type ReactElement } from "react"
 
 import { istPatrolNumbered } from "../../../model/IstPatrol"
+import { patrolSections } from "../../../model/Patrol"
 import { unitNumbered } from "../../../model/Unit"
 import { istPatrolOf, unitNumberOf } from "../../../model/groups"
 import { useUnitActions } from "../../actions"
 import { UnitCard } from "../../components/unitcard/UnitCard"
 import { counted, personCount } from "../../counted"
+import { useCareSheets } from "../../use-care-sheets"
+import { GroupedPatrols } from "../participants/GroupedPatrols"
 import { PeopleList } from "../participants/PeopleList"
 import { useLetterJumps } from "../participants/use-letter-jumps"
 import { groupLabel, useGroup } from "./use-groups"
@@ -51,7 +54,8 @@ export interface GroupScreenProps {
 
 /**
  * One unit, an IST patrol, the IST outside every patrol, or one funktion of the
- * contingent management: the people that group holds.
+ * contingent management: the people that group holds – a unit grouped by patrol once
+ * anybody in it is in one.
  *
  * Read out of the list the section already fetched, so arriving here from the groups view
  * costs no request – and a key no group has is not an error, only a group with nobody in
@@ -64,7 +68,10 @@ export function GroupScreen(props: GroupScreenProps): ReactElement {
   const { error, group, isPending, refetch } = useGroup(props.groupKey)
   const unitActions = useUnitActions()
   const title = group?.label ?? groupLabel(props.groupKey)
-  const jumps = useLetterJumps(group?.people ?? [])
+  const people = group?.people ?? []
+  const jumps = useLetterJumps(people)
+  // Read here rather than in the list, because a unit is drawn by patrol or as one list.
+  const care = useCareSheets(people)
   const unitNumber = unitNumberOf(props.groupKey)
   // Only a unit carries what other sections offer, since the IST and the management are
   // no avdelning. Kept across renders, because the list re-renders the screen as it
@@ -108,6 +115,8 @@ export function GroupScreen(props: GroupScreenProps): ReactElement {
     )
   }
 
+  const patrols = unitNumber === undefined ? [] : patrolSections(group.people)
+
   return (
     <>
       <PageTitle title={title} />
@@ -127,19 +136,35 @@ export function GroupScreen(props: GroupScreenProps): ReactElement {
           viewerTheme={cmtTheme}
         />
       )}
-      {/* The outline's stops over the name-sorted rows – declared, because the
-          virtualized rows are not in the document for the outline to scan. */}
-      <PageJumps current={jumps.current} entries={jumps.entries} onJump={jumps.onJump} />
-      <Card aside={<span aria-hidden="true">{counted(group.people.length)}</span>} title="Personer">
-        {/* Scoped, because everybody an entry holds belongs to what it names. */}
-        <PeopleList
-          isUnitScoped
-          onFirstVisibleChange={jumps.onFirstVisible}
-          people={group.people}
-          registerJump={jumps.registerJump}
-          resetKey={props.groupKey}
+      {care.notice}
+      {patrols.length > 0 ? (
+        <GroupedPatrols
+          care={care}
+          leaders={group.people.filter((person) => person.role === "ledare")}
+          sections={patrols}
         />
-      </Card>
+      ) : (
+        <>
+          {/* The outline's stops over the name-sorted rows – declared, because the
+              virtualized rows are not in the document for the outline to scan. */}
+          <PageJumps current={jumps.current} entries={jumps.entries} onJump={jumps.onJump} />
+          <Card
+            aside={<span aria-hidden="true">{counted(group.people.length)}</span>}
+            title="Personer"
+          >
+            {/* Scoped, because everybody an entry holds belongs to what it names. */}
+            <PeopleList
+              care={care}
+              isUnitScoped
+              onFirstVisibleChange={jumps.onFirstVisible}
+              people={group.people}
+              registerJump={jumps.registerJump}
+              resetKey={props.groupKey}
+            />
+          </Card>
+        </>
+      )}
+      {care.sheet}
     </>
   )
 }

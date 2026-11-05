@@ -50,6 +50,9 @@ const noAccess = 0
 const basicAccess = 1
 const fullAccess = 2
 
+// The longest patrol `PatrolUpdate` takes.
+const patrolMaxLength = 100
+
 // Whose name any leader or CMT member may read, wherever they are – the people who create, are
 // assigned to, and write notes on cases. Only the name: every other level still follows the
 // troop rules.
@@ -81,8 +84,9 @@ export function troopAccess(user: AuthUser, troop: string | undefined): number {
 /**
  * One record cut down to what a caller gets at a level. A leader's own contact and health
  * answers go only to the management with a health role – everyone else, their own troop's
- * leaders included, gets a leader's row without them – and are dropped rather than refused, so
- * one row cannot take a whole listing down.
+ * leaders included, gets a leader's row without them – and the management's own health answers
+ * go to nobody. All of it is dropped rather than refused, so one row cannot take a whole
+ * listing down.
  * @param record The decoded record.
  * @param infolevel The level asked for.
  * @param canSeeLeaderDetails Whether the caller may see a leader's own details.
@@ -99,6 +103,9 @@ export function projectRecord(
   const dropped = new Set(infolevel === "full" ? [] : ["forms_data"])
   if (!canSeeLeaderDetails && record.member_type === "Avdelningsledare") {
     dropped.add("contact_info")
+    dropped.add("forms_data")
+  }
+  if (record.member_type === "Kontingentledning") {
     dropped.add("forms_data")
   }
   return Object.fromEntries(Object.entries(record).filter(([key]) => !dropped.has(key)))
@@ -260,8 +267,101 @@ function individual(
 }
 
 /**
- * Builds `/participants`: the whole contingent, one troop or member type, one person, and the
- * role map – each gated exactly as `participants.py` and `roles.py` gate them.
+ * The patrol a write asks for, as pydantic reads `PatrolUpdate`: a string of at most the
+ * longest it takes, null, or no key at all – anything else is a validation error, and so is
+ * a body that is not a JSON object.
+ * @param body The request's body, as text.
+ * @returns The patrol, or null for none, or the error to answer with.
+ */
+function patrolOf(body: string): string | null | ValidationError {
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(body)
+  } catch {
+    return {
+      type: "json_invalid",
+      loc: ["body", 0],
+      msg: "JSON decode error",
+      input: {},
+      ctx: { error: "Expecting value" },
+    }
+  }
+  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+    return {
+      type: "model_attributes_type",
+      loc: ["body"],
+      msg: "Input should be a valid dictionary or object to extract fields from",
+      input: parsed,
+    }
+  }
+  const patrol: unknown = "patrol" in parsed ? parsed.patrol : undefined
+  if (patrol === undefined || patrol === null) {
+    // eslint-disable-next-line unicorn/no-null -- PatrolUpdate's patrol defaults to None
+    return null
+  }
+  if (typeof patrol !== "string") {
+    return {
+      type: "string_type",
+      loc: ["body", "patrol"],
+      msg: "Input should be a valid string",
+      input: patrol,
+    }
+  }
+  // eslint-disable-next-line @typescript-eslint/no-misused-spread -- pydantic counts code points, as the spread does, where `length` counts UTF-16 units
+  if ([...patrol].length > patrolMaxLength) {
+    return {
+      type: "string_too_long",
+      loc: ["body", "patrol"],
+      msg: `String should have at most ${String(patrolMaxLength)} characters`,
+      input: patrol,
+      ctx: { max_length: patrolMaxLength },
+    }
+  }
+  return patrol
+}
+
+/**
+ * Sets or clears one deltagare's patrol, for a leader of their own troop alone. The form the
+ * Patrull question is on is the deltagare's, so a ledare, an IST member, and a caller from
+ * anywhere else are answered as a person who does not exist. The name is stripped, the empty
+ * string clears it as null does, and the answer is the member and their patrol.
+ * @param context The request being answered.
+ * @param dependencies The key, the clock, and the list of participants written to.
+ * @returns The response.
+ */
+async function setPatrol(context: Context, dependencies: ProjectDependencies): Promise<Response> {
+  const { key, now, participantsList } = dependencies
+  const user = requireAuthUser(context, key, now())
+  if (user instanceof Response) {
+    return user
+  }
+  const errors: ValidationError[] = []
+  const memberId = parseInteger(context.req.param("memberId") ?? "")
+  if (memberId === undefined) {
+    errors.push(intParsingError(["path", "member_id"], context.req.param("memberId") ?? ""))
+  }
+  const patrol = patrolOf(await context.req.text())
+  if (patrol !== null && typeof patrol !== "string") {
+    errors.push(patrol)
+  }
+  if (memberId === undefined || (patrol !== null && typeof patrol !== "string")) {
+    return validationFailed(context, errors)
+  }
+  const record = participantsList.get(memberId)
+  if (
+    record?.member_type !== "Deltagare" ||
+    record.troop === "" ||
+    !roleSuffixes(user.roles, "wsj27:al").has(record.troop)
+  ) {
+    return context.json({ detail: "Participant not found in project." }, 404)
+  }
+  record.patrol = (patrol ?? "").trim()
+  return context.json({ member_no: memberId, patrol: record.patrol })
+}
+
+/**
+ * Builds `/participants`: the whole contingent, one troop or member type, one person, a person's
+ * patrol, and the role map – each gated exactly as `participants.py` and `roles.py` gate them.
  * @param dependencies The auth service's key, the clock, and the list of participants.
  * @returns The routes, ready to be mounted at `/participants`.
  */
@@ -270,6 +370,7 @@ export function participantRoutes(dependencies: ProjectDependencies): Hono {
   router.get("/troopinfo", (context) => allinfo(context, dependencies))
   router.get("/troopinfo/:troopId", (context) => troopinfo(context, dependencies))
   router.get("/individual/:memberId", (context) => individual(context, dependencies))
+  router.post("/:memberId/patrol", async (context) => setPatrol(context, dependencies))
   router.get("/roles", (context) => {
     const user = requireAuthUser(context, dependencies.key, dependencies.now())
     return user instanceof Response ? user : roleMap(context, user, dependencies.participantsList)
@@ -277,5 +378,6 @@ export function participantRoutes(dependencies: ProjectDependencies): Hono {
   for (const path of ["/troopinfo", "/troopinfo/:troopId", "/individual/:memberId", "/roles"]) {
     refuseOtherMethods(router, path, ["GET"])
   }
+  refuseOtherMethods(router, "/:memberId/patrol", ["POST"])
   return router
 }

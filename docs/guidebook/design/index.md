@@ -14,7 +14,7 @@ The application wears one of them as its theme:
 | The contingent management | Red                                       |
 | Anyone else, or nobody    | The theme this browser wore last, or blue |
 
-A theme is two tokens – the unit's bright color, its flag, and a darker ink of the same identity that text and controls use. A `data-theme` attribute swaps the pair rather than every rule that reads it, so a rule names a theme color once and follows whichever unit is in force. What sits on an ink fill is white in every theme, and so is what sits on a bright fill, except on yellow, which is too light to carry white and takes its ink instead.
+A theme is two tokens – the unit's bright color, its flag, and a darker ink of the same identity that text and controls use. A `data-theme` attribute swaps the pair rather than every rule that reads it, so a rule names a theme color once and follows whichever unit is in force. What sits on an ink fill is white in every theme, and so is what sits on a bright fill, except on yellow, which is too light to carry white or its own ink, and takes that ink darkened until it reads at 4.5:1.
 
 The theme goes on the document before React starts, so a returning brown-unit leader is greeted in brown rather than a flash of blue. Which unit wears which color is Campfire's own table in the design system, because the list of participants knows a unit only by its number.
 

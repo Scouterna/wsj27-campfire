@@ -1,5 +1,5 @@
 import { UnitAvatar, unitName } from "@scouterna/wsj27-campfire-ui"
-import type { ReactElement } from "react"
+import type { ReactElement, ReactNode } from "react"
 
 import { placingLine, type Person } from "../../../model/Person"
 import { useOwnUnit } from "../../use-people"
@@ -21,6 +21,10 @@ export interface SubjectCardProps {
    * What the card offers at its end, undefined for a reader who may not change it.
    */
   readonly action?: PersonAction | undefined
+  /**
+   * What sits at the card's end before the action, for another module's piece.
+   */
+  readonly end?: ReactNode
   /**
    * Whether a write is under way, which holds the action still.
    */
@@ -70,6 +74,7 @@ export function SubjectCard(props: SubjectCardProps): ReactElement {
         <strong>{props.name}</strong>
         {placing !== undefined && <small>{placing}</small>}
       </div>
+      {props.end === undefined ? null : <div className="subject-card-end">{props.end}</div>}
       {action !== undefined && (
         <button
           aria-label={`${action.spoken ?? action.label} ${props.name}`}

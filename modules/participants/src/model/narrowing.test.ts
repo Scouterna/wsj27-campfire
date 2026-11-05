@@ -57,6 +57,19 @@ describe("matching one person against a query", () => {
     expect(matches(person({ unit: { number: 2 } }), "myran")).toBe(false)
   })
 
+  it("matches the patrol within the unit by its name, in one unit's list alone", () => {
+    const falk = person({ patrol: "Falkarna", unit: { number: 2 } })
+    expect(matches(falk, "falk", true)).toBe(true)
+    expect(matches(falk, "falk")).toBe(false)
+    expect(matches(person({ patrol: "Uttrarna", unit: { number: 2 } }), "falk", true)).toBe(false)
+    expect(matches(person({ unit: { number: 2 } }), "falk", true)).toBe(false)
+  })
+
+  it("leaves a patrol typed in by hand on a leader out of the search", () => {
+    const leader = person({ patrol: "Falkarna", role: "ledare", unit: { number: 2 } })
+    expect(matches(leader, "falk", true)).toBe(false)
+  })
+
   it("matches an IST patrol's name, never the unit's of the same number", () => {
     const ist = person({ istPatrol: { name: "Läderbagge", number: 2 }, role: "ist" })
 
@@ -128,6 +141,13 @@ describe("narrowing a list", () => {
     const reversed = people.toReversed()
 
     expect(narrow(reversed, "Lind", undefined).map((one) => one.memberNo)).toEqual(["5", "1"])
+  })
+
+  it("reaches the unit's patrols only where the list is one unit's", () => {
+    const placed = [...people, person({ memberNo: "6", patrol: "Falkarna", unit: { number: 2 } })]
+
+    expect(narrow(placed, "falk", undefined, true).map((one) => one.memberNo)).toEqual(["6"])
+    expect(narrow(placed, "falk", undefined)).toEqual([])
   })
 
   it("answers an empty list when nothing matches", () => {

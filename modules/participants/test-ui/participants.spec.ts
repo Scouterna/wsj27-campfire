@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test"
+import { expect, test, type Locator, type Page } from "@playwright/test"
 
 // The participants section, walked as the people who use it: a leader reading their
 // own unit, the contingent management searching and narrowing the whole contingent,
@@ -35,24 +35,36 @@ function hiddenCopies(addresses: readonly string[]): string {
   return `mailto:?bcc=${addresses.join(",")}`
 }
 
-test("keeps a long unit's rows under the reader all the way to its end", async ({ page }) => {
+test("keeps a long list's rows under the reader all the way to its end", async ({ page }) => {
   await page.goto("/")
-  await signInAs(page, "Anders Andersson")
-  await page.locator(".sidemenu").getByRole("link", { name: "Min avdelning" }).click()
+  await signInAs(page, "Anna Almgren")
+  await page.locator(".sidemenu").getByRole("link", { name: "Deltagare" }).click()
   const list = page.getByRole("list", { name: "Deltagare" })
   await expect(list.getByRole("listitem").first()).toBeVisible()
+  const total = await list.getByRole("listitem").first().getAttribute("aria-setsize")
 
   // Down in steps, as a wheel scrolls, so the rows are drawn and measured on the way and
   // the list has to keep finding where it sits. A wheel lands when the page gets to it,
   // so the steps go on until the end is reached rather than for a fixed count.
-  // Waiting on the unit's last person rather than the last row drawn, because right after
+  // Waiting on the list's last person rather than the last row drawn, because right after
   // a step the rows drawn for the previous one are still on screen.
   await page.mouse.move(640, 450)
-  const end = list.locator('[role="listitem"][aria-posinset="40"]')
+  const end = list.locator(`[role="listitem"][aria-posinset="${total ?? ""}"]`)
   await expect(async () => {
     await page.mouse.wheel(0, 600)
     await expect(end).toBeInViewport({ timeout: 250 })
   }).toPass({ timeout: 10_000 })
+})
+
+test("finds a leader's scouts by their patrol", async ({ page }) => {
+  await page.goto("/")
+  await signInAs(page, "Anders Andersson")
+  await page.locator(".sidemenu").getByRole("link", { name: "Min avdelning" }).click()
+  await page.getByRole("searchbox", { name: "Sök deltagare" }).fill("falkarna")
+
+  await expect(page.getByRole("list", { name: "Falkarna" })).toBeVisible()
+  await expect(page.getByRole("list", { name: "Utan patrull" })).toHaveCount(0)
+  await expect(page.getByRole("list", { name: "Uttrarna" })).toHaveCount(0)
 })
 
 test("shows a leader their own unit, with the unit's own filter", async ({ page }) => {
@@ -94,20 +106,23 @@ test("says where a leader's own people come from, their gender, and how old the 
   // unit's place, at every width – and the gender and a deltagare's age ride at the
   // row's end, the gender first.
   const rows = page.getByRole("listitem")
+  // The whole row, because one with a care control keeps these beside its link, not in it.
+  const rowOf = (name: RegExp): Locator => rows.filter({ has: page.getByRole("link", { name }) })
   const ester = rows.getByRole("link", { name: /^Ester Dahl/u })
   await expect(ester).toContainText("Deltagare · Mockåsens scoutkår · Kungsbacka")
-  await expect(ester.locator(".person-row-facts > :first-child")).toHaveAccessibleName("Kvinna")
-  await expect(ester.locator(".person-row-age")).toHaveText(/^\d{1,3} år$/u)
+  const esterRow = rowOf(/^Ester Dahl/u)
+  await expect(esterRow.locator(".person-row-facts > :first-child")).toHaveAccessibleName("Kvinna")
+  await expect(esterRow.locator(".person-row-age")).toHaveText(/^\d{1,3} år$/u)
   const lars = rows.getByRole("link", { name: /^Lars Lindberg/u })
   await expect(lars).toContainText("Ledare · Mockåsens scoutkår · Göteborg")
-  await expect(lars.getByRole("img", { name: "Man" })).toBeVisible()
-  await expect(lars.locator(".person-row-age")).toHaveCount(0)
+  const larsRow = rowOf(/^Lars Lindberg/u)
+  await expect(larsRow.getByRole("img", { name: "Man" })).toBeVisible()
+  await expect(larsRow.locator(".person-row-age")).toHaveCount(0)
 
   // Annat has a sign of its own. Okänt has none, because a dash before the age would
   // read as a minus.
-  const edvin = rows.getByRole("link", { name: /^Edvin Malm/u })
-  await expect(edvin.getByRole("img", { name: "Annat" })).toBeVisible()
-  const otto = rows.getByRole("link", { name: /^Otto Lind/u })
+  await expect(rowOf(/^Edvin Malm/u).getByRole("img", { name: "Annat" })).toBeVisible()
+  const otto = rowOf(/^Otto Lind/u)
   await expect(otto.locator(".person-row-age")).toHaveText(/^\d{1,3} år$/u)
   await expect(otto.locator(".gender-mark")).toHaveCount(0)
 
@@ -264,6 +279,17 @@ test("lets the management search the contingent and narrow it by roll", async ({
   await expect(page.getByText("Inga träffar", { exact: true })).toBeVisible()
   await expect(page.getByText("Prova ett annat namn")).toBeVisible()
   await expect(page.getByRole("searchbox", { name: "Sök deltagare" })).toBeVisible()
+})
+
+test("leaves the units' patrol names out of the management's search", async ({ page }) => {
+  await page.goto("/")
+  await signInAs(page, "Anna Almgren")
+  await page.locator(".sidemenu").getByRole("link", { name: "Deltagare" }).click()
+  await expect(page.getByRole("list", { name: "Deltagare" })).toBeVisible()
+
+  // Every unit names its own patrols, so across the contingent a patrol name finds nobody.
+  await page.getByRole("searchbox", { name: "Sök deltagare" }).fill("falkarna")
+  await expect(page.getByText("Inga träffar", { exact: true })).toBeVisible()
 })
 
 test("reads the management the whole contingent in one request", async ({ page }) => {
@@ -423,6 +449,48 @@ test("shows the health answers to the health function, at the full level", async
   await expect(page).toHaveTitle("Lars Lindberg – Campfire")
   await expect(page.getByRole("heading", { level: 2, name: "Kost och allergier" })).toBeVisible()
   await expect(page.getByRole("heading", { level: 2, name: "Vaccinationer" })).toBeVisible()
+})
+
+/**
+ * A card on the person's page, by its heading.
+ * @param page The page standing on the person.
+ * @param title The card's heading.
+ * @returns The card.
+ */
+function card(page: Page, title: string): Locator {
+  return page.locator("section", {
+    has: page.getByRole("heading", { level: 2, name: title, exact: true }),
+  })
+}
+
+test("draws a food allergy ticked only as Övriga on the person's page", async ({ page }) => {
+  await page.goto("/")
+  await signInAs(page, "Anders Andersson")
+  await page.goto("/participants/1300510")
+
+  const food = card(page, "Kost och allergier")
+  await expect(food).toContainText("Övriga")
+  await expect(food).toContainText("Kiwi")
+  await expect(food).not.toContainText("Inga matallergier")
+})
+
+test("leaves the all-clear chips off a card that declares something", async ({ page }) => {
+  await page.goto("/")
+  await signInAs(page, "Anders Andersson")
+  // Molly answered that she eats no special diet, beside a nut allergy.
+  await page.goto("/participants/1300140")
+
+  const food = card(page, "Kost och allergier")
+  await expect(food).toContainText("Nötter")
+  await expect(food).not.toContainText("Ingen specialkost")
+})
+
+test("puts what a scout wrote to their leader in the Hälsa card", async ({ page }) => {
+  await page.goto("/")
+  await signInAs(page, "Anders Andersson")
+  await page.goto("/participants/1300520")
+
+  await expect(card(page, "Hälsa")).toContainText("Till avdelningsledaren")
 })
 
 test("asks at the basic level without a health grant, and renders without health", async ({

@@ -52,6 +52,25 @@
     transition: transform 150ms ease;
   }
 
+  /* A way onward hugs its label rather than filling its row, and points onward with the
+     back glyph mirrored, as a row's chevron does. It never grows past its row, so a long
+     name at a large text size wraps onto a taller pill instead of being cut off. */
+  .button.button-onward {
+    flex: none;
+    height: auto;
+    max-width: 100%;
+    min-height: 44px;
+    min-width: 0;
+    padding: 10px 18px 10px var(--spacing-card);
+    width: auto;
+  }
+
+  .button-onward-chevron {
+    display: flex;
+    flex: none;
+    transform: scaleX(-1);
+  }
+
   .button[aria-expanded="true"] .button-chevron {
     transform: rotate(90deg);
   }

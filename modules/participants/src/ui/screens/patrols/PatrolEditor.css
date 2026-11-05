@@ -1,0 +1,47 @@
+/* The editor: the people in no patrol over the patrol boards. */
+
+@layer screen {
+  .patrols {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-section);
+  }
+
+  /* What stays at the foot of the screen while the boards scroll under it: how a save is
+     going, and who is picked. Above the phone's tab strip, which grows with the home
+     indicator, and at the column's foot on a desktop. Below the stack of a chip's menu,
+     which would otherwise run under it. */
+  .patrols-foot {
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-stack);
+    position: sticky;
+    z-index: 4;
+  }
+
+  @media (min-width: 768px) {
+    .patrols-foot {
+      bottom: var(--spacing-container);
+    }
+  }
+
+  /* One column on a phone, two where the patrols fit side by side – all of them in a
+     row would leave each too narrow for a name. */
+  .patrols-boards {
+    display: grid;
+    gap: var(--spacing-container);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 1024px) {
+    .patrols-boards {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+  }
+
+  .patrols-dragging,
+  .patrols-dragging * {
+    cursor: grabbing;
+  }
+}

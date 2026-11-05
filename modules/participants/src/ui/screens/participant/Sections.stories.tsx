@@ -4,11 +4,9 @@ import type { ReactElement, ReactNode } from "react"
 import type { Experience } from "../../../model/Experience"
 import type { LanguageSkill } from "../../../model/LanguageSkill"
 import type { Readiness } from "../../../model/Readiness"
+import { complete, sparse, withoutHealth } from "../../storybook/people"
 import { ContactSection } from "./ContactSection"
-import { DietSection } from "./DietSection"
 import { ExperienceSection } from "./ExperienceSection"
-import { complete, sparse, withoutHealth } from "./fixtures"
-import { HealthSection } from "./HealthSection"
 import { LanguagesSection } from "./LanguagesSection"
 import { ProfileSection } from "./ProfileSection"
 import { ReadinessSection } from "./ReadinessSection"
@@ -37,9 +35,6 @@ function Person(props: { readonly children: ReactNode }): ReactElement {
   )
 }
 
-// The record's own health, which every health story reads – resolved once here, since
-// the fixtures type it as optional and every story would otherwise unwrap it itself.
-const health = complete.health ?? sparse.health
 const allClear = sparse.health
 
 const readyForEverything: Readiness = { swims200m: true, comfortableInCrowds: true }
@@ -53,13 +48,15 @@ const experience: Experience = {
 
 /**
  * Profil: the badge, the kind of registration, where it places the person, and the
- * registration facts – with and without a travel package on record.
+ * registration facts – with and without a travel package on record, and with the patrol
+ * line only a scout carries.
  */
 export const Profile: StoryObj = {
   render: (): ReactElement => (
     <Person>
       <ProfileSection participant={complete} />
       <ProfileSection participant={sparse} />
+      <ProfileSection participant={withoutHealth} />
     </Person>
   ),
 }
@@ -73,32 +70,6 @@ export const Contact: StoryObj = {
     <Person>
       <ContactSection contact={complete.contact} />
       <ContactSection contact={sparse.contact} />
-    </Person>
-  ),
-}
-
-/**
- * Kost och allergier: a diet chip, the graded allergens, and the free texts – or the
- * all-clear chips where there is nothing to flag.
- */
-export const Diet: StoryObj = {
-  render: (): ReactElement => (
-    <Person>
-      {health === undefined ? null : <DietSection health={health} />}
-      {allClear === undefined ? null : <DietSection health={allClear} />}
-    </Person>
-  ),
-}
-
-/**
- * Hälsa: the declared facts as rows and the catch-all notes as callouts, or the all-clear
- * chip on its own.
- */
-export const Health: StoryObj = {
-  render: (): ReactElement => (
-    <Person>
-      <HealthSection health={complete.health} notes={complete.notes} />
-      <HealthSection health={sparse.health} notes={sparse.notes} />
     </Person>
   ),
 }
@@ -125,7 +96,9 @@ export const ReadinessCard: StoryObj = {
 export const Vaccinations: StoryObj = {
   render: (): ReactElement => (
     <Person>
-      {health === undefined ? null : <VaccinationsSection vaccinations={health.vaccinations} />}
+      {complete.health === undefined ? null : (
+        <VaccinationsSection vaccinations={complete.health.vaccinations} />
+      )}
       {allClear === undefined ? null : <VaccinationsSection vaccinations={allClear.vaccinations} />}
     </Person>
   ),

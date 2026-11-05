@@ -2,6 +2,7 @@ import { queryDecorator, type NetworkParameters } from "@scouterna/wsj27-campfir
 
 import { fetchParticipantQuery } from "../../data/fetch-participant"
 import { fetchParticipantsQuery } from "../../data/fetch-participants"
+import { fetchUnitDetailsQuery } from "../../data/fetch-unit-details"
 import { ViewerProvider, type Viewer } from "../../data/viewer"
 import type { ParticipantDetail } from "../../model/ParticipantDetail"
 import type { ParticipantsList } from "../../model/ParticipantsList"
@@ -25,6 +26,11 @@ export interface ApiParameters extends NetworkParameters {
    */
   readonly list?: ParticipantsList
   /**
+   * What reading the viewer's own unit in full answers with – the records the patrol
+   * editor weighs care by.
+   */
+  readonly unitDetails?: readonly ParticipantDetail[]
+  /**
    * Who is reading. The widest viewer when unsaid.
    */
   readonly viewer?: Viewer
@@ -40,6 +46,9 @@ export const ApiDecorator = queryDecorator<ApiParameters>({
     const viewer = api.viewer ?? storyViewer
     if (api.list !== undefined) {
       client.setQueryData(fetchParticipantsQuery(viewer).queryKey, api.list)
+    }
+    if (api.unitDetails !== undefined) {
+      client.setQueryData(fetchUnitDetailsQuery(viewer).queryKey, api.unitDetails)
     }
     const details = api.details ?? []
     for (const detail of details) {

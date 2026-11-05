@@ -2,7 +2,7 @@ import { ScreenDecorator } from "@scouterna/wsj27-campfire-ui"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ApiDecorator } from "../../storybook/ApiDecorator"
-import { complete, details, sparse, withoutHealth } from "./fixtures"
+import { complete, details, sparse, withoutHealth } from "../../storybook/people"
 import { ParticipantScreen } from "./ParticipantScreen"
 
 const meta: Meta<typeof ParticipantScreen> = {

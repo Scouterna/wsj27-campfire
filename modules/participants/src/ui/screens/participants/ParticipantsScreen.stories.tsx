@@ -6,7 +6,14 @@ import { useEffect, type ReactElement } from "react"
 
 import type { Viewer } from "../../../data/viewer"
 import { ApiDecorator } from "../../storybook/ApiDecorator"
-import { largePeopleList, nobodyList, unitList, wholeList } from "../../storybook/cast"
+import {
+  largePeopleList,
+  nobodyList,
+  unitInPatrols,
+  unitInPatrolsDetails,
+  unitList,
+  wholeList,
+} from "../../storybook/cast"
 import { ParticipantsScreen } from "./ParticipantsScreen"
 
 /**
@@ -53,11 +60,39 @@ export const WholeContingentAtScale: Story = {
 }
 
 /**
+ * Somebody in the management who also leads a unit: the action stays the groups, and the
+ * page's menu holds their way in to the patrols.
+ */
+export const ManagementLeadingAUnit: Story = {
+  parameters: {
+    api: {
+      list: wholeList,
+      unitDetails: [],
+      viewer: { memberNo: "1", readsEveryone: true, readsHealth: true, unitNumber: 1 },
+    },
+  },
+}
+
+/**
+ * A leader's own unit with the care of everybody who declared anything on their rows.
+ */
+export const OneUnitWithCare: Story = {
+  parameters: {
+    api: { list: unitInPatrols(), unitDetails: unitInPatrolsDetails(), viewer: leaderViewer },
+  },
+  render: (): ReactElement => (
+    <RolesProvider roles={[{ kind: "leader", unitNumber: 1 }]}>
+      <ParticipantsScreen />
+    </RolesProvider>
+  ),
+}
+
+/**
  * A leader's own unit: searched and filtered like the contingent's list, in the unit's
  * smaller vocabulary, but with no way into a browser of the one unit they have.
  */
 export const OneUnit: Story = {
-  parameters: { api: { list: unitList(1), viewer: leaderViewer } },
+  parameters: { api: { list: unitList(1), unitDetails: [], viewer: leaderViewer } },
   render: (): ReactElement => (
     <RolesProvider roles={[{ kind: "leader", unitNumber: 1 }]}>
       <ParticipantsScreen />

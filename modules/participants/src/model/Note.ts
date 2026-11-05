@@ -14,6 +14,16 @@ export interface Note {
 }
 
 /**
+ * The notes a unit's leader reads on their lists, which leaves out what was addressed to the
+ * contingent management alone, even though the service sends it to them.
+ * @param notes What the person wrote.
+ * @returns The notes to the unit leader.
+ */
+export function notesToLeader(notes: readonly Note[]): readonly Note[] {
+  return notes.filter((note) => note.audience === "avdelningsledaren")
+}
+
+/**
  * What a note's audience is called in Swedish, as the callout titles it.
  * @param audience The audience to name.
  * @returns The Swedish title.

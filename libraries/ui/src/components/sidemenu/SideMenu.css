@@ -54,16 +54,6 @@
     stroke-width: 2.3;
   }
 
-  /* The what's-coming line sits quiet under a divider, plainly not a section. */
-  .sidemenu-teaser {
-    border-top: 1px solid var(--color-divider);
-    color: var(--color-ink-tertiary);
-    font-size: var(--font-size-footnote);
-    line-height: 1.45;
-    margin: var(--spacing-container) var(--spacing-inline) 0;
-    padding: var(--spacing-container) var(--spacing-stack) 0;
-  }
-
   /* What the column ends on – the profile control – pushed to its foot. */
   .sidemenu-footer {
     margin-top: auto;

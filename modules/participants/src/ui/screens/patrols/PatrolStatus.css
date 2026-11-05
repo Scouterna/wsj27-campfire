@@ -1,0 +1,14 @@
+/* The editor's status line. */
+
+@layer screen {
+  /* Spoken, not shown, because the board moving is what a sighted reader sees. Clipped
+     rather than hidden, because a display of none is read by nobody either. */
+  .patrols-spoken {
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+}

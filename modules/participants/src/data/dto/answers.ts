@@ -79,32 +79,62 @@ export function answer(answers: Answers, key: string): string | undefined {
 }
 
 /**
- * A multi-select answer, mapped through its label table. The service sends a list or a
- * comma-separated string, and anything the table does not know – including a plain "Nej"
- * – is no selection.
+ * A multi-select answer, mapped through its label table. Anything the table does not know
+ * – including a plain "Nej" – is no selection.
  * @param answers The flattened answers.
  * @param key The question key to read.
  * @param byLabel The Swedish labels this question's options map through.
  * @returns The options the answer selected, in the order they arrived.
  */
 export function selections<T>(answers: Answers, key: string, byLabel: ReadonlyMap<string, T>): T[] {
-  // eslint-disable-next-line security/detect-object-injection -- keys are the module's own literals
-  const value = answers[key]
-  if (value === undefined) {
-    return []
-  }
-  const labels = typeof value === "string" ? value.split(",") : value
-  return labels
-    .map((label) => byLabel.get(label.trim()))
+  return labelsOf(answers, key)
+    .map((label) => byLabel.get(label))
     .filter((selection): selection is T => selection !== undefined)
+}
+
+/**
+ * The labels of a multi-select answer that its table does not know, as the applicant saw
+ * them. The form's options can change without the tables following, and an answer that
+ * stays readable beats one that silently vanishes. A plain "Nej" is still no selection.
+ * @param answers The flattened answers.
+ * @param key The question key to read.
+ * @param byLabel The Swedish labels this question's options map through.
+ * @returns The labels no table entry covers, in the order they arrived.
+ */
+export function unlistedSelections(
+  answers: Answers,
+  key: string,
+  byLabel: ReadonlyMap<string, unknown>,
+): string[] {
+  return labelsOf(answers, key).filter((label) => label !== "Nej" && !byLabel.has(label))
+}
+
+/**
+ * A multi-select answer's labels. The service sends a list or a comma-separated string.
+ * @param answers The flattened answers.
+ * @param key The question key to read.
+ * @returns The trimmed labels, without the blanks.
+ */
+function labelsOf(answers: Answers, key: string): string[] {
+  // eslint-disable-next-line security/detect-object-injection -- keys are the module's own literals
+  const value = answers[key] ?? []
+  const labels = typeof value === "string" ? value.split(",") : value
+  return labels.map((label) => label.trim()).filter((label) => label !== "")
 }
 
 // The Swedish labels Scoutnet's answers carry, mapped to the domain model's literals. The
 // tables absorb the registration form's own spelling, so the screens never see it.
 
 /**
- * The special diet options. "Ingen specialkost" is deliberately absent, because no special
- * diet is no diet at all, and "kokött" is the form's own spelling.
+ * The answer that says no special diet is needed, which is no diet rather than one the
+ * table has not heard of.
+ */
+export const noSpecialDiet = "Ingen specialkost"
+
+/**
+ * The special diet options, without `noSpecialDiet`. The two forms word the Hindu option
+ * differently – "nötkött" for the participants, "kokött" for the leaders – and both are
+ * the forms' own spelling.
  */
 export const dietByLabel: ReadonlyMap<string, SpecialDiet> = new Map([
   ["Vegetarian", "vegetarian"],
@@ -112,6 +142,7 @@ export const dietByLabel: ReadonlyMap<string, SpecialDiet> = new Map([
   ["Halal", "halal"],
   ["Kosher", "kosher"],
   ["Hindu - inget kokött", "hinduNoBeef"],
+  ["Hindu - inget nötkött", "hinduNoBeef"],
   ["Annat", "other"],
 ])
 
@@ -140,9 +171,9 @@ export const allergenByKey: ReadonlyMap<string, Allergen> = new Map([
  * The medical equipment options.
  */
 export const equipmentByLabel: ReadonlyMap<string, EquipmentNeed> = new Map([
-  ["Laddning av CPAP", "cpapCharging"],
-  ["Permanent ström till medicinsk utrustning", "permanentPower"],
-  ["Kylförvaring av medicin", "refrigeration"],
+  ["Laddning av batteri för CPAP", "cpapCharging"],
+  ["Permanent elförsörjning till medicinsk utrustning eller hjälpmedel", "permanentPower"],
+  ["Kylning av medicin", "refrigeration"],
   ["Annat", "other"],
 ])
 
@@ -152,7 +183,7 @@ export const equipmentByLabel: ReadonlyMap<string, EquipmentNeed> = new Map([
 export const mobilityAidByLabel: ReadonlyMap<string, MobilityAid> = new Map([
   ["Käpp", "cane"],
   ["Kryckor", "crutches"],
-  ["Elrullstol", "electricWheelchair"],
+  ["Elektrisk rullstol", "electricWheelchair"],
   ["Rullator", "walker"],
   ["Större tält", "largerTent"],
   ["Andra hjälpmedel", "other"],
@@ -166,7 +197,7 @@ export const diagnosisByLabel: ReadonlyMap<string, Diagnosis> = new Map([
   ["ADD", "add"],
   ["ADHD", "adhd"],
   ["Autism", "autism"],
-  ["Bipolär", "bipolar"],
+  ["Bipolär sjukdom", "bipolar"],
   ["Kognitiv funktionsnedsättning", "cognitive"],
   ["Neuropsykiatrisk funktionsnedsättning", "neuropsychiatric"],
   ["OCD", "ocd"],

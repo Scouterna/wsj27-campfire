@@ -38,6 +38,10 @@ export const SecondaryDisabled: Story = {
   args: { disabled: true, label: "Avsluta", variant: "secondary" },
 }
 
+export const Onward: Story = {
+  args: { isOnward: true, label: "Visa allt om Ester" },
+}
+
 export const Plain: Story = {
   args: { label: "Avbryt", variant: "plain" },
 }

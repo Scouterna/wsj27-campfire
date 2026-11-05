@@ -29,13 +29,19 @@ export interface ParticipantRecord {
   readonly participation_type: string
   /**
    * The patrol, as plain text – the Patrull answer, or an IST member's Avdelning answer while
-   * their Patrull is unanswered. Empty when there is neither.
+   * their Patrull is unanswered. Empty when there is neither. The one part of the list that
+   * changes while the mock runs, because a leader's write lands on it.
    */
-  readonly patrol: string
+  patrol: string
   /**
    * The roles minted for the participant at decode time.
    */
   readonly roles: readonly string[]
+  /**
+   * The values the service keeps on the member's Scoutnet record, which nothing in the seed
+   * uses.
+   */
+  readonly scout_db: Readonly<Record<string, unknown>>
   readonly sex: string
   readonly troop: string
 }
@@ -118,6 +124,7 @@ export function decodeParticipantsList(
       patrol: patrolOf(participant),
       contact_info: contactInfo,
       forms_data: formsData,
+      scout_db: {},
     })
   }
   return participantsList

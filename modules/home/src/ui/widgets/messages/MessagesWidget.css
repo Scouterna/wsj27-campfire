@@ -8,8 +8,7 @@
     border-radius: var(--border-radius-surface);
 
     /* White on every theme, the yellow included, so the plate is one look across the
-       units. `--color-theme-on-bright` would put the yellow's ink here instead, and a
-       gold paragraph on yellow reads worse than a white one. */
+       units, rather than the dark ink `--color-theme-on-bright` gives the yellow. */
     color: #fff;
     padding: var(--spacing-section);
   }

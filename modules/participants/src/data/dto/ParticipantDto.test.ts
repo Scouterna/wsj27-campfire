@@ -203,7 +203,7 @@ describe("reading one listing row", () => {
 
     expect(ist?.istPatrol).toEqual({ name: "Tordyvel", number: 7 })
     expect(ist).not.toHaveProperty("unit")
-    expect(ist).not.toHaveProperty("unitPatrol")
+    expect(ist).not.toHaveProperty("patrol")
   })
 
   it("reads an IST patrol the contingent has not named by its number alone", () => {
@@ -226,27 +226,25 @@ describe("reading one listing row", () => {
       row({ member_type: "Deltagare", patrol: " Vargarna ", troop: "1" }),
     )
 
-    expect(deltagare?.unitPatrol).toEqual({ name: "Vargarna" })
+    expect(deltagare?.patrol).toBe("Vargarna")
     expect(deltagare).not.toHaveProperty("istPatrol")
   })
 
   it("reads a ledare's patrol the same way, and never as an IST patrol", () => {
     const ledare = toParticipant(row({ patrol: "7" }))
 
-    expect(ledare?.unitPatrol).toEqual({ name: "7" })
+    expect(ledare?.patrol).toBe("7")
     expect(ledare).not.toHaveProperty("istPatrol")
   })
 
   it.each([undefined, "", "  ", 3])("reads the unit patrol %s as no patrol", (patrol) => {
-    expect(toParticipant(row({ member_type: "Deltagare", patrol }))).not.toHaveProperty(
-      "unitPatrol",
-    )
+    expect(toParticipant(row({ member_type: "Deltagare", patrol }))).not.toHaveProperty("patrol")
   })
 
   it("reads no patrol for the contingent management", () => {
     expect(
       toParticipant(row({ member_type: "Kontingentledning", patrol: "2", troop: "" })),
-    ).not.toHaveProperty("unitPatrol")
+    ).not.toHaveProperty("patrol")
   })
 
   it("drops a row without a member number – it cannot be linked to", () => {

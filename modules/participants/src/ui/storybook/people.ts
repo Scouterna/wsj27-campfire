@@ -1,11 +1,10 @@
-import type { ParticipantDetail } from "../../../model/ParticipantDetail"
-import { unitNumbered } from "../../../model/Unit"
+import type { ParticipantDetail } from "../../model/ParticipantDetail"
+import { unitNumbered } from "../../model/Unit"
 
 /**
- * The people this screen's stories are told about. They live here rather than in the
- * module's shared fixtures because they exist to exercise this screen's sections: one
- * record that fills every one of them, one read without health access, and one with a hole
- * wherever the registration allowed one.
+ * The people whose records stories draw, each made to exercise the sections of a person: one
+ * that fills every one of them, one read without health access, and one with a hole wherever
+ * the registration allowed one.
  */
 
 /**
@@ -62,7 +61,7 @@ export const complete: ParticipantDetail = {
       ],
       details: "Nötter ger anafylaxi – bär alltid med sig adrenalinpenna.",
     },
-    otherAllergy: "Björkpollen på våren.",
+    otherAllergy: { details: "Björkpollen på våren." },
     vaccinations: {
       childhoodProgram: true,
       diphtheria: { kind: "given", year: 2023 },
@@ -73,7 +72,7 @@ export const complete: ParticipantDetail = {
       storage: "Kylförvaring mellan måltiderna.",
       managesOwn: true,
     },
-    condition: "Astma, välinställd.",
+    condition: { details: "Astma, välinställd." },
     equipment: {
       needs: ["refrigeration", "permanentPower"],
       details: "Insulinpennorna behöver stå kallt.",
@@ -87,7 +86,7 @@ export const complete: ParticipantDetail = {
         kinds: ["adhd", "ocd"],
         details: "Behöver tydliga rutiner och framförhållning.",
       },
-      phobia: "Höga höjder.",
+      phobia: { details: "Höga höjder." },
     },
     support: {
       unpredictability: { wantsSupport: true, details: "Oregelbundna måltider blir jobbiga." },
@@ -142,8 +141,8 @@ export const withoutHealth: ParticipantDetail = {
 
 /**
  * A hole wherever the registration allowed one: no kår, home town, or birth date, no
- * channels, no travel, one contact with no way to reach them, and a health profile that
- * says nothing at all. Every absent state on the screen is visible at once.
+ * channels, no travel, one contact with no way to reach them, and a form whose health
+ * questions were never answered. Every absent state on the screen is visible at once.
  */
 export const sparse: ParticipantDetail = {
   memberNo: "1400012",

@@ -1,0 +1,150 @@
+/* A person as a chip, and the list a patrol or the tray keeps them in. */
+
+@layer screen {
+  /* The scouts as a grid of chips all one width, so every row lines up with the next
+     whatever the names – as many columns as fit, and one on a phone. */
+  .patrol-members {
+    display: grid;
+    gap: var(--spacing-stack);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .patrol-members-empty {
+    border: 2px dashed var(--color-divider);
+    border-radius: var(--border-radius-control);
+    color: var(--color-ink-tertiary);
+    display: none;
+    font-size: var(--font-size-footnote);
+    margin: 0;
+    padding: var(--spacing-container);
+    text-align: center;
+  }
+
+  .patrol-members:empty + .patrol-members-empty {
+    display: block;
+  }
+
+  /* A chip is picked up where it is pressed, so it refuses the text selection and the
+     callout a long press would otherwise open, and says it can be grabbed. */
+  .patrol-member {
+    -webkit-touch-callout: none;
+    align-items: center;
+    background: color-mix(in srgb, var(--color-theme-wash) 45%, transparent);
+    border-radius: var(--border-radius-control);
+    cursor: grab;
+    display: flex;
+    gap: var(--spacing-inline);
+    min-height: 44px;
+    min-width: 0;
+    padding: 0;
+    touch-action: manipulation;
+    transition:
+      opacity 120ms ease,
+      background 120ms ease;
+    user-select: none;
+  }
+
+  @media (hover: hover) {
+    .patrol-member:hover {
+      background: var(--color-theme-wash);
+    }
+  }
+
+  /* The chip's body picks the person, so it is a button drawn as nothing but its
+     contents. */
+  .patrol-member-body {
+    align-items: center;
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: inherit;
+    display: flex;
+    flex: 1;
+    font: inherit;
+    gap: var(--spacing-stack);
+    min-width: 0;
+    padding: 0 0 0 var(--spacing-stack);
+    text-align: start;
+  }
+
+  .patrol-member-body:focus-visible {
+    border-radius: var(--border-radius-control);
+    outline: 2px solid var(--color-theme-ink);
+  }
+
+  /* A picked chip turns to the theme's ink, so the people about to move together stand
+     out from the rest at a glance – doubled, so it keeps its ink over the hover's wash. */
+  .patrol-member.patrol-member-selected {
+    background: var(--color-theme-ink);
+    color: var(--color-theme-on-ink);
+  }
+
+  .patrol-member-selected .patrol-member-text small,
+  .patrol-member-selected .gender-mark {
+    color: var(--color-theme-on-ink);
+  }
+
+  .patrol-member-selected .care-button:focus-visible {
+    outline-color: var(--color-theme-on-ink);
+  }
+
+  /* The chip left behind while its person is carried, so the reader sees where they
+     came from. */
+  .patrol-member-carried {
+    opacity: 0.35;
+  }
+
+  .patrol-member-landed {
+    animation: patrol-land 320ms ease-out;
+  }
+
+  @keyframes patrol-land {
+    from {
+      background: var(--color-theme-bright);
+      transform: scale(1.06);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .patrol-member-landed {
+      animation: none;
+    }
+  }
+
+  .patrol-member-text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    padding-block: var(--spacing-stack);
+  }
+
+  .patrol-member-name {
+    align-items: center;
+    display: flex;
+    font-size: var(--font-size-value);
+    font-weight: var(--font-weight-strong);
+    gap: var(--spacing-inline);
+    min-width: 0;
+  }
+
+  /* On the name itself, because a flex container does not clip its text with an ellipsis. */
+  .patrol-member-full-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .patrol-member-text small {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-detail);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

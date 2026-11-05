@@ -13,6 +13,8 @@ apps/web/
 └── src/
     ├── main.tsx        the boot order before React: the theme stamp, the navigation wiring, the bfcache reload, the mount
     ├── routes.tsx      the route and widget tables, the sections, the gate, and the two chromes
+    ├── participant-menus.tsx   the cases' entries in the menus of a person's and a unit's screens
+    ├── case-care.tsx   the participants' care on a person's card on a case
     ├── navigation.ts   the navigation memory: direction, trails, and scroll restoration
     ├── outline.tsx     the desktop outline column, read from the page as rendered
     ├── query.ts        the one query client, its persister, the session wrapper, and the cache-owner handover

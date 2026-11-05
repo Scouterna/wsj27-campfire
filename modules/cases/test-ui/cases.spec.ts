@@ -1176,3 +1176,141 @@ test("keeps the section open on the cases listed when the types cannot be read",
   await showWaiting(page)
   await expect(page.getByRole("link", { name: /Tidig hemresa/u })).toBeVisible()
 })
+
+test("puts a person's care on a health case for the health team", async ({ page }, testInfo) => {
+  await openUnitsReveal(page)
+  await page.goto("/")
+  await signInAs(page, "Helena Hägg")
+  const title = uniqueTitle(testInfo)
+  await openCase(page, healthCase, "Molly Sundqvist", title)
+
+  await page
+    .getByRole("region", { name: "Gäller" })
+    .getByRole("button", { name: /^Molly Sundqvist har /u })
+    .click()
+
+  const sheet = page.getByRole("dialog", { name: "Molly Sundqvist" })
+  await expect(sheet).toContainText("Nötter")
+  await expect(sheet).toContainText("anafylaxi")
+  await expect(sheet.getByRole("link", { name: "Visa allt om Molly" })).toBeVisible()
+
+  await page.keyboard.press("Escape")
+  await expect(sheet).toBeHidden()
+  await expect(page).toHaveURL(/\/cases\/\d+$/u)
+})
+
+test("leaves the way to the person off the care while the section is closed", async ({
+  page,
+}, testInfo) => {
+  // Held shut by a clock before the moment, because the moment itself passes.
+  await page.clock.setFixedTime(new Date("2026-09-01T12:00:00+02:00"))
+  await page.goto("/")
+  await signInAs(page, "Helena Hägg")
+  await openCase(page, healthCase, "Molly Sundqvist", uniqueTitle(testInfo))
+
+  await page.getByRole("button", { name: /^Molly Sundqvist har /u }).click()
+
+  const sheet = page.getByRole("dialog", { name: "Molly Sundqvist" })
+  await expect(sheet).toContainText("anafylaxi")
+  await expect(sheet.getByRole("link")).toHaveCount(0)
+})
+
+test("puts care on any case for a reader who may read the person's health", async ({
+  page,
+}, testInfo) => {
+  await openUnitsReveal(page)
+  await page.goto("/")
+  await signInAs(page, "Helena Hägg")
+  await openCase(page, { scope: "CMT" }, "Molly Sundqvist", uniqueTitle(testInfo))
+
+  await expect(
+    page
+      .getByRole("region", { name: "Gäller" })
+      .getByRole("button", { name: /^Molly Sundqvist har /u }),
+  ).toBeVisible()
+})
+
+test("draws no care for someone a case is shared with who may not read the person's health", async ({
+  browser,
+  page,
+}, testInfo) => {
+  await page.goto("/")
+  await signInAs(page, "Helena Hägg")
+  const title = uniqueTitle(testInfo)
+  await openCase(page, healthCase, "Molly Sundqvist", title)
+  const access = page.getByRole("region", { name: "Ansvarig och vem som ser ärendet" })
+  await access.getByRole("button", { name: "Dela", exact: true }).click()
+  await page
+    .getByRole("textbox", { name: "Ledare och CMT som inte ser ärendet" })
+    .fill("Karin Kron")
+  await page.getByRole("button", { name: "Karin Kron" }).click()
+  await expect(access.getByRole("list", { name: "De som ser ärendet" })).toContainText("Karin Kron")
+
+  const karin = await secondReader(browser, "Karin Kron")
+  await karin.getByRole("link", { name: title }).click()
+
+  await expect(karin.getByRole("region", { name: "Gäller" })).toContainText("Molly Sundqvist")
+  // Settled first, because the marks would arrive with the person's read.
+  await karin.waitForLoadState("networkidle")
+  await expect(karin.getByRole("button", { name: /Visa hälsa och kost\.$/u })).toHaveCount(0)
+  await karin.context().close()
+})
+
+test("puts care on a health case shared with a leader of the person's unit", async ({
+  browser,
+  page,
+}, testInfo) => {
+  // Lars may read Ester's health as her unit's leader, so he sees her care on any case he
+  // can open, the health team's included.
+  await page.goto("/")
+  await signInAs(page, "Helena Hägg")
+  const title = uniqueTitle(testInfo)
+  await openCase(page, healthCase, "Ester Dahl", title)
+  const access = page.getByRole("region", { name: "Ansvarig och vem som ser ärendet" })
+  await access.getByRole("button", { name: "Dela", exact: true }).click()
+  await page
+    .getByRole("textbox", { name: "Ledare och CMT som inte ser ärendet" })
+    .fill("Lars Lindberg")
+  await page.getByRole("button", { name: "Lars Lindberg" }).click()
+  await expect(access.getByRole("list", { name: "De som ser ärendet" })).toContainText(
+    "Lars Lindberg",
+  )
+
+  const lars = await secondReader(browser, "Lars Lindberg")
+  await lars.getByRole("link", { name: title }).click()
+
+  await expect(
+    lars.getByRole("region", { name: "Gäller" }).getByRole("button", { name: /^Ester Dahl har /u }),
+  ).toBeVisible()
+  await lars.context().close()
+})
+
+test("puts a scout's care on their unit's case for its leader", async ({ page }, testInfo) => {
+  await openUnitsReveal(page)
+  await page.goto("/")
+  await signInAs(page, "Lars Lindberg")
+  await openCase(page, {}, "Ester Dahl", uniqueTitle(testInfo))
+
+  await page
+    .getByRole("region", { name: "Gäller" })
+    .getByRole("button", { name: /^Ester Dahl har /u })
+    .click()
+
+  const sheet = page.getByRole("dialog", { name: "Ester Dahl" })
+  await expect(sheet).toContainText("Nötter")
+  await page.keyboard.press("Escape")
+  await expect(sheet).toBeHidden()
+})
+
+test("leaves a note to the management off the care a unit's leader sees on its case", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/")
+  await signInAs(page, "Anders Andersson")
+  await openCase(page, {}, "Örjan Kask", uniqueTitle(testInfo))
+
+  await expect(page.getByRole("region", { name: "Gäller" })).toContainText("Örjan Kask")
+  // Settled first, because the marks would arrive with the person's read.
+  await page.waitForLoadState("networkidle")
+  await expect(page.getByRole("button", { name: /Visa hälsa och kost\.$/u })).toHaveCount(0)
+})

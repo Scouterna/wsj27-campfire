@@ -2,7 +2,12 @@ import { ScreenDecorator } from "@scouterna/wsj27-campfire-ui"
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ApiDecorator } from "../../storybook/ApiDecorator"
-import { unitWithHomeTowns, wholeList } from "../../storybook/cast"
+import {
+  unitInPatrols,
+  unitInPatrolsDetails,
+  unitWithHomeTowns,
+  wholeList,
+} from "../../storybook/cast"
 import { GroupScreen } from "./GroupScreen"
 
 const meta: Meta<typeof GroupScreen> = {
@@ -23,6 +28,28 @@ type Story = StoryObj<typeof GroupScreen>
  * come from, and a count that says where they are.
  */
 export const OneUnit: Story = {}
+
+/**
+ * A unit divided into patrols: a section per patrol, the scouts in none, and the leaders
+ * closing the list.
+ */
+export const InPatrols: Story = {
+  parameters: { api: { list: unitInPatrols() } },
+}
+
+/**
+ * The same unit read by a leader who also serves in the management, each scout who
+ * declared anything carrying their care. A unit of anybody else's carries none.
+ */
+export const InPatrolsWithCare: Story = {
+  parameters: {
+    api: {
+      list: unitInPatrols(),
+      unitDetails: unitInPatrolsDetails(),
+      viewer: { memberNo: "1", readsEveryone: true, readsHealth: false, unitNumber: 1 },
+    },
+  },
+}
 
 /**
  * An IST patrol, numbered in the same series as the units but never one of them – no

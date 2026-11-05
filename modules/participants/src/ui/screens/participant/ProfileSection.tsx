@@ -6,6 +6,7 @@ import { ageOf, avatarNumberFor, belonging } from "../../../model/Participant"
 import type { ParticipantDetail } from "../../../model/ParticipantDetail"
 import { roleName } from "../../../model/ParticipantRole"
 import { funktionName, travelName } from "../../../model/Participation"
+import { isPatrolMember } from "../../../model/Patrol"
 import { PersonBadge } from "../../components/badge/PersonBadge"
 import { GenderMark } from "../../components/gender/GenderMark"
 
@@ -130,6 +131,16 @@ export function ProfileSection(props: ProfileSectionProps): ReactElement {
             <p>
               <span>{where.label}:</span> <strong>{where.value}</strong>
             </p>
+            {participant.unit !== undefined && isPatrolMember(participant) && (
+              <p>
+                <span>Patrull:</span>{" "}
+                {participant.patrol === undefined ? (
+                  <em>Ingen än</em>
+                ) : (
+                  <strong>{participant.patrol}</strong>
+                )}
+              </p>
+            )}
           </div>
         </div>
 

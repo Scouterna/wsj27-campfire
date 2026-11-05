@@ -9,10 +9,8 @@ import {
   watchExpiry,
 } from "@scouterna/wsj27-campfire-authentication"
 import {
-  casesPersonMenu,
   casesRoutes,
   casesSectionLabel,
-  casesUnitMenu,
   casesWidgets,
   useCasesAccess,
   type CasesAccess,
@@ -22,7 +20,6 @@ import { host } from "@scouterna/wsj27-campfire-host"
 import { journeyWidgets } from "@scouterna/wsj27-campfire-journey"
 import { materialRoutes, materialSectionLabel } from "@scouterna/wsj27-campfire-material"
 import {
-  ActionsProvider,
   participantsRoutes,
   participantsSectionLabel,
   participantsWidgets,
@@ -86,6 +83,7 @@ import { QueryClientProvider } from "@tanstack/react-query"
 import { createRouter, Link, useRouterState, type RouteComponent } from "@tanstack/react-router"
 import { useCallback, useEffect, useState, type ReactElement, type ReactNode } from "react"
 
+import { CaseCare } from "./case-care"
 import {
   historyIndex,
   markPush,
@@ -96,6 +94,7 @@ import {
   useNavigationBookkeeping,
 } from "./navigation"
 import { Outline } from "./outline"
+import { ParticipantMenus } from "./participant-menus"
 import { adoptCacheOwner, forgetCache, queryClient } from "./query"
 
 /**
@@ -304,39 +303,6 @@ type SignedInProps = {
   readonly children: ReactNode
 }
 
-type ParticipantMenusProps = {
-  /**
-   * The subtree whose person and unit screens carry the entries.
-   */
-  readonly children: ReactNode
-}
-
-/**
- * What other sections offer on a person's and a unit's own screens, each only where the
- * section itself is granted – the cases about them, and a new one. Composed here, because
- * those screens and the cases belong to different modules.
- * @param props The subtree that shows the entries.
- * @returns The subtree, with the entries in scope.
- */
-function ParticipantMenus(props: ParticipantMenusProps): ReactElement {
-  const isSectionGranted = useSectionLookup()
-  const { canOpen } = useCasesAccess()
-  const hasCases = isSectionGranted("cases")
-  const person = useCallback(
-    (memberNo: string) => (hasCases ? casesPersonMenu(memberNo, canOpen) : []),
-    [canOpen, hasCases],
-  )
-  const unit = useCallback(
-    (unitNumber: number) => (hasCases ? casesUnitMenu(unitNumber, canOpen) : []),
-    [canOpen, hasCases],
-  )
-  return (
-    <ActionsProvider person={person} unit={unit}>
-      {props.children}
-    </ActionsProvider>
-  )
-}
-
 /**
  * Where the gate stands: asking at boot, signed in, signed out, or ending a session that
  * the service refused – the one stretch where the cache is being forgotten and nothing of
@@ -490,13 +456,15 @@ function SignedInChrome(props: SignedInProps): ReactElement {
                 <RevealProvider reveals={reveals}>
                   <SectionGrants>
                     <ParticipantMenus>
-                      <WidgetsProvider widgets={widgets}>
-                        {host.tier === "shell" ? (
-                          <ShellChrome user={props.user}>{props.children}</ShellChrome>
-                        ) : (
-                          <BrowserChrome user={props.user}>{props.children}</BrowserChrome>
-                        )}
-                      </WidgetsProvider>
+                      <CaseCare>
+                        <WidgetsProvider widgets={widgets}>
+                          {host.tier === "shell" ? (
+                            <ShellChrome user={props.user}>{props.children}</ShellChrome>
+                          ) : (
+                            <BrowserChrome user={props.user}>{props.children}</BrowserChrome>
+                          )}
+                        </WidgetsProvider>
+                      </CaseCare>
                     </ParticipantMenus>
                   </SectionGrants>
                 </RevealProvider>
@@ -695,13 +663,7 @@ function BrowserChrome(props: SignedInProps): ReactElement {
 
   return (
     <div className="shell">
-      <SideMenu
-        items={items}
-        current={currentTab}
-        onReselect={scrollToTop}
-        teaser="Mer kommer snart…"
-        footer={pill(false)}
-      />
+      <SideMenu items={items} current={currentTab} onReselect={scrollToTop} footer={pill(false)} />
       <div className="page">
         <main>
           <NavigationBar

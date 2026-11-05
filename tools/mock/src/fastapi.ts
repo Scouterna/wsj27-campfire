@@ -14,17 +14,18 @@ import type { ContentfulStatusCode } from "hono/utils/http-status"
  */
 export interface ValidationError {
   /**
-   * Extra detail some errors carry, such as the values a literal accepts.
+   * Extra detail some errors carry, such as the values a literal accepts or a length limit.
    */
-  readonly ctx?: Readonly<Record<string, string>>
+  readonly ctx?: Readonly<Record<string, number | string>>
   /**
    * What was sent, or null when nothing was.
    */
   readonly input: unknown
   /**
-   * Where the value was looked for – `["query", "infolevel"]`.
+   * Where the value was looked for – `["query", "infolevel"]`, or a position in the body
+   * that did not parse, which pydantic gives as a number.
    */
-  readonly loc: readonly string[]
+  readonly loc: readonly (number | string)[]
   /**
    * The sentence pydantic words the error in.
    */

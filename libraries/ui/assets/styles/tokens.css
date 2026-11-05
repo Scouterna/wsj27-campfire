@@ -29,6 +29,11 @@
     /* The shade a modal lays over the page behind it, the ink at two fifths. */
     --color-scrim: rgb(26 26 26 / 40%);
 
+    /* The shadows of what leaves the page: raised for something carried or following the
+       reader, and overlay for a sheet laid over everything. */
+    --shadow-overlay: 0 24px 60px rgb(0 0 0 / 30%);
+    --shadow-raised: 0 12px 28px rgb(0 0 0 / 25%);
+
     /* The unit colors – the exact outer-ring values from the badge marks, which are the
        authoritative artwork for the color identities. */
     --color-theme-blue: #2a778a;
@@ -139,6 +144,10 @@
        thinned onto the sheet, so it follows the unit color in force. Declared on every
        themed scope for the same substitution reason as on-bright above. */
     --color-theme-wash: color-mix(in srgb, var(--color-theme-ink) 12%, var(--color-sheet));
+
+    /* A mark drawn on the wash with nothing beside it to read, which has to hold 3:1
+       against it – the ink itself, wherever the ink does. */
+    --color-theme-on-wash: var(--color-theme-ink);
   }
 
   [data-theme="blue"] {
@@ -165,7 +174,12 @@
     --color-theme-bright: var(--color-theme-yellow);
     --color-theme-ink: #c3900b;
 
-    /* White vanishes on the bright yellow, so its fills carry the ink instead. */
-    --color-theme-on-bright: var(--color-theme-ink);
+    /* White vanishes on the bright yellow, and so does the yellow's own ink, so its fills
+       carry that ink darkened until it reads at 4.5:1. */
+    --color-theme-on-bright: color-mix(in srgb, var(--color-theme-ink) 50%, black);
+
+    /* The ink on its own wash reads at about 2.6:1, so a mark there takes the same
+       darkened ink. */
+    --color-theme-on-wash: var(--color-theme-on-bright);
   }
 }

@@ -22,13 +22,15 @@
     margin: 0;
   }
 
-  /* The person's own words under a value: quieter than the label above it, indented and
-     quoted, so it reads as a quotation rather than as a second value. */
+  /* The person's own words under a value, as readable as the value but quieter, set off
+     by a rule in the theme's wash, so it reads as a quotation rather than as a second
+     value. */
   .fields .field-quote {
-    color: var(--color-ink-tertiary);
-    font-size: var(--font-size-footnote);
+    border-inline-start: 3px solid var(--color-theme-wash);
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-value);
     line-height: 1.45;
-    margin-top: var(--spacing-inline);
+    margin-top: var(--spacing-stack);
     padding-inline-start: var(--spacing-group);
     text-wrap: pretty;
   }

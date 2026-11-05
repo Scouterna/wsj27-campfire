@@ -1,0 +1,9 @@
+/* What the screen says in place of the editor. */
+
+@layer screen {
+  .patrols-status {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+  }
+}

@@ -26,3 +26,28 @@ export function genderName(gender: Gender): string {
     }
   }
 }
+
+/**
+ * How many people of a gender there are, in words a sentence can carry – "2 kvinnor",
+ * "1 man", "3 med annat kön".
+ * @param gender The gender counted.
+ * @param count How many have it.
+ * @returns The count and its noun, inflected for the count.
+ */
+export function genderCount(gender: Gender, count: number): string {
+  const isOne = count === 1
+  switch (gender) {
+    case "annat": {
+      return `${String(count)} med annat kön`
+    }
+    case "kvinna": {
+      return `${String(count)} ${isOne ? "kvinna" : "kvinnor"}`
+    }
+    case "man": {
+      return `${String(count)} ${isOne ? "man" : "män"}`
+    }
+    case "okant": {
+      return `${String(count)} med okänt kön`
+    }
+  }
+}

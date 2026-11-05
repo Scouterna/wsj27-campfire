@@ -1,0 +1,159 @@
+/* The sheet: a heading that stays put, content that scrolls under it, and an optional
+   footer, all on one surface – risen from the bottom edge on a phone, and centered from
+   768px. */
+
+@layer component {
+  /* The page under a modal does not scroll, or a swipe past the sheet's end moves it. */
+  :root:has(.sheet[open]) {
+    overflow: hidden;
+  }
+
+  .sheet {
+    background: var(--color-paper);
+    border: none;
+    border-start-end-radius: var(--border-radius-surface);
+    border-start-start-radius: var(--border-radius-surface);
+    box-shadow: var(--shadow-overlay);
+    color: var(--color-ink);
+
+    /* Pinned to the bottom edge, with a strip of the page left showing above it so it
+       reads as lifted over the page and clears the notch. */
+    margin: auto 0 0;
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - var(--spacing-section));
+    max-width: none;
+    overflow: hidden;
+    padding: 0;
+    width: 100%;
+  }
+
+  /* Only while open, because display would otherwise show a closed dialog. */
+  .sheet[open] {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sheet::backdrop {
+    background: var(--color-scrim);
+  }
+
+  /* The sheet's padding, one value for every edge, tighter on a phone. */
+  .sheet {
+    --sheet-padding: var(--spacing-section);
+  }
+
+  .sheet-header,
+  .sheet-body,
+  .sheet-footer {
+    padding-inline: max(var(--sheet-padding), env(safe-area-inset-left, 0px))
+      max(var(--sheet-padding), env(safe-area-inset-right, 0px));
+  }
+
+  .sheet-header {
+    align-items: center;
+    display: flex;
+    flex: none;
+    gap: var(--spacing-group);
+    padding-block: var(--sheet-padding) var(--spacing-section);
+  }
+
+  .sheet-leading {
+    display: flex;
+    flex: none;
+  }
+
+  .sheet-heading {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .sheet-title {
+    font-size: var(--font-size-heading);
+    font-weight: var(--font-weight-strong);
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  /* Focused only to start the reader there, never to be pressed, so it draws no ring. */
+  .sheet-title:focus {
+    outline: none;
+  }
+
+  .sheet-description {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  /* Contained, so a swipe past the content's end stops here. */
+  .sheet-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-block: var(--spacing-group);
+  }
+
+  .sheet-body:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: -2px;
+  }
+
+  /* Whatever ends the sheet clears the home indicator. */
+  .sheet-body:last-child,
+  .sheet-footer {
+    padding-bottom: calc(var(--sheet-padding) + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* What it holds sits at the trailing edge, where a way onward is looked for. */
+  .sheet-footer {
+    display: flex;
+    flex: none;
+    justify-content: flex-end;
+    padding-top: var(--spacing-group);
+  }
+
+  @media (max-width: 767px) {
+    .sheet {
+      --sheet-padding: var(--spacing-container);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .sheet {
+      border-radius: var(--border-radius-surface);
+      margin: auto;
+
+      /* In rem, so a larger text size widens the panel with its lines. */
+      max-height: min(80dvh, 45rem);
+      max-width: calc(100vw - 2 * var(--spacing-container));
+      width: 30rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .sheet[open] {
+      animation: sheet-rise 250ms cubic-bezier(0.32, 0.72, 0.35, 1);
+    }
+
+    .sheet[open]::backdrop {
+      animation: sheet-dim 250ms ease;
+    }
+  }
+
+  @keyframes sheet-rise {
+    from {
+      opacity: 0;
+      transform: translateY(var(--spacing-section));
+    }
+  }
+
+  @keyframes sheet-dim {
+    from {
+      opacity: 0;
+    }
+  }
+}

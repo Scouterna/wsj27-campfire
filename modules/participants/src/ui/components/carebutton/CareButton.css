@@ -1,0 +1,45 @@
+/* A person's care as a button: a leaf for food and a heart for health, in a small pill
+   on the theme's wash, drawn like the small icon button beside a row's text. */
+
+@layer component {
+  .care-button {
+    align-items: center;
+    background: var(--color-theme-wash);
+    border: none;
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-on-wash);
+    cursor: pointer;
+    display: inline-flex;
+    flex: none;
+    gap: var(--spacing-inline);
+    height: 32px;
+    justify-content: center;
+    min-width: 32px;
+    padding: 0 var(--spacing-stack);
+    position: relative;
+    transition: background 120ms ease;
+  }
+
+  /* The press still reaches a fingertip's width, because the target is what a thumb
+     needs, not the drawing. */
+  .care-button::before {
+    content: "";
+    inset: -6px;
+    position: absolute;
+  }
+
+  @media (hover: hover) {
+    .care-button:hover {
+      background: color-mix(in srgb, var(--color-theme-ink) 18%, var(--color-sheet));
+    }
+  }
+
+  .care-button:active {
+    background: color-mix(in srgb, var(--color-theme-ink) 24%, var(--color-sheet));
+  }
+
+  .care-button:focus-visible {
+    outline: 2px solid var(--color-theme-ink);
+    outline-offset: 2px;
+  }
+}

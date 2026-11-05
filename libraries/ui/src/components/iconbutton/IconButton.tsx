@@ -4,9 +4,10 @@ import "./IconButton.css"
 
 /**
  * How loudly an icon button asks to be pressed: primary for the action the row exists
- * for, filled in the theme's ink, and secondary for a tool beside it, in the theme's wash.
+ * for, filled in the theme's ink, secondary for a tool beside it, in the theme's wash, and
+ * glass for a control floating over a surface, in the overflow menu's glass and quiet ink.
  */
-export type IconButtonVariant = "primary" | "secondary"
+export type IconButtonVariant = "glass" | "primary" | "secondary"
 
 /**
  * The icon, the words it stands for, its size and variant, and what pressing it does.
