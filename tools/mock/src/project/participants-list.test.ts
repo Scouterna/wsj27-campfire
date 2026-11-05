@@ -43,6 +43,7 @@ describe("the decoded list of participants", () => {
       "patrol",
       "contact_info",
       "forms_data",
+      "scout_db",
     ])
     expect(lars).toMatchObject({
       name: "Lars Lindberg",
@@ -145,7 +146,8 @@ describe("the decoded list of participants", () => {
     // An IST member's is their patrol's number, and a unit member's the name their
     // leaders chose.
     expect(decoded(1_300_210).patrol).toBe("7")
-    expect(decoded(1_100_101).patrol).toBe("Falkarna")
+    expect(decoded(1_300_140).patrol).toBe("Falkarna")
+    expect(decoded(1_100_101).patrol).toBe("")
     expect(decoded(1_300_533).patrol).toBe("")
   })
 

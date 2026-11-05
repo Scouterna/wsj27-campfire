@@ -1,6 +1,7 @@
 import { fullName, type Participant } from "./Participant"
 import type { ParticipantRole } from "./ParticipantRole"
 import { funktionName } from "./Participation"
+import { isPatrolMember } from "./Patrol"
 
 /**
  * The participation role a list can be narrowed to, as the address carries it and as the
@@ -38,18 +39,22 @@ not */
 /**
  * Whether a person answers a search.
  *
- * The query is tested against the full name, the unit's or the IST patrol's name, and the
- * management member's funktion, each separately – never joined, so a query cannot match
- * across the seam between two fields. A query that is only digits is a unit number and matches it
+ * The query is tested against the full name, the unit's or the IST patrol's name, a
+ * deltagare's patrol within the unit where the list is one unit's, and the management
+ * member's funktion, each separately – never joined, so a query cannot match across the
+ * seam between two fields. A query that is only digits is a unit number and matches it
  * exactly – "2" finds Avdelning 2, never 28. The member number and the plain role words
  * stay out, because the chips narrow by role and a search that matched "ist" would be a
  * second, accidental filter. An empty query, or one that is only whitespace, matches
  * everybody.
  * @param person The person to test.
  * @param query What the reader typed.
+ * @param isUnitScoped Whether the list is one unit's, where the unit's own patrols are
+ *   something to search by. Across the contingent their names say nothing, because every
+ *   unit names its own.
  * @returns True when the person answers the query.
  */
-export function matches(person: Participant, query: string): boolean {
+export function matches(person: Participant, query: string, isUnitScoped = false): boolean {
   const needle = fold(query.trim())
   if (needle === "") {
     return true
@@ -64,6 +69,14 @@ export function matches(person: Participant, query: string): boolean {
   if (groupName !== undefined && fold(groupName).includes(needle)) {
     return true
   }
+  if (
+    isUnitScoped &&
+    isPatrolMember(person) &&
+    person.patrol !== undefined &&
+    fold(person.patrol).includes(needle)
+  ) {
+    return true
+  }
   return person.funktion !== undefined && fold(funktionName(person.funktion)).includes(needle)
 }
 /* eslint-enable unicorn/consistent-boolean-name */
@@ -76,14 +89,18 @@ export function matches(person: Participant, query: string): boolean {
  * @param people The people to narrow.
  * @param query What the reader typed. Empty or whitespace narrows nothing.
  * @param roll The role to keep, or undefined to keep every role.
+ * @param isUnitScoped Whether the list is one unit's, so the search reaches its patrols.
  * @returns The people that answer both, in the order they arrived.
  */
 export function narrow(
   people: readonly Participant[],
   query: string,
   roll: RoleFilter | undefined,
+  isUnitScoped = false,
 ): readonly Participant[] {
   const role = roll === undefined ? undefined : rolesByFilter.get(roll)
   const byRole = role === undefined ? people : people.filter((person) => person.role === role)
-  return query.trim() === "" ? byRole : byRole.filter((person) => matches(person, query))
+  return query.trim() === ""
+    ? byRole
+    : byRole.filter((person) => matches(person, query, isUnitScoped))
 }

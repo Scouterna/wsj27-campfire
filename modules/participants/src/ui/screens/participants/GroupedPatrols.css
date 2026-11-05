@@ -1,0 +1,23 @@
+/* A unit grouped by patrol, each patrol's rows a plain list on its card. */
+
+@layer screen {
+  .grouped-patrols-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* The rows sit in the list rather than straight on the card, so the card's own edge
+     rules do not reach them – the same arrangement the virtual list makes. The card gives
+     up its vertical padding so the rows reach its top and bottom, and clips so a pressed
+     edge row is cut to the radius. */
+  .card:has(> .grouped-patrols-list) {
+    overflow: clip;
+    padding-block: 0;
+  }
+
+  /* The divider belongs between rows, so the first one drops it. */
+  .grouped-patrols-list > li:first-child .row {
+    border-top: none;
+  }
+}

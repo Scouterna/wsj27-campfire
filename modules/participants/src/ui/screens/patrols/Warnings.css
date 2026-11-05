@@ -1,0 +1,12 @@
+/* What the editor warns about. */
+
+@layer screen {
+  .patrols-warning {
+    background: var(--color-tone-caution-wash);
+    border-radius: var(--border-radius-control);
+    color: var(--color-tone-caution-ink);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+    padding: var(--spacing-group) var(--spacing-container);
+  }
+}

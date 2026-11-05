@@ -30,7 +30,8 @@ export interface ParticipantDetail extends Participant {
    */
   readonly contact: ContactDetails
   /**
-   * What they declared about their health – absent for a viewer who may not read it.
+   * What they declared about their health – absent for a viewer who may not read it, and
+   * for somebody who answered nothing.
    */
   readonly health?: HealthProfile
   /**

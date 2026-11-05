@@ -2,7 +2,7 @@
 
 The data layer is where the outside world is dealt with – the back-end services, Google Drive, the shapes they send, and the cache that keeps their answers – and turned into the types [the domain](./domain) declares.
 
-Only a module that owns a capability has one. Authentication asks the auth service who is signed in, and reads the signed-in person's own registration – their unit and how they travel – from the participants service. Participants reads the list of participants. Cases reads and writes the cases its reader reaches, and reads the names within their reach to show them with. Material reads the contingent's material from Google Drive. No other module reads from anywhere.
+Only a module that owns a capability has one. Authentication asks the auth service who is signed in, and reads the signed-in person's own registration – their unit and how they travel – from the participants service. Participants reads the list of participants and writes a unit's patrols. Cases reads and writes the cases its reader reaches, and reads the names within their reach to show them with. Material reads the contingent's material from Google Drive. No other module reads from anywhere.
 
 ## Query factories
 
@@ -14,9 +14,11 @@ Every read goes through the application's one query client, so one cache holds e
 
 ## Writes
 
-A write is a plain function in `data/` beside the factories – it builds the request, sends it through the same `fetch` wrapper, and converts the answer with the converter the reads use, so what a write hands back is validated at the boundary like anything read. It is not a query, because nothing caches a write; what it changes is the cache's business afterward. A screen runs it through a mutation hook in `ui/`, and however the write settles, the module marks its own queries stale so the screens on them read again – after a refusal too, because a case refused as already closed has changed under the reader, and what it is now is worth showing. A query a write cannot change, such as the contingent's names, is spared, because reading it again would bring back the same large answer.
+A write is a plain function in `data/` beside the factories – it builds the request, sends it through the same `fetch` wrapper, and converts the answer with the converter the reads use, so what a write hands back is validated at the boundary like anything read, and an answer that only repeats the write is left unread. It is not a query, because nothing caches a write; what it changes is the cache's business afterward. A screen runs it through a mutation hook in `ui/`, and however the write settles, the module marks its own queries stale so the screens on them read again – after a refusal too, because a case refused as already closed has changed under the reader, and what it is now is worth showing. A query a write cannot change, such as the contingent's names, is spared, because reading it again would bring back the same large answer.
 
-Nothing is written optimistically. On the island a write may take a while to answer, and a screen showing a note the service never stored would be worse than one that waits, so a screen holds its controls still until the answer is in, and shows what the service stored.
+The service stores one person's patrol per request, so saving a unit is many writes, sent a few at a time. Each lands or fails on its own, what landed stays, and what failed stays a change still to save.
+
+Nothing is written optimistically. On the island a write may take a while to answer, and a screen showing a note the service never stored would be worse than one that waits, so a screen shows what the service stored only once the answer is in, and most hold their controls still until then. The patrol editor is the exception: its draft is the leader's own, so it stays live through a save, and a change made meanwhile is kept as one still to save. Saved patrols go into the cached list once the service has answered, because the read straight after may not get through on the island.
 
 ## DTOs and converters
 
@@ -63,6 +65,6 @@ The cache is persisted query by query into IndexedDB, rather than as one snapsho
 
 ## The cache has an owner
 
-The cache holds personal data for up to thirty days, health answers included, so it belongs to one member number at a time ([ADR 017](/decisions/017-route-and-load-data-with-tanstack-router-and-query)). Before any screen mounts, the session gate hands it to the signed-in person, and a different person than last time wipes it in memory and on disk first. A leader's cached unit must never be shown to the next person who signs in on the same phone.
+The cache holds personal data for up to thirty days, health answers included, so it belongs to one member number at a time ([ADR 017](/decisions/017-route-and-load-data-with-tanstack-router-and-query)). Before any screen mounts, the session gate hands it to the signed-in person, and a different person than last time wipes it in memory and on disk first. A leader's cached unit must never be shown to the next person who signs in on the same phone. A unit leader's first home screen already reads their scouts' health answers, because each scout's row carries their care, so those answers sit unencrypted on the device from then on.
 
 The same person signing back in keeps everything – that is the offline-first promise, and only a change of person costs a refetch. Signing out, or a session the service ends, forgets the cache before the sign-in screen shows.

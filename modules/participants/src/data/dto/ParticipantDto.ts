@@ -190,8 +190,9 @@ function toIstPatrol(text: string): IstPatrol | undefined {
  * Which unit and which patrol a person belongs to. The troop is a unit only for a
  * deltagare or a ledare, and the service leaves it empty for everyone else. The patrol
  * answer means one of two things: an IST member's is the number of one of the IST's
- * patrols, which share the units' series, and a deltagare's or a ledare's is the name
- * their unit's leaders chose for a patrol of their own.
+ * patrols, which share the units' series, and a deltagare's is the name their unit's
+ * leaders chose for a patrol of their own. A ledare's can only have been entered by hand
+ * in Scoutnet, because the service refuses that write for anyone but a deltagare.
  * @param role What the person is at the jamboree.
  * @param dto The row the participants service sent.
  * @returns The unit and the patrol, each present only where there is one.
@@ -199,7 +200,7 @@ function toIstPatrol(text: string): IstPatrol | undefined {
 function toBelonging(
   role: ParticipantRole,
   dto: ParticipantDto,
-): Pick<Participant, "istPatrol" | "unit" | "unitPatrol"> {
+): Pick<Participant, "istPatrol" | "patrol" | "unit"> {
   const patrol = typeof dto.patrol === "string" ? dto.patrol : ""
   if (role === "ist") {
     const istPatrol = toIstPatrol(patrol)
@@ -215,7 +216,7 @@ function toBelonging(
   const name = patrol.trim()
   return {
     ...(unit !== undefined && { unit }),
-    ...(name !== "" && { unitPatrol: { name } }),
+    ...(name !== "" && { patrol: name }),
   }
 }
 

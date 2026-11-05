@@ -268,12 +268,16 @@ test("places a leader's unit on the start screen, and nobody else's", async ({ p
   await expect(page.getByText("Avdelning 1", { exact: true })).toBeVisible()
   // Led by the name, because the cases above name her in their rows too.
   const scout = page.getByRole("link", { name: /^Ester Dahl/u })
-  await expect(scout).toContainText(/\d år/)
-  await expect(scout.getByRole("img", { name: "Kvinna" })).toBeVisible()
-  const leader = page.getByRole("link", { name: /^Hanna Hellström/u })
+  // The row, not the link, because the gender and the age sit beside it, past the care.
+  const scoutRow = page.locator(".unit-widget-person", { has: scout })
+  await expect(scoutRow).toContainText(/\d år/)
+  await expect(scoutRow.getByRole("img", { name: "Kvinna" })).toBeVisible()
+  const leaderRow = page.locator(".unit-widget-person", {
+    has: page.getByRole("link", { name: /^Hanna Hellström/u }),
+  })
   // The pattern, not the word: the kår under every name ends in "år" too.
-  await expect(leader).not.toContainText(/\d år/)
-  await expect(leader.getByRole("img", { name: "Kvinna" })).toBeVisible()
+  await expect(leaderRow).not.toContainText(/\d år/)
+  await expect(leaderRow.getByRole("img", { name: "Kvinna" })).toBeVisible()
 
   // A pill is a doorway into the person. Pressed once the cases card above has arrived,
   // because its arrival moves the pills down, and a press that lands mid-move falls on a

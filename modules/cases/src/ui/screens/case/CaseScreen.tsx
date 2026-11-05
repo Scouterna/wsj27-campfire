@@ -435,7 +435,8 @@ function CaseBody(props: CaseBodyProps): ReactElement {
   const { data: types } = useQuery(fetchCaseTypesQuery())
   const reader = { memberNo: user?.memberNo, roles, types }
   const isSharable = canShare(item, reader)
-  const canChangePeople = !item.isClosed && isRoleHolder(item, reader)
+  const isHolder = isRoleHolder(item, reader)
+  const canChangePeople = !item.isClosed && isHolder
   const menu = menuFor(item, people, {
     // A case about a unit as a whole stays about the whole unit, so nobody is added to it.
     onAddPerson:

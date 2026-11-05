@@ -26,14 +26,21 @@ sequenceDiagram
   Query->>Query: Convert each row, dropping what it cannot read
   Query-->>Hook: The list of participants and its scope
   Hook-->>Screen: The people, in reading order
-  Screen->>Screen: Draw the list, virtualized
+  Screen->>Screen: Draw the list, by patrol or virtualized
+  Screen->>Hook: The unit's care
+  Hook->>Query: Full options for this viewer
+  Query->>Service: The unit's listing, in full
+  Service-->>Query: Records with their health answers
+  Query-->>Hook: The records
+  Hook-->>Screen: Each person's care marks
 ```
 
 1. **The screen renders.** It does not fetch, validate, or decide which unit to ask for. It calls the hook beside it and draws what comes back, including the empty and the failed states, so it holds no logic worth a unit test.
 2. **The hook connects the two.** It reads the viewer, hands it to the query, and returns the people in reading order, their state, and a way to try again. It is what a test drives.
 3. **The query describes the request rather than making it.** It is a stable key and the function that would fetch. A route that prefetches, a screen that reads, and a test that substitutes all share it, and the cache collapses them into one request however many callers there are ([ADR 017](/decisions/017-route-and-load-data-with-tanstack-router-and-query)).
 4. **The converter is the boundary.** Every field arrives untyped. A row without a member number cannot be linked to, and a member type the domain has no role for would show a person in the wrong role, so both are dropped and the rest of the list still renders. The list that comes back carries its scope – everyone, one unit, or nobody – so the screen can say what it shows rather than infer it from a row count.
-5. **The list is virtual.** The whole contingent scrolls as one list with only the rows near the viewport in the document, so a filter costs the same at forty rows as at thousands ([ADR 036](/decisions/036-virtualize-a-list-that-can-grow-to-the-contingents-size)).
+5. **The list is virtual until the unit is divided.** A unit with patrols is drawn as a card per patrol, then the scouts in none, then the leaders, in plain sections, because a unit is a few dozen people. An undivided unit, and the whole contingent, scroll as one list with only the rows near the viewport in the document, so a filter costs the same at forty rows as at thousands ([ADR 036](/decisions/036-virtualize-a-list-that-can-grow-to-the-contingents-size)).
+6. **The care comes second.** For a leader the screen also reads the unit in full, the health answers with it, for the care marks on the rows. The list does not wait for it, and a viewer who leads no unit makes no such read.
 
 ## Where the shape changes
 
@@ -51,7 +58,7 @@ Nothing above the converter sees a wire field name, and nothing below the hook s
 
 The contingent management team reads everyone through the same flow, with the whole contingent's listing in place of the unit's. One request holds every unit, the IST, and the management, and the service answers it only for the management.
 
-The management also browses by group, for when the question is about a unit rather than a person. The groups view sorts the same list into the units, the IST patrols with the IST outside every patrol, and the management by function, so opening it costs no request, and an entry opens as a list of its own. An IST patrol is numbered in the same series as the units but kept apart from them, so nobody in a patrol shows in the unit with the same number. A filter narrows the view to one of the three, and lives in the address like the list's own.
+The management also browses by group, for when the question is about a unit rather than a person. The groups view sorts the same list into the units, the IST patrols with the IST outside every patrol, and the management by function, so opening it costs no request, and an entry opens as a list of its own – a unit divided into patrols as a section per patrol, the scouts in none after them and the leaders last. An IST patrol is numbered in the same series as the units but kept apart from them, so nobody in a patrol shows in the unit with the same number. A filter narrows the view to one of the three, and lives in the address like the list's own.
 
 ## Narrowing and coming back
 
@@ -72,5 +79,6 @@ Opening the section again draws the cached list at once and asks for a fresh one
 | A row does not convert              | The rest of the list                                                   |
 | No connection                       | The cached list, or a failure with a way to try again if there is none |
 | The listing still fails after retry | That the list could not be read, never that it is empty                |
+| The care could not be read          | The list, with a line saying nobody's care is shown                    |
 | The person is outside the scope     | The same as a person who does not exist                                |
 | The session has ended               | The sign-in screen, in place ([Sign in](./sign-in))                    |

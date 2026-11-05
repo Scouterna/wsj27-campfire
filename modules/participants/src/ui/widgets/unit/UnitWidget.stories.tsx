@@ -1,7 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ApiDecorator } from "../../storybook/ApiDecorator"
-import { unitList, unitWithHomeTowns } from "../../storybook/cast"
+import {
+  unitInPatrols,
+  unitInPatrolsDetails,
+  unitList,
+  unitWithHomeTowns,
+} from "../../storybook/cast"
 import { UnitWidget } from "./UnitWidget"
 
 const meta: Meta<typeof UnitWidget> = {
@@ -23,7 +28,35 @@ export const OneUnit: Story = {
   parameters: {
     api: {
       list: unitList(1),
+      unitDetails: [],
       viewer: { memberNo: "1100101", readsEveryone: false, readsHealth: true, unitNumber: 1 },
+    },
+  },
+}
+
+/**
+ * A divided unit, each scout who declared anything carrying their care as a control of
+ * its own: pressed, it opens the sheet rather than the person.
+ */
+export const WithCare: Story = {
+  parameters: {
+    api: {
+      list: unitInPatrols(),
+      unitDetails: unitInPatrolsDetails(),
+      viewer: { memberNo: "1100101", readsEveryone: false, readsHealth: false, unitNumber: 1 },
+    },
+  },
+}
+
+/**
+ * The care could not be read, said once under the unit's card.
+ */
+export const CareUnknown: Story = {
+  parameters: {
+    api: {
+      list: unitInPatrols(),
+      state: "error",
+      viewer: { memberNo: "1100101", readsEveryone: false, readsHealth: false, unitNumber: 1 },
     },
   },
 }
@@ -73,6 +106,7 @@ export const WithMap: Story = {
         "Askim",
         "Borås",
       ]),
+      unitDetails: [],
       viewer: leaderOfUnit1,
     },
   },
@@ -99,6 +133,7 @@ export const WithMapAcrossSweden: Story = {
         "Stockholm",
         "Göteborg",
       ]),
+      unitDetails: [],
       viewer: leaderOfUnit1,
     },
   },
@@ -119,6 +154,7 @@ export const WithUnplacedHomeTowns: Story = {
         "Oslo (Norge)",
         "Motala",
       ]),
+      unitDetails: [],
       viewer: leaderOfUnit1,
     },
   },
@@ -131,6 +167,7 @@ export const OnlyUnplacedHomeTowns: Story = {
   parameters: {
     api: {
       list: unitWithHomeTowns(["Bryssel (Belgien)", "Oslo (Norge)"]),
+      unitDetails: [],
       viewer: leaderOfUnit1,
     },
   },
@@ -142,6 +179,20 @@ export const OnlyUnplacedHomeTowns: Story = {
  */
 export const WithoutHomeTowns: Story = {
   parameters: {
-    api: { list: unitWithHomeTowns([]), viewer: leaderOfUnit1 },
+    api: { list: unitWithHomeTowns([]), unitDetails: [], viewer: leaderOfUnit1 },
+  },
+}
+
+/**
+ * A unit divided into patrols: the scouts come a patrol at a time, and the scouts in none
+ * close the patrols.
+ */
+export const InPatrols: Story = {
+  parameters: {
+    api: {
+      list: unitInPatrols(),
+      unitDetails: [],
+      viewer: { ...leaderOfUnit1, memberNo: "1600000" },
+    },
   },
 }

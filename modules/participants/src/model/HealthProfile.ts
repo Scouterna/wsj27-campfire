@@ -1,4 +1,20 @@
 /**
+ * What a screen draws for a question somebody said yes to and wrote nothing under, so the
+ * yes still reads as one.
+ */
+export const noDescription = "Ingen beskrivning ifylld."
+
+/**
+ * Something declared behind a yes-or-no question.
+ */
+export interface Declared {
+  /**
+   * What they wrote about it. Absent when they left the text blank.
+   */
+  readonly details?: string
+}
+
+/**
  * The special diets the registration offers. A closed set – "no special diet" is the
  * absence of a `Diet`, not a member of it.
  */
@@ -148,6 +164,11 @@ export interface AllergenSeverity {
  */
 export interface FoodAllergy {
   /**
+   * Marks a ticked "Övriga" on the participant form, which has no grade, so what it is and
+   * how serious stand in the free text. Absent otherwise.
+   */
+  readonly hasOther?: true
+  /**
    * The allergens they graded.
    */
   readonly severities: readonly AllergenSeverity[]
@@ -191,9 +212,9 @@ export interface Vaccinations {
  */
 export interface Medication {
   /**
-   * What they take, in their own words.
+   * What they take, in their own words. Absent when they left the text blank.
    */
-  readonly details: string
+  readonly details?: string
   /**
    * How it has to be stored, when that was asked and answered.
    */
@@ -239,6 +260,10 @@ export interface EquipmentNeeds {
    * The needs they selected.
    */
   readonly needs: readonly EquipmentNeed[]
+  /**
+   * Options they selected that this build does not know, as the form words them.
+   */
+  readonly unlisted?: readonly string[]
   /**
    * What they wrote about them.
    */
@@ -293,6 +318,10 @@ export interface MobilityNeeds {
    */
   readonly aids: readonly MobilityAid[]
   /**
+   * Options they selected that this build does not know, as the form words them.
+   */
+  readonly unlisted?: readonly string[]
+  /**
    * An aid the list did not offer.
    */
   readonly otherAids?: string
@@ -344,17 +373,22 @@ export function diagnosisName(diagnosis: Diagnosis): string {
  */
 export interface MentalHealth {
   /**
-   * The diagnoses they selected, and what they wrote about them.
+   * The diagnoses they selected, any this build does not know as the form words them, and
+   * what they wrote about them.
    */
-  readonly diagnoses?: { readonly kinds: readonly Diagnosis[]; readonly details?: string }
+  readonly diagnoses?: {
+    readonly details?: string
+    readonly kinds: readonly Diagnosis[]
+    readonly unlisted?: readonly string[]
+  }
   /**
-   * What they are afraid of, when they named something.
+   * A phobia, and what they are afraid of.
    */
-  readonly phobia?: string
+  readonly phobia?: Declared
   /**
    * Another condition worth knowing about.
    */
-  readonly condition?: string
+  readonly condition?: Declared
 }
 
 /**
@@ -382,17 +416,37 @@ export interface HealthProfile {
    */
   readonly diet?: Diet
   /**
+   * Marks an explicit "no special diet", which is what tells it from a question never
+   * answered. Absent otherwise.
+   */
+  readonly deniesDiet?: true
+  /**
+   * Marks an explicit "Nej" to the food allergy question with nothing to contradict it,
+   * which is what tells no allergy from a question never answered. Absent otherwise.
+   */
+  readonly deniesFoodAllergy?: true
+  /**
+   * Marks an explicit "Nej" to the other allergy question with nothing to contradict it,
+   * which is what tells no allergy from a question never answered. Absent otherwise.
+   */
+  readonly deniesOtherAllergy?: true
+  /**
    * The food allergy they declared.
    */
   readonly foodAllergy?: FoodAllergy
   /**
    * An allergy that is not to food.
    */
-  readonly otherAllergy?: string
+  readonly otherAllergy?: Declared
   /**
    * The vaccination answers, which everybody gives.
    */
   readonly vaccinations: Vaccinations
+  /**
+   * Marks a form where every yes-or-no question about health has an answer, because a
+   * half-filled form saying nothing is not an all-clear. Absent otherwise.
+   */
+  readonly isHealthAnswered?: true
   /**
    * The medication they take.
    */
@@ -400,7 +454,7 @@ export interface HealthProfile {
   /**
    * A medical condition they declared.
    */
-  readonly condition?: string
+  readonly condition?: Declared
   /**
    * The medical equipment they bring.
    */
@@ -420,14 +474,28 @@ export interface HealthProfile {
 }
 
 /**
- * Whether a health profile says nothing at all – what drives the "Inga hälsoanmärkningar"
- * chip. The vaccinations do not count against it; they render in their own card whatever
- * they say.
+ * Whether a food allergy was declared with nothing graded and nothing written. It still
+ * shows, or a leader reads the silence as no allergy at all.
+ * @param allergy The allergy as declared.
+ * @returns True where the yes is all there is.
+ */
+export function isBlankAllergy(allergy: FoodAllergy): boolean {
+  return (
+    allergy.severities.length === 0 && allergy.hasOther !== true && allergy.details === undefined
+  )
+}
+
+/**
+ * Whether a health profile is an all-clear – what drives the "Inga hälsoanmärkningar" chip.
+ * The vaccinations do not count against it; they render in their own card whatever they
+ * say.
  * @param health The profile to weigh.
- * @returns True when nothing beyond the vaccinations was declared.
+ * @returns True when the health questions were answered and nothing beyond the vaccinations
+ *   was declared.
  */
 export function isUnremarkable(health: HealthProfile): boolean {
   return (
+    health.isHealthAnswered === true &&
     health.diet === undefined &&
     health.foodAllergy === undefined &&
     health.otherAllergy === undefined &&

@@ -1,0 +1,24 @@
+/* What a person cannot and has to eat: the chips over what was declared. */
+
+@layer component {
+  .person-diet {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* The chips over the card, which wrap on a narrow screen. */
+  .person-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-stack);
+  }
+
+  .person-diet-notes {
+    border-top: 1px solid var(--color-divider);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-top: 14px;
+  }
+}

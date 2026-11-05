@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest"
 
+import type { HealthProfile } from "../../model/HealthProfile"
 import { toParticipantDetail } from "./ParticipantDetailDto"
 import { toParticipant } from "./ParticipantDto"
+import { diagnosisByLabel, dietByLabel, equipmentByLabel, mobilityAidByLabel } from "./answers"
 
 /**
  * One person in full, as the participants service sends them: the basic block, the contact
@@ -99,6 +101,32 @@ function allergies(diet: Record<string, unknown>): Record<string, unknown> {
         Hälsoinformation: { "Diet och födoämnesallergier": diet },
       },
     },
+  })
+}
+
+/**
+ * The health profile of somebody who answered only what the case names.
+ * @param answers The answers.
+ * @returns The profile.
+ */
+function healthOf(answers: Record<string, unknown>): HealthProfile | undefined {
+  return toParticipantDetail(allergies(answers))?.health
+}
+
+/**
+ * A record whose only answer is one catch-all question, the leader's on the deltagare
+ * form and the management's on the leader form.
+ * @param key Which catch-all question.
+ * @param text What was written in it.
+ * @returns The record.
+ */
+function catchAll(
+  key: "additionalInfo" | "additionalInfoUnitLeader",
+  text: string,
+): Record<string, unknown> {
+  const form = key === "additionalInfo" ? "avdelningsledare_kontingentledning" : "deltagare_ist"
+  return record({
+    forms_data: { [form]: { Hälsoinformation: { "Övriga frågor": { [key]: text } } } },
   })
 }
 
@@ -203,6 +231,24 @@ describe("reading one person in full", () => {
     ])
   })
 
+  it.each(["additionalInfo", "additionalInfoUnitLeader"] as const)(
+    "reads no note from %s where it only says there is nothing to add",
+    (key) => {
+      for (const nothing of ["Nej", "nej.", " Nej tack! ", "Inget", "-"]) {
+        expect(toParticipantDetail(catchAll(key, nothing))?.notes).toEqual([])
+      }
+    },
+  )
+
+  it.each([
+    ["additionalInfo", "kontingentledningen"],
+    ["additionalInfoUnitLeader", "avdelningsledaren"],
+  ] as const)("keeps a note in %s that starts with a no and goes on", (key, audience) => {
+    expect(toParticipantDetail(catchAll(key, "Nej, men jag snarkar."))?.notes).toEqual([
+      { audience, text: "Nej, men jag snarkar." },
+    ])
+  })
+
   it("leaves the health profile out when the service sent no forms_data", () => {
     // A basic fetch, or a viewer without health access – absence is the answer, and the
     // screens render nothing rather than a caveat.
@@ -212,15 +258,21 @@ describe("reading one person in full", () => {
     expect(person?.health).toBeUndefined()
   })
 
-  it("gives someone who answered nothing an empty profile, not a broken one", () => {
+  it("gives someone who answered nothing no profile, rather than an all-clear", () => {
     const person = toParticipantDetail(record({ forms_data: {}, contact_info: {} }))
 
-    expect(person?.health?.vaccinations).toEqual({
+    expect(person?.health).toBeUndefined()
+    expect(person?.notes).toEqual([])
+  })
+
+  it("gives someone with answers but none about their health an empty profile", () => {
+    const health = toParticipantDetail(allergies({ specialDiet: "Ingen specialkost" }))?.health
+
+    expect(health?.vaccinations).toEqual({
       childhoodProgram: false,
       diphtheria: { kind: "unanswered" },
       tetanus: { kind: "unanswered" },
     })
-    expect(person?.notes).toEqual([])
   })
 
   it("reads the travel package the service normalized", () => {
@@ -309,6 +361,195 @@ describe("reading one person in full", () => {
     const refusal: Record<string, unknown> = { detail: "Participant not found in project." }
 
     expect(toParticipantDetail(refusal)).toBeUndefined()
+  })
+})
+
+describe("reading the answers that declare something", () => {
+  it("keeps Övriga ticked with a description and nothing graded, as reported", () => {
+    const health = healthOf({
+      hasFoodAllergy: "Ja",
+      foodAllergyOther: "Ja",
+      foodAllergyDetails: "Kiwi",
+    })
+
+    expect(health?.foodAllergy).toEqual({ details: "Kiwi", hasOther: true, severities: [] })
+    expect(health).not.toHaveProperty("deniesFoodAllergy")
+  })
+
+  it("marks the participant form's Övriga no when it says no, and grades the leaders'", () => {
+    const participants = healthOf({ hasFoodAllergy: "Ja", foodAllergyOther: "Nej" })
+    const leaders = healthOf({ hasFoodAllergy: "Ja", foodAllergyOther: "4" })
+
+    expect(participants?.foodAllergy).toEqual({ severities: [] })
+    expect(leaders?.foodAllergy).toEqual({ severities: [{ allergen: "other", severity: 4 }] })
+  })
+
+  it.each([
+    ["a grade", { hasFoodAllergy: "Nej", foodAllergyNuts: "5" }],
+    ["a grade without a gate", { foodAllergyNuts: "2" }],
+    ["Övriga", { hasFoodAllergy: "Nej", foodAllergyOther: "Ja" }],
+    ["a description", { hasFoodAllergy: "Nej", foodAllergyDetails: "Kiwi" }],
+  ])("lets %s win over the food allergy gate", (_, answers) => {
+    const health = healthOf(answers)
+
+    expect(health?.foodAllergy).toBeDefined()
+    expect(health).not.toHaveProperty("deniesFoodAllergy")
+  })
+
+  it("reads a grade of 1 behind a closed gate as no allergy", () => {
+    expect(healthOf({ hasFoodAllergy: "Nej", foodAllergyNuts: "1" })?.foodAllergy).toBeUndefined()
+  })
+
+  it("tells an explicit no to food allergies from a question never answered", () => {
+    expect(healthOf({ hasFoodAllergy: "Nej" })?.deniesFoodAllergy).toBe(true)
+    expect(healthOf({ specialDiet: "Vegan" })).not.toHaveProperty("deniesFoodAllergy")
+  })
+
+  it("keeps another allergy on a yes with nothing written, and on text behind a no", () => {
+    expect(healthOf({ hasOtherAllergy: "Ja" })?.otherAllergy).toEqual({})
+    expect(healthOf({ hasOtherAllergy: "Nej", otherAllergyDetails: "Bi" })?.otherAllergy).toEqual({
+      details: "Bi",
+    })
+    expect(healthOf({ hasOtherAllergy: "Nej" })?.otherAllergy).toBeUndefined()
+  })
+
+  it("keeps a yes with nothing written for what the gate alone declares", () => {
+    const health = healthOf({
+      hasMedicalCondition: "Ja",
+      hasMentalHealthCondition: "Ja",
+      hasPhobia: "Ja",
+      managesOwnMedication: "Nej",
+      usesPrescriptionMedication: "Ja",
+    })
+
+    expect(health?.condition).toEqual({})
+    expect(health?.medication).toEqual({ managesOwn: false })
+    expect(health?.mind).toEqual({ condition: {}, phobia: {} })
+  })
+
+  it("leaves text behind a no out of what the gate alone declares", () => {
+    const health = healthOf({
+      hasMedicalCondition: "Nej",
+      hasPhobia: "Nej",
+      medicalConditionDetails: "Astma",
+      phobiaDetails: "Getingar",
+    })
+
+    expect(health?.condition).toBeUndefined()
+    expect(health?.mind).toBeUndefined()
+  })
+
+  it("keeps a diet the table does not know, with the label where no text stands", () => {
+    expect(healthOf({ specialDiet: "Jain" })?.diet).toEqual({ details: "Jain", sort: "other" })
+    expect(healthOf({ specialDiet: "Jain", specialDietDetails: "Inga rotfrukter" })?.diet).toEqual({
+      details: "Inga rotfrukter",
+      sort: "other",
+    })
+    expect(healthOf({ specialDiet: "Ingen specialkost" })?.diet).toBeUndefined()
+  })
+
+  it("tells an explicit no from a question never answered", () => {
+    expect(healthOf({ specialDiet: "Ingen specialkost" })?.deniesDiet).toBe(true)
+    expect(healthOf({ specialDiet: "Vegan" })).not.toHaveProperty("deniesDiet")
+    expect(healthOf({ hasOtherAllergy: "Nej" })?.deniesOtherAllergy).toBe(true)
+    expect(healthOf({ hasOtherAllergy: "Nej", otherAllergyDetails: "Pollen" })).not.toHaveProperty(
+      "deniesOtherAllergy",
+    )
+    expect(healthOf({})).not.toHaveProperty("deniesDiet")
+    expect(healthOf({})).not.toHaveProperty("deniesOtherAllergy")
+  })
+
+  it("calls the health questions answered only once every one of them is", () => {
+    const answered = {
+      hasMedicalCondition: "Nej",
+      hasMentalHealthCondition: "Nej",
+      hasPhobia: "Nej",
+      hasPhysicalLimitations: "Nej",
+      needsMedicalEquipment: "Nej",
+      usesPrescriptionMedication: "Nej",
+    }
+
+    expect(healthOf(answered)?.isHealthAnswered).toBe(true)
+    expect(healthOf({ ...answered, hasPhobia: "" })).not.toHaveProperty("isHealthAnswered")
+  })
+
+  it("keeps the options a multi-select's table does not know as the form words them", () => {
+    const health = healthOf({
+      cognitiveDiagnoses: ["ADHD", "Dyslexi"],
+      medicalEquipmentNeeds: ["Syrgas"],
+      mobilityAids: "Kryckor, Ståhjälp",
+      needsMedicalEquipment: "Ja",
+    })
+
+    expect(health?.equipment).toEqual({ needs: [], unlisted: ["Syrgas"] })
+    expect(health?.mobility).toEqual({ aids: ["crutches"], unlisted: ["Ståhjälp"] })
+    expect(health?.mind?.diagnoses).toEqual({ kinds: ["adhd"], unlisted: ["Dyslexi"] })
+  })
+
+  it("raises a mobility need and a diagnosis on an unknown option alone", () => {
+    const health = healthOf({ cognitiveDiagnoses: ["Dyslexi"], mobilityAids: ["Ståhjälp"] })
+
+    expect(health?.mobility).toEqual({ aids: [], unlisted: ["Ståhjälp"] })
+    expect(health?.mind?.diagnoses).toEqual({ kinds: [], unlisted: ["Dyslexi"] })
+  })
+
+  it("reads a plain no on a multi-select as no selection", () => {
+    expect(healthOf({ cognitiveDiagnoses: "Nej", mobilityAids: ["Nej"] })?.mind).toBeUndefined()
+    expect(healthOf({ mobilityAids: "Nej" })?.mobility).toBeUndefined()
+  })
+})
+
+describe("the registration forms' own option labels", () => {
+  // Copied from the two forms' question definitions, so a table that drifts from the forms
+  // fails here rather than quietly dropping somebody's answer.
+  const everyOption: readonly [string, ReadonlyMap<string, unknown>, readonly string[]][] = [
+    [
+      "special diet",
+      dietByLabel,
+      [
+        "Vegetarian",
+        "Vegan",
+        "Halal",
+        "Kosher",
+        "Hindu - inget nötkött",
+        "Hindu - inget kokött",
+        "Annat",
+      ],
+    ],
+    [
+      "medical equipment",
+      equipmentByLabel,
+      [
+        "Laddning av batteri för CPAP",
+        "Permanent elförsörjning till medicinsk utrustning eller hjälpmedel",
+        "Kylning av medicin",
+        "Annat",
+      ],
+    ],
+    [
+      "mobility aids",
+      mobilityAidByLabel,
+      ["Käpp", "Kryckor", "Elektrisk rullstol", "Rullator", "Större tält", "Andra hjälpmedel"],
+    ],
+    [
+      "diagnoses",
+      diagnosisByLabel,
+      [
+        "ADD",
+        "ADHD",
+        "Autism",
+        "Bipolär sjukdom",
+        "Kognitiv funktionsnedsättning",
+        "Neuropsykiatrisk funktionsnedsättning",
+        "OCD",
+        "ODC",
+        "Annat",
+      ],
+    ],
+  ]
+
+  it.each(everyOption)("maps every %s option", (_, table, labels) => {
+    expect(labels.filter((label) => !table.has(label))).toEqual([])
   })
 })
 

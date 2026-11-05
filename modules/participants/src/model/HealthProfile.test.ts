@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import {
   allergenName,
   dietName,
+  isBlankAllergy,
   isUnremarkable,
   type HealthProfile,
   type Vaccinations,
@@ -18,7 +19,7 @@ const vaccinations: Vaccinations = {
  * A profile with nothing but the vaccinations everybody answers, overridable per case.
  */
 function health(overrides: Partial<HealthProfile> = {}): HealthProfile {
-  return { vaccinations, ...overrides }
+  return { isHealthAnswered: true, vaccinations, ...overrides }
 }
 
 describe("naming a special diet", () => {
@@ -37,6 +38,18 @@ describe("naming an allergen", () => {
   })
 })
 
+describe("a food allergy declared blank", () => {
+  it("is a yes with nothing graded, ticked, or written", () => {
+    expect(isBlankAllergy({ severities: [] })).toBe(true)
+  })
+
+  it("stops being blank on anything beside the yes", () => {
+    expect(isBlankAllergy({ severities: [{ allergen: "nuts", severity: 2 }] })).toBe(false)
+    expect(isBlankAllergy({ hasOther: true, severities: [] })).toBe(false)
+    expect(isBlankAllergy({ details: "Kiwi", severities: [] })).toBe(false)
+  })
+})
+
 describe("an unremarkable health profile", () => {
   it("is one with nothing beyond the vaccinations", () => {
     expect(isUnremarkable(health())).toBe(true)
@@ -47,13 +60,29 @@ describe("an unremarkable health profile", () => {
     expect(
       isUnremarkable(health({ foodAllergy: { severities: [{ allergen: "nuts", severity: 5 }] } })),
     ).toBe(false)
-    expect(isUnremarkable(health({ otherAllergy: "Pollen" }))).toBe(false)
+    expect(isUnremarkable(health({ otherAllergy: { details: "Pollen" } }))).toBe(false)
     expect(isUnremarkable(health({ medication: { details: "Levaxin" } }))).toBe(false)
-    expect(isUnremarkable(health({ condition: "Astma" }))).toBe(false)
+    expect(isUnremarkable(health({ condition: { details: "Astma" } }))).toBe(false)
     expect(isUnremarkable(health({ equipment: { needs: ["cpapCharging"] } }))).toBe(false)
     expect(isUnremarkable(health({ mobility: { aids: ["cane"] } }))).toBe(false)
-    expect(isUnremarkable(health({ mind: { phobia: "Getingar" } }))).toBe(false)
+    expect(isUnremarkable(health({ mind: { phobia: { details: "Getingar" } } }))).toBe(false)
     expect(isUnremarkable(health({ support: { personalAssistant: true } }))).toBe(false)
+  })
+
+  it("stops being unremarkable on a yes with nothing written", () => {
+    expect(isUnremarkable(health({ foodAllergy: { hasOther: true, severities: [] } }))).toBe(false)
+    expect(isUnremarkable(health({ otherAllergy: {} }))).toBe(false)
+    expect(isUnremarkable(health({ condition: {} }))).toBe(false)
+    expect(isUnremarkable(health({ medication: {} }))).toBe(false)
+    expect(isUnremarkable(health({ mind: { condition: {} } }))).toBe(false)
+  })
+
+  it("stays unremarkable on an explicit no to food allergies", () => {
+    expect(isUnremarkable(health({ deniesFoodAllergy: true }))).toBe(true)
+  })
+
+  it("is not unremarkable while a health question has no answer", () => {
+    expect(isUnremarkable({ vaccinations })).toBe(false)
   })
 
   it("does not count the vaccination answers against it", () => {

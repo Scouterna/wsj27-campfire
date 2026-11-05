@@ -41,6 +41,12 @@ export interface OverflowMenuReceipt {
  */
 interface OverflowMenuEntry {
   /**
+   * A quiet value at the entry's trailing end, such as how full a place it moves somebody
+   * to is – shown as written, and read out in words, because a screen reader takes a
+   * figure like "7/9" for a date.
+   */
+  readonly detail?: { readonly shown: string; readonly spoken: string }
+  /**
    * The glyph ahead of the label. Where any entry in a menu has one, the entries without
    * are indented to match, so every label starts on the same line.
    */
@@ -98,6 +104,11 @@ export type OverflowMenuItem =
     })
 
 export interface OverflowMenuProps {
+  /**
+   * Whether the trigger sits flush in what holds it, taking that surface's text color,
+   * rather than floating over it on glass.
+   */
+  readonly isFlush?: boolean
   /**
    * The entries, in the order they are listed.
    */
@@ -192,7 +203,7 @@ export function OverflowMenu(props: OverflowMenuProps): ReactElement {
     <div className="overflow" ref={root}>
       <button
         type="button"
-        className="overflow-trigger"
+        className={props.isFlush === true ? "overflow-trigger overflow-flush" : "overflow-trigger"}
         ref={trigger}
         aria-haspopup="menu"
         aria-expanded={isOpen}
@@ -384,6 +395,32 @@ function afterNavigating(close: () => void): () => void {
 }
 
 /**
+ * The detail an `EntryDetail` draws.
+ */
+interface EntryDetailProps {
+  /**
+   * The value as shown, and as read out.
+   */
+  readonly detail: NonNullable<OverflowMenuEntry["detail"]>
+}
+
+/**
+ * An entry's detail: the figure for the eye, and its words for a screen reader.
+ * @param props The detail.
+ * @returns The detail's two spans.
+ */
+function EntryDetail(props: EntryDetailProps): ReactElement {
+  return (
+    <>
+      <span aria-hidden="true" className="overflow-item-detail">
+        {props.detail.shown}
+      </span>
+      <span className="overflow-item-detail-spoken">{props.detail.spoken}</span>
+    </>
+  )
+}
+
+/**
  * One choosable entry: a real link where the entry leads somewhere or opens an address,
  * a button where it does something. All stay out of the document's tab order – the menu
  * itself owns the arrow keys, and Tab means "leave" rather than "next entry".
@@ -430,6 +467,7 @@ function MenuEntry(props: MenuEntryProps): ReactElement {
           <span className="overflow-item-reason">{item.unavailable}</span>
         ) : null}
       </span>
+      {item.detail === undefined ? null : <EntryDetail detail={item.detail} />}
     </>
   )
 

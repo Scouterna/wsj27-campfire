@@ -94,6 +94,16 @@
   margin: 0;
 }
 
+/* Words a screen shows only to a screen reader, drawn so a story can show them. Unlayered,
+   so it beats the clipping a component's own layered stylesheet gives them. */
+.story-spoken > * {
+  clip-path: none;
+  height: auto;
+  position: static;
+  white-space: normal;
+  width: auto;
+}
+
 /* What a headless component reported, printed beside it. */
 .story-readout {
   color: var(--color-ink-secondary);

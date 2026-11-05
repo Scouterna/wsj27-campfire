@@ -31,7 +31,6 @@ export const Default: Story = {
       <SideMenu
         items={items}
         current="home"
-        teaser="Mer kommer snart…"
         footer={
           <ProfilePill
             name="Anna Björk"

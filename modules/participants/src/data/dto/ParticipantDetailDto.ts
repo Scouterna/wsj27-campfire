@@ -60,10 +60,11 @@ export function toParticipantDetail(dto: ParticipantDetailDto): ParticipantDetai
     ...base,
     ...(travel !== undefined && { travel }),
     contact: toContactDetails(dto, answers, base.phone),
-    // The health block exists exactly when the service sent `forms_data`, so a viewer
-    // without health access, or a basic fetch, gets a person without one, and the screens
-    // render nothing rather than a caveat.
-    ...(isRecord(dto.forms_data) && { health: toHealthProfile(answers) }),
+    // The health block exists exactly when the service sent answers, so a viewer without
+    // health access, a basic fetch, or somebody who filled in nothing gets a person
+    // without one, and the screens render nothing rather than an all-clear nobody gave.
+    ...(isRecord(dto.forms_data) &&
+      Object.keys(dto.forms_data).length > 0 && { health: toHealthProfile(answers) }),
     ...(readiness !== undefined && { readiness }),
     ...(experience !== undefined && { experience }),
     notes: toNotes(answers),
@@ -197,21 +198,40 @@ function toEmergencyContact(
   return person === undefined ? undefined : { ...person, rank }
 }
 
+// What people write in a catch-all question to say they have nothing to add, compared
+// without case or the punctuation around it.
+const nothingToAdd = new Set(["-", "ingenting", "inget", "inga", "nej", "nej tack", "nä", "no"])
+
+/**
+ * Whether a catch-all answer only says there is nothing to add, which a reader would
+ * otherwise get as a note to read and a mark on the person's row.
+ * @param text The answer.
+ * @returns True for an answer that says nothing.
+ */
+function isNothingToAdd(text: string): boolean {
+  let bare = text.trim().toLocaleLowerCase("sv")
+  while (bare.endsWith(".") || bare.endsWith("!") || bare.endsWith(",")) {
+    bare = bare.slice(0, -1).trimEnd()
+  }
+  return nothingToAdd.has(bare)
+}
+
 /**
  * The free-text messages, each addressed to whoever the form said would read it. The
  * participant form asks one question for the unit leader and one for the contingent
- * management, and the leader form only the latter.
+ * management, and the leader form only the latter. An answer that only says there is
+ * nothing to add is no message.
  * @param answers The flattened answers.
  * @returns The notes that were written, each with its audience.
  */
 function toNotes(answers: Answers): readonly Note[] {
   const notes: Note[] = []
   const toLeader = answer(answers, "additionalInfoUnitLeader")
-  if (toLeader !== undefined) {
+  if (toLeader !== undefined && !isNothingToAdd(toLeader)) {
     notes.push({ audience: "avdelningsledaren", text: toLeader })
   }
   const toCmt = answer(answers, "additionalInfo")
-  if (toCmt !== undefined) {
+  if (toCmt !== undefined && !isNothingToAdd(toCmt)) {
     notes.push({ audience: "kontingentledningen", text: toCmt })
   }
   return notes

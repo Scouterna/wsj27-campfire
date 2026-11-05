@@ -6,6 +6,7 @@ import { canBeAbout } from "../../../model/CaseType"
 import { nameOf, type People, type Person } from "../../../model/Person"
 import { PersonPicker } from "../../components/personpicker/PersonPicker"
 import { SubjectCard } from "../../components/subjectcard/SubjectCard"
+import { useSubjectSlot } from "../../subject-slot"
 import { useOwnUnit } from "../../use-people"
 import { focusOnOpen } from "./focus-on-open"
 
@@ -124,6 +125,7 @@ export function AboutCard(props: AboutCardProps): ReactElement {
   // Taking off the one person a case is about would leave it about nobody, so only one of
   // several can be.
   const canRemove = props.canChange && about.length > 1
+  const slot = useSubjectSlot()
 
   return (
     <div aria-label="Gäller" className="about-cards" role="region">
@@ -143,6 +145,7 @@ export function AboutCard(props: AboutCardProps): ReactElement {
                   }
                 : undefined
             }
+            end={slot(memberNo)}
             isBusy={props.isBusy}
             key={memberNo}
             label={name}

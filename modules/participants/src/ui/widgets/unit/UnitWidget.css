@@ -44,8 +44,16 @@
     gap: var(--spacing-stack);
     min-height: 44px;
     padding-inline: var(--spacing-group);
-    text-decoration: none;
+    position: relative;
     transition: background 120ms ease;
+  }
+
+  /* The care rides above the link stretched over the pill, so it takes its own press. */
+  .unit-widget-person-care {
+    display: flex;
+    flex: none;
+    position: relative;
+    z-index: 1;
   }
 
   /* The gender and the age at the trailing edge, in quiet ink – facts, not a second
@@ -66,14 +74,25 @@
     transform: scaleX(-1);
   }
 
-  /* The name, and where the person comes from on a line of its own under it. */
+  /* The name, and where the person comes from on a line of its own under it – the link,
+     which stretches over the whole pill, so a press anywhere but the care opens the
+     person. */
   .unit-widget-person-text {
+    color: inherit;
     display: flex;
     flex: 1;
     flex-direction: column;
     gap: 3px;
     min-width: 0;
     padding-block: var(--spacing-stack);
+    text-decoration: none;
+  }
+
+  .unit-widget-person-text::after {
+    border-radius: inherit;
+    content: "";
+    inset: 0;
+    position: absolute;
   }
 
   /* A name longer than the line is the one thing cut short. */
@@ -98,12 +117,16 @@
   }
 
   @media (hover: hover) {
-    .unit-widget-person:hover {
+    .unit-widget-person:has(.unit-widget-person-text:hover) {
       background: var(--color-theme-wash);
     }
   }
 
-  .unit-widget-person:focus-visible {
+  .unit-widget-person-text:focus-visible {
+    outline: none;
+  }
+
+  .unit-widget-person:has(.unit-widget-person-text:focus-visible) {
     outline: 2px solid var(--color-theme-ink);
     outline-offset: -2px;
   }

@@ -3,7 +3,6 @@ import type { IstPatrol } from "./IstPatrol"
 import { type ParticipantRole } from "./ParticipantRole"
 import type { CmtFunktion } from "./Participation"
 import type { Unit } from "./Unit"
-import type { UnitPatrol } from "./UnitPatrol"
 
 /**
  * The slots the registration names people in, in the order it asks for them – the
@@ -57,10 +56,12 @@ export interface Participant {
    */
   readonly unit?: Unit
   /**
-   * The patrol a deltagare or a ledare is in within their unit. Absent for everyone else,
-   * and for anybody their leaders have not put in one.
+   * The patrol within their unit, as the Patrull answer names it – what the unit's leaders
+   * typed, or whatever was entered by hand in Scoutnet, so a number or a ledare's own
+   * answer can arrive here too. Absent for the IST and the contingent management, and for
+   * anybody not yet placed in one.
    */
-  readonly unitPatrol?: UnitPatrol
+  readonly patrol?: string
   /**
    * The IST patrol an IST member is in. Absent for everyone outside the IST, and for an
    * IST member whose patrol answer names none.

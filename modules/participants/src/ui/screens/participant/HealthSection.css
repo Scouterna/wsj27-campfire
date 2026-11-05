@@ -1,0 +1,9 @@
+/* What a person declared about their health, as rows and callouts. */
+
+@layer component {
+  .person-health {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-group);
+  }
+}

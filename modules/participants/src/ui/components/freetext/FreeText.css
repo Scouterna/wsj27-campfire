@@ -1,0 +1,20 @@
+/* One free-text answer: the question in quiet type over the person's own words. */
+
+@layer component {
+  .person-free-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .person-free-text small {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+  }
+
+  .person-free-text strong {
+    font-size: var(--font-size-value);
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
+}

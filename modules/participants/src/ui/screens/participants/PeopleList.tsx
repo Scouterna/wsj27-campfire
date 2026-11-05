@@ -1,6 +1,7 @@
 import { Row, UnitAvatar, VirtualList } from "@scouterna/wsj27-campfire-ui"
 import { memo, type ReactElement } from "react"
 
+import type { Care } from "../../../model/Care"
 import {
   ageOf,
   avatarNumberFor,
@@ -12,7 +13,9 @@ import {
 import { roleName } from "../../../model/ParticipantRole"
 import { funktionName } from "../../../model/Participation"
 import { PersonBadge } from "../../components/badge/PersonBadge"
+import { CareButton } from "../../components/carebutton/CareButton"
 import { GenderMark } from "../../components/gender/GenderMark"
+import type { CareSheets } from "../../use-care-sheets"
 
 import "./PeopleList.css"
 
@@ -54,9 +57,9 @@ function placingLine(person: Participant): string {
 
 /**
  * The line under a name. In a list whose people all belong to the same unit, IST patrol,
- * or funktion, saying so says nothing, so where the person comes from takes its place
- * after the role. Anywhere else the line places the person as always, and where they come
- * from follows on a screen wide enough to hold both.
+ * or funktion, saying so says nothing, so where they come from takes its place after the
+ * role. Anywhere else the line places the person as always, and where they
+ * come from follows on a screen wide enough to hold both.
  * @param person The row's person.
  * @param isUnitScoped Whether every row in the list belongs to the same unit, IST patrol,
  *   or funktion.
@@ -65,8 +68,9 @@ function placingLine(person: Participant): string {
 function rowDetail(person: Participant, isUnitScoped: boolean): RowDetail {
   const from = whereFrom(person)
   if (isUnitScoped) {
-    const role = roleName(person.role)
-    return { always: from === undefined ? role : `${role} · ${from}` }
+    return {
+      always: [roleName(person.role), from].filter((part) => part !== undefined).join(" · "),
+    }
   }
   const always = placingLine(person)
   return from === undefined ? { always } : { always, wide: from }
@@ -77,10 +81,20 @@ function rowDetail(person: Participant, isUnitScoped: boolean): RowDetail {
  */
 export interface PersonRowProps {
   /**
+   * What the person needs, where it is the viewer's to know and there is something to say.
+   * Compared by identity, as the person is.
+   */
+  readonly care?: Care | undefined
+  /**
    * Whether every row in the list belongs to the same unit, IST patrol, or funktion, so
    * that is left out of the detail line in favor of where the person comes from.
    */
   readonly isUnitScoped: boolean
+  /**
+   * Opens a person's care, by member number – one function for the whole list, so the
+   * sheet outlives the row and the row's memo holds.
+   */
+  readonly onOpenCare?: ((memberNo: string) => void) | undefined
   /**
    * The person the row names and links to. Compared by identity, so a row whose
    * person is unchanged skips rendering.
@@ -90,11 +104,12 @@ export interface PersonRowProps {
 
 /**
  * One row – a doorway into the person, with their gender and a deltagare's age at its
- * end. Memoized on its props, because narrowing the list re-renders it with most of its
+ * end, and their care as a control of its own beside them, pressed without leaving the
+ * list. Memoized on its props, because narrowing the list re-renders it with most of its
  * rows unchanged, and a row that stays needs no work.
  */
 export const PersonRow = memo(function PersonRow(props: PersonRowProps): ReactElement {
-  const { isUnitScoped, person } = props
+  const { care, isUnitScoped, onOpenCare, person } = props
   const detail = rowDetail(person, isUnitScoped)
   const avatarNumber = avatarNumberFor(person)
   // A deltagare's age is the fact a leader reaches for, as on the home screen; a grown
@@ -111,6 +126,18 @@ export const PersonRow = memo(function PersonRow(props: PersonRowProps): ReactEl
         )
       }
       className="person-row"
+      {...(care !== undefined &&
+        onOpenCare !== undefined && {
+          action: (
+            <CareButton
+              care={care}
+              name={fullName(person)}
+              onPress={() => {
+                onOpenCare(person.memberNo)
+              }}
+            />
+          ),
+        })}
       link={{ to: "/participants/$memberNo", params: { memberNo: person.memberNo } }}
       {...((person.gender !== undefined || age !== undefined) && {
         trailing: (
@@ -136,6 +163,11 @@ export const PersonRow = memo(function PersonRow(props: PersonRowProps): ReactEl
 })
 
 export interface PeopleListProps {
+  /**
+   * The care of the leader's unit and how a row opens it, read by the screen, which places
+   * the notice and the sheet outside the list.
+   */
+  readonly care: CareSheets
   /**
    * Whether every row in the list belongs to the same unit, IST patrol, or funktion, so
    * that is left out of the detail line in favor of where the person comes from.
@@ -165,12 +197,14 @@ export interface PeopleListProps {
 
 /**
  * The people as a virtual list, so narrowing costs the same for a unit as for the whole
- * contingent.
- * @param props The people to list, and what says the narrowing changed.
+ * contingent. Whoever of them belongs to the leader's own unit carries their care, handed
+ * in once for the list because a row comes and goes as the list scrolls.
+ * @param props The people to list, their care, and what says the narrowing changed.
  * @returns The list.
  */
 export function PeopleList(props: PeopleListProps): ReactElement {
   const { isUnitScoped } = props
+  const { byMemberNo, onOpen } = props.care
   return (
     <VirtualList
       estimatedRowHeight={estimatedRowHeight}
@@ -179,7 +213,14 @@ export function PeopleList(props: PeopleListProps): ReactElement {
       label="Deltagare"
       onFirstVisibleChange={props.onFirstVisibleChange}
       registerJump={props.registerJump}
-      renderRow={(person) => <PersonRow isUnitScoped={isUnitScoped} person={person} />}
+      renderRow={(person) => (
+        <PersonRow
+          care={byMemberNo.get(person.memberNo)?.care}
+          isUnitScoped={isUnitScoped}
+          onOpenCare={onOpen}
+          person={person}
+        />
+      )}
       resetKey={props.resetKey}
     />
   )

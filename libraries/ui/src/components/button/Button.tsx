@@ -32,6 +32,12 @@ export type ButtonProps = {
    */
   readonly isExpanded?: boolean | undefined
   /**
+   * Whether the button leads on to more of what is shown, such as a whole page behind a
+   * summary. Given, it hugs its label and ends in the onward chevron a row ends in, so it
+   * reads as a way further rather than the action the screen is for.
+   */
+  readonly isOnward?: boolean
+  /**
    * The word or two on the control.
    */
   readonly label: string
@@ -73,13 +79,21 @@ export type ButtonProps = {
  */
 export function Button(props: ButtonProps): ReactElement {
   const variant = props.variant ?? "primary"
-  const className = variant === "primary" ? "button" : `button button-${variant}`
+  const base = variant === "primary" ? "button" : `button button-${variant}`
+  const className = props.isOnward === true ? `${base} button-onward` : base
+  const onward =
+    props.isOnward === true ? (
+      <span aria-hidden="true" className="button-onward-chevron">
+        <BackIcon size={14} strokeWidth={2.4} />
+      </span>
+    ) : null
 
   if (props.link !== undefined) {
     return (
       <Link className={className} {...linkPropsOf(props.link)}>
         {props.icon}
         {props.label}
+        {onward}
       </Link>
     )
   }
@@ -94,6 +108,7 @@ export function Button(props: ButtonProps): ReactElement {
     >
       {props.icon}
       {props.label}
+      {onward}
       {props.isExpanded === undefined ? null : (
         <span aria-hidden="true" className="button-chevron">
           <BackIcon size={14} strokeWidth={2.4} />

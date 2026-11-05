@@ -48,6 +48,24 @@ export const Removable: Story = {
 }
 
 /**
+ * With another module's piece at the card's end, as a case draws a person's care.
+ */
+export const WithEnd: Story = {
+  args: { end: <button type="button">Hälsa och kost</button> },
+}
+
+/**
+ * Both ends at once: the piece, and the way to take them off.
+ */
+export const WithEndAndAction: Story = {
+  args: {
+    action: { isTaking: true, label: "Ta bort", onPress: fn() },
+    end: <button type="button">Hälsa och kost</button>,
+    label: "Ester Dahl",
+  },
+}
+
+/**
  * A unit as a whole, for a case about nobody in it.
  */
 export const WholeUnit: Story = {

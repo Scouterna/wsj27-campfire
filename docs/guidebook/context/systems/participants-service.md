@@ -6,6 +6,7 @@ The participants service holds the contingent's list of participants: who is in 
 
 - **Listing people** – the members of one unit, or the whole contingent at once.
 - **Showing one person** – their contact details and, for those allowed, their health and dietary answers.
+- **Storing a patrol** – a unit's leaders place their deltagare in patrols, one person at a time, kept in Scoutnet.
 - **Knowing the signed-in person** – their own unit and how they travel.
 - **Deciding the roles** – every WSJ27 role is minted here, and the [auth service](./auth-service) puts them in each session.
 

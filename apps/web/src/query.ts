@@ -59,7 +59,7 @@ const storage: AsyncStorage = {
 const persister = createQueryPersister({
   // The cached shapes' version. Bump it whenever a persisted payload's shape changes,
   // because a stale shape read as a fresh one is worse than a cold cache.
-  buster: "7",
+  buster: "8",
   // Thirty days, not the library's twenty-four hours, which would drop the whole cache on
   // the jamboree's second day – exactly when the network is worst and the cache matters
   // most.
@@ -86,24 +86,49 @@ const persisterWithSession: QueryPersister = (queryFunction, context, query) =>
   persister.persisterFn((c) => withSession(() => Promise.resolve(queryFunction(c))), context, query)
 
 /**
+ * Makes the client persist what is written into its cache by hand too. The persister
+ * saves only what its own fetch read, so an answer put there by hand – a save's result,
+ * kept because the read after it may not get through – would otherwise be lost on a cold
+ * start. It goes through the same storage, so a forget still wins.
+ * @param client The client to persist.
+ * @returns The same client.
+ */
+function persistingManualUpdates(client: QueryClient): QueryClient {
+  const cache = client.getQueryCache()
+  cache.subscribe((event) => {
+    if (event.type !== "updated" || event.action.type !== "success" || !event.action.manual) {
+      return
+    }
+    // Found again by its hash, because the event carries the query untyped.
+    const query = cache.get(event.query.queryHash)
+    if (query !== undefined) {
+      void persister.persistQuery(query)
+    }
+  })
+  return client
+}
+
+/**
  * The application's one query client – see this file's opening note for the defaults and
  * why they are not the library's.
  */
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      // The longest delay a browser's timer keeps. Anything longer overflows and fires at
-      // once, so every query would leave memory the moment no screen shows it.
-      gcTime: 2 ** 31 - 1,
-      networkMode: "offlineFirst",
-      persister: persisterWithSession,
-      refetchOnMount: "always",
-      refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
-      retry: 1,
+export const queryClient = persistingManualUpdates(
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        // The longest delay a browser's timer keeps. Anything longer overflows and fires at
+        // once, so every query would leave memory the moment no screen shows it.
+        gcTime: 2 ** 31 - 1,
+        networkMode: "offlineFirst",
+        persister: persisterWithSession,
+        refetchOnMount: "always",
+        refetchOnReconnect: false,
+        refetchOnWindowFocus: false,
+        retry: 1,
+      },
     },
-  },
-})
+  }),
+)
 
 /**
  * The key the cache's owner is remembered under, beside the persisted queries. Not a

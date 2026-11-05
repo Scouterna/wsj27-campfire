@@ -18,6 +18,7 @@ How the suite runs, and why:
 - **Against the local environment**, on `http://localhost:8000`, so the mock answers the back-end paths and the whole sign-in round trip is walkable, persona picker included. Playwright starts the environment when nothing answers there, and reuses one a developer already has running.
 - **Chromium alone**, because the question is whether the screens are composed right, not whether three engines agree, and a browser matrix would triple the minutes to say the same thing.
 - **Every test in its own browser context**, so the specs share no state and the whole suite runs in parallel.
+- **One mock behind every walk**, so no walk's write may change what another walk reads. A patrol is answered by the walk that saves it and never reaches the mock, and a case is written under a title no other walk uses.
 - **Stricter in continuous integration.** A stray `test.only` fails there rather than quietly narrowing the run, and a failed test is retried once. Locally it is not, because locally the flake is worth seeing.
 - **A trace only for a failed test**, the run where the recording is worth the wait, kept under `.build/playwright`.
 

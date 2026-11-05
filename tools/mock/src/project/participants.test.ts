@@ -210,6 +210,14 @@ describe("the troop listing", () => {
     }
   })
 
+  it("withholds the management's own health answers from everybody", async () => {
+    const rows = await listing("/participants/troopinfo/cmt?infolevel=full", "health@wsj.se")
+
+    expect(rows.length).toBeGreaterThan(0)
+    expect(rows.every((row) => row.forms_data === undefined)).toBe(true)
+    expect(rows.every((row) => row.contact_info !== undefined)).toBe(true)
+  })
+
   it("cuts the name level down to two keys, and refuses a level the service does not know", async () => {
     const names = await listing("/participants/troopinfo/1?infolevel=name", "program@wsj.se")
     expect(names.every((row) => Object.keys(row).join(",") === "member_no,name")).toBe(true)
@@ -398,6 +406,162 @@ describe("an adult's name", () => {
 
     expect(basic.status).toBe(404)
     expect(await basic.text()).toBe('{"detail":"Troop not found in project."}')
+  })
+})
+
+describe("a participant's patrol", () => {
+  // An app of its own, because a write changes the list it answers from.
+  const writable = createApp({ key })
+
+  async function post(path: string, email: string, body: string): Promise<Response> {
+    return writable.request(`${origin}/api/project/participants${path}`, {
+      body,
+      headers: { ...as(email), "Content-Type": "application/json" },
+      method: "POST",
+    })
+  }
+
+  it("lets a leader set and clear a scout's patrol in their own troop, answering the patrol", async () => {
+    const set = await post("/1300035/patrol", "leader-1@wsj.se", '{"patrol":"  Falken "}')
+    expect(set.status).toBe(200)
+    expect(await set.text()).toBe('{"member_no":1300035,"patrol":"Falken"}')
+
+    const listed = await writable.request(`${origin}/api/project/participants/troopinfo/1`, {
+      headers: as("leader-1@wsj.se"),
+    })
+    const rows = (await listed.json()) as { member_no: number; patrol: string; scout_db: unknown }[]
+    const row = rows.find(({ member_no: memberNo }) => memberNo === 1_300_035)
+    expect(row?.patrol).toBe("Falken")
+    expect(row?.scout_db).toEqual({})
+
+    const cleared = await post("/1300035/patrol", "leader-1@wsj.se", '{"patrol":""}')
+    expect(await cleared.text()).toBe('{"member_no":1300035,"patrol":""}')
+  })
+
+  it("answers anybody but the troop's own leaders as a person who does not exist", async () => {
+    for (const [path, email] of [
+      ["/1300140/patrol", "leader-1@wsj.se"],
+      ["/1300035/patrol", "cmt@wsj.se"],
+      ["/9999999/patrol", "leader-1@wsj.se"],
+      // A ledare of the caller's own troop, who does not answer the form Patrull is on.
+      ["/1100402/patrol", "leader-1@wsj.se"],
+    ] as const) {
+      const response = await post(path, email, '{"patrol":"Falken"}')
+      expect(response.status).toBe(404)
+      expect(await response.json()).toEqual({ detail: "Participant not found in project." })
+    }
+  })
+
+  it("collects a bad member number and a patrol that is no string into one refusal", async () => {
+    const response = await post("/x/patrol", "leader-1@wsj.se", '{"patrol":4}')
+
+    expect(response.status).toBe(422)
+    expect(await response.json()).toEqual({
+      detail: [
+        {
+          type: "int_parsing",
+          loc: ["path", "member_id"],
+          msg: "Input should be a valid integer, unable to parse string as an integer",
+          input: "x",
+        },
+        {
+          type: "string_type",
+          loc: ["body", "patrol"],
+          msg: "Input should be a valid string",
+          input: 4,
+        },
+      ],
+    })
+  })
+
+  it("clears a patrol on a null one and on a body that names none", async () => {
+    for (const body of ['{"patrol":null}', "{}"]) {
+      await post("/1300035/patrol", "leader-1@wsj.se", '{"patrol":"Falken"}')
+
+      const cleared = await post("/1300035/patrol", "leader-1@wsj.se", body)
+
+      expect(cleared.status).toBe(200)
+      expect(await cleared.text()).toBe('{"member_no":1300035,"patrol":""}')
+    }
+  })
+
+  it("takes the longest name the service does, and refuses a longer one", async () => {
+    const longest = "å".repeat(100)
+    const tooLong = `${longest}å`
+
+    const taken = await post("/1300035/patrol", "leader-1@wsj.se", `{"patrol":"${longest}"}`)
+
+    expect(taken.status).toBe(200)
+    const refused = await post("/1300035/patrol", "leader-1@wsj.se", `{"patrol":"${tooLong}"}`)
+
+    expect(refused.status).toBe(422)
+    expect(await refused.json()).toEqual({
+      detail: [
+        {
+          type: "string_too_long",
+          loc: ["body", "patrol"],
+          msg: "String should have at most 100 characters",
+          input: tooLong,
+          ctx: { max_length: 100 },
+        },
+      ],
+    })
+  })
+
+  it("answers 401 to a write without a session, as the reads do", async () => {
+    const response = await writable.request(`${origin}/api/project/participants/1300035/patrol`, {
+      body: '{"patrol":"Falken"}',
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    })
+
+    expect(response.status).toBe(401)
+    expect(await response.text()).toBe('{"detail":"Unauthorized"}')
+  })
+
+  it("refuses a body that is not a JSON object", async () => {
+    const notJson = await post("/1300035/patrol", "leader-1@wsj.se", "nope")
+
+    expect(notJson.status).toBe(422)
+    expect(await notJson.json()).toEqual({
+      detail: [
+        {
+          type: "json_invalid",
+          loc: ["body", 0],
+          msg: "JSON decode error",
+          input: {},
+          ctx: { error: "Expecting value" },
+        },
+      ],
+    })
+    for (const [body, input] of [
+      ["[]", []],
+      // eslint-disable-next-line unicorn/no-null -- pydantic echoes the JSON null it was sent
+      ["null", null],
+    ] as const) {
+      const response = await post("/1300035/patrol", "leader-1@wsj.se", body)
+
+      expect(response.status).toBe(422)
+      expect(await response.json()).toEqual({
+        detail: [
+          {
+            type: "model_attributes_type",
+            loc: ["body"],
+            msg: "Input should be a valid dictionary or object to extract fields from",
+            input,
+          },
+        ],
+      })
+    }
+  })
+
+  it("answers any other method with 405", async () => {
+    const response = await writable.request(`${origin}/api/project/participants/1300035/patrol`, {
+      headers: as("leader-1@wsj.se"),
+    })
+
+    expect(response.status).toBe(405)
+    expect(response.headers.get("Allow")).toBe("POST")
   })
 })
 

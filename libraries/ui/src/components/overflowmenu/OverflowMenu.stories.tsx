@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState, type ReactElement } from "react"
+import { fn } from "storybook/test"
 
 import { CopyIcon } from "../../foundations/icons/set/CopyIcon"
 import { MailIcon } from "../../foundations/icons/set/MailIcon"
@@ -84,6 +85,26 @@ export const Unavailable: Story = {
 }
 
 /**
+ * A detail at each entry's end, here how full the place each move leads to already is.
+ */
+export const Details: Story = {
+  args: {
+    items: [
+      {
+        detail: { shown: "7/9", spoken: "7 av 9" },
+        label: "Till Falkarna",
+        onSelect: fn(),
+      },
+      {
+        detail: { shown: "0/9", spoken: "0 av 9" },
+        label: "Till Patrull 3",
+        onSelect: fn(),
+      },
+    ],
+  },
+}
+
+/**
  * Icons on some entries indent the rest, so every label starts on the same line – and
  * two unavailable entries in a row still read as two entries, each reason belonging to
  * the label above it.
@@ -138,4 +159,11 @@ export const Receipt: Story = {
       />
     </div>
   ),
+}
+
+/**
+ * Flush in a row of its own surface, where glass would have nothing to float over.
+ */
+export const Flush: Story = {
+  args: { isFlush: true, items: [{ label: "Visa", onSelect: fn() }], label: "Mer" },
 }

@@ -1,0 +1,18 @@
+/* The people in no patrol, where a carried person can be put down. */
+
+@layer screen {
+  .patrols-tray {
+    border: 2px solid transparent;
+    border-radius: var(--border-radius-control);
+    margin: -6px;
+    padding: 4px;
+    transition:
+      border-color 120ms ease,
+      background 120ms ease;
+  }
+
+  .patrols-tray-over {
+    background: color-mix(in srgb, var(--color-theme-wash) 60%, var(--color-sheet));
+    border-color: var(--color-theme-bright);
+  }
+}

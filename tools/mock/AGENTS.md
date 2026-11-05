@@ -62,14 +62,14 @@ tools/mock/
 
 **ScoutID's session outlives the auth service's cookies.** While it lives, a login goes straight through without the picker. Signing out ends it, which is how a developer switches persona – exactly as the real flow works.
 
-**Nothing reaches disk.** Sessions, cases, and their pictures live in memory and the key is made at start, so a restart signs everyone out and forgets every case written since. The clock is injectable, so a test ages a token without waiting.
+**Nothing reaches disk.** Sessions, cases, their pictures, and the patrols leaders write live in memory and the key is made at start, so a restart signs everyone out and forgets every case, picture, and patrol written since. The clock is injectable, so a test ages a token without waiting.
 
 ## The seed
 
 **A seed is data, not a special case.** Each persona is a file under `seed/personas/`, there for a case rather than for numbers, and listed for the picker in `seed/personas/index.ts` with a description of the case it covers. Add a persona by adding a file and listing it, and by giving them a row in the list of participants if they are in the contingent – never by branching in a route.
 
 - `seed/units.ts` seeds two units, because a leader's boundary needs a unit on each side. Their real names and glyphs come from the web application's own unit identities, not from the mock.
-- `seed/participants/participants.ts` is the list before the service decodes it, every answer keyed by its question. The ledare and kontingentledning rows carry the personas' identities, so a signed-in persona holds the roles their row mints. The holes – a missing mobile number, a missing scout group, a missing home town, a home town abroad – are deliberate.
+- `seed/participants/participants.ts` is the list before the service decodes it, every answer keyed by its question. The ledare and kontingentledning rows carry the personas' identities, so a signed-in persona holds the roles their row mints. The holes – a missing mobile number, a missing scout group, a missing home town, a home town abroad – are deliberate. Unit 2 is half divided into patrols and unit 1 not at all, and no leader has a Patrull answer, so both a grouped and an ungrouped unit are walked.
 - `seed/cases.ts` holds a case of each type at secrecy level 3, each written by a persona who holds its role: the health persona's three about deltagare in both units – two open, one closed – the head of contingent's one, and a unit 1 leader's one. They are dated from a fixed moment, so a case written while the mock runs sorts above them.
 - `src/project/participants-list.ts` walks the form template rather than the answers, so an answer the template does not carry never reaches the wire.
 - `max-lines` is off for `seed/**`, because a row carries a whole registration form.

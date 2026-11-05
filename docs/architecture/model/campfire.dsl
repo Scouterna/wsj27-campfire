@@ -76,7 +76,7 @@ campfire = softwareSystem "Campfire" {
     }
 
     participantsModule = container "Participants" {
-      description "The contingent's list of participants and the screens that show it."
+      description "The contingent's list of participants, and the patrols leaders divide it into."
       technology "TypeScript, React 19, TanStack Query"
       tags "module"
     }
@@ -149,12 +149,12 @@ campfire = softwareSystem "Campfire" {
   # It is the app that sends a member to ScoutID, and the auth service that completes the
   # round trip once they arrive.
   this -> authService "Signs members in and out through"
-  this -> participantsService "Reads the contingent's list of participants from"
+  this -> participantsService "Reads participants and stores patrols through"
   this -> casesService "Keeps the cases in"
   this -> scoutid "Sends members to sign in at"
   authService -> scoutid "Runs the OpenID round trip with"
   scoutid -> scoutnet "Verifies sign-ins against"
-  participantsService -> scoutnet "Reads the contingent's member data from"
+  participantsService -> scoutnet "Reads member data from and stores patrols in"
   developers -> github "Build, check, and publish through"
 
   developers -> mock "Run in place of the back-end services, locally"
@@ -197,7 +197,7 @@ campfire = softwareSystem "Campfire" {
   authenticationModule -> participantsService "Reads the member's unit and travel over /api/project"
   casesModule -> casesService "Reads and writes cases over /api/project"
   casesModule -> participantsService "Reads the contingent's names over /api/project"
-  participantsModule -> participantsService "Reads the list of participants over /api/project"
+  participantsModule -> participantsService "Reads participants and stores patrols over /api/project"
   participantsModule -> openFreeMap "Draws unit maps over tiles from"
   materialModule -> googleDrive "Lists, previews, and downloads the material from"
 }

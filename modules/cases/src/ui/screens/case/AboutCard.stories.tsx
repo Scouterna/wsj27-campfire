@@ -1,10 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import type { ReactElement } from "react"
 import { fn } from "storybook/test"
 
 import { toCases } from "../../../data/dto/CaseDto"
 import { toPeople } from "../../../data/dto/PersonDto"
 import { ApiDecorator } from "../../storybook/ApiDecorator"
 import { caseRows, peopleRows } from "../../storybook/fixtures"
+import { SubjectSlotProvider } from "../../subject-slot"
 import { AboutCard } from "./AboutCard"
 
 const cases = toCases(caseRows)
@@ -68,4 +70,26 @@ export const Adding: Story = {
  */
 export const WholeUnit: Story = {
   args: { item: caseWith("7") },
+}
+
+/**
+ * A slot the application fills, standing in for what the participants section draws.
+ * @param Story The story.
+ * @returns The story, with the slot in scope.
+ */
+function withSlot(Story: () => ReactElement): ReactElement {
+  return (
+    <SubjectSlotProvider slot={() => <button type="button">Hälsa och kost</button>}>
+      <Story />
+    </SubjectSlotProvider>
+  )
+}
+
+/**
+ * A person's card carries what the application put in the slot, on any case – what is
+ * drawn there decides for itself what the reader may see.
+ */
+export const WithSlot: Story = {
+  args: { item: caseWith("3") },
+  decorators: [withSlot],
 }

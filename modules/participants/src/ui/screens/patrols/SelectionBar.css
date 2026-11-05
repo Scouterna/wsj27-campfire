@@ -1,0 +1,37 @@
+/* The bar that follows the reader while people are picked. */
+
+@layer screen {
+  .patrols-selection {
+    border-radius: var(--border-radius-surface);
+    box-shadow: var(--shadow-raised);
+  }
+
+  .patrols-selection-head {
+    align-items: center;
+    display: flex;
+    gap: var(--spacing-group);
+    justify-content: space-between;
+    margin-block-end: var(--spacing-stack);
+    /* Pulled out by the plain button's own padding, so its word lines up with the card's
+       content rather than sitting inside the edge. */
+    margin-inline-end: calc(-1 * var(--spacing-container));
+  }
+
+  /* Clear of the phone's floating save button while there is one to press. */
+  .patrols-selection-beside-save {
+    margin-right: 72px;
+  }
+
+  @media (min-width: 768px) {
+    .patrols-selection-beside-save {
+      margin-right: 0;
+    }
+  }
+
+  /* The moves wrap rather than scroll, so every patrol can be seen on a phone. */
+  .patrols-selection-moves {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-stack);
+  }
+}

@@ -1,5 +1,6 @@
 import { istPatrolNumbered } from "../../model/IstPatrol"
 import type { Participant } from "../../model/Participant"
+import type { ParticipantDetail } from "../../model/ParticipantDetail"
 import type { ParticipantsList } from "../../model/ParticipantsList"
 import { unitNumbered } from "../../model/Unit"
 
@@ -25,7 +26,6 @@ export const cast: readonly Participant[] = [
     lastName: "Lindberg",
     role: "ledare",
     unit: unitNumbered(1),
-    unitPatrol: { name: "Falkarna" },
   },
   {
     memberGroup: "Seedviks scoutkår",
@@ -36,7 +36,6 @@ export const cast: readonly Participant[] = [
     lastName: "Hellström",
     role: "ledare",
     unit: unitNumbered(1),
-    unitPatrol: { name: "Uttrarna" },
   },
   {
     memberGroup: "Mockåsens scoutkår",
@@ -47,7 +46,6 @@ export const cast: readonly Participant[] = [
     lastName: "Dahl",
     role: "deltagare",
     unit: unitNumbered(1),
-    unitPatrol: { name: "Falkarna" },
     birthDate: "2012-03-14",
   },
   {
@@ -59,7 +57,6 @@ export const cast: readonly Participant[] = [
     lastName: "Forsberg",
     role: "deltagare",
     unit: unitNumbered(1),
-    unitPatrol: { name: "Uttrarna" },
     birthDate: "2011-11-02",
   },
   {
@@ -71,7 +68,6 @@ export const cast: readonly Participant[] = [
     lastName: "Lind",
     role: "deltagare",
     unit: unitNumbered(1),
-    unitPatrol: { name: "Falkarna" },
     birthDate: "2013-06-21",
   },
   {
@@ -83,7 +79,6 @@ export const cast: readonly Participant[] = [
     lastName: "Ström",
     role: "deltagare",
     unit: unitNumbered(1),
-    unitPatrol: { name: "Uttrarna" },
     birthDate: "2012-09-05",
   },
   {
@@ -95,7 +90,6 @@ export const cast: readonly Participant[] = [
     lastName: "Malm",
     role: "deltagare",
     unit: unitNumbered(1),
-    unitPatrol: { name: "Falkarna" },
     birthDate: "2013-01-30",
   },
   {
@@ -107,7 +101,6 @@ export const cast: readonly Participant[] = [
     lastName: "Forsberg",
     role: "deltagare",
     unit: unitNumbered(1),
-    unitPatrol: { name: "Uttrarna" },
     birthDate: "2012-05-17",
   },
   {
@@ -125,7 +118,6 @@ export const cast: readonly Participant[] = [
     lastName: "Andersson",
     role: "ledare",
     unit: unitNumbered(2),
-    unitPatrol: { name: "Hökarna" },
   },
   {
     memberGroup: "Stubbhults scoutkår",
@@ -135,7 +127,6 @@ export const cast: readonly Participant[] = [
     lastName: "Sundqvist",
     role: "deltagare",
     unit: unitNumbered(2),
-    unitPatrol: { name: "Hökarna" },
   },
   {
     memberGroup: "Stubbhults scoutkår",
@@ -145,7 +136,6 @@ export const cast: readonly Participant[] = [
     lastName: "Lundgren",
     role: "deltagare",
     unit: unitNumbered(2),
-    unitPatrol: { name: "Ekorrarna" },
   },
   {
     memberGroup: "Stubbhults scoutkår",
@@ -155,7 +145,6 @@ export const cast: readonly Participant[] = [
     lastName: "Lind",
     role: "deltagare",
     unit: unitNumbered(2),
-    unitPatrol: { name: "Bävrarna" },
   },
   {
     memberGroup: "Fixturby scoutkår",
@@ -420,4 +409,90 @@ export function unitWithHomeTowns(homeTowns: readonly string[]): ParticipantsLis
     }
   })
   return { people, scope: { kind: "unit", unitNumber: 1 } }
+}
+
+// Patrol names as a unit might choose them, dealt round the unit's people below.
+const patrolNames = ["Falkarna", "Uttrarna", "Ugglorna"]
+const genders = ["kvinna", "man", "kvinna", "man", "annat"] as const
+
+/**
+ * A unit at its real size, three patrols in and some of its scouts still in none – every
+ * scout with a gender, an age, and a kår, so each patrol has figures to weigh.
+ * @param placed How many of the scouts are in a patrol already, dealt round the patrols
+ *   in turn.
+ * @returns Unit 1, divided as far as asked.
+ */
+export function unitInPatrols(placed = 27): ParticipantsList {
+  const people = Array.from({ length: 40 }, (_, index): Participant => {
+    const isLeader = index < 4
+    const scout = index - 4
+    const patrol =
+      !isLeader && scout < placed ? patrolNames.at(scout % patrolNames.length) : undefined
+    return {
+      birthDate: isLeader
+        ? "1990-05-01"
+        : `201${String(1 + (index % 3))}-0${String((index % 9) + 1)}-15`,
+      firstName: firstNames[index % firstNames.length] ?? "Ester",
+      gender: genders[index % genders.length] ?? "kvinna",
+      lastName: lastNames[(index * 7) % lastNames.length] ?? "Dahl",
+      memberGroup: memberGroups[index % memberGroups.length] ?? "Mockåsens scoutkår",
+      memberNo: String(1_600_000 + index),
+      role: isLeader ? "ledare" : "deltagare",
+      unit: unitNumbered(1),
+      ...(patrol !== undefined && { patrol }),
+    }
+  })
+  return { people, scope: { kind: "unit", unitNumber: 1 } }
+}
+
+/**
+ * The records of `unitInPatrols` in full, a few of its scouts with needs a leader plans a
+ * patrol around – a serious nut allergy, a special diet, a medication, and a note to the
+ * leaders – and everybody else with none.
+ * @returns The records.
+ */
+export function unitInPatrolsDetails(): readonly ParticipantDetail[] {
+  const vaccinations = {
+    childhoodProgram: true,
+    diphtheria: { kind: "notGiven" },
+    tetanus: { kind: "notGiven" },
+  } as const
+  const needs: ReadonlyMap<number, Pick<ParticipantDetail, "health" | "notes">> = new Map([
+    [
+      5,
+      {
+        health: {
+          foodAllergy: {
+            details: "Jordnötter ger anafylaxi – bär EpiPen.",
+            severities: [{ allergen: "nuts", severity: 5 }],
+          },
+          vaccinations,
+        },
+        notes: [],
+      },
+    ],
+    [8, { health: { diet: { sort: "vegetarian" }, vaccinations }, notes: [] }],
+    [
+      12,
+      {
+        health: {
+          medication: { details: "Astmamedicin vid behov.", managesOwn: true },
+          vaccinations,
+        },
+        notes: [],
+      },
+    ],
+    [
+      20,
+      {
+        health: { vaccinations },
+        notes: [{ audience: "avdelningsledaren", text: "Sover dåligt i stora tält." }],
+      },
+    ],
+  ])
+  return unitInPatrols().people.map((person, index) => ({
+    ...person,
+    contact: { email: "", emergencyContacts: [], phone: "", relatives: [] },
+    ...(needs.get(index) ?? { health: { vaccinations }, notes: [] }),
+  }))
 }

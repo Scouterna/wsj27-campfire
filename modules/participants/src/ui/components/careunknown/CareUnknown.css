@@ -1,0 +1,10 @@
+/* What a list says over its rows when their care could not be read. */
+
+@layer component {
+  /* Said once over the rows, quietly, and only because their marks are missing. */
+  .care-unknown {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0 0 var(--spacing-stack);
+  }
+}

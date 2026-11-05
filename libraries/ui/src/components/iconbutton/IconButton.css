@@ -50,6 +50,17 @@
     color: var(--color-theme-ink);
   }
 
+  /* The overflow menu's trigger, so the two read as one kind of control. */
+  .icon-button-glass {
+    backdrop-filter: blur(22px) saturate(1.7);
+    background: var(--color-glass);
+    color: var(--color-ink-secondary);
+  }
+
+  .icon-button-glass:active:not(:disabled) {
+    opacity: 0.7;
+  }
+
   /* Only where a pointer can hover, so a touch never leaves a hover state stuck on. */
   @media (hover: hover) {
     .icon-button-primary:hover:not(:disabled) {

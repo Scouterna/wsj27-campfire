@@ -21,7 +21,7 @@ ScoutID is the one part that is not a copy, because it is not ours to run. The a
 
 Access follows the real rules. A unit leader reads their own unit, and beyond it only the names of the other leaders and the management team. The contingent management team reads everyone, and sees health answers only through a health role or a personal grant – a request without one is refused, never quietly answered with less. Someone with no access gets the same 404 as a person who does not exist, so a refusal never reveals who is on the list. Cases follow the cases service's rules the same way: the health team reaches health cases, the whole management team its own, and a unit's leaders their unit's, and a case out of reach answers like one that does not exist.
 
-Nothing reaches disk, and the signing key is made at start, so restarting the mock signs everyone out and forgets every case and picture written since. The access token lasts the real service's five minutes rather than something longer and kinder, so the refresh path runs during an ordinary afternoon of local work rather than only in production.
+Nothing reaches disk, and the signing key is made at start, so restarting the mock signs everyone out and forgets every case, picture, and patrol written since. The access token lasts the real service's five minutes rather than something longer and kinder, so the refresh path runs during an ordinary afternoon of local work rather than only in production.
 
 ## The personas
 

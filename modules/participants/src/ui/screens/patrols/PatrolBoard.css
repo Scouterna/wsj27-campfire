@@ -1,0 +1,185 @@
+/* A patrol as a board a person can be dropped on. */
+
+@layer screen {
+  /* A board is a card's sheet with its own heading inside, because the heading is a
+     field the leader types the name into. It lifts toward the reader under a carried
+     person, which is how it says it will take them. */
+  .patrol-board {
+    background: var(--color-sheet);
+    border: 2px solid transparent;
+    border-radius: var(--border-radius-surface);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-group);
+    padding: var(--spacing-container);
+    transition:
+      border-color 120ms ease,
+      background 120ms ease,
+      transform 160ms ease;
+  }
+
+  .patrol-board-over {
+    background: color-mix(in srgb, var(--color-theme-wash) 60%, var(--color-sheet));
+    border-color: var(--color-theme-bright);
+    transform: scale(1.01);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .patrol-board-over {
+      transform: none;
+    }
+  }
+
+  .patrol-board-heading {
+    align-items: center;
+    display: flex;
+    gap: var(--spacing-group);
+  }
+
+  /* The name as a field in the theme's wash, with a pencil at its end, so it reads as
+     something to type into before anybody tries. */
+  .patrol-board-name-field {
+    align-items: center;
+    background: color-mix(in srgb, var(--color-theme-wash) 45%, transparent);
+    border-radius: var(--border-radius-control);
+    cursor: text;
+    display: flex;
+    flex: 1;
+    gap: var(--spacing-inline);
+    min-width: 0;
+    padding-inline-end: var(--spacing-stack);
+    transition: background 120ms ease;
+  }
+
+  .patrol-board-name-field:hover,
+  .patrol-board-name-field:focus-within {
+    background: var(--color-theme-wash);
+  }
+
+  .patrol-board-name-field:has(.patrol-board-name:focus-visible) {
+    outline: 2px solid var(--color-theme-ink);
+  }
+
+  .patrol-board-name {
+    background: transparent;
+    border: none;
+    color: var(--color-ink);
+    flex: 1;
+    font: inherit;
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-strong);
+    min-height: 44px;
+    min-width: 0;
+    outline: none;
+    padding: 0 var(--spacing-stack);
+  }
+
+  /* The place's own name, well under a name a leader gave, so it reads as one still to
+     give – lighter than any text the app reads, because it is a suggestion, not a fact. */
+  .patrol-board-name::placeholder {
+    color: color-mix(in srgb, var(--color-ink) 38%, var(--color-paper));
+    opacity: 1;
+  }
+
+  .patrol-board-name-pencil {
+    color: var(--color-ink-secondary);
+    display: flex;
+    flex: none;
+  }
+
+  /* A quiet footnote under the name it is about. */
+  .patrol-board-name-note {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+  }
+
+  .patrol-board-size {
+    align-items: center;
+    color: var(--color-ink-secondary);
+    display: flex;
+    flex: none;
+    font-size: var(--font-size-footnote);
+    font-variant-numeric: tabular-nums;
+    gap: var(--spacing-stack);
+  }
+
+  .patrol-board-overfull {
+    color: var(--color-tone-danger-ink);
+    font-weight: var(--font-weight-strong);
+  }
+
+  /* The gender mix as one thick bar split in proportion, each part carrying its own
+     mark and count. */
+  /* Set further off the scouts than the board's other gaps, so the mix reads as the
+     heading's and not as the first of the list. */
+  .patrol-genders {
+    display: flex;
+    gap: 2px;
+    margin-bottom: var(--spacing-stack);
+  }
+
+  /* A part is never narrower than its count, so a lone scout's still reads. */
+  .patrol-genders-part {
+    align-items: center;
+    display: inline-flex;
+    flex-basis: 0;
+    font-size: var(--font-size-footnote);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--font-weight-strong);
+    gap: 3px;
+    min-height: 24px;
+    min-width: max-content;
+    padding-inline: var(--spacing-stack);
+    transition: flex-grow 240ms ease;
+  }
+
+  /* The mark takes the part's own ink, because its usual quiet gray disappears on the
+     colors. */
+  .patrol-genders-part .gender-mark {
+    color: inherit;
+  }
+
+  /* The bar's ends are round, its joins square. */
+  .patrol-genders-part:first-child {
+    border-end-start-radius: var(--border-radius-round);
+    border-start-start-radius: var(--border-radius-round);
+  }
+
+  .patrol-genders-part:last-child {
+    border-end-end-radius: var(--border-radius-round);
+    border-start-end-radius: var(--border-radius-round);
+  }
+
+  .patrol-genders-kvinna {
+    background: var(--color-theme-bright);
+    color: var(--color-theme-on-bright);
+  }
+
+  .patrol-genders-man {
+    background: var(--color-theme-ink);
+    color: var(--color-theme-on-ink);
+  }
+
+  /* White reads at under 4.5:1 on the green's bright and on the yellow's ink, so those two
+     parts are darkened just enough for it – the least that does, so each stays its unit's
+     color and keeps apart from the part beside it. */
+  [data-theme="green"] .patrol-genders-kvinna {
+    background: color-mix(in srgb, var(--color-theme-bright) 90%, black);
+    color: var(--color-theme-on-ink);
+  }
+
+  [data-theme="yellow"] .patrol-genders-man {
+    background: color-mix(in srgb, var(--color-theme-ink) 75%, black);
+  }
+
+  /* Darkened from the dot's mark until white reads on it at 4.5:1. */
+  .patrol-genders-annat {
+    background: color-mix(in srgb, var(--color-tone-caution-mark) 75%, black);
+    color: var(--color-theme-on-ink);
+  }
+
+  .patrol-genders-okant {
+    background: var(--color-tone-empty);
+    color: var(--color-ink-secondary);
+  }
+}
