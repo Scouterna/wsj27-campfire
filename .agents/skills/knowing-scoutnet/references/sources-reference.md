@@ -4,7 +4,7 @@ The repositories behind this skill, when they were last checked, and how to upda
 
 ## Last checked
 
-1 October 2026, for version 1.1.
+2 November 2026, for version 1.2 – `wsj27-project-api` at `v1.4.0` for the access grant; the rest as checked on 1 October 2026.
 
 ## Sources
 
