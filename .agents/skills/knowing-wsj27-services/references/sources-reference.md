@@ -4,7 +4,7 @@ The repositories behind this skill, the state of things when it was last checked
 
 ## Last checked
 
-22 October 2026, for version 1.3 – `wsj27-project-api` at `dev` f53b104 and `main` b5c3b41 for the cases service. The rest stands as checked on 1 October 2026.
+2 November 2026, for version 1.4 – `wsj27-project-api` at `v1.4.0`, which is `main` af65bf6, for the patrol route and the state below. 22 October 2026 for the cases service otherwise. The rest stands as checked on 1 October 2026.
 
 ## Sources
 
@@ -25,8 +25,7 @@ Describe a private repository's mechanism only – never its code, names, or int
 These describe a moment, and are the first facts to re-check:
 
 - **The refresh interval** was hourly while registration data still churned, meant to fall to daily.
-- **`dev` and `main` differ.** `dev` names the form's personal grant `wsj27:legacy-access:`, adds hand-assigned `wsj27:access:` roles and the patrol and role routes, and withholds the management team's own answers from everyone. `main` still names the grant `wsj27:access:`.
-- **Case access lives on `dev`.** The type, secrecy level, and extra-access rules, the access list, renaming, pictures, the optional unit, and several people on a case are on `dev`, which the dev site runs; `main` still admits anyone with a `wsj27:` role to every case, and names at most one member on it, as `about_person_id`.
+- **`dev` and `main` carry the same code.** `dev` is `main` plus one commit to `CLAUDE.md`, so what used to separate them – the `wsj27:legacy-access:` grant, hand-assigned `wsj27:access:` roles and the role route, the management team's own answers withheld from everyone, and the case access rules – is on both.
 
 ## Updating the skill
 

@@ -60,6 +60,8 @@ These come from specific questions and land in the decoded basic fields, not in 
 - **The applicant type** – Deltagare, IST, Avdelningsledare, or Kontingentledning – asked by a different question on each form.
 - **The unit** (avdelning), as its number. IST and the management team belong to no unit.
 - **The travel choice**, asked differently per applicant type and normalized to `Rundresa`, `Direktresa`, or `Egen resa`. The management team is not asked.
+- **The patrol**, from the Patrull question, which a deltagare's unit leaders fill in and a job of its own fills for the IST. An IST member whose Patrull is still empty keeps their Avdelning answer as their patrol. It is decoded to a top-level `patrol`, and a unit's leaders write a deltagare's through the participants service.
+- **The management team's function**, from a question only project admins see and edit, answered as `<Funktion> | <Roll>`.
 
 The roles minted from these are in the `knowing-wsj27-services` skill.
 
@@ -72,7 +74,7 @@ A question named Accesstyp gives each person one of four access levels:
 - **Hälsa plus intern information** – health and internal information
 - **Avdelningsledare** – a unit leader's access
 
-It becomes a role carried by everyone granted access – `wsj27:legacy-access:<level>` on the participants service's `dev` branch, `wsj27:access:<level>` on its `main`. On `dev`, the `wsj27:access:` namespace holds grants assigned by hand instead, which are meant to replace this question. The participants service uses the role, beside the others, to decide who reads what at which level.
+It becomes a role carried by everyone granted access, `wsj27:legacy-access:<level>`. The `wsj27:access:` namespace holds grants assigned by hand instead, which are meant to replace this question. The participants service uses the role, beside the others, to decide who reads what at which level.
 
 ## Drift
 

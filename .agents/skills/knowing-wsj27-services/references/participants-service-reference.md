@@ -15,16 +15,16 @@ The participants service – the part of the WSJ27 project's back-end, `wsj27-pr
 
 Served at the service's root; the ingress adds and strips `/api/project`.
 
-| Route                                      | What it does                                                                                                                                                                                     |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `GET /participants/troopinfo`              | Every participant in the project at once, for the management team only. Takes `infolevel`.                                                                                                       |
-| `GET /participants/troopinfo/{troop}`      | The participants in one unit, or in one member type – `al`, `ist`, or `cmt`. Takes `infolevel`.                                                                                                  |
-| `GET /participants/individual/{member_no}` | One participant. Takes `infolevel`.                                                                                                                                                              |
-| `GET /participants/roles`                  | The whole role map – member number to roles – for callers holding `wsj27:bulkread`, `wsj27:rolereader`, or `wsj27:cmt:admin`. Answers 304 on a matching `If-None-Match`, and 404 to anyone else. |
-| `POST /participants/{member_no}/patrol`    | Sets or clears one participant's patrol, stored in Scoutnet. Only a leader of the participant's own unit; anyone else gets 404. On `dev` only.                                                   |
-| `POST /participants/{member_no}/role`      | Replaces one participant's hand-assigned roles with the whole list sent. Only the management team; every role must be under `wsj27:access:`, or the request answers 422. On `dev` only.          |
-| `GET /scoutnet/refresh`                    | Refreshes the Scoutnet cache now. 409 while the service is pinned to a snapshot.                                                                                                                 |
-| `GET /`                                    | Health.                                                                                                                                                                                          |
+| Route                                      | What it does                                                                                                                                                                                                                                                                 |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /participants/troopinfo`              | Every participant in the project at once, for the management team only. Takes `infolevel`.                                                                                                                                                                                   |
+| `GET /participants/troopinfo/{troop}`      | The participants in one unit, or in one member type – `al`, `ist`, or `cmt`. Takes `infolevel`.                                                                                                                                                                              |
+| `GET /participants/individual/{member_no}` | One participant. Takes `infolevel`.                                                                                                                                                                                                                                          |
+| `GET /participants/roles`                  | The whole role map – member number to roles – for callers holding `wsj27:bulkread`, `wsj27:rolereader`, or `wsj27:cmt:admin`. Answers 304 on a matching `If-None-Match`, and 404 to anyone else.                                                                             |
+| `POST /participants/{member_no}/patrol`    | Sets or clears one deltagare's patrol, for a leader of their own unit; any other caller or target gets 404. Answers `{member_no, patrol}`. Stored as Patrull, question 120104 – in Scoutnet in prod, in the overlay elsewhere – and read back at once as top-level `patrol`. |
+| `POST /participants/{member_no}/role`      | Replaces one participant's hand-assigned roles with the whole list sent. Only the management team; every role must be under `wsj27:access:`, or the request answers 422.                                                                                                     |
+| `GET /scoutnet/refresh`                    | Refreshes the Scoutnet cache now. 409 while the service is pinned to a snapshot.                                                                                                                                                                                             |
+| `GET /`                                    | Health.                                                                                                                                                                                                                                                                      |
 
 `/participants/roles` is left out of the API docs, but it is the contract the auth service depends on, so its path does not change.
 
@@ -40,12 +40,12 @@ Every route but health needs the auth service's access-token cookie or a bearer 
 
 ## Roles
 
-The service is the single definition of a WSJ27 role. Roles are minted when Scoutnet data is decoded and stored on the participant. On `dev`, roles assigned by hand are merged in beside them.
+The service is the single definition of a WSJ27 role. Roles are minted when Scoutnet data is decoded and stored on the participant. Roles assigned by hand are merged in beside them.
 
 - **`wsj27:al:<unit>`** – a unit leader (Avdelningsledare), scoped to their own unit. A leader with no unit on file gets no leader role.
-- **`wsj27:cmt:<function>:<role>`** – a member of the contingent management team (Kontingentledning). The function and role come from a roster file matched by member number, because Scoutnet does not hold them. Someone missing from the roster gets plain `wsj27:cmt`. A trailing "PL" on a role is dropped, so a coordinator mints the same role as the rest of their team.
-- **`wsj27:legacy-access:<level>`** on `dev`, **`wsj27:access:<level>`** on `main` – the personal access grant from the registration form, added to whatever else the person holds. No grant is expressed by no role.
-- **`wsj27:access:<anything>`** on `dev` – a grant assigned by hand through `POST /participants/{member_no}/role` and stored in Scoutnet, taking effect at once. Nothing else mints into this namespace, so an assigned role can never pose as a unit or management role. No access rule reads one yet.
+- **`wsj27:cmt:<function>:<role>`** – a member of the contingent management team (Kontingentledning). The function and role come from Scoutnet question 120008, which only project admins see and edit, holding `<Funktion> | <Roll>`. An empty answer gets plain `wsj27:cmt`, and a function with no role `wsj27:cmt:<function>`. A trailing "PL" on a role is dropped, so a coordinator mints the same role as the rest of their team.
+- **`wsj27:legacy-access:<level>`** – the personal access grant from the registration form, added to whatever else the person holds. No grant is expressed by no role.
+- **`wsj27:access:<anything>`** – a grant assigned by hand through `POST /participants/{member_no}/role` and stored in Scoutnet, taking effect at once. Nothing else mints into this namespace, so an assigned role can never pose as a unit or management role. No access rule reads one yet.
 
 Segments are slugified – accents folded, anything else collapsed to a dash – so no segment can smuggle in a colon. Deltagare and IST get no role.
 
@@ -60,7 +60,7 @@ Segments are slugified – accents folded, anything else collapsed to a dash –
 - **An adult's name is open to every leader and management member.** Anyone holding `wsj27:al:<unit>` or `wsj27:cmt` may read the `name` level of any Avdelningsledare or Kontingentledning – one by member number, or the `al` and `cmt` listings – because those are the people who create, are assigned to, and write on cases. Every other level, every young participant, and the `ist` listing still follow the unit rules. A bare `wsj27:al` or a service account does not count.
 - **No access answers 404**, with the same body as a record that does not exist, so a refusal never confirms membership. Access at too low a level answers 403.
 - **A unit's own leaders are names only to each other.** A unit leader's contact details and answers go only to management with health access, so a leader reading their unit sees its young people in full and its other leaders by name.
-- **The management team's own answers** are held back more tightly still, from everyone without the form's personal grant – and on `dev`, for now, from everyone.
+- **The management team's own answers are withheld from everyone.**
 - **A health grant without the management team's role opens nothing beyond a leader's own unit**, because full access across units starts from `wsj27:cmt`.
 - **Access adds up.** Someone who is both a leader and on the management team gets full access to their own unit and management's access everywhere else.
 - For a listing, access is decided before the lookup. The whole project is nobody's unit, so only the management team's access opens it, and a leader gets the 404 another unit gets.
@@ -74,11 +74,11 @@ The service fetches each configured Scoutnet project's participants, forms, and 
 
 ## Configuration
 
-| Variable                                                 | Meaning                                                                                                                                        |
-| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SCOUTNET_PROJECTS`                                      | The Scoutnet projects to read, with each project's API keys                                                                                    |
-| `SCOUTNET_BODYLIST_ID`, `SCOUTNET_BODYLIST_KEY`          | Reads the scout groups' names                                                                                                                  |
-| `SCOUTNET_REFRESH_INTERVAL_HOURS`, `PERSIST_DIR`         | How often to refresh, and where the disk cache lives                                                                                           |
-| `SCOUTNET_SNAPSHOT_DIR`                                  | Pins every read to a captured snapshot and stops refreshing                                                                                    |
-| `CMT_ROLES_FILE`                                         | The management team's roster of functions and roles                                                                                            |
-| `AUTH_DISABLED`, `FAKE_USER_ROLES`, `SCOUTNET_DEV_CACHE` | Local development only – no token check, a fake caller's roles, and a disk cache of raw responses that would freeze a deployment on stale data |
+| Variable                                                 | Meaning                                                                                                                                                                    |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SCOUTNET_PROJECTS`                                      | The Scoutnet projects to read, with each project's API keys                                                                                                                |
+| `SCOUTNET_BODYLIST_ID`, `SCOUTNET_BODYLIST_KEY`          | Reads the scout groups' names                                                                                                                                              |
+| `SCOUTNET_REFRESH_INTERVAL_HOURS`, `PERSIST_DIR`         | How often to refresh, and where the disk cache lives                                                                                                                       |
+| `SCOUTNET_SNAPSHOT_DIR`                                  | Pins every read to a captured snapshot and stops refreshing                                                                                                                |
+| `SCOUTNET_OVERLAY`                                       | On by default, keeping every write to Scoutnet in a file under `PERSIST_DIR` and laying it over each read instead. Only prod turns it off, so only prod writes to Scoutnet |
+| `AUTH_DISABLED`, `FAKE_USER_ROLES`, `SCOUTNET_DEV_CACHE` | Local development only – no token check, a fake caller's roles, and a disk cache of raw responses that would freeze a deployment on stale data                             |
