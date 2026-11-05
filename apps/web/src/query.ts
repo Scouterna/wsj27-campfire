@@ -60,9 +60,9 @@ const persister = createQueryPersister({
   // The cached shapes' version. Bump it whenever a persisted payload's shape changes,
   // because a stale shape read as a fresh one is worse than a cold cache.
   buster: "7",
-  // Thirty days, not the library's twenty-four hours, and the same span as `gcTime` –
-  // the default would drop the whole cache on the jamboree's second day, which is
-  // exactly when the network is worst and the cache matters most.
+  // Thirty days, not the library's twenty-four hours, which would drop the whole cache on
+  // the jamboree's second day – exactly when the network is worst and the cache matters
+  // most.
   maxAge: 30 * 24 * 60 * 60 * 1000,
   storage,
 })
@@ -92,7 +92,9 @@ const persisterWithSession: QueryPersister = (queryFunction, context, query) =>
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      gcTime: 30 * 24 * 60 * 60 * 1000,
+      // The longest delay a browser's timer keeps. Anything longer overflows and fires at
+      // once, so every query would leave memory the moment no screen shows it.
+      gcTime: 2 ** 31 - 1,
       networkMode: "offlineFirst",
       persister: persisterWithSession,
       refetchOnMount: "always",

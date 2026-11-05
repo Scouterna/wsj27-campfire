@@ -49,12 +49,13 @@ The auth service's own script keeps an active session alive, and the application
 
 The cache is set for a camp site rather than a desk. Thousands of phones share the few cell towers that reach the island, which is exactly when a leader needs the list of participants and exactly when a request is least likely to answer ([ADR 017](/decisions/017-route-and-load-data-with-tanstack-router-and-query)).
 
-| Setting                              | Value          | Why                                                          |
-| ------------------------------------ | -------------- | ------------------------------------------------------------ |
-| `gcTime`                             | 30 days        | A cold start without a connection still has the list         |
-| `networkMode`                        | `offlineFirst` | A query runs even when the webview guesses it is offline     |
-| `refetchOnMount`                     | `always`       | A screen draws the cache at once and asks for a fresh answer |
-| `refetchOnWindowFocus`, `…Reconnect` | off            | A phone waking up is not a reason to ask                     |
+| Setting                              | Value          | Why                                                                                 |
+| ------------------------------------ | -------------- | ----------------------------------------------------------------------------------- |
+| `gcTime`                             | about 24 days  | The longest a browser's timer keeps, so nothing leaves memory while the app is open |
+| The persister's `maxAge`             | 30 days        | A cold start without a connection still has the list                                |
+| `networkMode`                        | `offlineFirst` | A query runs even when the webview guesses it is offline                            |
+| `refetchOnMount`                     | `always`       | A screen draws the cache at once and asks for a fresh answer                        |
+| `refetchOnWindowFocus`, `…Reconnect` | off            | A phone waking up is not a reason to ask                                            |
 
 A fresh answer that fails leaves the cached one in place, so a screen that has ever loaded keeps showing what it had.
 
