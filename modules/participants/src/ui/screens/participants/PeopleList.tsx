@@ -39,7 +39,7 @@ interface RowDetail {
 
 /**
  * The line that places a person: the role first, then their unit or IST patrol, by number
- * and name, or the management member's funktion where the roster details one.
+ * and name, or the management member's funktion where one is filled in.
  * @param person The row's person.
  * @returns The line.
  */

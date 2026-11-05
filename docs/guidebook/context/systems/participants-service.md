@@ -23,7 +23,7 @@ The service decides what each caller gets, so the front-end never filters what i
 
 Any leader or member of the management team may read every adult's name, because those are the people on cases. A person the caller may not see answers exactly as someone who does not exist, so nobody can learn who is in the contingent by asking. A caller who may see a person but not at the level asked for is refused outright rather than handed less.
 
-The contingent management team's functions are not in Scoutnet, so the service reads them from the contingent's own roster. What leaves the service is decided by a template in its repository – a form question the template does not carry never reaches Campfire.
+The contingent management team's functions sit in a registration question only project admins see, and the service reads them from there. What leaves the service is decided by a template in its repository – a form question the template does not carry never reaches Campfire.
 
 ## Locally
 

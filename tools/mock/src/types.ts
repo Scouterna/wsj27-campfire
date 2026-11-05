@@ -129,6 +129,11 @@ export interface Participant {
    */
   readonly city?: string
   /**
+   * A management member's Funktion and Roll, as the project's admins write them in the
+   * admin-only question 120008 – "Support | Hälsa PL". Absent is unanswered.
+   */
+  readonly cmtRole?: string
+  /**
    * Their primary email in Scoutnet. Absent is null on the wire.
    */
   readonly email?: string

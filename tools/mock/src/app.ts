@@ -1,6 +1,6 @@
 import { Hono } from "hono"
 
-import { forms, participants, readCmtRoles } from "../seed/participants/index.ts"
+import { forms, participants } from "../seed/participants/index.ts"
 import { RoleCache } from "./auth/roles.ts"
 import { authHealth, authRoutes } from "./auth/routes.ts"
 import { controlRoutes } from "./control/routes.ts"
@@ -8,7 +8,6 @@ import { noCache, notFound } from "./fastapi.ts"
 import { generateSigningKey, type SigningKey } from "./keys.ts"
 import { decodeParticipantsList } from "./project/participants-list.ts"
 import { roleMapOf } from "./project/role-map.ts"
-import { loadCmtRoles } from "./project/roles.ts"
 import { projectHealth, projectRoutes } from "./project/routes.ts"
 import { ScoutId } from "./scoutid/provider.ts"
 import { scoutIdRoutes } from "./scoutid/routes.ts"
@@ -38,7 +37,7 @@ export interface MockOptions {
 export function createApp(options: MockOptions = {}): Hono {
   const now = options.now ?? Date.now
   const key = options.key ?? generateSigningKey()
-  const participantsList = decodeParticipantsList(participants, forms, loadCmtRoles(readCmtRoles()))
+  const participantsList = decodeParticipantsList(participants, forms)
   const roles = new RoleCache(roleMapOf(participantsList), now())
   const scoutId = new ScoutId(now)
 

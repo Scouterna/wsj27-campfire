@@ -1,13 +1,8 @@
 /**
- * The single definition of a WSJ27 role, as `roles.py` mints them from a participant's fields
- * and the CMT roster: `wsj27:al:<troop>` for a leader, `wsj27:cmt:<funktion>:<roll>` for the
- * contingent management, and `wsj27:legacy-access:<level>` for a personal grant from the form.
+ * The single definition of a WSJ27 role, as `roles.py` mints them from a participant's fields:
+ * `wsj27:al:<troop>` for a leader, `wsj27:cmt:<funktion>:<roll>` for the contingent management,
+ * and `wsj27:legacy-access:<level>` for a personal grant from the form.
  */
-
-/**
- * A management member's Funktion and Roll, slugified, keyed by member number.
- */
-export type CmtDetails = ReadonlyMap<number, readonly [funktion: string, roll: string]>
 
 /**
  * Lowercases a Swedish label into a role segment: accents folded, and any run of other
@@ -32,7 +27,7 @@ export function slug(value: string): string {
 /**
  * Drops a trailing "PL" from a Roll, so "Hälsa PL" mints the same role as "Hälsa". Only a
  * trailing PL set off by whitespace counts – "PL Food house" is a title of its own.
- * @param roll The Roll as the roster writes it.
+ * @param roll The Roll as the answer writes it.
  * @returns The Roll without the qualifier.
  */
 export function dropPlSuffix(roll: string): string {
@@ -42,31 +37,22 @@ export function dropPlSuffix(roll: string): string {
 }
 
 /**
- * Reads the CMT roster – the CSV `CMT_ROLES_FILE` points at – into each member's slugified
- * Funktion and Roll. A row with no member number is someone not yet matched to Scoutnet and is
- * skipped, as is one whose number does not parse or that has no Funktion. The roster holds no
- * quoted fields, so a line splits on its commas.
- * @param csv The roster's text.
- * @returns The details, keyed by member number.
+ * The management role for one member's "<Funktion> | <Roll>" answer, as specific as it allows –
+ * falling back through `wsj27:cmt:<funktion>` to plain `wsj27:cmt` rather than granting nothing,
+ * so a member whose answer is still empty gets what every management member has. The answer is
+ * written by hand, so the spacing around the "|" counts for nothing, and the separator is "|"
+ * because a Roll can hold a "/".
+ * @param answer The member's answer, empty where there is none.
+ * @returns The role.
  */
-export function loadCmtRoles(csv: string): CmtDetails {
-  const text = csv.startsWith("\u{FEFF}") ? csv.slice(1) : csv
-  const [header = [], ...rows] = text
-    .split(/\r?\n/u)
-    .filter((line) => line !== "")
-    .map((line) => line.split(","))
-  const column = (row: readonly string[], name: string): string =>
-    row.at(header.indexOf(name)) ?? ""
-  const details = new Map<number, readonly [string, string]>()
-  for (const row of rows) {
-    const memberNo = column(row, "Medlemsnummer").trim()
-    const funktion = slug(column(row, "Funktion"))
-    const roll = slug(dropPlSuffix(column(row, "Roll")))
-    if (/^[+-]?\d+$/u.test(memberNo) && funktion !== "") {
-      details.set(Number(memberNo), [funktion, roll])
-    }
+export function cmtRole(answer: string): string {
+  const separator = answer.indexOf("|")
+  const funktion = slug(separator === -1 ? answer : answer.slice(0, separator))
+  if (funktion === "") {
+    return "wsj27:cmt"
   }
-  return details
+  const roll = separator === -1 ? "" : slug(dropPlSuffix(answer.slice(separator + 1).trim()))
+  return roll === "" ? `wsj27:cmt:${funktion}` : `wsj27:cmt:${funktion}:${roll}`
 }
 
 /**
@@ -77,7 +63,10 @@ export interface RoleInputs {
    * Their Accesstyp, by its option text.
    */
   readonly accessLevel: string
-  readonly memberNo: number
+  /**
+   * A management member's "<Funktion> | <Roll>" answer, empty where there is none.
+   */
+  readonly cmtRole: string
   /**
    * Scoutnet's member type – `Avdelningsledare`, `Kontingentledning`, and the rest.
    */
@@ -88,13 +77,12 @@ export interface RoleInputs {
 /**
  * Mints one participant's roles. Only leaders and the contingent management get any. A leader
  * gets their troop's role, and none when Scoutnet holds no troop for them; a management member
- * gets their Funktion and Roll from the roster, falling back to plain `wsj27:cmt`. Either then
- * gets their Accesstyp as a role, unless it is "Ingen" or blank.
- * @param inputs The participant's member type, troop, member number, and Accesstyp.
- * @param cmtDetails The roster's Funktion and Roll per member.
+ * gets their Funktion and Roll from their answer. Either then gets their Accesstyp as a role,
+ * unless it is "Ingen" or blank.
+ * @param inputs The participant's member type, troop, management answer, and Accesstyp.
  * @returns The roles, in the order the service mints them.
  */
-export function rolesForParticipant(inputs: RoleInputs, cmtDetails: CmtDetails): string[] {
+export function rolesForParticipant(inputs: RoleInputs): string[] {
   const roles: string[] = []
   const troop = inputs.troop.trim()
   if (inputs.memberType === "Avdelningsledare") {
@@ -102,8 +90,7 @@ export function rolesForParticipant(inputs: RoleInputs, cmtDetails: CmtDetails):
       roles.push(`wsj27:al:${troop}`)
     }
   } else if (inputs.memberType === "Kontingentledning") {
-    const [funktion = "", roll = ""] = cmtDetails.get(inputs.memberNo) ?? []
-    roles.push(["wsj27:cmt", funktion, roll].filter((segment) => segment !== "").join(":"))
+    roles.push(cmtRole(inputs.cmtRole))
   } else {
     return []
   }

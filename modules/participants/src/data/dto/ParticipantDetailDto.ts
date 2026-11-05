@@ -37,8 +37,9 @@ const travelByLabel: ReadonlyMap<string, Travel> = new Map([
  *
  * The ID-card name and the graded languages have no question behind them in the template
  * the service publishes, so nothing fills them and the screens draw them as absent. The
- * management's funktion has no question either, but the roster mints it into the record's
- * roles, and the basic converter reads it back out of them.
+ * management's funktion comes from a registration question only project admins see, which
+ * the template does not publish either, but the service mints it into the record's roles,
+ * and the basic converter reads it back out of them.
  * @param dto The record the participants service answered with.
  * @returns The person, or undefined when the payload is not one.
  */

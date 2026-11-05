@@ -63,7 +63,7 @@ const gendersBySex: ReadonlyMap<string, Gender> = new Map([
 // The funktion segment a `wsj27:cmt:<funktion>:<roll>` role names, mapped to the
 // domain's. The support function is split by its roll into its subgroups, and a support
 // roll that names none – the funktionsansvariga, and specialsupport – is the support
-// function itself. A funktion segment a later roster invents maps to nothing rather than
+// function itself. A funktion segment the answer gains later maps to nothing rather than
 // a guess.
 const funktionsBySegment: ReadonlyMap<string, CmtFunktion> = new Map([
   ["admin", "administration"],
@@ -78,7 +78,7 @@ const funktionsBySupportRoll: ReadonlyMap<string, CmtFunktion> = new Map([
   ["ist-support", "istSupport"],
 ])
 
-// The roster's FA roll – funktionsansvarig – as the service slugifies it: "FA" plain,
+// The FA roll – funktionsansvarig – as the service slugifies it: "FA" plain,
 // and "FA/CET" for the ones who are also in the core event team.
 const faRolls = new Set(["fa", "fa-cet"])
 

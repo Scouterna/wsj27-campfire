@@ -113,12 +113,12 @@ export interface Participant {
   readonly phone?: string
   /**
    * The function a management member serves in, read out of the record's minted roles.
-   * Absent for everyone else, and for a management member the roster has not detailed.
+   * Absent for everyone else, and for a management member whose funktion is not filled in.
    */
   readonly funktion?: CmtFunktion
   /**
    * Marks a funktionsansvarig – one of the members responsible for their funktion, the
-   * "FA" roll on the contingent's roster. Absent rather than false for everyone else.
+   * "FA" roll of the Funktion | Roll answer. Absent rather than false for everyone else.
    */
   readonly isFunktionsansvarig?: true
 }
