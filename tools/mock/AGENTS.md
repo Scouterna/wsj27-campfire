@@ -2,7 +2,7 @@
 
 Read the [root `AGENTS.md`](../../AGENTS.md) first. This file is what is true only of `tools/mock`, the stand-in for the whole back-end on a developer's machine ([ADR 021](../../docs/decisions/021-develop-against-a-mock-back-end.md)). How it is used is the guidebook's [mock page](../../docs/guidebook/testing/mock.md).
 
-It serves `wsj27-auth-api` under `/api/auth`, `wsj27-project-api` under `/api/project`, a ScoutID stand-in under `/__mock__/scoutid`, and a control surface under `/__mock__`. The two service prefixes are the ones the deployed ingress serves, so an address that works here works against dev unchanged ([ADR 012](../../docs/decisions/012-run-campfire-in-three-environments-on-one-origin.md)). It ships to nobody, and it defines nothing – **it copies what the services' code does**.
+It serves `wsj27-auth-api` under `/api/auth`, `wsj27-project-api` under `/api/project`, the CMS's handbook listing and its images under `/services/cms`, a ScoutID stand-in under `/__mock__/scoutid`, and a control surface under `/__mock__`. The two service prefixes are the ones the deployed ingress serves, so an address that works here works against dev unchanged ([ADR 012](../../docs/decisions/012-run-campfire-in-three-environments-on-one-origin.md)). It ships to nobody, and it defines nothing – **it copies what the services' code does**.
 
 ## Layout
 
@@ -13,11 +13,12 @@ tools/mock/
 │   ├── app.ts         createApp(), every route, importable without listening
 │   ├── auth/          wsj27-auth-api
 │   ├── project/       wsj27-project-api
+│   ├── cms/           the CMS's page listing and its pictures
 │   ├── scoutid/       the ScoutID stand-in and the persona picker
 │   ├── control/       the control surface
 │   ├── testing/       a cookie-keeping browser and a hand-moved clock, for the tests
 │   └── *.ts           what the services share – FastAPI's and pydantic's wire habits, JWTs, the key, the settings
-├── seed/              the personas, the list of participants, the units, and the cases
+├── seed/              the personas, the list of participants, the units, the cases, and the handbook
 └── static/            files copied from elsewhere
 ```
 
@@ -31,7 +32,7 @@ tools/mock/
 ## Running it
 
 - `pnpm start:mock` runs it alone on 8003. Signing in works only through `http://localhost:8000`, because the auth service's public URL and redirect allowlist name that origin.
-- `pnpm start:local` runs it behind Caddy on `:8000`, where [`config/environments/local/Caddyfile`](../../config/environments/local/Caddyfile) proxies the three prefixes to it. Nothing talks to 8003 except Caddy.
+- `pnpm start:local` runs it behind Caddy on `:8000`, where [`config/environments/local/Caddyfile`](../../config/environments/local/Caddyfile) proxies its prefixes to it. Nothing talks to 8003 except Caddy.
 - `scripts/start/local.sh` reports the environment up only once `/__mock__/state` answers both on the port and through Caddy.
 - The dev and prod environments run the real services instead, behind the same paths.
 
@@ -68,6 +69,7 @@ tools/mock/
 
 **A seed is data, not a special case.** Each persona is a file under `seed/personas/`, there for a case rather than for numbers, and listed for the picker in `seed/personas/index.ts` with a description of the case it covers. Add a persona by adding a file and listing it, and by giving them a row in the list of participants if they are in the contingent – never by branching in a route.
 
+- `seed/handbook.json` is the CMS's page listing as it answers one, with a short handbook whose pages carry every kind of block Campfire draws, in the editor's own serialized form. The pages are stored out of reading order, so the reader's ordering is what puts them right, and one is Campfire's alone, so the public handbook leaves it out. Every page carries a change note, each a different age before the seed's moment, and the mock moves them forward to now when it answers, so the handbook always has news of every age a badge fades through. Its one image is the live handbook's own, in `static/cms/`.
 - `seed/units.ts` seeds two units, because a leader's boundary needs a unit on each side. Their real names and glyphs come from the web application's own unit identities, not from the mock.
 - `seed/participants/participants.ts` is the list before the service decodes it, every answer keyed by its question. The ledare and kontingentledning rows carry the personas' identities, so a signed-in persona holds the roles their row mints. The holes – a missing mobile number, a missing scout group, a missing home town, a home town abroad – are deliberate. Unit 2 is half divided into patrols and unit 1 not at all, and no leader has a Patrull answer, so both a grouped and an ungrouped unit are walked.
 - `seed/cases.ts` holds a case of each type at secrecy level 3, each written by a persona who holds its role: the health persona's three about deltagare in both units – two open, one closed – the head of contingent's one, and a unit 1 leader's one. They are dated from a fixed moment, so a case written while the mock runs sorts above them.
