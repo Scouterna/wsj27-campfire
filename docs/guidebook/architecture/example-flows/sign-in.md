@@ -4,7 +4,7 @@ A leader opens Campfire, sees the sign-in screen, and taps the button. Signing i
 
 ## The round trip
 
-The sequence below is a browser with no session signing in and landing back in the application. The session gate is the part of the web application every screen sits behind.
+The sequence below is a browser with no session signing in and landing back in the application. The session gate is the part of the web application every screen but the public ones sits behind.
 
 ```mermaid
 sequenceDiagram

@@ -12,10 +12,11 @@ In the local environment, Caddy serves everything on `http://localhost:8000`, se
 | ------------------- | ---------------------------------------------------------------------------------- |
 | `/api/auth`         | The auth service – sign-in, the session cookies, and a real signed access token    |
 | `/api/project`      | The participants service, scoped by the caller's roles, and the cases service      |
+| `/services/cms`     | The CMS's page read, with a short seeded handbook                                  |
 | `/__mock__/scoutid` | ScoutID, with a persona picker where the password form would be                    |
 | `/__mock__`         | The mock's own controls – forgetting every session, and reporting who is signed in |
 
-A unit's map and the material are the two reads the mock does not answer. The map's tiles come from OpenFreeMap in every environment, the walk-throughs included, and only Storybook refuses them ([ADR 037](/decisions/037-draw-maps-on-the-device-over-openfreemaps-tiles)). The material comes from Google Drive locally, while its walk-throughs answer the Drive API themselves and Storybook seeds its own ([ADR 039](/decisions/039-read-the-contingents-material-straight-from-google-drive)).
+A unit's map, the material, and the FAQ are the reads the mock does not answer. The map's tiles come from OpenFreeMap in every environment, the walk-throughs included, and only Storybook refuses them ([ADR 037](/decisions/037-draw-maps-on-the-device-over-openfreemaps-tiles)). The material comes from Google Drive locally, while its walk-throughs answer the Drive API themselves and Storybook seeds its own ([ADR 039](/decisions/039-read-the-contingents-material-straight-from-google-drive)). The FAQ comes from Scouterna's help center locally, while its walk-throughs answer the folders themselves and Storybook seeds its own ([ADR 040](/decisions/040-read-the-handbook-from-the-cms-and-the-faq-from-the-help-center)).
 
 ScoutID is the one part that is not a copy, because it is not ours to run. The auth service sends the browser there as it would to the real ScoutID, and the page that answers lists invented people instead of asking for a password. Tap a name and the browser returns through the auth service with a code, exactly as it does from the real sign-in.
 
