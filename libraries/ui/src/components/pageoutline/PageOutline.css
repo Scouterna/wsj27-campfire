@@ -59,6 +59,20 @@
     text-align: left;
   }
 
+  /* An entry under the one before it – a page under its chapter – indented and a step
+     quieter, so the outline reads as a table of contents rather than a flat list. */
+  .outline-items button.outline-nested {
+    font-size: var(--font-size-footnote);
+    padding-block: 3px;
+    padding-inline-start: calc(var(--spacing-container) * 2 - 2px);
+  }
+
+  /* A top-level entry after a nested run starts a new group, so it keeps a little air
+     above it. */
+  .outline-items button.outline-nested + button:not(.outline-nested) {
+    margin-top: var(--spacing-stack);
+  }
+
   .outline-items button[aria-current] {
     color: var(--color-theme-ink);
     font-weight: var(--font-weight-strong);

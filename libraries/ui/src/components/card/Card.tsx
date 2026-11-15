@@ -16,8 +16,13 @@ export interface CardProps {
    */
   readonly children: ReactNode
   /**
-   * The card's heading, over the sheet. A card heading is an `h2`, so the page
-   * outline lists the card as a section.
+   * The level of the card's heading, for a card under a heading of the screen's own
+   * rather than straight under its title. An `h2` without one.
+   */
+  readonly level?: 2 | 3 | undefined
+  /**
+   * The card's heading, over the sheet. A card heading is an `h2` unless `level` says
+   * otherwise, so the page outline lists the card as a section.
    */
   readonly title?: string
 }
@@ -34,10 +39,11 @@ export function Card(props: CardProps): ReactElement {
     return <div className="card">{props.children}</div>
   }
 
+  const Heading = props.level === 3 ? "h3" : "h2"
   return (
     <section className="card-section">
       <div className="card-heading">
-        <h2 className="card-title">{props.title}</h2>
+        <Heading className="card-title">{props.title}</Heading>
         {props.aside === undefined ? null : <span className="card-aside">{props.aside}</span>}
       </div>
       <div className="card">{props.children}</div>

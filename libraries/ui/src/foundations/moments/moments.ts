@@ -20,7 +20,8 @@ const clock = new Intl.DateTimeFormat("sv-SE", { hour: "2-digit", minute: "2-dig
 
 /**
  * A moment as a list row says it – the time alone today, "igår" and the time
- * yesterday, and the day and month before that, such as "20 aug".
+ * yesterday, and the day and month before that, such as "20 aug", with the year when it
+ * is not this year's.
  * @param at The moment to write.
  * @param now The moment the reader is in, defaulting to now.
  * @returns The moment, for a reader.
@@ -33,12 +34,13 @@ export function formatRowMoment(at: Date, now = new Date()): string {
   if (days === 1) {
     return `igår ${clock.format(at)}`
   }
-  return dayAndMonth(at)
+  return dayAndMonth(at, now)
 }
 
 /**
- * A moment as a timeline says it – "idag" or "igår", or the day and month, and
- * always the time, such as "1 aug 16:40". The screen sets it in capitals.
+ * A moment as a timeline says it – "idag" or "igår", or the day and month, with the
+ * year when it is not this year's, and always the time, such as "1 aug 16:40". The
+ * screen sets it in capitals.
  * @param at The moment to write.
  * @param now The moment the reader is in, defaulting to now.
  * @returns The moment, for a reader.
@@ -51,7 +53,7 @@ export function formatTimelineMoment(at: Date, now = new Date()): string {
   if (days === 1) {
     return `igår ${clock.format(at)}`
   }
-  return `${dayAndMonth(at)} ${clock.format(at)}`
+  return `${dayAndMonth(at, now)} ${clock.format(at)}`
 }
 
 /**
@@ -68,11 +70,14 @@ function daysBetween(from: Date, to: Date): number {
 }
 
 /**
- * The day and the short month, such as "20 aug". The year is left out, because what the
- * product dates happens within one jamboree.
+ * The day and the short month, such as "20 aug", and the year only when it is not the
+ * reader's – most of what a list dates happens in the year it is read, and a date from
+ * another year without its year reads as one in this.
  * @param at The moment to write.
- * @returns The day and the month.
+ * @param now The moment the reader is in.
+ * @returns The day and the month, and the year where it differs.
  */
-function dayAndMonth(at: Date): string {
-  return `${String(at.getDate())} ${months[at.getMonth()] ?? ""}`
+function dayAndMonth(at: Date, now: Date): string {
+  const day = `${String(at.getDate())} ${months[at.getMonth()] ?? ""}`
+  return at.getFullYear() === now.getFullYear() ? day : `${day} ${String(at.getFullYear())}`
 }

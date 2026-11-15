@@ -14,6 +14,13 @@ export interface RowProps {
    */
   readonly action?: ReactNode
   /**
+   * An address outside the application the row opens instead – a mail to write, a
+   * number to call, a web page – with no chevron, because the row starts something rather
+   * than going somewhere in the application. A web page opens in a tab of its own, so the
+   * application stays where the reader left it. Never together with `link` or `action`.
+   */
+  readonly href?: string
+  /**
    * Where the row leads. A row without it does not react to a press.
    */
   readonly link?: LinkTarget
@@ -85,6 +92,19 @@ export function Row(props: RowProps): ReactElement {
         </Link>
         {end}
       </div>
+    )
+  }
+
+  if (props.href !== undefined) {
+    const isPage = /^https?:/u.test(props.href)
+    return (
+      <a
+        className={className}
+        href={props.href}
+        {...(isPage && { rel: "noopener noreferrer", target: "_blank" })}
+      >
+        {content}
+      </a>
     )
   }
 
