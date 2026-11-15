@@ -13,7 +13,7 @@ applyInitialTheme()
 
 // The direction listeners go on before the router mounts, so the very first click is
 // already decided by its source.
-wireNavigation()
+wireNavigation(router.history)
 
 // The update listeners go on before anything renders, so a deploy that takes over
 // during boot still reaches the page as one reload rather than staying invisible.

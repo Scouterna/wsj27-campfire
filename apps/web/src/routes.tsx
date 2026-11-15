@@ -15,6 +15,7 @@ import {
   useCasesAccess,
   type CasesAccess,
 } from "@scouterna/wsj27-campfire-cases"
+import { HandbookOffline, handbookRoutes } from "@scouterna/wsj27-campfire-handbook"
 import { HomeScreen } from "@scouterna/wsj27-campfire-home"
 import { host } from "@scouterna/wsj27-campfire-host"
 import { journeyWidgets } from "@scouterna/wsj27-campfire-journey"
@@ -27,6 +28,7 @@ import {
   type Viewer,
 } from "@scouterna/wsj27-campfire-participants"
 import {
+  BookIcon,
   Button,
   Card,
   ChatIcon,
@@ -95,6 +97,7 @@ import {
 } from "./navigation"
 import { Outline } from "./outline"
 import { ParticipantMenus } from "./participant-menus"
+import { isPublic, PublicChrome, publicScreens } from "./public"
 import { adoptCacheOwner, forgetCache, queryClient } from "./query"
 
 /**
@@ -127,6 +130,7 @@ const screens = guardScreens({
   "/": { Component: HomeScreen, tab: "home" },
   ...authenticationRoutes,
   ...casesRoutes,
+  ...handbookRoutes,
   ...materialRoutes,
   ...participantsRoutes,
 } satisfies Routes)
@@ -171,8 +175,8 @@ interface Grants {
 
 /**
  * The sections, in menu order: home for everyone, the participants and material sections
- * for a leader and for any management function, and the cases section for whoever the
- * cases service lets in.
+ * for a leader and for any management function, the cases section for whoever the cases
+ * service lets in, and the handbook section for the management.
  */
 const sections: readonly AppSection[] = [
   { icon: <HomeIcon />, id: "home", isGranted: () => true, label: () => "Hem", path: "/" },
@@ -203,6 +207,15 @@ const sections: readonly AppSection[] = [
     isGranted: ({ roles }) => hasAnyRole(roles, "leader", "cmt"),
     label: materialSectionLabel,
     path: "/material",
+  },
+  {
+    icon: <BookIcon />,
+    id: "handbook",
+    // The management alone, while they fill the handbook and try it – the leaders it is
+    // written for are let in by adding them here.
+    isGranted: ({ roles }) => hasAnyRole(roles, "cmt"),
+    label: () => "Handbok",
+    path: "/handbook",
   },
 ]
 
@@ -242,7 +255,14 @@ function SectionGrants(props: SectionGrantsProps): ReactElement {
     (id: string) => isGranted(id, { cases, isRevealed, roles }),
     [cases, isRevealed, roles],
   )
-  return <SectionsProvider isGranted={lookup}>{props.children}</SectionsProvider>
+  return (
+    <SectionsProvider isGranted={lookup}>
+      {/* Kept on the device from the start, whichever screen opens first, because the
+        handbook is what its reader reaches for where there is no connection. */}
+      {lookup("handbook") ? <HandbookOffline /> : null}
+      {props.children}
+    </SectionsProvider>
+  )
 }
 
 /**
@@ -315,8 +335,23 @@ type Gate =
   | { readonly kind: "signed-out" }
 
 /**
- * The gate. Every screen sits behind it, so a signed-out visitor sees sign-in whichever
- * address they opened – there is no useful screen without a session. It asks once per
+ * What stands in front of a screen: a client of its own for a public one, the gate for
+ * every other.
+ * @param props The routed screens.
+ * @returns The public screen, or the gate.
+ */
+function AppChrome(props: AppChromeProps): ReactElement {
+  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  if (isPublic(pathname)) {
+    return <PublicChrome>{props.children}</PublicChrome>
+  }
+  return <GatedChrome>{props.children}</GatedChrome>
+}
+
+/**
+ * The gate. Every screen but the public ones sits behind it, so a signed-out visitor sees
+ * sign-in whichever address they opened – there is no other useful screen without a
+ * session. It asks once per
  * page load who is signed in and renders nothing at all until the answer – no spinner,
  * and no flash of the sign-in screen past a signed-in person. While somebody is signed
  * in it keeps listening, so a session the service ends takes the application down, forgets
@@ -326,7 +361,7 @@ type Gate =
  * @returns Nothing until the session is known, then the sign-in screen or the
  * application.
  */
-function AppChrome(props: AppChromeProps): ReactElement {
+function GatedChrome(props: AppChromeProps): ReactElement {
   const [gate, setGate] = useState<Gate>({ kind: "asking" })
 
   useEffect(() => {
@@ -605,6 +640,7 @@ function BrowserChrome(props: SignedInProps): ReactElement {
   // moment a reveal opens – the whole chrome changes as one, with no reload.
   const isRevealed = useRevealLookup()
   const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const hash = useRouterState({ select: (state) => state.location.hash })
   const found = matchScreen(pathname, screens)
   const isSectionGranted = useSectionLookup()
   const isGrantedScreen = found !== undefined && isSectionGranted(found.spec.tab ?? "")
@@ -621,7 +657,7 @@ function BrowserChrome(props: SignedInProps): ReactElement {
     document.title = title === "" ? "Campfire" : `${title} – Campfire`
   }, [title])
 
-  useNavigationBookkeeping(pathname, title)
+  useNavigationBookkeeping(pathname, hash, title)
 
   const back = isGrantedScreen ? backControlFor(pathname, found.spec.parent, user.roles) : undefined
   const items: readonly SideMenuItem[] = sections
@@ -761,7 +797,7 @@ function NotFoundRoute(): ReactElement {
 // Left unannotated, because the tree's inferred type is what gives every `Link` and
 // `useParams` in the application its checked paths and parameters. Naming it `AnyRoute`
 // would typecheck and quietly turn all of that back into `any`.
-const routeTree = rootRoute.addChildren(mountRoutes(screens))
+const routeTree = rootRoute.addChildren(mountRoutes({ ...screens, ...publicScreens }))
 
 /**
  * The application's one router. Every navigation runs as a view transition; which way

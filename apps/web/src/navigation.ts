@@ -1,4 +1,10 @@
-import { setNavDirection, wasPopExpected, type NavDirection } from "@scouterna/wsj27-campfire-ui"
+import {
+  setNavDirection,
+  wasPopExpected,
+  wasPushExpected,
+  type NavDirection,
+} from "@scouterna/wsj27-campfire-ui"
+import type { RouterHistory } from "@tanstack/react-router"
 import { useLayoutEffect } from "react"
 
 /**
@@ -134,6 +140,23 @@ const lastNavigation: { type: "push" | "pop" | "replace"; index: number | undefi
 }
 
 /**
+ * Whether the push about to run has had its direction declared – by a link's click, or
+ * by whatever asked the router for it directly – so the history listener gives one only
+ * to a push nothing declared.
+ */
+const pushDirection = { isDeclared: false }
+
+/**
+ * Declare that the navigation about to run is a push whose direction is already set,
+ * for one the router is asked for directly rather than through a link. Without it, the
+ * push moves forward.
+ */
+export function markPush(): void {
+  lastNavigation.type = "push"
+  pushDirection.isDeclared = true
+}
+
+/**
  * How long a pop's restore keeps trying before accepting where the page is. Long
  * enough for the router to mount the arriving screen and a virtual list to size
  * itself; short enough that the reader's own scrolling is never fought for long.
@@ -172,28 +195,20 @@ function restoreScroll(index: number, windowTop: number, columnTop: number): voi
 }
 
 /**
- * Declare that the navigation about to run is a push, for one the router is asked for
- * directly rather than through a link.
- *
- * The click listener marks every link and the pop listener marks every pop, so a
- * programmatic navigation is the one nothing sees, and without this it is stamped with
- * whatever the *previous* navigation was. After a pop that reuses the entry's own
- * index, and the new entry overwrites the title, root, and scroll trails of the one it
- * was pushed on top of.
- */
-export function markPush(): void {
-  lastNavigation.type = "push"
-}
-
-/**
  * Everything the chrome has to remember about a navigation – the title of each history
  * entry, which entries are section roots, the phase mark the crumb morph reads, and
- * the scroll positions. Runs on every location change.
+ * the scroll positions. Runs on every change of screen, and of the place on it a hash
+ * names, since a jump to another passage is a history entry back returns from.
  *
  * @param pathname Where the navigation landed.
+ * @param hash The passage on the screen the address names, or empty for its top.
  * @param title What the screen showing now is called.
  */
-export function useNavigationBookkeeping(pathname: string, title: string | undefined): void {
+export function useNavigationBookkeeping(
+  pathname: string,
+  hash: string,
+  title: string | undefined,
+): void {
   // Before paint, so the scroll position is what the view transition snapshots. The
   // index is stamped first, because everything else is keyed by it.
   useLayoutEffect(() => {
@@ -201,15 +216,19 @@ export function useNavigationBookkeeping(pathname: string, title: string | undef
     const isPop = lastNavigation.type === "pop"
     lastNavigation.index = index
 
-    // A pop returns to where the scroller was left; a push or replace starts at the top.
+    // A pop returns to where the scroller was left; a push or replace starts at the
+    // passage its hash names, or at the top.
+    const passage = hash === "" ? undefined : document.querySelector(`#${CSS.escape(hash)}`)
     if (isPop) {
       restoreScroll(index, windowScrollTrail.get(index) ?? 0, scrollTrail.get(index) ?? 0)
-    } else {
+    } else if (passage === undefined || passage === null) {
       scrollTo(0, 0)
       const column = document.querySelector(".page")
       if (column instanceof HTMLElement) {
         column.scrollTop = 0
       }
+    } else {
+      passage.scrollIntoView({ block: "start" })
     }
 
     // The root trail: a pending section switch is resolved to the entry it landed on.
@@ -228,7 +247,7 @@ export function useNavigationBookkeeping(pathname: string, title: string | undef
     // and before the new one is, which is what lets one stylesheet name the title in
     // the leaving state and the eyebrow in the arriving one.
     document.documentElement.dataset["vtNew"] = ""
-  }, [pathname])
+  }, [pathname, hash])
 
   // A screen can name itself a beat after the navigation lands, so the title trail
   // follows the title as well as the address.
@@ -237,7 +256,7 @@ export function useNavigationBookkeeping(pathname: string, title: string | undef
     if (index !== undefined && title !== undefined && title !== "") {
       titleTrail.set(index, title)
     }
-  }, [pathname, title])
+  }, [pathname, hash, title])
 }
 
 /**
@@ -267,8 +286,8 @@ const onClick = (event: MouseEvent): void => {
   const fallback: NavDirection = isSection ? "fade" : "forward"
   setNavDirection(declared ?? fallback)
   delete document.documentElement.dataset["vtNew"]
-
   lastNavigation.type = "push"
+  pushDirection.isDeclared = true
 
   // A section switch lands on a start screen, wherever it was clicked from – noted
   // now, resolved to a history entry when the navigation lands.
@@ -324,9 +343,13 @@ function requiresIndex(data: unknown): data is Record<string, unknown> {
 }
 
 /**
- * Install the listeners, once, at startup.
+ * Install the listeners, once, at startup, before the router mounts and subscribes to its
+ * history itself, so every navigation is known for what it is before the router renders
+ * it.
+ * @param routerHistory The router's history, which says of every navigation whether it
+ * pushed, replaced, or popped – what a screen asks of the router directly included.
  */
-export function wireNavigation(): void {
+export function wireNavigation(routerHistory: RouterHistory): void {
   // Left on "auto", WebKit restores a pop's scroll position itself, asynchronously,
   // racing the SPA's own render and the view transition, and that race puts the painted
   // page out of step with where taps land.
@@ -342,6 +365,25 @@ export function wireNavigation(): void {
     const carried = index !== undefined && requiresIndex(data) ? { ...data, __index: index } : data
     replaceState(carried, unused, url)
   }
+
+  // A push a screen asked for directly, not through a link, moves forward like one, so
+  // it never inherits the direction the navigation before it left – unless the screen
+  // declared a direction of its own just before asking.
+  routerHistory.subscribe(({ action }) => {
+    if (action.type === "PUSH") {
+      lastNavigation.type = "push"
+      const isExpected = wasPushExpected()
+      if (!pushDirection.isDeclared) {
+        if (!isExpected) {
+          setNavDirection("forward")
+        }
+        delete document.documentElement.dataset["vtNew"]
+      }
+    } else {
+      lastNavigation.type = action.type === "REPLACE" ? "replace" : "pop"
+    }
+    pushDirection.isDeclared = false
+  })
 
   document.addEventListener("click", onClick, { capture: true })
   document.addEventListener("scroll", onScroll, { capture: true, passive: true })
