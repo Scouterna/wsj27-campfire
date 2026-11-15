@@ -3,7 +3,8 @@
 # door, because there is nothing behind it. It serves the built files, and any path
 # that is not a real file falls back to index.html, so a deep link into a screen loads
 # the app that then routes to it. 8080 rather than 80, so the container never needs
-# root. /api/auth and /api/project belong to whatever ingress sits in front of it.
+# root. /api/auth, /api/project, and /services/cms belong to whatever ingress sits in
+# front of it.
 #
 # One Caddy config per way Campfire is served, one folder per environment:
 #   local/Caddyfile       `pnpm start:local`, the mock back-end

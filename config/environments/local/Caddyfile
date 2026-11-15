@@ -11,10 +11,10 @@
 #   prod/image.Caddyfile  inside the image, wherever it is deployed
 :8000 {
 	# Everything the back-end owns goes to the mock: the auth service, the project API,
-	# and under /__mock__ its ScoutID stand-in and control surface. Anything not listed
-	# here is the web application's. handle rather than handle_path, because the mock
-	# mounts every service at these full paths – the prefixes the deployed ingress
-	# serves.
+	# the CMS's handbook, and under /__mock__ its ScoutID stand-in and control surface.
+	# Anything not listed here is the web application's. handle rather than handle_path,
+	# because the mock mounts every service at these full paths – the prefixes the
+	# deployed ingress serves.
 	#
 	# Each matcher names the bare prefix beside the subtree, because `/api/auth/*`
 	# alone does not match `/api/auth` – the health check the mock serves there would
@@ -26,6 +26,12 @@
 
 	@project path /api/project /api/project/*
 	handle @project {
+		reverse_proxy localhost:8003
+	}
+
+	# The CMS's handbook, which the mock serves from its seed. Only the handbook's read
+	# is there – the CMS's editor is not, so editing needs the dev origin.
+	handle /services/cms/* {
 		reverse_proxy localhost:8003
 	}
 
