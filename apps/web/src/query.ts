@@ -17,9 +17,10 @@ import { clear, createStore, del, get, set } from "idb-keyval"
  * trusted. A fresh answer that fails leaves the cached one in place. Focus and reconnect
  * refetch nothing, because a phone waking up in a field is not a reason to ask.
  *
- * Every service read goes through this client, so one cache holds every answer and one
- * IndexedDB store persists it query by query, with every read that reaches the network
- * run under the session. The cache belongs to one member number at a time.
+ * Every service read of a session goes through this client, so one cache holds every
+ * answer and one IndexedDB store persists it query by query, with every read that reaches
+ * the network run under the session. The cache belongs to one member number at a time.
+ * The public screens, which nobody signs in to, read through a client of their own.
  */
 
 /**
@@ -174,3 +175,14 @@ export async function forgetCache(): Promise<void> {
   await del(ownerKey, store)
   await clear(store)
 }
+
+/**
+ * The client the public screens read through. Nobody is signed in there, so it runs no
+ * read under a session and keeps nothing on the device, and a signed-in member's cache
+ * is never read into a page anyone may open.
+ */
+export const publicQueryClient = new QueryClient({
+  defaultOptions: {
+    queries: { refetchOnReconnect: false, refetchOnWindowFocus: false, retry: 1 },
+  },
+})
