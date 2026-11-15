@@ -19,7 +19,7 @@ Below the gate, the application branches once on its tier, which `libraries/host
 
 Nothing below that branch asks which tier it is in, so no screen can grow a native-only path by accident. Because the tier is known before anything renders, the other tier's chrome is never briefly on screen.
 
-The application also installs from the browser as a progressive web app. A generated service worker precaches it, so it opens with no network, and a new deploy reloads an open page onto itself as soon as its worker takes over. The worker never answers the paths the back-end and the services beside it own, so a sign-in navigation always reaches the auth service rather than the cached application.
+The application also installs from the browser as a progressive web app. A generated service worker precaches it, so it opens with no network, and a new deploy reloads an open page onto itself as soon as its worker takes over. The page also asks the server which build is deployed, and fetches a newer one without the worker when the worker is not bringing it. The worker never answers the paths the back-end and the services beside it own, so a sign-in navigation always reaches the auth service rather than the cached application.
 
 ## The shell pattern
 
