@@ -21,6 +21,7 @@ The others matter; this one decides the architecture. For three weeks in the sum
 - Every screen is in the web application, and the shells stay thin ([ADR 010](/decisions/010-deliver-the-front-end-as-one-web-application-in-native-shells)).
 - The web ships as one container image, published by the merge that earns a new version and promoted to prod by moving a tag ([ADR 026](/decisions/026-publish-the-web-application-as-a-container-image), [ADR 034](/decisions/034-version-each-artifact-from-its-own-commits), [ADR 035](/decisions/035-promote-the-web-by-moving-environment-tags)).
 - A page that is already open reloads onto a new deploy by itself, through its service worker, and checks for one whenever it returns to the foreground.
+- A copy whose service worker is not bringing a new deploy fetches it without the worker after a minute, so nobody stays on an old build – but never while a new worker is still installing or the reader is writing ([ADR 042](/decisions/042-recover-a-copy-its-service-worker-left-on-an-old-build)).
 - What crosses into a shell is a versioned contract, so a new web version needs no new shell ([ADR 018](/decisions/018-bridge-the-web-application-and-the-shells-with-versioned-messages)).
 
 Availability sits right behind it and pulls the same way. A fix that has shipped is worth nothing to a phone with no signal, so the application is useful before the network answers.
