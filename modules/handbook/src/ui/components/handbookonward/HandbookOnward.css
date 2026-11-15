@@ -1,0 +1,70 @@
+/* The chapters and folders either side of the one on screen. */
+
+@layer component {
+  /* The chapters or folders either side, under the last page, in two columns of one
+     width – the next keeps its column when there is no previous, so it always sits on
+     the side it leads to. Set apart from the last page by space alone. */
+  .handbook-onward {
+    display: grid;
+    gap: var(--spacing-group);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding-top: var(--spacing-section);
+  }
+
+  /* Set on the paper rather than on a sheet, because it is a way on from the chapter or
+     folder rather than more of it. The inset is taken back by the margin, so the words
+     line up with the content's edge and only a press's tint reaches past it. */
+  .handbook-neighbor {
+    align-items: center;
+    border-radius: var(--border-radius-control);
+    color: var(--color-theme-ink);
+    display: flex;
+    font-size: var(--font-size-value);
+    font-weight: var(--font-weight-strong);
+    gap: var(--spacing-stack);
+    justify-self: start;
+    line-height: 1.3;
+    margin: 0 calc(-1 * var(--spacing-stack));
+    padding: var(--spacing-stack);
+    text-decoration: none;
+    transition: background 120ms ease;
+
+    & span {
+      flex: 1;
+      min-width: 0;
+    }
+
+    & small {
+      color: var(--color-ink-tertiary);
+      display: block;
+      font-size: var(--font-size-caption);
+      letter-spacing: 0.14em;
+      margin-bottom: 2px;
+      text-transform: uppercase;
+    }
+
+    & svg {
+      flex-shrink: 0;
+    }
+
+    &:active {
+      background: color-mix(in srgb, var(--color-theme-ink) 11%, transparent);
+    }
+  }
+
+  @media (hover: hover) {
+    .handbook-neighbor:hover {
+      background: color-mix(in srgb, var(--color-theme-ink) 5%, transparent);
+    }
+  }
+
+  .handbook-neighbor-next {
+    grid-column: 2;
+    justify-self: end;
+    text-align: end;
+
+    & svg {
+      transform: scaleX(-1);
+    }
+  }
+}

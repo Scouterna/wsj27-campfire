@@ -1,0 +1,142 @@
+/* The public handbook: the application's own page, without the application around it. */
+
+@layer screen {
+  /* While the handbook is on its way, or could not be read – a line in the middle of an
+     otherwise empty page. */
+  .public-status {
+    align-items: center;
+    color: var(--color-ink-secondary);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-group);
+    justify-content: center;
+    min-height: 100dvh;
+  }
+
+  /* The page: the paper the application reads on, as wide as its reading measure and
+     its outline together. The bottom clears the button that opens the contents. */
+  .public-handbook {
+    background: var(--color-paper);
+    box-sizing: border-box;
+    margin-inline: auto;
+    max-width: calc(858px + 250px + var(--spacing-card) * 4);
+    min-height: 100dvh;
+    padding: clamp(20px, 5vw, 48px) var(--spacing-container) 120px;
+  }
+
+  /* The contingent's mark over the title, small, so the page says whose handbook it is
+     before it says anything else. */
+  .public-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-group);
+    margin-bottom: calc(var(--spacing-section) * 1.5);
+
+    & .logo {
+      width: 96px;
+    }
+  }
+
+  /* The title, and at its end the way to the PDF and the menu – wrapping under the
+     title where the window is too narrow for one row. */
+  .public-heading {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-group);
+
+    & h1 {
+      color: var(--color-theme-ink);
+      flex: 1 1 auto;
+      font-family: var(--typography-display-font_family);
+      font-size: var(--font-size-display);
+      font-weight: var(--typography-display-font_weight);
+      line-height: 1;
+      margin: 0;
+      text-transform: uppercase;
+    }
+
+    & .button {
+      flex: none;
+      width: auto;
+    }
+  }
+
+  .public-failed {
+    color: var(--color-tone-danger-ink);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+  }
+
+  .public-content {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-section) * 2);
+    min-width: 0;
+  }
+
+  /* A chapter: its name, then its pages a section's step apart, as on the chapter's own
+     screen in the application. */
+  .public-part {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-section);
+    scroll-margin-top: var(--spacing-section);
+  }
+
+  .public-part-title {
+    color: var(--color-ink);
+    font-family: var(--typography-display-font_family);
+    font-size: var(--font-size-display-small);
+    font-weight: var(--typography-display-font_weight);
+    line-height: 1.05;
+    margin: 0;
+    scroll-margin-top: var(--spacing-section);
+    text-transform: uppercase;
+  }
+
+  /* A page lands clear of the top of the window, which has no bar here. */
+  .public-handbook .handbook-section {
+    scroll-margin-top: var(--spacing-section);
+  }
+
+  /* The contents beside the page need the room of a wide window. Below it they are a
+     button in the corner that opens them in a sheet. */
+  .public-outline {
+    display: none;
+  }
+
+  .public-tools {
+    bottom: max(clamp(12px, 3vw, 28px), env(safe-area-inset-bottom, 0px));
+    position: fixed;
+    right: max(clamp(12px, 3vw, 28px), env(safe-area-inset-right, 0px));
+    z-index: 1;
+
+    & .button {
+      box-shadow: var(--shadow-overlay);
+    }
+  }
+
+  @media (min-width: 1100px) {
+    .public-columns {
+      align-items: start;
+      display: grid;
+      gap: calc(var(--spacing-card) * 2);
+      grid-template-columns: minmax(0, 858px) 250px;
+    }
+
+    /* Held in view as the page scrolls, with a scroll of its own when a chapter has
+       more pages than the window has room for. */
+    .public-outline {
+      display: block;
+      max-height: calc(100dvh - var(--spacing-section) * 2);
+      overflow-y: auto;
+      position: sticky;
+      top: var(--spacing-section);
+    }
+
+    .public-tools {
+      display: none;
+    }
+  }
+}

@@ -1,0 +1,21 @@
+/* When something changed, at a handbook row's end. */
+
+@layer component {
+  /* As quiet as a case row's moment. */
+  .row-moment {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  /* Read out with the moment, and not shown, because the moment alone says it. */
+  .row-moment-said {
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+}

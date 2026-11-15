@@ -1,0 +1,140 @@
+/* A handbook page's content: running text set for reading at length. */
+
+@layer component {
+  /* Set in the full ink at a moderate leading, because a page is read at length, and a
+     quieter ink or an airier line turns a long passage into a grey field. */
+  .richtext {
+    color: var(--color-ink);
+    font-size: var(--font-size-body);
+    line-height: 1.55;
+    overflow-wrap: break-word;
+    text-wrap: pretty;
+
+    & > :first-child {
+      margin-top: 0;
+    }
+
+    & > :last-child {
+      margin-bottom: 0;
+    }
+
+    & p,
+    & ul,
+    & ol {
+      margin: 0 0 var(--spacing-container);
+    }
+
+    /* The headings step down from the page's title without competing with it, and sit
+       closer to what follows than to what came before, so each reads as the start of
+       its passage. */
+    & h2,
+    & h3,
+    & h4,
+    & h5,
+    & h6 {
+      font-weight: var(--font-weight-strong);
+      line-height: 1.25;
+      margin: var(--spacing-section) 0 var(--spacing-stack);
+      text-wrap: balance;
+    }
+
+    & h2 {
+      font-size: var(--font-size-display-mini);
+    }
+
+    & h3 {
+      font-size: var(--font-size-body);
+    }
+
+    & h4,
+    & h5,
+    & h6 {
+      font-size: var(--font-size-value);
+    }
+
+    & ul,
+    & ol {
+      padding-inline-start: 1.4em;
+    }
+
+    & li + li {
+      margin-top: var(--spacing-inline);
+    }
+
+    /* The bullets and numbers wear the unit's color, which no reader needs to tell one
+       passage from another. */
+    & li::marker {
+      color: var(--color-theme-ink);
+    }
+
+    & li > ul,
+    & li > ol {
+      margin: var(--spacing-inline) 0 0;
+    }
+
+    /* A link wears the unit's color, the emphasis the editors put on most of them
+       included. */
+    & a,
+    & a :is(strong, em) {
+      color: var(--color-theme-ink);
+    }
+
+    & a {
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.15em;
+    }
+
+    /* A passage the editor set apart – a reminder, washed in the theme. */
+    & .richtext-reminder {
+      background: var(--color-theme-wash);
+      border-radius: var(--border-radius-default);
+      color: var(--color-theme-ink);
+      font-size: var(--font-size-value);
+      line-height: 1.6;
+      margin: var(--spacing-section) 0;
+      padding: var(--spacing-group) var(--spacing-container);
+
+      & p {
+        margin: 0;
+      }
+    }
+
+    & img {
+      border-radius: var(--border-radius-default);
+      display: block;
+      height: auto;
+      margin: 0 0 var(--spacing-group);
+      max-width: 100%;
+    }
+  }
+
+  /* A table scrolls sideways inside its own box on a phone rather than widening the
+     page. */
+  .richtext-table {
+    margin: 0 0 var(--spacing-group);
+    overflow-x: auto;
+
+    & table {
+      border-collapse: collapse;
+      font-size: var(--font-size-footnote);
+      min-width: 100%;
+    }
+
+    & th,
+    & td {
+      color: var(--color-ink);
+      border-bottom: 1px solid var(--color-divider);
+      padding: var(--spacing-inline) var(--spacing-group) var(--spacing-inline) 0;
+      text-align: start;
+      vertical-align: top;
+    }
+
+    & th {
+      font-weight: var(--font-weight-strong);
+    }
+
+    & p {
+      margin: 0;
+    }
+  }
+}

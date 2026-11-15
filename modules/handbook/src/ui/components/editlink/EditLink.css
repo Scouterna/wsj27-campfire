@@ -1,0 +1,19 @@
+/* A page's way into its editor, quiet beside the page's title. */
+
+@layer component {
+  .handbook-edit {
+    align-items: center;
+    color: var(--color-theme-ink);
+    display: inline-flex;
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-strong);
+    gap: 4px;
+    text-decoration: none;
+  }
+
+  @media (hover: hover) {
+    .handbook-edit:hover {
+      text-decoration: underline;
+    }
+  }
+}

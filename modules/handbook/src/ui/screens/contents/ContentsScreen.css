@@ -1,0 +1,88 @@
+/* The handbook's front: the search, the chapters, the FAQ's folders, and the hits. */
+
+@layer screen {
+  /* What the screen says in place of its chapters – fetching, failing, or empty. */
+  .handbook-status {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+  }
+
+  /* Spoken, not shown, where the field's own count already shows it. */
+  .handbook-spoken {
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+
+  .handbook-search-count {
+    color: var(--color-ink-tertiary);
+    flex-shrink: 0;
+    font-size: var(--font-size-footnote);
+    white-space: nowrap;
+  }
+
+  /* The pages a chapter holds, two lines at most – a summary, not a list to read. */
+  .handbook-chapter-row small {
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+
+  /* The FAQ under the chapters, which the outline scrolls to – clear of the bar above
+     it. */
+  .handbook-faq {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-group);
+    scroll-margin-top: calc(var(--spacing-section) * 2);
+  }
+
+  /* The chapters with what is said under them, close to the list, as the FAQ's are. */
+  .handbook-part {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-group);
+  }
+
+  /* The offline promise, quiet under its list, set in by the rows' own inset, so its
+     mark lines up with the tiles in front of them. */
+  .handbook-offline {
+    align-items: center;
+    color: var(--color-ink-secondary);
+    display: flex;
+    font-size: var(--font-size-footnote);
+    gap: var(--spacing-inline);
+    margin: 0;
+    padding-inline: var(--spacing-container);
+
+    & svg {
+      color: var(--color-theme-ink);
+      flex: none;
+    }
+  }
+
+  /* The quote a hit was found in, as the row's quiet line, the match tinted without
+     padding of its own, because a match inside a word must not read as a word of its
+     own. */
+  .handbook-hit-row mark {
+    background: var(--color-tone-caution-wash);
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px var(--color-tone-caution-wash);
+    color: var(--color-tone-caution-ink);
+  }
+
+  /* How many more times the place holds the text, on a line of its own under the quote. */
+  .handbook-hit-more {
+    color: var(--color-ink-tertiary);
+    display: block;
+    font-size: var(--font-size-footnote);
+    font-style: normal;
+    margin-top: 2px;
+  }
+}
