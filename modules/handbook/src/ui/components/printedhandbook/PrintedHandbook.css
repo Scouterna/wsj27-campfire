@@ -1,0 +1,305 @@
+/* The handbook as a document: the contingent's printed handbook, in the reader's own unit
+   color. Nothing of it shows on screen, and nothing but it prints. */
+
+@layer screen {
+  .printed-handbook {
+    color: #1a1a1a;
+    display: none;
+    font-size: 10.5pt;
+    line-height: 1.5;
+    print-color-adjust: exact;
+
+    & a {
+      color: inherit;
+    }
+  }
+
+  .printed-cover {
+    background: var(--color-theme-bright);
+    box-sizing: border-box;
+    color: var(--color-theme-on-bright);
+    padding: 95mm 20mm 0;
+    position: relative;
+
+    & h1 {
+      font-family: "Bravely Script", cursive;
+      font-size: 60pt;
+      font-weight: normal;
+      line-height: 1;
+      margin: 0 0 6mm;
+      text-transform: uppercase;
+    }
+
+    & p {
+      font-family: "Bravely Script", cursive;
+      font-size: 14pt;
+      margin: 0;
+      text-transform: uppercase;
+    }
+  }
+
+  /* The mark in the corner, a shade under the cover so it reads as printed on it. */
+  .printed-cover-logo {
+    bottom: 12mm;
+    filter: brightness(0.92);
+    position: absolute;
+    right: 12mm;
+    width: 60mm;
+
+    & img {
+      display: block;
+      width: 100%;
+    }
+  }
+
+  .printed-contents {
+    break-before: page;
+    columns: 2;
+    column-gap: 12mm;
+    font-size: 9.5pt;
+
+    & h2 {
+      column-span: all;
+      font-family: "Bravely Script", cursive;
+      font-size: 13pt;
+      font-weight: normal;
+      margin: 0 0 6mm;
+      text-transform: uppercase;
+    }
+
+    & ol {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    & > ol > li {
+      break-inside: avoid;
+      margin-bottom: 5mm;
+
+      & > a {
+        border-bottom: 1px solid #1a1a1a;
+        display: block;
+        font-weight: 700;
+        margin-bottom: 1.5mm;
+        padding-bottom: 1mm;
+        text-decoration: none;
+        text-transform: uppercase;
+      }
+    }
+
+    & li li {
+      font-style: italic;
+      padding-left: 4mm;
+
+      & a {
+        text-decoration: none;
+      }
+    }
+  }
+
+  .printed-changes {
+    break-before: page;
+
+    & ul {
+      margin: 0;
+      padding: 0 0 0 5mm;
+    }
+
+    & li + li {
+      margin-top: 2mm;
+    }
+
+    & span {
+      color: #7a7a7a;
+    }
+  }
+
+  /* A chapter from a fresh sheet, its name in the display face at full size. */
+  .printed-chapter {
+    break-before: page;
+
+    & > h1 {
+      font-family: "Bravely Script", cursive;
+      font-size: 44pt;
+      font-weight: normal;
+      line-height: 1;
+      margin: 18mm 0 8mm;
+      text-transform: uppercase;
+    }
+  }
+
+  /* A page's title, and the changelog's, in the unit's color. */
+  .printed-page > h2,
+  .printed-changes > h2 {
+    break-after: avoid;
+    color: var(--color-theme-bright);
+    font-family: "Bravely Script", cursive;
+    font-size: 20pt;
+    font-weight: normal;
+    line-height: 1.1;
+    margin: 9mm 0 3mm;
+    text-transform: uppercase;
+  }
+
+  .printed-page:first-of-type > h2 {
+    margin-top: 0;
+  }
+
+  /* When an editor last noted a change to a page, under its title. */
+  .printed-changed {
+    break-after: avoid;
+    color: #7a7a7a;
+    font-size: 9pt;
+    margin: -1.5mm 0 3mm;
+  }
+
+  /* Where the FAQ comes from, said once under its title. */
+  .printed-source {
+    color: #7a7a7a;
+    margin: -4mm 0 8mm;
+  }
+
+  /* A question of the FAQ, kept with the start of its answer. */
+  .printed-question {
+    & > h3 {
+      break-after: avoid;
+      font-size: 11pt;
+      margin: 5mm 0 1.5mm;
+    }
+
+    & .richtext {
+      margin-bottom: 0;
+    }
+  }
+
+  /* The content itself, set for paper rather than the screen's sheet. */
+  .printed-page .richtext {
+    color: #1a1a1a;
+    font-size: 10.5pt;
+    line-height: 1.55;
+
+    & h3,
+    & h4,
+    & h5,
+    & h6 {
+      break-after: avoid;
+      font-size: 11pt;
+      margin: 5mm 0 2mm;
+    }
+
+    & p,
+    & ul,
+    & ol {
+      margin-bottom: 3mm;
+    }
+
+    & li + li {
+      margin-top: 1mm;
+    }
+
+    & a,
+    & a :is(strong, em) {
+      color: var(--color-theme-ink);
+      font-weight: 700;
+    }
+
+    & .richtext-reminder {
+      break-inside: avoid;
+      font-size: 10pt;
+    }
+
+    & img {
+      break-inside: avoid;
+      max-height: 120mm;
+    }
+  }
+
+  .printed-page .richtext-table {
+    overflow: visible;
+
+    & table {
+      font-size: 9.5pt;
+      width: 100%;
+    }
+
+    & tr {
+      break-inside: avoid;
+    }
+
+    & th,
+    & td {
+      border-bottom: 0.75pt solid #1a1a1a;
+      font-weight: normal;
+      padding: 1mm 2mm;
+    }
+
+    /* The first row is the table's head, marked or not, and wears a heavier rule – the
+       way the printed handbook sets it. */
+    & tr:first-child > * {
+      border-bottom-width: 1.5pt;
+    }
+
+    /* A cell holds paragraphs, which sit flush in it rather than spaced as text. */
+    & td p,
+    & th p {
+      margin: 0;
+    }
+  }
+
+  @media print {
+    /* Only the printed copy – the application, its chrome, and every overlay stay off
+       the paper. What encloses the copy gives up its box, so the copy lays out as if it
+       sat directly in the page, free of the columns and padding of the screen. Only
+       where the copy is in the page, because this stylesheet reaches every screen of
+       the application, and the others print as they are. The sheet itself – its
+       margins and its foot – is set by the copy for the same reason. */
+    body:has(.printed-handbook)
+      :not(.printed-handbook, .printed-handbook *):not(:has(.printed-handbook)) {
+      display: none;
+    }
+
+    body :has(.printed-handbook) {
+      display: contents;
+    }
+
+    html:has(.printed-handbook),
+    html:has(.printed-handbook) body {
+      background: #fff;
+    }
+
+    .printed-handbook {
+      display: block;
+    }
+
+    /* The whole first sheet, and not a hair more – a cover a rounding over the sheet's
+       height spills its color onto a second one. In print the viewport is the page, so
+       a browser that shrinks the sheet for its own header and footer shrinks the cover
+       with it. */
+    .printed-cover {
+      break-after: page;
+      height: min(296.5mm, 100vh);
+      overflow: hidden;
+    }
+
+    /* WebKit gives every sheet the same margins, so there the cover is a block inside
+       them rather than the whole sheet – shorter than the sheet's content by enough to
+       leave room for the header and footer Safari adds on request, and its title
+       moved up to sit as it does on the full sheet.
+
+       WebKit also lays a printed page out narrower than the sheet and enlarges the
+       result to fit, which makes every length on paper longer than it is written. The
+       copy is as wide as the sheet between its margins, so there is nothing to
+       enlarge. */
+    @supports (font: -apple-system-body) {
+      .printed-handbook {
+        width: 170mm;
+      }
+
+      .printed-cover {
+        height: 225mm;
+        padding-top: 70mm;
+      }
+    }
+  }
+}

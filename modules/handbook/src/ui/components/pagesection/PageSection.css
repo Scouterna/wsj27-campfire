@@ -1,0 +1,79 @@
+/* One page of the handbook as a card. */
+
+@layer component {
+  /* What an editor said changed on a page, opened from its date: a strip across the top
+     of the card, edge to edge, so it reads as about the page rather than as part of it.
+     In the tone of the badge that opens it. */
+  .handbook-change-note {
+    align-items: start;
+    animation: handbook-change-note-in 160ms ease-out;
+    background: var(--color-tone-caution-wash);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-tone-caution-ink) 14%, transparent);
+    border-radius: var(--border-radius-surface) var(--border-radius-surface) 0 0;
+    color: var(--color-tone-caution-ink);
+    display: grid;
+    gap: var(--spacing-group);
+    grid-template-columns: auto 1fr;
+    margin: calc(-1 * var(--card-padding)) calc(-1 * var(--card-padding)) var(--card-padding);
+    padding: var(--spacing-group) var(--card-padding);
+
+    & svg {
+      margin-top: 2px;
+    }
+
+    & p {
+      color: var(--color-ink);
+      font-size: var(--font-size-value);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    & small {
+      color: var(--color-tone-caution-ink);
+      display: block;
+      font-size: var(--font-size-caption);
+      font-weight: var(--font-weight-strong);
+      letter-spacing: 0.08em;
+      margin-bottom: 2px;
+      text-transform: uppercase;
+    }
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  @keyframes handbook-change-note-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .handbook-change-note {
+      animation: none;
+    }
+  }
+
+  /* A page's card, which a link to the page scrolls to – clear of the bar above it. */
+  .handbook-section {
+    scroll-margin-top: calc(var(--spacing-section) * 2);
+  }
+
+  /* What a page's heading row carries at its end – that the page changed, and for an
+     editor the way into it – side by side. */
+  .handbook-section-aside {
+    align-items: center;
+    display: inline-flex;
+    gap: var(--spacing-group);
+  }
+
+  /* An introduction's card has no heading row, so what it would carry stands on a row of
+     its own at the trailing edge above the card. */
+  .handbook-section-row {
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 0 var(--spacing-inline);
+  }
+}

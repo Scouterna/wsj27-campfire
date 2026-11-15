@@ -20,7 +20,15 @@ const root = fileURLToPath(new URL("../..", import.meta.url))
  * .github/workflows/test_web.yml. A module added to one and not the other either runs
  * nowhere or fails with "no project named X".
  */
-const modules = ["authentication", "cases", "home", "journey", "material", "participants"] as const
+const modules = [
+  "authentication",
+  "cases",
+  "handbook",
+  "home",
+  "journey",
+  "material",
+  "participants",
+] as const
 
 /**
  * Where the local environment answers: Caddy on the one origin, with the mock behind
@@ -44,6 +52,13 @@ export default defineConfig({
   // thing.
   use: {
     baseURL: origin,
+    // Scouterna's help center is outside the one origin, and the application reads the
+    // whole FAQ from it on every start, whatever screen a walk is on. Every walk starts
+    // with an empty browser, so a run of every module would ask it more often than it
+    // allows. The browser cannot find it instead, as on a camp site without coverage – a
+    // walk that needs the FAQ answers it with routes of its own, which Playwright serves
+    // before any lookup.
+    launchOptions: { args: ["--host-resolver-rules=MAP support.scouterna.se ~NOTFOUND"] },
     // Kept only for a test that failed, which is the run where the recording is worth
     // the wait.
     trace: "retain-on-failure",

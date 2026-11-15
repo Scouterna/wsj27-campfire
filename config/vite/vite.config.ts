@@ -68,11 +68,13 @@ export default defineConfig({
         clientsClaim: true,
         skipWaiting: true,
 
-        globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2}"],
+        // The `otf` is the display face as a document reads it, kept so a PDF can be made
+        // with no network, as the rest of the application works.
+        globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2,otf}"],
         // The worker answers every navigation with the precached shell, which is right
         // for a screen and wrong for anything else the ingress serves on this origin –
         // sign-in and sign-out are full-page navigations to /api/auth, and the CMS lives
-        // under /_services/cms. A shell served in their place means they work only until
+        // under /services/cms. A shell served in their place means they work only until
         // the worker is installed – on a browser's very first visit, and never again.
         navigateFallbackDenylist: [/^\/_services\//, /^\/api\//, /^\/services\//],
       },
@@ -109,10 +111,12 @@ export default defineConfig({
     // can remove its output without reaching upward.
     outDir: ".build",
     emptyOutDir: true,
-    // The map library, its worker, and the postorter are one chunk, split off so only a
-    // unit's card loads it, and it is twice Vite's default. Raised just past it rather
-    // than silenced, so any other chunk that grows toward the map's size still warns.
-    chunkSizeWarningLimit: 1200,
+    // Two chunks are far past Vite's default, each split off so only who asks for it
+    // loads it: the map library, its worker, and the postorter, for a unit's card, and
+    // what sets the handbook as a PDF, for a reader who downloads one. Raised just past
+    // the larger rather than silenced, so any other chunk that grows toward their size
+    // still warns.
+    chunkSizeWarningLimit: 1250,
   },
 
   server: {

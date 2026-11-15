@@ -1,0 +1,8 @@
+/* One question of the FAQ as a card. */
+
+@layer component {
+  /* A question's card, which a search hit scrolls to – clear of the bar above it. */
+  .handbook-faq-question {
+    scroll-margin-top: calc(var(--spacing-section) * 2);
+  }
+}

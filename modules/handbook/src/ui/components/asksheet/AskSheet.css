@@ -1,0 +1,112 @@
+/* Where to ask what the handbook does not answer – each way on a card of its own, as the
+   rest of Campfire sets a block of content, rather than rows in a list. */
+
+@layer component {
+  .ask-sheet {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-group);
+    padding-bottom: var(--spacing-section);
+  }
+
+  /* One way to ask: its mark and name, what it is for, and the one action that takes it
+     – everything under the name from the card's own edge, so the card has one left edge. */
+  .ask-way {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-stack);
+
+    & h3 {
+      font-size: var(--font-size-body);
+      font-weight: var(--font-weight-strong);
+      margin: 0;
+    }
+
+    & p {
+      color: var(--color-ink-secondary);
+      font-size: var(--font-size-entry);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* The answer time, in the ink, since it is what the reader came to know. */
+    & .ask-time {
+      color: var(--color-ink);
+      font-weight: var(--font-weight-strong);
+    }
+
+    & .button {
+      margin-top: var(--spacing-inline);
+    }
+  }
+
+  /* The way's mark beside its name, as a row's tile sits beside its title. */
+  .ask-head {
+    align-items: center;
+    display: flex;
+    gap: var(--spacing-group);
+    margin-bottom: var(--spacing-inline);
+  }
+
+  .ask-tile {
+    align-items: center;
+    background: var(--color-theme-wash);
+    border-radius: var(--border-radius-round);
+    color: var(--color-theme-ink);
+    display: flex;
+    flex: none;
+    height: 44px;
+    justify-content: center;
+    width: 44px;
+  }
+
+  .ask-note {
+    font-size: var(--font-size-footnote);
+    text-align: center;
+
+    & a {
+      color: var(--color-theme-ink);
+      font-weight: var(--font-weight-strong);
+    }
+  }
+
+  /* The forum's rules, under the way to the forum on its card, set off by a rule since
+     they are how to use it rather than how to reach it. */
+  .ask-rules {
+    border-top: 1px solid var(--color-divider);
+    margin-top: var(--spacing-card);
+    padding-top: var(--spacing-card);
+
+    & h3 {
+      color: var(--color-ink-secondary);
+      font-size: var(--font-size-detail);
+      font-weight: var(--font-weight-strong);
+      letter-spacing: 0.08em;
+      margin: 0 0 var(--spacing-stack);
+      text-transform: uppercase;
+    }
+
+    & ul {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-stack);
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    & li {
+      align-items: start;
+      display: flex;
+      font-size: var(--font-size-entry);
+      gap: var(--spacing-inline);
+      line-height: 1.45;
+
+      & svg {
+        color: var(--color-theme-ink);
+        flex: none;
+        margin-top: 0.2em;
+      }
+    }
+  }
+}

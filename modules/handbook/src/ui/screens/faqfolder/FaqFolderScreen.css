@@ -1,0 +1,10 @@
+/* One folder of the FAQ, read as one document. */
+
+@layer screen {
+  /* What the screen says in place of the folder – fetching, failing, or not there. */
+  .handbook-faq-status {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    margin: 0;
+  }
+}
