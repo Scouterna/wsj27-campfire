@@ -45,6 +45,11 @@ export type AppPath = keyof RouteRegistry
  */
 export interface LinkTarget {
   /**
+   * The passage on the screen to open at – a section's anchor, without the `#`. Left out
+   * to open at the screen's top.
+   */
+  readonly hash?: string
+  /**
    * The address to open.
    */
   readonly to: AppPath
@@ -59,13 +64,18 @@ export interface LinkTarget {
  * A link target as the router's link takes it, every part filled, so a component passes
  * one object rather than each part with its default.
  * @param target Where the link leads.
- * @returns The address and its parameters.
+ * @returns The address, its parameters, and the passage to open at, if any.
  */
 export function linkPropsOf(target: LinkTarget): {
+  readonly hash?: string
   readonly params: Readonly<Record<string, string>>
   readonly to: AppPath
 } {
-  return { params: target.params ?? {}, to: target.to }
+  return {
+    params: target.params ?? {},
+    to: target.to,
+    ...(target.hash !== undefined && { hash: target.hash }),
+  }
 }
 
 /**

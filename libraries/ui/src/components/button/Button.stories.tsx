@@ -49,3 +49,11 @@ export const Plain: Story = {
 export const PlainWithIcon: Story = {
   args: { icon: <PictureIcon size={18} />, label: "Bifoga bild", variant: "plain" },
 }
+
+/**
+ * A way out of the application – a web page opens in a tab of its own.
+ */
+export const Outside: Story = {
+  args: { label: "Öppna Discord" },
+  render: (args) => <Button href="https://discord.com/app" label={args.label} />,
+}

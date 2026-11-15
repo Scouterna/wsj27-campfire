@@ -4,7 +4,13 @@
  * with the component.
  */
 
-export { expectPop, setNavDirection, wasPopExpected } from "./behavior/transitions"
+export {
+  expectPop,
+  expectPush,
+  setNavDirection,
+  wasPopExpected,
+  wasPushExpected,
+} from "./behavior/transitions"
 export type { NavDirection } from "./behavior/transitions"
 export { Button } from "./components/button/Button"
 export type { ButtonProps, ButtonVariant } from "./components/button/Button"
@@ -56,7 +62,7 @@ export type { PageHeadingProps } from "./components/pageheading/PageHeading"
 export { PageJumps, usePageJumps } from "./components/pagejumps/PageJumps"
 export type { PageJumpsProps } from "./components/pagejumps/PageJumps"
 export { PageOutline } from "./components/pageoutline/PageOutline"
-export type { PageOutlineProps } from "./components/pageoutline/PageOutline"
+export type { OutlineEntry, PageOutlineProps } from "./components/pageoutline/PageOutline"
 export { PageTitle, usePageTitle } from "./components/pagetitle/PageTitle"
 export type { PageTitleProps } from "./components/pagetitle/PageTitle"
 export { PreviewDialog } from "./components/previewdialog/PreviewDialog"
@@ -88,8 +94,10 @@ export { UnitAvatar, cmtAvatarNumber, istAvatarNumber } from "./components/unita
 export type { UnitAvatarProps } from "./components/unitavatar/UnitAvatar"
 export { VirtualList } from "./components/virtuallist/VirtualList"
 export type { VirtualListProps } from "./components/virtuallist/VirtualList"
+export { displayFontFile } from "./foundations/fonts/display-font"
 export type { IconProps } from "./foundations/icons/IconProps"
 export { BackIcon } from "./foundations/icons/set/BackIcon"
+export { BookIcon } from "./foundations/icons/set/BookIcon"
 export { ChatIcon } from "./foundations/icons/set/ChatIcon"
 export { CheckIcon } from "./foundations/icons/set/CheckIcon"
 export { CloseIcon } from "./foundations/icons/set/CloseIcon"

@@ -50,6 +50,10 @@ export type ButtonProps = {
       /**
        * Not with `onPress` – a button does one thing.
        */
+      readonly href?: never
+      /**
+       * Not with `onPress` – a button does one thing.
+       */
       readonly link?: never
       /**
        * What pressing it does.
@@ -57,6 +61,10 @@ export type ButtonProps = {
       readonly onPress: () => void
     }
   | {
+      /**
+       * Not with `link` – a button does one thing.
+       */
+      readonly href?: never
       /**
        * Where the button leads. Rendered as a real link, so the router – and the
        * reader's middle click – treat it as the navigation it is.
@@ -67,11 +75,28 @@ export type ButtonProps = {
        */
       readonly onPress?: never
     }
+  | {
+      /**
+       * An address outside the application the button opens – a mail to write, a web
+       * page. A web page opens in a tab of its own, so the application stays where the
+       * reader left it.
+       */
+      readonly href: string
+      /**
+       * Not with `href` – a button does one thing.
+       */
+      readonly link?: never
+      /**
+       * Not with `href` – a button does one thing.
+       */
+      readonly onPress?: never
+    }
 )
 
 /**
  * A labeled action as a pill. With `onPress` it is a button; with `link` it is the same
- * pill as a real link to the address it names.
+ * pill as a real link to the address it names, and with `href` a link out of the
+ * application.
  *
  * @param props The label and its icon, the variant, and what pressing it does or where it
  * leads.
@@ -87,6 +112,21 @@ export function Button(props: ButtonProps): ReactElement {
         <BackIcon size={14} strokeWidth={2.4} />
       </span>
     ) : null
+
+  if (props.href !== undefined) {
+    const isPage = /^https?:/u.test(props.href)
+    return (
+      <a
+        className={className}
+        href={props.href}
+        {...(isPage && { rel: "noopener noreferrer", target: "_blank" })}
+      >
+        {props.icon}
+        {props.label}
+        {onward}
+      </a>
+    )
+  }
 
   if (props.link !== undefined) {
     return (
