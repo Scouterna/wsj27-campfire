@@ -1,0 +1,12 @@
+/* What changed lately, in the handbook or the FAQ. */
+
+@layer component {
+  /* What changed, under the title, two lines at most – a note, not the page. */
+  .recent-news-row small {
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+}

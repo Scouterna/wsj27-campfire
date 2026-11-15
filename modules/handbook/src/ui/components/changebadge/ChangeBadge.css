@@ -1,0 +1,64 @@
+/* When something changed, its tint fading with the change's age – in the caution tone of
+   the note it opens, so the two read as one. */
+
+@layer component {
+  /* A badge's shape, as a static chip has it, so the faded and the plain ones line up
+     with a fresh one. */
+  .handbook-change-badge {
+    align-items: center;
+    background: color-mix(
+      in srgb,
+      var(--color-tone-caution-ink) 22%,
+      var(--color-tone-caution-wash)
+    );
+    border: none;
+    border-radius: var(--border-radius-tag);
+    color: var(--color-tone-caution-ink);
+    display: inline-flex;
+    font-family: inherit;
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-strong);
+    gap: 6px;
+    line-height: inherit;
+    padding: var(--spacing-inline) var(--spacing-group);
+    white-space: nowrap;
+
+    &.is-recent {
+      background: var(--color-tone-caution-wash);
+    }
+
+    &.is-fading {
+      background: color-mix(in srgb, var(--color-tone-caution-wash) 45%, transparent);
+    }
+
+    /* No longer news, so no tint – only the date, quiet beside the title. */
+    &.is-settled {
+      background: transparent;
+      color: var(--color-ink-secondary);
+      font-weight: normal;
+      padding-inline: 0;
+    }
+  }
+
+  /* The badge that opens its note says so with a caret, turned while the note is open. */
+  button.handbook-change-badge {
+    cursor: pointer;
+
+    &::after {
+      border-inline: 4px solid transparent;
+      border-top: 5px solid currentcolor;
+      content: "";
+      transition: transform 120ms ease;
+    }
+
+    &[aria-expanded="true"]::after {
+      transform: rotate(180deg);
+    }
+  }
+
+  @media (hover: hover) {
+    button.handbook-change-badge:hover {
+      text-decoration: underline;
+    }
+  }
+}
