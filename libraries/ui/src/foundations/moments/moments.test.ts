@@ -18,6 +18,10 @@ describe("writing a moment for a list row", () => {
     expect(formatRowMoment(new Date(2027, 6, 20, 14, 5), now)).toBe("20 juli")
     expect(formatRowMoment(new Date(2027, 7, 1, 14, 5), now)).toBe("1 aug")
   })
+
+  it("adds the year to a day from another year", () => {
+    expect(formatRowMoment(new Date(2026, 11, 15, 10, 0), now)).toBe("15 dec 2026")
+  })
 })
 
 describe("writing a moment for the timeline", () => {
@@ -28,5 +32,6 @@ describe("writing a moment for the timeline", () => {
 
   it("says the day, the month, and the time before that", () => {
     expect(formatTimelineMoment(new Date(2027, 7, 1, 16, 40), now)).toBe("1 aug 16:40")
+    expect(formatTimelineMoment(new Date(2026, 9, 3, 8, 0), now)).toBe("3 okt 2026 08:00")
   })
 })

@@ -3,6 +3,7 @@ import type { ReactElement } from "react"
 import { fn } from "storybook/test"
 
 import { HandIcon } from "../../foundations/icons/set/HandIcon"
+import { MailIcon } from "../../foundations/icons/set/MailIcon"
 import { Card } from "../card/Card"
 import { IconButton } from "../iconbutton/IconButton"
 import { Row } from "./Row"
@@ -58,6 +59,23 @@ export const Linked: Story = {
         <Row leading={tile("AA")} link={{ to: "/" }}>
           <strong>Anna Almgren</strong>
           <small>Kontingentledningen · Administration</small>
+        </Row>
+      </Card>
+    </div>
+  ),
+}
+
+/**
+ * A row that starts something outside the application – a mail, here – carries no
+ * chevron, because it goes nowhere in the application.
+ */
+export const Outside: Story = {
+  render: (): ReactElement => (
+    <div className="story-column">
+      <Card>
+        <Row href="mailto:wsj@scouterna.se" leading={<MailIcon />}>
+          <strong>Mejla kontingentledningen</strong>
+          <small>wsj@scouterna.se</small>
         </Row>
       </Card>
     </div>

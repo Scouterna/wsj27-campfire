@@ -9,7 +9,10 @@
     border-bottom: 1px solid transparent;
     display: flex;
     gap: var(--spacing-group);
-    min-height: 44px;
+    /* Room for a full touch target inside the padding and the border, whether or not the
+       screen has one, so the bar – and the title under it – sits at one height on every
+       screen. */
+    min-height: calc(44px + 2 * var(--spacing-stack) + 1px);
     padding: var(--spacing-stack) var(--spacing-container);
   }
 

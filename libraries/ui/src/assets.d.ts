@@ -10,6 +10,14 @@ declare module "*.svg" {
   export default url
 }
 
+declare module "*.otf" {
+  /**
+   * The address Vite serves the font file at.
+   */
+  const url: string
+  export default url
+}
+
 interface ImportMeta {
   /**
    * Vite's glob import, in the one shape the library uses: every match loaded eagerly,

@@ -40,3 +40,30 @@ export function wasPopExpected(): boolean {
   popState.expected = false
   return expected
 }
+
+// Whether the next push has had its direction declared by whatever asked the router for
+// it, rather than by a link's click, which the application's click listener sees itself.
+const pushState = { expected: false }
+
+/**
+ * Declare the direction of the push about to run, for one a screen asks the router for
+ * directly rather than through a link – a list of places beside the page that pages
+ * through it, which cross-fades rather than slides. Call it immediately before
+ * navigating; a push without it, and without a link, slides forward.
+ * @param direction The direction the push animates in.
+ */
+export function expectPush(direction: NavDirection): void {
+  setNavDirection(direction)
+  pushState.expected = true
+}
+
+/**
+ * Whether the push now arriving had its direction declared, clearing the mark either way
+ * – so a mark left by a push that never came cannot decide the one after it.
+ * @returns True when the push was declared.
+ */
+export function wasPushExpected(): boolean {
+  const { expected } = pushState
+  pushState.expected = false
+  return expected
+}

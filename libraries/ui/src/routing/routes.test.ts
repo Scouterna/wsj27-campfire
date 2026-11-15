@@ -1,7 +1,14 @@
 import { Fragment } from "react"
 import { describe, expect, it } from "vitest"
 
-import { matchScreen, mountRoutes, type Routes, type ScreenSpec } from "./routes"
+import {
+  linkPropsOf,
+  matchScreen,
+  mountRoutes,
+  type AppPath,
+  type Routes,
+  type ScreenSpec,
+} from "./routes"
 
 // The registry is the modules' to fill, so the table under test is spelled out and
 // cast. The runtime match walks the entries and never reads the registry.
@@ -59,5 +66,21 @@ describe("mounting a table as routes", () => {
 
   it("mounts an empty table to an empty record", () => {
     expect(Object.keys(mountRoutes({}))).toHaveLength(0)
+  })
+})
+
+describe("a link target as the router takes it", () => {
+  const to = "/participants/$id" as AppPath
+
+  it("fills in no parameters, and carries no passage it was not given", () => {
+    expect(linkPropsOf({ to })).toEqual({ params: {}, to })
+  })
+
+  it("carries the passage to open at", () => {
+    expect(linkPropsOf({ hash: "adresser", params: { id: "7" }, to })).toEqual({
+      hash: "adresser",
+      params: { id: "7" },
+      to,
+    })
   })
 })
