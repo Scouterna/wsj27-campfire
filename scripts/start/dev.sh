@@ -93,7 +93,7 @@ if [ ! -f .env ]; then
   echo "No credentials for the $environment environment." >&2
   echo >&2
   echo "Write config/environments/$environment/.env with:" >&2
-  echo "  OIDC_SERVER=<the ScoutID realm, e.g. https://dev.id.scouterna.se/realms/scoutnet>" >&2
+  echo "  OIDC_SERVER=<the ScoutID realm, e.g. https://dev1.id.scouterna.se/realms/scoutid>" >&2
   echo "  OIDC_CLIENT_ID=<a client that accepts http://localhost:8000/api/auth/callback>" >&2
   echo "  OIDC_CLIENT_SECRET=<its secret>" >&2
   echo "  SCOUTNET_PROJECTS=<the WSJ27 project's Scoutnet API config, one JSON line>" >&2
