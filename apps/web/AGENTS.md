@@ -19,7 +19,8 @@ apps/web/
     ├── navigation.ts   the navigation memory: direction, trails, and scroll restoration
     ├── outline.tsx     the desktop outline column, read from the page as rendered
     ├── query.ts        the query client, its persister, the session wrapper, the cache-owner handover, and the public screens' own client
-    ├── service-worker.ts   when a new deploy reaches an open page
+    ├── service-worker.ts   when a new deploy reaches an open page, and the recovery when its worker does not bring it
+    ├── deployed-build.ts   what names a build, for comparing the one running with the one deployed
     └── app.css         the chrome layout, the view transitions, and the one import of the design system's stylesheet
 ```
 
@@ -59,13 +60,13 @@ Every module and library is a `workspace:*` dependency, resolved to raw TypeScri
 - The cascade layers are declared in `index.html` before any stylesheet loads, so stylesheet order never matters. `app.css` is linked from the document, not imported, so `tsc` never resolves CSS.
 - `app.css` owns where the chrome sits – its breakpoints and the view-transition choreography – and nothing about how a piece looks, which is `libraries/ui`'s.
 - A theme is a name written to `data-theme`, never a stylesheet and never a color sent over the bridge.
-- `vite-plugin-pwa` precaches the built shell, and `service-worker.ts` reloads an open page onto a new deploy as soon as it takes control, checking for one whenever the application returns to the foreground. Navigations under `/api/`, `/_services/`, and `/services/` stay off its fallback, because sign-in, sign-out, and the CMS are served there, and a precached shell in their place breaks them.
+- `vite-plugin-pwa` precaches the built shell, and `service-worker.ts` reloads an open page onto a new deploy as soon as it takes control, checking for one whenever the application returns to the foreground. It also asks the server which build is deployed, and drops the worker and reloads when the worker is not bringing a newer one ([ADR 042](../../docs/decisions/042-recover-a-copy-its-service-worker-left-on-an-old-build.md)). Navigations under `/api/`, `/_services/`, and `/services/` stay off its fallback, because sign-in, sign-out, and the CMS are served there, and a precached shell in their place breaks them.
 - The document is Swedish, and so is every word a user reads.
 
 ## Tests and running
 
 - A screen is proven by its module's Playwright walk-through and by Storybook, not by unit tests ([ADR 024](../../docs/decisions/024-walk-through-the-web-application-per-module-with-playwright.md), [ADR 023](../../docs/decisions/023-catalog-the-ui-in-storybook.md)). A change to a screen ends with `pnpm test:web:ui`.
-- `apps/web` has no Vitest project. The first test here needs one in [`config/vitest/vitest.config.ts`](../../config/vitest/vitest.config.ts), whose list is hand-written so a glob never decides what runs.
+- `apps/web` has a Vitest project, `web`, for the little here that is pure – what names a build. Its entry is in [`config/vitest/vitest.config.ts`](../../config/vitest/vitest.config.ts), whose list is hand-written so a glob never decides what runs.
 - `build_web.yml` builds the application and Storybook on a pull request, so a story that no longer bundles fails there. Run `pnpm build:web` and `pnpm build:storybook` for a change they import.
 - `pnpm start:web` serves the application alone, with nothing behind the back-end paths. `pnpm start:local` puts the mock behind them.
 - Read the [architecture chapter](../../docs/guidebook/architecture/index.md) before a change that moves a boundary.

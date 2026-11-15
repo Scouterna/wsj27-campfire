@@ -14,6 +14,14 @@ export default defineConfig({
     projects: [
       {
         test: {
+          name: "web",
+          root: "apps/web",
+          environment: "node",
+          include: ["src/**/*.test.ts"],
+        },
+      },
+      {
+        test: {
           name: "utils",
           root: "libraries/utils",
           environment: "node",
