@@ -12,8 +12,6 @@ import { messages } from "../../../model/messages"
 import { MessagesWidget } from "../../widgets/messages/MessagesWidget"
 import { RevealWidget } from "../../widgets/reveal/RevealWidget"
 
-import "./HomeScreen.css"
-
 /**
  * The start screen – the units reveal counting down, then the widgets the screen
  * places. What goes where, who sees it, and from when are this screen's own decisions,
@@ -44,14 +42,12 @@ export function HomeScreen(): ReactElement {
   return (
     <>
       <PageTitle title="Välkommen" />
-      <div className="home">
-        <RevealWidget reveal={unitsReveal} />
-        {isUnitsRevealed && <MessagesWidget messages={messages} roles={roles} />}
-        {isUnitsRevealed && <Widget id="journey:countdown" />}
-        {isUnitsRevealed && hasCases && <Widget id="cases:mine" />}
-        {isUnitsRevealed && hasCases && <Widget id="cases:waiting" />}
-        {isUnitsRevealed && isLeader && <Widget id="participants:unit" />}
-      </div>
+      <RevealWidget reveal={unitsReveal} />
+      {isUnitsRevealed && <MessagesWidget messages={messages} roles={roles} />}
+      {isUnitsRevealed && <Widget id="journey:countdown" />}
+      {isUnitsRevealed && hasCases && <Widget id="cases:mine" />}
+      {isUnitsRevealed && hasCases && <Widget id="cases:waiting" />}
+      {isUnitsRevealed && isLeader && <Widget id="participants:unit" />}
     </>
   )
 }

@@ -13,11 +13,12 @@ apps/web/
 └── src/
     ├── main.tsx        the boot order before React: the theme stamp, the navigation wiring, the bfcache reload, the mount
     ├── routes.tsx      the route and widget tables, the sections, the gate, and the two chromes
+    ├── public.tsx      the screens anyone may open without signing in, and all they stand in
     ├── participant-menus.tsx   the cases' entries in the menus of a person's and a unit's screens
     ├── case-care.tsx   the participants' care on a person's card on a case
     ├── navigation.ts   the navigation memory: direction, trails, and scroll restoration
     ├── outline.tsx     the desktop outline column, read from the page as rendered
-    ├── query.ts        the one query client, its persister, the session wrapper, and the cache-owner handover
+    ├── query.ts        the query client, its persister, the session wrapper, the cache-owner handover, and the public screens' own client
     ├── service-worker.ts   when a new deploy reaches an open page
     └── app.css         the chrome layout, the view transitions, and the one import of the design system's stylesheet
 ```
@@ -35,7 +36,7 @@ Every module and library is a `workspace:*` dependency, resolved to raw TypeScri
 
 ## The gate and the two chromes
 
-`AppChrome` in `routes.tsx` is the router's `InnerWrap` and the session gate, one `Gate` state: `asking`, `signed-in`, `signed-out`, or `ending` ([Presentation layer](../../docs/guidebook/architecture/layers/presentation.md)).
+`AppChrome` in `routes.tsx` is the router's `InnerWrap`. It hands a public screen to `PublicChrome` and everything else to `GatedChrome`, which is the session gate, one `Gate` state: `asking`, `signed-in`, `signed-out`, or `ending` ([Presentation layer](../../docs/guidebook/architecture/layers/presentation.md)).
 
 - It asks `currentUser(queryClient)` once at boot and renders nothing until the answer – no spinner, and no flash of the sign-in screen.
 - Signed in, it hands the cache to the member number with `adoptCacheOwner`, resolves the theme unit-first, makes the roles ambient, and branches once on `host.tier`.
@@ -46,8 +47,8 @@ Every module and library is a `workspace:*` dependency, resolved to raw TypeScri
 
 ## Data and the cache
 
-- **Every service read goes through the one `QueryClient`** in `src/query.ts`. The utils `fetch` is the transport inside a query function, never a path around the cache ([Data layer](../../docs/guidebook/architecture/layers/data.md)).
-- **Fetch origin-relative paths only.** The application never knows its environment ([ADR 012](../../docs/decisions/012-run-campfire-in-three-environments-on-one-origin.md)). The material module's reads from Google Drive are the one exception, because Drive is the same in every environment ([ADR 039](../../docs/decisions/039-read-the-contingents-material-straight-from-google-drive.md)).
+- **Every service read behind the gate goes through the one `QueryClient`** in `src/query.ts`. A public screen reads through `publicQueryClient`, which keeps nothing and runs under no session. The utils `fetch` is the transport inside a query function, never a path around the cache ([Data layer](../../docs/guidebook/architecture/layers/data.md)).
+- **Fetch origin-relative paths only.** The application never knows its environment ([ADR 012](../../docs/decisions/012-run-campfire-in-three-environments-on-one-origin.md)). The exceptions are the material module's reads from Google Drive and the handbook module's from Scouterna's help center, because each is the same in every environment ([ADR 039](../../docs/decisions/039-read-the-contingents-material-straight-from-google-drive.md), [ADR 040](../../docs/decisions/040-read-the-handbook-from-the-cms-and-the-faq-from-the-help-center.md)).
 - **The query defaults are set for a field in Poland** – a long garbage-collection time, offline first, a refetch on every mount, and none on focus or reconnect. A hook that reads a query hands its screen the cached data rather than an error when a fresh read fails. Override a default per query only with a reason worth writing down.
 - **Persistence is per query, into IndexedDB.** When a cached payload's shape changes, bump the store's buster, because a stale shape read as fresh is worse than a cold cache.
 - **`withSession` runs every network read.** A 401 asks who is signed in, and the same person still signed in gets the read once more, so no screen renders a refusal.
