@@ -86,8 +86,10 @@ const contextPeople = chapterPages("context/people", [
 const contextSystems = chapterPages("context/systems", [
   "auth-service",
   "cases-service",
+  "cms",
   "github",
   "google-drive",
+  "help-center",
   "openfreemap",
   "participants-service",
   "scoutid",

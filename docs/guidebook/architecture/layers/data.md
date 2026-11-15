@@ -1,8 +1,8 @@
 # Data layer
 
-The data layer is where the outside world is dealt with – the back-end services, Google Drive, the shapes they send, and the cache that keeps their answers – and turned into the types [the domain](./domain) declares.
+The data layer is where the outside world is dealt with – the back-end services, Google Drive, the CMS, the help center, the shapes they send, and the cache that keeps their answers – and turned into the types [the domain](./domain) declares.
 
-Only a module that owns a capability has one. Authentication asks the auth service who is signed in, and reads the signed-in person's own registration – their unit and how they travel – from the participants service. Participants reads the list of participants and writes a unit's patrols. Cases reads and writes the cases its reader reaches, and reads the names within their reach to show them with. Material reads the contingent's material from Google Drive. No other module reads from anywhere.
+Only a module that owns a capability has one. Authentication asks the auth service who is signed in, and reads the signed-in person's own registration – their unit and how they travel – from the participants service. Participants reads the list of participants and writes a unit's patrols. Cases reads and writes the cases its reader reaches, and reads the names within their reach to show them with. Material reads the contingent's material from Google Drive. Handbook reads the handbook from the CMS and the FAQ from Scouterna's help center. No other module reads from anywhere.
 
 ## Query factories
 
@@ -10,7 +10,7 @@ Every data read is a factory returning TanStack Query options – a stable key, 
 
 The factories live in `data/` and are the only thing in a module that knows a URL. A screen calls a hook, the hook reads the options, and the options know the address – so the factory knows the address and the hook, which lives in `ui/`, knows React. Every URL to the back-end is origin-relative, and the mock and the real services answer the same paths, so the application never learns which environment it runs in ([ADR 012](/decisions/012-run-campfire-in-three-environments-on-one-origin)). The material is the one read that leaves the origin, because it is Google Drive's, the same in every environment ([ADR 039](/decisions/039-read-the-contingents-material-straight-from-google-drive)).
 
-Every read goes through the application's one query client, so one cache holds every answer. The `fetch` wrapper in `libraries/utils` is only the transport inside a query function; a read that called it directly would be neither cached, deduplicated, nor owned. The wrapper keeps three outcomes apart – the request never arrived, the service refused, or the answer was not JSON – and a refusal carries its status, because the status means something. A person's full record refused with 403 means the caller may see them but not in full, so the read steps down to the basic level; a 404 means there is nobody to show.
+Every read behind the gate goes through the application's one query client, so one cache holds every answer. A public screen reads through a client of its own, which keeps nothing and runs under no session ([Presentation layer](./presentation)). The `fetch` wrapper in `libraries/utils` is only the transport inside a query function; a read that called it directly would be neither cached, deduplicated, nor owned. The wrapper keeps three outcomes apart – the request never arrived, the service refused, or the answer was not JSON – and a refusal carries its status, because the status means something. A person's full record refused with 403 means the caller may see them but not in full, so the read steps down to the basic level; a 404 means there is nobody to show.
 
 ## Writes
 
