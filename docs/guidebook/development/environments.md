@@ -45,6 +45,8 @@ On a cold start, a session made before the auth service has loaded the roles fro
 
 Prod is dev with the web served by the image `pnpm build:image` produced, so the production build, the image's own Caddy, and its single-page fallback all run before a deploy ([ADR 026](/decisions/026-publish-the-web-application-as-a-container-image)). `start:prod` never builds the image, because a stale image would run and mislead – a missing one is an error telling you to build it. It refuses `--user-id`, because prod is there to prove the real flow.
 
+The CMS runs in neither. Dev and prod read the handbook from the deployed dev environment's CMS, which publishes it openly, so both need the internet for the handbook and show the content that is on dev. Its editor cannot be reached from either, because the CMS signs its editors in through the deployed auth service.
+
 The image is `linux/amd64`, the cluster's platform, so an Apple-silicon machine runs it under emulation. Prod runs the same back-end containers as dev, Postgres included, except that they are built from their `main`, as the deployed prod site's are. It proves the image rather than the deployment.
 
 ## Running a shell against it
