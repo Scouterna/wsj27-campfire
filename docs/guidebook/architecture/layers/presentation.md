@@ -33,11 +33,13 @@ A widget takes no props. It reads what it needs where it is used – its own que
 
 ## The session gate
 
-Every screen sits behind the gate in the composition root, and its order matters:
+Every screen but the public ones sits behind the gate in the composition root, and its order matters:
 
 1. Ask the auth service who is signed in, and render nothing until it answers – not a spinner, not the sign-in screen, because a sign-in screen flashing past a signed-in person reads as being signed out.
 2. Hand the cache to that person before any screen mounts, so nobody reads the previous owner's data ([Data layer](./data)).
 3. Show the sign-in screen, or mount the session's providers and branch once, on the tier, into the browser chrome or the shell chrome ([Applications](../applications)).
+
+A public screen – the public handbook, which anyone may read – stands outside the gate, the section guard, and the chrome alike. It reads through a query client of its own that runs nothing under a session and keeps nothing on the device, so no member's cache reaches a page anyone can open.
 
 The gate keeps listening after boot ([ADR 033](/decisions/033-recover-an-ended-session-at-the-query-client-and-the-gate)). The authentication module holds the session as a store, and a read refused with 401 or an expiry the keep-alive did not renew both ask it again. What the answer means decides what the gate does:
 

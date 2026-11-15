@@ -24,6 +24,14 @@ Follow-ups about some people or a unit as a whole, for the health team, the mana
 
 The names a case shows come from the participants service's listings, which the module reads itself – the whole contingent at the basic level for the management team, and for a leader their own unit and the names of every leader and member of the management team – since it cannot reach the list the Participants module composes. Who reaches a case is the cases service's to decide, from its type, its secrecy level, and who it is shared with. The types are the service's too: one the module has never heard of is offered and shown by the name the service gives it, its people worded as its group, and whoever the service lists it for counted as its role holders, so a new type needs no release. The module asks the service which types the reader may open, and says on every case who sees it ([Cases service](../context/systems/cases-service)).
 
+## Handbook
+
+The leaders' handbook and the answers to recurring questions, read where the contingent management already writes them: the handbook from the CMS, and the FAQ from Scouterna's help center ([ADR 040](/decisions/040-read-the-handbook-from-the-cms-and-the-faq-from-the-help-center)). Both are read whole when the application starts and kept on the device, pictures included, so every page works on a camp site with no coverage. Each is converted into the module's own model of text, lists, tables, and pictures, and only that model is drawn, never the markup a source sent.
+
+A chapter reads as one document, and one search runs over the handbook and the FAQ alike. A page says when an editor noted a change on it, the note opens from the date, and the change log gathers every change by how long ago it happened. The management reaches the CMS's editor from the page they are reading. The section is the management's alone while they fill it.
+
+The public pages are also one web page that needs no sign-in, at an address named for who the handbook is written for, with its contents beside it and its change log last. The handbook and each appendix download as PDFs set on the device, from the application and, holding the public pages alone, from the public page ([ADR 041](/decisions/041-set-the-handbook-as-a-pdf-on-the-device)).
+
 ## Home
 
 The start screen. It decides what the screen shows, to whom, and from when, and places other modules' widgets – the countdown, a leader's unit, the reader's cases and the latest open ones – by id without knowing which module draws them. Until a part of the product is revealed at its moment, the screen counts down to it instead.

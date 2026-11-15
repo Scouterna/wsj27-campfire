@@ -54,7 +54,7 @@ Back leads to the declared `parent`, never to whatever `history.length` suggests
 
 Going back pops history, so a page returns to where it was left, scrolled as it was. On a cold deep link there is no history to pop, so the parent is navigated to instead.
 
-Every navigation is a view transition. The router does not know direction, so one click listener decides it before the router acts: a menu or tab click cross-fades between sections, anything else slides forward, and a history pop the application did not ask for – the browser's back button or an edge swipe – runs no transition, because the platform already animated the move.
+Every navigation is a view transition. The router does not know direction, so one click listener decides it before the router acts: a menu or tab click cross-fades between sections, anything else slides forward, and a history pop the application did not ask for – the browser's back button or an edge swipe – runs no transition, because the platform already animated the move. A screen that asks the router itself, with no link to click, declares its direction just before, or it slides forward too – the handbook's outline cross-fades, because it pages through one handbook rather than going deeper into it.
 
 ## Inside a shell
 
