@@ -272,6 +272,8 @@ test("places a leader's unit on the start screen, and nobody else's", async ({ p
   const scoutRow = page.locator(".unit-widget-person", { has: scout })
   await expect(scoutRow).toContainText(/\d år/)
   await expect(scoutRow.getByRole("img", { name: "Kvinna" })).toBeVisible()
+  // She said no to published pictures, which her pill says beside the gender.
+  await expect(scoutRow.getByRole("img", { name: "Bilder får inte publiceras" })).toBeVisible()
   const leaderRow = page.locator(".unit-widget-person", {
     has: page.getByRole("link", { name: /^Hanna Hellström/u }),
   })

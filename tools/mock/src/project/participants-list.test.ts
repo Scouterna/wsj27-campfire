@@ -111,6 +111,21 @@ describe("the decoded list of participants", () => {
     )
   })
 
+  it("carries the pictures answer in the contact tab, from either form", () => {
+    // Ester Dahl and Ivar Forsberg answered the deltagare and IST form, Hanna Hellström
+    // and Karin Kron the leaders' form.
+    expect(decoded(1_300_035).contact_info["Samtycken"]).toEqual({ photoConsent: "Nej" })
+    expect(decoded(1_300_049).contact_info["Samtycken"]).toEqual({ photoConsent: "Ja" })
+    expect(decoded(1_100_402).contact_info["Samtycken"]).toEqual({ photoConsent: "Nej" })
+    expect(decoded(1_200_401).contact_info["Samtycken"]).toEqual({ photoConsent: "Ja" })
+  })
+
+  it("leaves the pictures section out for someone who never answered", () => {
+    // Freja Sandberg, an IST member, whom Scoutnet never asks.
+    expect(decoded(1_300_098).contact_info).not.toHaveProperty("Samtycken")
+    expect(lars.contact_info).not.toHaveProperty("Samtycken")
+  })
+
   it("nests the rest form, tab, and section", () => {
     const health = formsData(lars)["avdelningsledare_kontingentledning"]?.["Hälsoinformation"]
 
@@ -176,6 +191,6 @@ describe("the decoded list of participants", () => {
       form.tabs.flatMap((tab) => tab.sections.flatMap((section) => section.questions)),
     )
 
-    expect(questions).toHaveLength(136)
+    expect(questions).toHaveLength(138)
   })
 })

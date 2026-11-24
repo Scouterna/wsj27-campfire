@@ -48,8 +48,9 @@ const experience: Experience = {
 
 /**
  * Profil: the badge, the kind of registration, where it places the person, and the
- * registration facts – with and without a travel package on record, and with the patrol
- * line only a scout carries.
+ * registration facts – with and without a travel package on record, with the patrol line
+ * only a scout carries, and with pictures that may not be published, may be, and no
+ * answer sent at all.
  */
 export const Profile: StoryObj = {
   render: (): ReactElement => (

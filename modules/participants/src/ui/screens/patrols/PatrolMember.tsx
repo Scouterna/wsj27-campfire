@@ -4,8 +4,10 @@ import type { PointerEvent, ReactElement } from "react"
 import type { Care } from "../../../model/Care"
 import { genderName } from "../../../model/Gender"
 import { ageOf, fullName, type Participant } from "../../../model/Participant"
+import { picturesWithheldLabel } from "../../../model/pictures"
 import { CareButton } from "../../components/carebutton/CareButton"
 import { GenderMark } from "../../components/gender/GenderMark"
+import { PictureMark } from "../../components/picturemark/PictureMark"
 import { chipId } from "./use-patrol-moves"
 
 import "./PatrolMember.css"
@@ -67,16 +69,18 @@ function detailOf(person: Participant): readonly string[] {
 }
 
 /**
- * What a chip is called to a screen reader: all it shows, because the mark, the age, and
- * the kår are what a patrol is balanced by, and the name alone would hide them.
+ * What a chip is called to a screen reader: all it shows, because the marks, the age, and
+ * the kår are what a patrol is balanced by and photographed around, and the name alone
+ * would hide them.
  * @param person The chip's person.
  * @returns The name.
  */
 function nameOf(person: Participant): string {
   const { gender } = person
   const mark = gender === undefined || gender === "okant" ? [] : [genderName(gender).toLowerCase()]
+  const pictures = person.picturesPublishable === false ? [picturesWithheldLabel.toLowerCase()] : []
   // Joined with commas rather than the line's dot, which a screen reader may say aloud.
-  return [`Välj ${fullName(person)}`, ...mark, ...detailOf(person)].join(", ")
+  return [`Välj ${fullName(person)}`, ...mark, ...pictures, ...detailOf(person)].join(", ")
 }
 
 /**
@@ -127,6 +131,7 @@ export function PatrolMember(props: PatrolMemberProps): ReactElement {
           </span>
           <small>{detailOf(person).join(" · ")}</small>
         </span>
+        {person.picturesPublishable === false ? <PictureMark /> : null}
       </button>
       {care === undefined ? null : (
         <span data-no-drag="">

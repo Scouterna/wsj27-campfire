@@ -35,6 +35,7 @@ describe("reading one listing row", () => {
       lastName: "Lindberg",
       memberGroup: "Mockåsens scoutkår",
       phone: "070-719 56 23",
+      picturesPublishable: true,
       role: "ledare",
       unit: { name: "Björnen", number: 1 },
     })
@@ -301,6 +302,51 @@ describe("reading one listing row", () => {
       // eslint-disable-next-line unicorn/no-null -- as above
       toParticipant(row({ contact_info: undefined, mobile: null })),
     ).not.toHaveProperty("phone")
+  })
+})
+
+/**
+ * A listing row whose contact answers hold nothing but the pictures answer.
+ * @param answer The answer as the service sent it.
+ * @param section The contact section the service filed it under.
+ * @returns The row.
+ */
+function consent(answer: unknown, section = "Samtycken"): Record<string, unknown> {
+  return row({ contact_info: { [section]: { photoConsent: answer } } })
+}
+
+describe("reading whether pictures may be published", () => {
+  it.each(["Nej", " Nej "])("reads %j as a no", (answer) => {
+    expect(toParticipant(consent(answer))?.picturesPublishable).toBe(false)
+  })
+
+  it("reads a yes as one", () => {
+    expect(toParticipant(consent("Ja"))?.picturesPublishable).toBe(true)
+  })
+
+  it.each([undefined, "", "nej", "Vet ej", 0, ["Nej"]])(
+    "reads %j as no answer, which may be photographed",
+    (answer) => {
+      expect(toParticipant(consent(answer))?.picturesPublishable).toBe(true)
+    },
+  )
+
+  it("reads the answer whatever section the service files it under", () => {
+    expect(toParticipant(consent("Nej", "Godkännande"))?.picturesPublishable).toBe(false)
+  })
+
+  it("claims nothing for a person whose contact answers were withheld", () => {
+    expect(toParticipant(row({ contact_info: undefined }))).not.toHaveProperty(
+      "picturesPublishable",
+    )
+  })
+
+  it("reads a leader's no the same as a deltagare's", () => {
+    const leader = toParticipant({ ...consent("Nej"), member_type: "Avdelningsledare" })
+    const deltagare = toParticipant({ ...consent("Nej"), member_type: "Deltagare" })
+
+    expect(leader?.picturesPublishable).toBe(false)
+    expect(deltagare?.picturesPublishable).toBe(false)
   })
 })
 

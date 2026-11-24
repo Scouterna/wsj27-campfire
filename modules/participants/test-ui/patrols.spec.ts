@@ -133,6 +133,17 @@ test("carries a scout into a patrol and saves only what changed", async ({ page 
   await expect(page.getByRole("status")).toHaveText("")
 })
 
+test("names a scout who said no to pictures on their chip", async ({ page }) => {
+  await openPatrols(page)
+
+  await expect(
+    page.getByRole("button", { name: /^Välj Molly Sundqvist, .*bilder får inte publiceras/u }),
+  ).toBeVisible()
+  await expect(page.getByRole("button", { name: /^Välj Elsa Norén/u })).not.toHaveAccessibleName(
+    /bilder får inte publiceras/u,
+  )
+})
+
 test("ends a save when the service has answered, whatever the read after it does", async ({
   page,
 }) => {
