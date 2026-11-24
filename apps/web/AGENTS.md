@@ -14,8 +14,10 @@ apps/web/
     ├── main.tsx        the boot order before React: the theme stamp, the navigation wiring, the bfcache reload, the mount
     ├── routes.tsx      the route and widget tables, the sections, the gate, and the two chromes
     ├── public.tsx      the screens anyone may open without signing in, and all they stand in
+    ├── module-seams.tsx   every seam below, mounted together under the section grants
     ├── participant-menus.tsx   the cases' entries in the menus of a person's and a unit's screens
     ├── case-care.tsx   the participants' care on a person's card on a case
+    ├── withheld-pictures.tsx   the people who said no to published pictures, in the image maker
     ├── navigation.ts   the navigation memory: direction, trails, and scroll restoration
     ├── outline.tsx     the desktop outline column, read from the page as rendered
     ├── query.ts        the query client, its persister, the session wrapper, the cache-owner handover, and the public screens' own client

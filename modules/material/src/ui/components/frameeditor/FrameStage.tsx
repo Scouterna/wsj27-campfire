@@ -1,4 +1,4 @@
-import type { ReactElement, RefObject } from "react"
+import type { ReactElement, ReactNode, RefObject } from "react"
 
 import { exportSize, type Frame, type TextSlot } from "../../../model/social/Frame"
 import type { DrawnText } from "./compose"
@@ -42,6 +42,10 @@ export interface FrameStageProps {
    * The reader's photo, decoded, or undefined before one is chosen.
    */
   readonly photo: ImageBitmap | undefined
+  /**
+   * What to make sure of before publishing, shown above the button until a photo is chosen.
+   */
+  readonly reminder: ReactNode
   /**
    * The slot added texts go in.
    */
@@ -133,7 +137,7 @@ export function FrameStage(props: FrameStageProps): ReactElement {
         />
       )}
       {photo === undefined ? (
-        <PhotoPrompt isReading={isReading} onChoose={onChoosePhoto} />
+        <PhotoPrompt isReading={isReading} onChoose={onChoosePhoto} reminder={props.reminder} />
       ) : (
         <button className="frame-glass frame-change" onClick={onChoosePhoto} type="button">
           Byt bild

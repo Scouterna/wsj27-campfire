@@ -1,6 +1,7 @@
 import type { Theme } from "@scouterna/wsj27-campfire-ui"
 import type { ReactElement } from "react"
 
+import { useWithheldSlot } from "../../withheld-slot"
 import { MarkPicker, type Mark } from "./MarkPicker"
 import { ThemePicker } from "./ThemePicker"
 
@@ -30,12 +31,14 @@ export interface SenderPickerProps {
 }
 
 /**
- * Who the contingent management's image is for, and, only for the contingent itself,
+ * Who the contingent management's image is for – with, for a unit, the people of it who
+ * said no to pictures of them being published – and, only for the contingent itself,
  * which has no color of its own, the color it is drawn in.
  * @param props Who the image is for, its color, and what picking either does.
  * @returns The controls.
  */
 export function SenderPicker(props: SenderPickerProps): ReactElement {
+  const withheld = useWithheldSlot()
   return (
     <>
       <MarkPicker current={props.mark} onPick={props.onMark} showUnits={props.showUnits} />
@@ -44,7 +47,9 @@ export function SenderPicker(props: SenderPickerProps): ReactElement {
           <p className="social-color-label">Färg</p>
           <ThemePicker current={props.color} onPick={props.onColor} />
         </div>
-      ) : null}
+      ) : (
+        <div className="sender-withheld">{withheld(props.mark)}</div>
+      )}
     </>
   )
 }

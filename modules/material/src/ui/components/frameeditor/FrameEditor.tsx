@@ -56,6 +56,11 @@ export interface FrameEditorProps {
    */
   readonly placed: readonly PlacedText[]
   /**
+   * What to make sure of before the image is published, in the empty picture above the
+   * button that chooses a photo.
+   */
+  readonly reminder: ReactNode
+  /**
    * The controls for who the image is for, in a card of their own under the picture,
    * since they change the frame's color and mark. Left out for a reader whose unit
    * settles it.
@@ -138,6 +143,7 @@ export function FrameEditor(props: FrameEditorProps): ReactElement {
             onChoosePhoto={props.onChoosePhoto}
             onTexts={props.onTexts}
             photo={photo}
+            reminder={props.reminder}
             slot={slot}
             texts={texts}
           />
