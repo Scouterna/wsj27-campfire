@@ -1,0 +1,44 @@
+/* A title in the theme's ink over the names, with no plate around them, so it reads as a
+   statement centered in an empty picture and as a labeled value beside a form field,
+   taking its alignment from wherever it is placed. */
+@layer component {
+  .withheld-pictures {
+    display: grid;
+    gap: 0.2rem;
+  }
+
+  .withheld-pictures > p {
+    margin: 0;
+  }
+
+  .withheld-pictures-title {
+    color: var(--color-theme-ink);
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-strong);
+  }
+
+  /* In the line rather than beside it, so the title follows the alignment around it. */
+  .withheld-pictures-title svg {
+    display: inline-block;
+    height: 1.2em;
+    margin-inline-end: 0.35em;
+    vertical-align: -0.25em;
+    width: 1.2em;
+  }
+
+  /* The names wear the text's ink rather than a link's color, underlined so each still
+     reads as a way into the person. */
+  .withheld-pictures-names {
+    font-size: var(--font-size-value);
+    font-weight: var(--font-weight-strong);
+    line-height: 1.45;
+    text-wrap: balance;
+  }
+
+  .withheld-pictures-names a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.15em;
+  }
+}

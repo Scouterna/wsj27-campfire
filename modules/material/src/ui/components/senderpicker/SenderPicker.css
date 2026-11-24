@@ -36,6 +36,16 @@
     outline-offset: 2px;
   }
 
+  /* The unit's people who said no, under the unit they belong to, and nothing at all
+     where the unit has none the reader can see. */
+  .sender-withheld {
+    margin-top: var(--spacing-group);
+  }
+
+  .sender-withheld:empty {
+    display: none;
+  }
+
   /* The color, under the sender it belongs to – a second question that only the
      contingent has an answer to. */
   .social-color {

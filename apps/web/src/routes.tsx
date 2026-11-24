@@ -85,7 +85,7 @@ import { QueryClientProvider } from "@tanstack/react-query"
 import { createRouter, Link, useRouterState, type RouteComponent } from "@tanstack/react-router"
 import { useCallback, useEffect, useState, type ReactElement, type ReactNode } from "react"
 
-import { CaseCare } from "./case-care"
+import { ModuleSeams } from "./module-seams"
 import {
   historyIndex,
   markPush,
@@ -96,7 +96,6 @@ import {
   useNavigationBookkeeping,
 } from "./navigation"
 import { Outline } from "./outline"
-import { ParticipantMenus } from "./participant-menus"
 import { isPublic, PublicChrome, publicScreens } from "./public"
 import { adoptCacheOwner, forgetCache, queryClient } from "./query"
 
@@ -488,17 +487,15 @@ function SignedInChrome(props: SignedInProps): ReactElement {
                 another mechanism. */}
                 <RevealProvider reveals={reveals}>
                   <SectionGrants>
-                    <ParticipantMenus>
-                      <CaseCare>
-                        <WidgetsProvider widgets={widgets}>
-                          {host.tier === "shell" ? (
-                            <ShellChrome user={props.user}>{props.children}</ShellChrome>
-                          ) : (
-                            <BrowserChrome user={props.user}>{props.children}</BrowserChrome>
-                          )}
-                        </WidgetsProvider>
-                      </CaseCare>
-                    </ParticipantMenus>
+                    <ModuleSeams>
+                      <WidgetsProvider widgets={widgets}>
+                        {host.tier === "shell" ? (
+                          <ShellChrome user={props.user}>{props.children}</ShellChrome>
+                        ) : (
+                          <BrowserChrome user={props.user}>{props.children}</BrowserChrome>
+                        )}
+                      </WidgetsProvider>
+                    </ModuleSeams>
                   </SectionGrants>
                 </RevealProvider>
               </ViewerProvider>

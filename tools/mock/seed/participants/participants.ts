@@ -18,10 +18,11 @@ import type { Participant } from "../../src/types.ts"
  * ticked only Övriga among the food allergens and described it in words, and Örjan Kask in
  * unit 2 wrote only to the contingent management. Unit 2 is half divided into patrols – two
  * of them named and filled with scouts, and the rest of its scouts in none – and unit 1 is
- * not divided at all. No leader has a Patrull answer. Ester Dahl, Hanna Hellström, and
- * Molly Sundqvist in unit 2 said no to pictures of them being published, Ivar Forsberg and
- * Karin Kron said yes, and everybody else never answered – every IST among them, since
- * Scoutnet does not show them the question. Every answer is keyed by the form
+ * not divided at all. No leader has a Patrull answer. Ester Dahl, Leo Ström, Astrid
+ * Forsberg, and Hanna Hellström in unit 1 and Molly Sundqvist in unit 2 said no to
+ * pictures of them being published, Ivar Forsberg and Karin Kron said yes, and everybody
+ * else never answered – every IST among them, since Scoutnet does not show them the
+ * question. Every answer is keyed by the form
  * template's question key and carries the label Scoutnet would export – "Ja", "Nej", the
  * diet option texts, "1"–"5" severities, and a list where the question takes several
  * options.
@@ -275,6 +276,7 @@ export const participants: readonly Participant[] = [
     phone: "070-740 37 39",
     formId: "deltagare_ist",
     answers: {
+      photoConsent: "Nej",
       travel: "Rundresa",
       email: "leo.ström@example.se",
       mobilePhone: "070-740 37 39",
@@ -371,6 +373,7 @@ export const participants: readonly Participant[] = [
     phone: "070-504 71 70",
     formId: "deltagare_ist",
     answers: {
+      photoConsent: "Nej",
       travel: "Rundresa",
       nextOfKin1Name: "Johannes Forsberg",
       nextOfKin1Phone: "070-404 32 12",
