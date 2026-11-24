@@ -5,6 +5,7 @@ import type { Frame } from "../../../model/social/Frame"
 import { addedTextsKeyOf, frames } from "../../../model/social/frames"
 import type { PlacedText } from "../../../model/social/placement"
 import { storyGlyph, storyPhoto } from "../../storybook/photo"
+import { PublishingReminder } from "../publishingreminder/PublishingReminder"
 import { FrameChoice } from "./FrameChoice"
 import { FrameEditor } from "./FrameEditor"
 
@@ -75,6 +76,7 @@ function HeldEditor(props: HeldEditorProps): ReactElement {
       onTexts={setTexts}
       photo={props.photo}
       placed={placed}
+      reminder={<PublishingReminder unitNumber={1} />}
       texts={texts}
       theme="yellow"
     />

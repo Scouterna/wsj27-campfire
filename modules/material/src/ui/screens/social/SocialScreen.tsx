@@ -18,6 +18,7 @@ import type { PlacedText } from "../../../model/social/placement"
 import { FrameChoice } from "../../components/frameeditor/FrameChoice"
 import { FrameEditor } from "../../components/frameeditor/FrameEditor"
 import { noFrame, noTexts, untouched } from "../../components/frameeditor/untouched"
+import { PublishingReminder } from "../../components/publishingreminder/PublishingReminder"
 import type { Mark } from "../../components/senderpicker/MarkPicker"
 import { SenderPicker } from "../../components/senderpicker/SenderPicker"
 import { usePhoto } from "./use-photo"
@@ -113,6 +114,13 @@ export function SocialScreen(): ReactElement {
         }}
         photo={photo}
         placed={placed.get(addedKey) ?? noTexts}
+        reminder={
+          // The management's names sit beside the unit it picks, so its empty picture
+          // carries the line alone.
+          <PublishingReminder
+            {...(!isManagement && typeof mark === "number" && { unitNumber: mark })}
+          />
+        }
         {...(isManagement && {
           sender: (
             <SenderPicker

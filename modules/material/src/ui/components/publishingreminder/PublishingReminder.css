@@ -1,0 +1,20 @@
+/* The names, where there are any, over a line in quiet ink but bold, so it is there for
+   every image and still read. Balanced, so its two lines break near the middle rather
+   than leave a word on its own. */
+@layer component {
+  /* The names stand as far above the line as the prompt's lead stands above them – its
+     section margin and the prompt's own gap – so they read as a part of their own. */
+  .publishing-reminder {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-section) + var(--spacing-group));
+  }
+
+  .publishing-reminder-note {
+    color: var(--color-ink-secondary);
+    font-size: var(--font-size-footnote);
+    font-weight: var(--font-weight-strong);
+    margin: 0;
+    text-wrap: balance;
+  }
+}

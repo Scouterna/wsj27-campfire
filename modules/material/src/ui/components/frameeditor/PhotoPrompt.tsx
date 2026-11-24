@@ -1,5 +1,5 @@
 import { Button } from "@scouterna/wsj27-campfire-ui"
-import type { ReactElement } from "react"
+import type { ReactElement, ReactNode } from "react"
 
 export interface PhotoPromptProps {
   /**
@@ -10,12 +10,17 @@ export interface PhotoPromptProps {
    * Fires when the reader asks to choose a photo.
    */
   readonly onChoose: () => void
+  /**
+   * What to make sure of before publishing, read before the photo is chosen.
+   */
+  readonly reminder: ReactNode
 }
 
 /**
- * What the empty picture says before there is a photo: what the screen makes, the button
- * that chooses the photo, and the promise that it stays on the device.
- * @param props Whether a photo is being read, and what pressing does.
+ * What the empty picture says before there is a photo: what the screen makes, what to make
+ * sure of before publishing, the button that chooses the photo, and the promise that it
+ * stays on the device.
+ * @param props Whether a photo is being read, what to make sure of, and what pressing does.
  * @returns The prompt.
  */
 export function PhotoPrompt(props: PhotoPromptProps): ReactElement {
@@ -28,6 +33,7 @@ export function PhotoPrompt(props: PhotoPromptProps): ReactElement {
           skriva något på den.
         </p>
       </div>
+      {props.reminder}
       <div className="frame-stage-action">
         <Button
           disabled={props.isReading}

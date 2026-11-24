@@ -609,3 +609,45 @@ test("sizes and turns an added text from the keyboard", async ({ page }) => {
   expect(keyed.angle).toBe(90)
   expect(keyed.size).toBeGreaterThan(fitted.size)
 })
+
+test("names the leader's own people who said no to published pictures", async ({ page }) => {
+  await page.goto("/social")
+  await signInAs(page, "Lars Lindberg")
+
+  // Ester Dahl, Leo Ström, and Astrid Forsberg said no. Hanna Hellström did too, but a
+  // leader is not sent a fellow leader's answers, so she is not named – which is why the
+  // line under the names is there whoever is named.
+  const withheld = page.getByText("Bilder får inte publiceras på")
+  await expect(withheld).toBeVisible()
+  await expect(page.locator(".withheld-pictures-names")).toHaveText(
+    "Astrid Forsberg, Ester Dahl, Leo Ström",
+  )
+  await expect(page.getByRole("link", { name: "Hanna Hellström" })).toHaveCount(0)
+  await expect(
+    page.getByText(
+      "Se till att alla som syns på bilden har sagt ja till att bilder på dem publiceras.",
+    ),
+  ).toBeVisible()
+
+  await page.getByRole("link", { name: "Ester Dahl" }).click()
+  await expect(page).toHaveTitle("Ester Dahl – Campfire")
+})
+
+test("names nobody for the contingent's own image, and a unit's people for the unit's", async ({
+  page,
+}) => {
+  await page.goto("/social")
+  await signInAs(page, "Karin Kron")
+
+  // The contingent's image could show anybody, so it carries the line alone.
+  const line = page.getByText(
+    "Se till att alla som syns på bilden har sagt ja till att bilder på dem publiceras.",
+  )
+  await expect(line).toBeVisible()
+  await expect(page.getByText("Bilder får inte publiceras på")).toHaveCount(0)
+
+  // Molly Sundqvist, in unit 2, said no.
+  await page.getByLabel("Vem är bilden för?").selectOption("2")
+  await expect(page.getByRole("link", { name: "Molly Sundqvist" })).toBeVisible()
+  await expect(line).toBeVisible()
+})

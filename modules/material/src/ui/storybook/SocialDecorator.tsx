@@ -2,6 +2,9 @@ import { RolesProvider, UserProvider, type Role, type User } from "@scouterna/ws
 import type { Decorator } from "@storybook/react-vite"
 import type { ReactElement } from "react"
 
+import { WithheldSlotProvider } from "../withheld-slot"
+import { twoSaidNo } from "./withheld"
+
 /**
  * What a story says about who is looking, under `parameters.roles`.
  */
@@ -15,7 +18,8 @@ export interface RolesParameters {
 
 /**
  * The roles a story of the image maker runs as – the one thing that screen changes shape
- * for, because the contingent management picks a color and a unit wears its own.
+ * for, because the contingent management picks a color and a unit wears its own – and the
+ * people of a unit who said no to published pictures, stood in for.
  * @param Story The story being rendered.
  * @param context The story's own parameters.
  * @returns The story, with roles around it.
@@ -26,7 +30,9 @@ export const SocialDecorator: Decorator = (Story, context): ReactElement => {
   return (
     <RolesProvider roles={roles}>
       <UserProvider user={storyUser(roles)}>
-        <Story />
+        <WithheldSlotProvider slot={twoSaidNo}>
+          <Story />
+        </WithheldSlotProvider>
       </UserProvider>
     </RolesProvider>
   )
