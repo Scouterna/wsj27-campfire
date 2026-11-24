@@ -2,14 +2,14 @@ import { expect, test, type Page, type Route } from "@playwright/test"
 
 import { faqFolders } from "../src/data/fetch-faq"
 
-// The handbook and its FAQ, walked as the people who read them. Inside the application
-// that is the contingent management for now: finding the chapter that changed and
-// reading it through, a page published again without a note, searching the handbook and
-// the FAQ at once and landing on the passage, reading every change in both, reading an
-// FAQ folder, opening the editor on the page they are reading, printing the whole
-// handbook, downloading it as a PDF, and an address nothing holds. A leader and a person
-// outside the contingent are offered no handbook at all, and anyone, signed in or not,
-// the public handbook as a page.
+// The handbook and its FAQ, walked as the people who read them – the leaders and the
+// contingent management: finding the chapter that changed and reading it through, a page
+// published again without a note, searching the handbook and the FAQ at once and landing
+// on the passage, reading every change in both, reading an FAQ folder, the management
+// opening the editor on the page they are reading, printing the whole handbook,
+// downloading it as a PDF, and an address nothing holds. A leader reads it with no way
+// into the editor, a person outside the contingent is offered no handbook at all, and
+// anyone, signed in or not, the public handbook as a page.
 //
 // The mock serves a short seeded handbook in the CMS's own shape. The FAQ is read from
 // Scouterna's help center by the browser rather than from the back-end, so the mock
@@ -666,16 +666,16 @@ test("opens the CMS's editor on the exact page the management is reading", async
   ).toHaveAttribute("href", "/services/cms/admin/collections/info-page/9")
 })
 
-test("keeps the handbook from a leader while the management fills it", async ({ page }) => {
-  await page.goto("/handbook")
+test("offers the handbook to a leader, with no way into the CMS's editor", async ({ page }) => {
+  await page.goto("/handbook/resa")
   await signInAs(page, "Lars Lindberg")
 
-  // The section is the management's alone for now, so to a leader it is not there at
-  // all – no way to it in the menu, and its address answers as one nothing holds.
-  await expect(page.locator(".sidemenu").getByRole("link", { name: "Handbok" })).toHaveCount(0)
-  await expect(page.getByRole("heading", { level: 1, name: "Sidan finns inte" })).toBeVisible()
-  await page.goto("/handbook/resa")
-  await expect(page.getByRole("heading", { level: 1, name: "Sidan finns inte" })).toBeVisible()
+  // A leader reads what the handbook is written for, and the editing stays the
+  // management's.
+  await expect(page.locator(".sidemenu").getByRole("link", { name: "Handbok" })).toBeVisible()
+  await expect(page.getByRole("heading", { level: 1, name: "Resa" })).toBeVisible()
+  await expect(page.getByRole("heading", { level: 2, name: "Resan till WSJ" })).toBeVisible()
+  await expect(page.getByRole("link", { name: /^Redigera/u })).toHaveCount(0)
 })
 
 test("opens a page's chapter at the page, from an address naming the page", async ({ page }) => {
