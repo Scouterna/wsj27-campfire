@@ -1,7 +1,12 @@
 import { Card, PencilIcon } from "@scouterna/wsj27-campfire-ui"
 import { useState, type ReactElement } from "react"
 
-import { isIntroduction, type ChapterEntry, type HandbookPage } from "../../../model/Handbook"
+import {
+  isIntroduction,
+  lastChangeOn,
+  type ChapterEntry,
+  type HandbookPage,
+} from "../../../model/Handbook"
 import { changedOn } from "../../changed-on"
 import { useCanEdit } from "../../use-editor-menu"
 import { ChangeBadge } from "../changebadge/ChangeBadge"
@@ -32,8 +37,8 @@ export type PageSectionProps = {
 
 /**
  * One page as a card of its chapter, its title the card's heading, anchored by its slug,
- * and dated beside the title when an editor wrote a note on it – the date opening the
- * note at the top of the card. A page that only repeats its chapter's name is the
+ * and dated beside the title when it changed – the date opening the editor's note at the
+ * top of the card, when they wrote one. A page that only repeats its chapter's name is the
  * chapter's introduction, and its card carries no heading.
  * @param props The page, its chapter, and the moment its change is aged against.
  * @returns The card.
@@ -47,6 +52,7 @@ export function PageSection(props: PageSectionProps): ReactElement {
   const canEdit = useCanEdit()
   const [isNoteOpen, setNoteOpen] = useState(false)
   const change = props.page.change
+  const changedAt = lastChangeOn(props.page)
   const noteId = `${props.page.slug}-change`
 
   const content = (
@@ -64,18 +70,20 @@ export function PageSection(props: PageSectionProps): ReactElement {
     </>
   )
   const aside =
-    change !== undefined || canEdit ? (
+    changedAt !== undefined || canEdit ? (
       <span className="handbook-section-aside">
-        {change === undefined ? null : (
+        {changedAt === undefined ? null : (
           <ChangeBadge
-            at={change.at}
-            controls={noteId}
+            at={changedAt}
             isOpen={isNoteOpen}
             label="Uppdaterad"
             now={props.now}
-            onToggle={() => {
-              setNoteOpen((isOpen) => !isOpen)
-            }}
+            {...(change !== undefined && {
+              controls: noteId,
+              onToggle: () => {
+                setNoteOpen((isOpen) => !isOpen)
+              },
+            })}
           />
         )}
         <EditLink page={props.page} />

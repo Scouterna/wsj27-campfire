@@ -48,8 +48,9 @@ export type RecentNewsProps = {
 
 /**
  * What changed, newest first, as a card of its own: a row each, as the contents' rows
- * are, opening where it is – a page under its chapter's number with the editor's note,
- * and a question under the FAQ's mark with whether it is new or changed.
+ * are, opening where it is – a page under its chapter's number with the editor's note
+ * when they wrote one, and a question under the FAQ's mark with whether it is new or
+ * changed.
  * @param props The items, and the heading over them.
  * @returns The card.
  */
@@ -60,7 +61,7 @@ export function RecentNews(props: RecentNewsProps): ReactElement {
         <NewsRow
           key={
             item.kind === "page"
-              ? `page-${String(item.page.id)}`
+              ? `page-${String(item.page.id)}-${item.at}`
               : `question-${String(item.question.id)}`
           }
           item={item}
@@ -99,7 +100,11 @@ function NewsRow(props: NewsRowProps): ReactElement {
         trailing={<RowMoment at={newsAt(item)} said="Uppdaterad" />}
       >
         <strong>{item.page.title}</strong>
-        <small>{`${item.entry.chapter.name} · ${item.note.text}`}</small>
+        <small>
+          {item.text === undefined
+            ? item.entry.chapter.name
+            : `${item.entry.chapter.name} · ${item.text}`}
+        </small>
       </Row>
     )
   }

@@ -7,6 +7,8 @@ import {
   freshChanges,
   freshnessOf,
   inReadingOrder,
+  lastChangeIn,
+  lastChangeOn,
   type Chapter,
   type HandbookPage,
 } from "./Handbook"
@@ -54,20 +56,42 @@ describe("chaptersOf", () => {
     ])
   })
 
-  it("gathers a chapter's change notes, newest first", () => {
-    expect(second?.changes.map((change) => change.text)).toEqual([
-      "Nytt på resan",
-      "Nytt på adresser",
+  it("gathers when a chapter's pages changed, noted or not, newest first", () => {
+    const revised = chaptersOf([
+      { ...page("resan", travel, 20_000, "2026-09-23T07:35:30.000Z") },
+      { ...page("adresser", travel, 20_080), revisedAt: "2026-09-25T10:00:00.000Z" },
     ])
+    expect(revised[0]?.changes).toEqual(["2026-09-25T10:00:00.000Z", "2026-09-23T07:35:30.000Z"])
+  })
+})
+
+describe("lastChangeIn", () => {
+  it("dates the chapters by the newest change in any of them, noted or not", () => {
+    const revised = chaptersOf([
+      page("om", welcome, 0, "2026-09-01T00:00:00.000Z"),
+      { ...page("resan", travel, 20_000), revisedAt: "2026-09-25T10:00:00.000Z" },
+    ])
+    expect(lastChangeIn(revised)).toBe("2026-09-25T10:00:00.000Z")
+    const unchanged = chaptersOf([page("om", welcome, 0)])
+    expect(lastChangeIn(unchanged)).toBeUndefined()
+  })
+})
+
+describe("lastChangeOn", () => {
+  it("dates a page by its note or by a later publishing without one", () => {
+    const noted = page("resan", travel, 20_000, "2026-09-23T07:35:30.000Z")
+    expect(lastChangeOn(noted)).toBe("2026-09-23T07:35:30.000Z")
+    expect(lastChangeOn({ ...noted, revisedAt: "2026-11-24T10:32:26.230Z" })).toBe(
+      "2026-11-24T10:32:26.230Z",
+    )
+    expect(lastChangeOn(page("om", welcome, 0))).toBeUndefined()
   })
 })
 
 describe("freshChanges", () => {
-  it("keeps only the notes of the last month, whoever reads them", () => {
+  it("keeps only the changes of the last month, whoever reads them", () => {
     const now = new Date("2026-09-29T12:00:00.000Z")
-    expect(second && freshChanges(second, now).map((change) => change.text)).toEqual([
-      "Nytt på resan",
-    ])
+    expect(second && freshChanges(second, now)).toEqual(["2026-09-23T07:35:30.000Z"])
   })
 })
 

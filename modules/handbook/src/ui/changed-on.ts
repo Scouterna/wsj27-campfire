@@ -1,3 +1,5 @@
+import { lastChangeOn, type HandbookPage } from "../model/Handbook"
+
 // Swedish time, whatever the device is set to, because the notes are about a Swedish
 // handbook and the day an editor wrote one is the day in Sweden.
 const timeZone = "Europe/Stockholm"
@@ -22,4 +24,16 @@ export function changedOn(at: string, now = new Date()): string {
   return yearOf.format(moment) === yearOf.format(now)
     ? dayAndMonth.format(moment)
     : withYear.format(moment)
+}
+
+/**
+ * When a page last changed, as a printed copy dates it under its title – with the year
+ * always, because a printed copy is read long after it was made.
+ * @param page The page.
+ * @returns The line, such as "Uppdaterad 24 november 2026", or undefined for a page
+ * unchanged since it was written.
+ */
+export function updatedLine(page: HandbookPage): string | undefined {
+  const at = lastChangeOn(page)
+  return at === undefined ? undefined : `Uppdaterad ${withYear.format(new Date(at))}`
 }

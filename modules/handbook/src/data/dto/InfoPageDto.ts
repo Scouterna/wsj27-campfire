@@ -14,11 +14,13 @@ export interface InfoPageDto {
   readonly changeNoteAt?: unknown
   readonly chapter?: unknown
   readonly content?: unknown
+  readonly createdAt?: unknown
   readonly id?: unknown
   readonly order?: unknown
   readonly position?: unknown
   readonly slug?: unknown
   readonly title?: unknown
+  readonly updatedAt?: unknown
 }
 
 /**
@@ -69,6 +71,7 @@ export function toHandbookPage(dto: InfoPageDto): HandbookPage | undefined {
   }
   const position = numberOr(dto.position, numberOr(dto.order, 0))
   const change = toChangeNote(dto.changeNote, dto.changeNoteAt)
+  const revisedAt = toRevisedAt(dto.updatedAt, [toInstant(dto.createdAt), change?.at])
   return {
     chapter,
     content: toBlocks(dto.content),
@@ -80,6 +83,7 @@ export function toHandbookPage(dto: InfoPageDto): HandbookPage | undefined {
     slug,
     title: title.trim(),
     ...(change !== undefined && { change }),
+    ...(revisedAt !== undefined && { revisedAt }),
   }
 }
 
@@ -111,11 +115,54 @@ function toChapter(value: unknown): Chapter | undefined {
  * @returns The note, or undefined when either half is missing.
  */
 function toChangeNote(text: unknown, at: unknown): ChangeNote | undefined {
-  if (typeof text !== "string" || text.trim() === "" || typeof at !== "string") {
+  const moment = toInstant(at)
+  return typeof text !== "string" || text.trim() === "" || moment === undefined
+    ? undefined
+    : { at: moment, text: text.trim() }
+}
+
+/**
+ * How long after a page was written or noted a save still belongs to that. An editor
+ * often publishes a page again within minutes – the page being written, or the note
+ * being saved with the change it describes.
+ */
+const writingMs = 24 * 60 * 60 * 1000
+
+/**
+ * When a page was published again with no note to say what changed. The CMS keeps a note
+ * through every later save, so a save well after the note is a change the note does not
+ * describe.
+ * @param updatedAt The page's `updatedAt` field.
+ * @param earlier When the page was written and when its note was, where known.
+ * @returns The moment, as an ISO 8601 instant in UTC, or undefined when the last save
+ * belongs to the writing or to the note.
+ */
+function toRevisedAt(
+  updatedAt: unknown,
+  earlier: readonly (string | undefined)[],
+): string | undefined {
+  const saved = toInstant(updatedAt)
+  if (saved === undefined) {
     return undefined
   }
-  const date = new Date(at)
-  return Number.isNaN(date.getTime()) ? undefined : { at: date.toISOString(), text: text.trim() }
+  const savedMs = new Date(saved).getTime()
+  return earlier.every((at) => at === undefined || savedMs - new Date(at).getTime() > writingMs)
+    ? saved
+    : undefined
+}
+
+/**
+ * A moment the CMS sent, normalized.
+ * @param value The untyped value.
+ * @returns The moment, as an ISO 8601 instant in UTC, or undefined for anything that is
+ * not a date.
+ */
+function toInstant(value: unknown): string | undefined {
+  if (typeof value !== "string") {
+    return undefined
+  }
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? undefined : date.toISOString()
 }
 
 /**

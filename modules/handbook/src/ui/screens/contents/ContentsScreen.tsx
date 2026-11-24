@@ -297,7 +297,7 @@ function Chapters(props: ChaptersProps): ReactElement {
             className="handbook-chapter-row"
             leading={<HandbookTile>{chapterNumber(entry.number)}</HandbookTile>}
             link={{ params: { chapter: entry.chapter.slug }, to: "/handbook/$chapter" }}
-            trailing={updatedAt(freshChanges(entry, now)[0]?.at)}
+            trailing={updatedAt(freshChanges(entry, now)[0])}
           >
             <strong>{entry.chapter.name}</strong>
             <small>{summaryOf(entry)}</small>
