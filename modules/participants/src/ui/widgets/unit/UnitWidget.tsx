@@ -8,6 +8,7 @@ import { patrolSections } from "../../../model/Patrol"
 import { unitNumbered } from "../../../model/Unit"
 import { CareButton } from "../../components/carebutton/CareButton"
 import { GenderMark } from "../../components/gender/GenderMark"
+import { PictureMark } from "../../components/picturemark/PictureMark"
 import { UnitCard } from "../../components/unitcard/UnitCard"
 import { useParticipants } from "../../screens/participants/use-participants"
 import { useCareSheets } from "../../use-care-sheets"
@@ -80,6 +81,7 @@ function PeopleCard(props: PeopleCardProps): ReactElement | null {
                 </span>
               )}
               <span className="unit-widget-person-facts">
+                {person.picturesPublishable === false ? <PictureMark /> : null}
                 {person.gender === undefined ? null : <GenderMark gender={person.gender} />}
                 {age === undefined ? null : (
                   <span className="unit-widget-person-age">{age} år</span>

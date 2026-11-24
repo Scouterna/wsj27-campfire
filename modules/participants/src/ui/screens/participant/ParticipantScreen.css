@@ -73,6 +73,12 @@
     padding-top: var(--spacing-container);
   }
 
+  /* Six facts fill both widths. The pictures answer, where it was sent, makes seven, and
+     the last would stand alone in its row, so it takes the whole row instead. */
+  .person-profile-grid > :nth-child(7):last-child {
+    grid-column: 1 / -1;
+  }
+
   .person-profile-grid small {
     color: var(--color-ink-secondary);
     font-size: var(--font-size-footnote);
@@ -86,7 +92,8 @@
     overflow-wrap: anywhere;
   }
 
-  .person-profile-grid .gender-mark {
+  .person-profile-grid .gender-mark,
+  .person-profile-grid .picture-mark {
     margin-inline-start: var(--spacing-stack);
   }
 

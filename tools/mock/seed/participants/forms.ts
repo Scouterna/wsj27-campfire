@@ -123,6 +123,16 @@ export const forms: readonly Form[] = [
               },
             ],
           },
+          {
+            title: "Samtycken",
+            questions: [
+              {
+                id: "93216",
+                key: "photoConsent",
+                label: "Fotografering",
+              },
+            ],
+          },
         ],
       },
       {
@@ -834,6 +844,16 @@ export const forms: readonly Form[] = [
                 id: "88137",
                 key: "nextOfKin2Relation",
                 label: "Närstående 2 - Relation",
+              },
+            ],
+          },
+          {
+            title: "Samtycken",
+            questions: [
+              {
+                id: "93961",
+                key: "photoConsent",
+                label: "Fotografering",
               },
             ],
           },

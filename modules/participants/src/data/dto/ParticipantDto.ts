@@ -6,6 +6,7 @@ import type { CmtFunktion } from "../../model/Participation"
 import { unitNumbered } from "../../model/Unit"
 import { answer, flattenAnswers } from "./answers"
 import { toContactValues, toCurrent } from "./contact"
+import { isRecord } from "./validation"
 
 /**
  * One participant as the participants service sends them – the basic block a listing row
@@ -118,25 +119,37 @@ function toCmtDetail(roles: unknown): Pick<Participant, "funktion" | "isFunktion
 /**
  * How to reach a person from the list – their own addresses and phone number, and the
  * addresses and numbers of everybody the registration names around them – read from the
- * basic block and the contact answers the service sends with a listing row.
+ * basic block and the contact answers the service sends with a listing row, together
+ * with whether pictures of them may be published, which those answers carry too.
  * @param dto The row the participants service sent.
- * @returns The addresses and the numbers, each present only where there is one.
+ * @returns The addresses and the numbers, each present only where there is one, and the
+ * pictures answer wherever the contact answers were sent at all.
  */
 function toContactInfo(
   dto: ParticipantDto,
-): Pick<Participant, "alternateEmail" | "contactEmails" | "contactPhones" | "email" | "phone"> {
+): Pick<
+  Participant,
+  "alternateEmail" | "contactEmails" | "contactPhones" | "email" | "phone" | "picturesPublishable"
+> {
   const answers = flattenAnswers(dto.contact_info, undefined)
   const email = toCurrent(dto.email, answers, "email")
   const phone = toCurrent(dto.mobile, answers, "mobilePhone")
   const alternateEmail = answer(answers, "alternateEmail")
   const contactEmails = toContactValues(answers, "email")
   const contactPhones = toContactValues(answers, "phone")
+  // Only an explicit no is a no, so pictures of someone who never answered may be
+  // published. Without the contact answers nothing is known, so the field is left out
+  // rather than read as a yes.
+  const picturesPublishable = isRecord(dto.contact_info)
+    ? answer(answers, "photoConsent")?.trim() !== "Nej"
+    : undefined
   return {
     ...(email !== undefined && { email }),
     ...(phone !== undefined && { phone }),
     ...(alternateEmail !== undefined && { alternateEmail }),
     ...(Object.keys(contactEmails).length > 0 && { contactEmails }),
     ...(Object.keys(contactPhones).length > 0 && { contactPhones }),
+    ...(picturesPublishable !== undefined && { picturesPublishable }),
   }
 }
 

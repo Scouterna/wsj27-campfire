@@ -140,6 +140,14 @@ describe("reading one person in full", () => {
     expect(person?.birthDate).toBe("1995-07-16")
   })
 
+  it("keeps the listing row's pictures answer", () => {
+    const person = toParticipantDetail(
+      record({ contact_info: { Samtycken: { photoConsent: "Nej" } } }),
+    )
+
+    expect(person?.picturesPublishable).toBe(false)
+  })
+
   it("reads the contact answers, with Scoutnet's own email and phone winning", () => {
     const contact = toParticipantDetail(record())?.contact
 

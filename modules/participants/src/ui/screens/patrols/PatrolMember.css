@@ -83,7 +83,8 @@
   }
 
   .patrol-member-selected .patrol-member-text small,
-  .patrol-member-selected .gender-mark {
+  .patrol-member-selected .gender-mark,
+  .patrol-member-selected .picture-mark {
     color: var(--color-theme-on-ink);
   }
 

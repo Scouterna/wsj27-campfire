@@ -18,7 +18,10 @@ import type { Participant } from "../../src/types.ts"
  * ticked only Övriga among the food allergens and described it in words, and Örjan Kask in
  * unit 2 wrote only to the contingent management. Unit 2 is half divided into patrols – two
  * of them named and filled with scouts, and the rest of its scouts in none – and unit 1 is
- * not divided at all. No leader has a Patrull answer. Every answer is keyed by the form
+ * not divided at all. No leader has a Patrull answer. Ester Dahl, Hanna Hellström, and
+ * Molly Sundqvist in unit 2 said no to pictures of them being published, Ivar Forsberg and
+ * Karin Kron said yes, and everybody else never answered – every IST among them, since
+ * Scoutnet does not show them the question. Every answer is keyed by the form
  * template's question key and carries the label Scoutnet would export – "Ja", "Nej", the
  * diet option texts, "1"–"5" severities, and a list where the question takes several
  * options.
@@ -99,6 +102,7 @@ export const participants: readonly Participant[] = [
     email: "hanna.hellström@example.se",
     formId: "avdelningsledare_kontingentledning",
     answers: {
+      photoConsent: "Nej",
       travel: "Direktresa",
       nextOfKin1Name: "Jörgen Håkansson",
       nextOfKin1Phone: "070-722 45 97",
@@ -133,6 +137,7 @@ export const participants: readonly Participant[] = [
     phone: "070-302 93 47",
     formId: "deltagare_ist",
     answers: {
+      photoConsent: "Nej",
       travel: "Rundresa",
       email: "ester.dahl@example.se",
       alternateEmail: "ester.dahl@example.org",
@@ -185,6 +190,7 @@ export const participants: readonly Participant[] = [
     phone: "070-956 52 87",
     formId: "deltagare_ist",
     answers: {
+      photoConsent: "Ja",
       travel: "Rundresa",
       nextOfKin1Name: "Jörgen Forsberg",
       nextOfKin1Phone: "070-702 77 94",
@@ -501,6 +507,7 @@ export const participants: readonly Participant[] = [
     phone: "070-848 76 45",
     formId: "deltagare_ist",
     answers: {
+      photoConsent: "Nej",
       travel: "Direktresa",
       hasFoodAllergy: "Ja",
       foodAllergyNuts: "5",
@@ -676,6 +683,7 @@ export const participants: readonly Participant[] = [
     phone: "070-317 82 45",
     formId: "avdelningsledare_kontingentledning",
     answers: {
+      photoConsent: "Ja",
       email: "karin.kron@example.se",
       mobilePhone: "070-317 82 45",
       nextOfKin1Name: "Mats Kron",

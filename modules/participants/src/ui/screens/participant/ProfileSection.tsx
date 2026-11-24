@@ -7,8 +7,10 @@ import type { ParticipantDetail } from "../../../model/ParticipantDetail"
 import { roleName } from "../../../model/ParticipantRole"
 import { funktionName, travelName } from "../../../model/Participation"
 import { isPatrolMember } from "../../../model/Patrol"
+import { picturesName } from "../../../model/pictures"
 import { PersonBadge } from "../../components/badge/PersonBadge"
 import { GenderMark } from "../../components/gender/GenderMark"
+import { PictureMark } from "../../components/picturemark/PictureMark"
 
 export interface ProfileSectionProps {
   /**
@@ -167,6 +169,13 @@ export function ProfileSection(props: ProfileSectionProps): ReactElement {
               value: genderName(participant.gender),
             })}
           />
+          {participant.picturesPublishable === undefined ? null : (
+            <Fact
+              label="Bilder"
+              value={picturesName(participant.picturesPublishable)}
+              {...(!participant.picturesPublishable && { icon: <PictureMark /> })}
+            />
+          )}
           <Fact
             label="Typ av resa"
             {...(participant.travel !== undefined && { value: travelName(participant.travel) })}

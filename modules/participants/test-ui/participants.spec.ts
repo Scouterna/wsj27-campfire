@@ -111,7 +111,7 @@ test("says where a leader's own people come from, their gender, and how old the 
   const ester = rows.getByRole("link", { name: /^Ester Dahl/u })
   await expect(ester).toContainText("Deltagare · Mockåsens scoutkår · Kungsbacka")
   const esterRow = rowOf(/^Ester Dahl/u)
-  await expect(esterRow.locator(".person-row-facts > :first-child")).toHaveAccessibleName("Kvinna")
+  await expect(esterRow.locator(".person-row-facts .gender-mark")).toHaveAccessibleName("Kvinna")
   await expect(esterRow.locator(".person-row-age")).toHaveText(/^\d{1,3} år$/u)
   const lars = rows.getByRole("link", { name: /^Lars Lindberg/u })
   await expect(lars).toContainText("Ledare · Mockåsens scoutkår · Göteborg")
@@ -187,6 +187,54 @@ test("names a person's home town, age, and gender on their own page", async ({ p
   await expect(page).toHaveTitle("Otto Lind – Campfire")
   await expect(profile.getByText("Okänt", { exact: true })).toBeVisible()
   await expect(profile.locator(".gender-mark")).toHaveCount(0)
+})
+
+test("marks who said no to published pictures, without a health grant", async ({ page }) => {
+  await page.goto("/participants")
+  await signInAs(page, "Lars Lindberg")
+  await expect(page.getByRole("status")).toHaveText("8 personer i avdelningen")
+
+  // The no leads the row's facts, straight after the care control. A yes, and a fellow
+  // leader whose answers are not a leader's to read, carry nothing.
+  const rows = page.getByRole("listitem")
+  const rowOf = (name: RegExp): Locator => rows.filter({ has: page.getByRole("link", { name }) })
+  const withheld = { name: "Bilder får inte publiceras" }
+  await expect(
+    rowOf(/^Ester Dahl/u).locator(".person-row-facts > :first-child"),
+  ).toHaveAccessibleName(withheld.name)
+  await expect(rowOf(/^Ivar Forsberg/u).getByRole("img", withheld)).toHaveCount(0)
+  await expect(rowOf(/^Hanna Hellström/u).getByRole("img", withheld)).toHaveCount(0)
+
+  // The page says it in words, and leaves it out for someone whose answer was not sent.
+  const profile = page.locator(".person-profile-grid")
+  await page.goto("/participants/1300035")
+  await expect(profile.getByText("Bilder")).toBeVisible()
+  await expect(profile.getByText("Får inte publiceras", { exact: true })).toBeVisible()
+  await page.goto("/participants/1300049")
+  await expect(profile.getByText("Får publiceras", { exact: true })).toBeVisible()
+  await page.goto("/participants/1300077")
+  await expect(profile.getByText("Får publiceras", { exact: true })).toBeVisible()
+  await page.goto("/participants/1100402")
+  await expect(page).toHaveTitle("Hanna Hellström – Campfire")
+  await expect(profile.getByText("Kön")).toBeVisible()
+  await expect(profile.getByText("Bilder")).toHaveCount(0)
+})
+
+test("shows the management without a health grant who said no to pictures", async ({ page }) => {
+  await page.goto("/participants")
+  await signInAs(page, "Arvid Ask")
+  await expect(page.getByRole("status")).toHaveText("60 personer i kontingenten")
+
+  const withheld = { name: "Bilder får inte publiceras" }
+  await page.getByRole("searchbox", { name: "Sök deltagare" }).fill("Ester Dahl")
+  const ester = page.getByRole("listitem").filter({
+    has: page.getByRole("link", { name: /^Ester Dahl/u }),
+  })
+  await expect(ester.getByRole("img", withheld)).toBeVisible()
+
+  await page.goto("/participants/1300035")
+  const profile = page.locator(".person-profile-grid")
+  await expect(profile.getByText("Får inte publiceras", { exact: true })).toBeVisible()
 })
 
 test("opens a unit's card up to the map of where it lives, and folds it back", async ({ page }) => {
