@@ -86,6 +86,12 @@ export const closedMessagesKey = "campfire.messages.closed"
  * of it, or only the writer, and a leader between the unit's leaders and only the
  * writer. It shows for a week rather than the usual five days, because it introduces a
  * whole section.
+ *
+ * The pictures note goes to both roles in one wording, because both make images for a
+ * unit, and it is important rather than news, because it asks something of the reader
+ * before every image they publish. The handbook note is the leaders' alone, because the
+ * management has read the handbook since it was being filled. Both show for a week, as
+ * the cases note does.
  */
 export const messages: readonly Message[] = [
   {
@@ -163,6 +169,33 @@ export const messages: readonly Message[] = [
     ],
     start: new Date("2026-10-27T01:00:00+01:00"),
     title: "Nu finns ärenden för din avdelning",
+  },
+  {
+    audience: ["cmt", "leader"],
+    date: "2026-11-25",
+    end: new Date("2026-12-02T08:00:00+01:00"),
+    id: "pictures-2026-11",
+    kind: "important",
+    paragraphs: [
+      "Innan du publicerar en bild är det viktigt att kolla att ingen på den har sagt nej " +
+        "till att bilder på dem publiceras. De som sagt nej är nu markerade i listorna och " +
+        "visas när du skapar en bild under Material.",
+    ],
+    start: new Date("2026-11-24T08:00:00+01:00"),
+    title: "Kolla vem som inte får synas på bild",
+  },
+  {
+    audience: ["leader"],
+    date: "2026-11-25",
+    end: new Date("2026-12-02T08:00:00+01:00"),
+    id: "handbook-leader-2026-11",
+    kind: "news",
+    paragraphs: [
+      "Nu kan du läsa handboken och vanliga frågor direkt i Campfire, under Handbok. Sök i " +
+        "allt på en gång och läs det även när du inte har uppkoppling.",
+    ],
+    start: new Date("2026-11-24T08:00:00+01:00"),
+    title: "Nu finns handboken i Campfire",
   },
 ]
 
