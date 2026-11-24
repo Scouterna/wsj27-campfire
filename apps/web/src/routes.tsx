@@ -174,9 +174,9 @@ interface Grants {
 }
 
 /**
- * The sections, in menu order: home for everyone, the participants and material sections
- * for a leader and for any management function, the cases section for whoever the cases
- * service lets in, and the handbook section for the management.
+ * The sections, in menu order: home for everyone, the participants, material, and
+ * handbook sections for a leader and for any management function, and the cases section
+ * for whoever the cases service lets in.
  */
 const sections: readonly AppSection[] = [
   { icon: <HomeIcon />, id: "home", isGranted: () => true, label: () => "Hem", path: "/" },
@@ -211,9 +211,7 @@ const sections: readonly AppSection[] = [
   {
     icon: <BookIcon />,
     id: "handbook",
-    // The management alone, while they fill the handbook and try it – the leaders it is
-    // written for are let in by adding them here.
-    isGranted: ({ roles }) => hasAnyRole(roles, "cmt"),
+    isGranted: ({ roles }) => hasAnyRole(roles, "leader", "cmt"),
     label: () => "Handbok",
     path: "/handbook",
   },
