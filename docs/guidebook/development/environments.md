@@ -29,6 +29,8 @@ Everything about running Campfire lives in `config/environments/`, one folder pe
 
 Local is the everyday environment. It needs nothing beyond the machine and starts in seconds: Caddy on 8000, [the mock](../testing/mock) on 8003, and Vite on 3000. The mock answers as the back-end services do, and serves a ScoutID stand-in whose sign-in page is a persona picker, so signing in is tapping a name – no password, and no network ([ADR 021](/decisions/021-develop-against-a-mock-back-end)).
 
+The mock serves a short seeded handbook. `CAMPFIRE_CMS=https://campfire.wsj27.se pnpm start:local` reads a deployed CMS's handbook instead, so a persona can show the real one.
+
 ![Deployment diagram of the local environment. On a developer's machine, Caddy on port 8000 is the one origin, proxying /api/auth and /api/project to the mock back-end and every other path to the web app on Vite. The Apple shell in the iOS Simulator and the Android shell in the emulator load the application from Caddy.](../../architecture/diagrams/deploymentLocal.svg)
 
 ## Dev
