@@ -30,9 +30,14 @@
 	}
 
 	# The CMS's handbook, which the mock serves from its seed. Only the handbook's read
-	# is there – the CMS's editor is not, so editing needs the dev origin.
+	# is there – the CMS's editor is not, so editing needs the dev origin. CAMPFIRE_CMS
+	# reads a deployed CMS's handbook instead, which it publishes openly – such as
+	# https://campfire.wsj27.se, to show the real one to a mock persona. Its ingress
+	# routes by host, so the request carries the upstream's host rather than this one's.
 	handle /services/cms/* {
-		reverse_proxy localhost:8003
+		reverse_proxy {$CAMPFIRE_CMS:localhost:8003} {
+			header_up Host {upstream_hostport}
+		}
 	}
 
 	handle /__mock__/* {
