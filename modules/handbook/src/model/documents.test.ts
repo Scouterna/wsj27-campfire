@@ -28,14 +28,14 @@ function heading(rank: 1 | 2, text: string): Block {
  * @param chapter Its chapter.
  * @param title The page's title, which its slug is made from.
  * @param position Where it sits in the handbook.
- * @param extra Its content and its change note, where it has them.
+ * @param extra Its content and its changes, where it has them.
  * @returns The page.
  */
 function page(
   chapter: Chapter,
   title: string,
   position: number,
-  extra: Partial<Pick<HandbookPage, "change" | "content">> = {},
+  extra: Partial<Pick<HandbookPage, "change" | "content" | "revisedAt">> = {},
 ): HandbookPage {
   return {
     chapter,
@@ -112,11 +112,22 @@ describe("contentsOf", () => {
 })
 
 describe("changedPages", () => {
-  it("lists a document's own noted pages, newest first", () => {
+  it("lists a document's own changes, newest first", () => {
+    const now = new Date("2026-11-10T00:00:00.000Z")
     expect(
       documentsOf(chapters).map((document) =>
-        changedPages(document).map((changed) => changed.title),
+        changedPages(document, now).map((changed) => changed.page.title),
       ),
     ).toEqual([["Boende"], ["Schema"]])
+  })
+
+  it("lists a page published again without a note, as the change log does", () => {
+    const now = new Date("2026-11-10T00:00:00.000Z")
+    const [handbook] = documentsOf(
+      chaptersOf([page(travel, "Resa", 1, { revisedAt: "2026-11-09T00:00:00.000Z" })]),
+    )
+    expect(
+      handbook === undefined ? [] : changedPages(handbook, now).map((changed) => changed.text),
+    ).toEqual([undefined])
   })
 })

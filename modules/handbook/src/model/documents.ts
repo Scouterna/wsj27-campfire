@@ -1,4 +1,5 @@
 import { isIntroduction, type ChapterEntry, type HandbookPage } from "./Handbook"
+import { pageChangesOf, type PageNews } from "./news"
 import { plainText } from "./RichText"
 
 /**
@@ -125,15 +126,11 @@ export function contentsOf(document: HandbookDocument): readonly ContentsLine[] 
 }
 
 /**
- * The pages of a document an editor has noted a change on, newest first.
+ * What changed in a document, newest first, as the application's change log lists it.
  * @param document The document.
- * @returns The pages, each with a note.
+ * @param now The moment an unnoted change's month is counted to.
+ * @returns The changes.
  */
-export function changedPages(
-  document: HandbookDocument,
-): readonly (HandbookPage & { readonly change: NonNullable<HandbookPage["change"]> })[] {
-  return document.chapters
-    .flatMap((entry) => entry.pages)
-    .flatMap((page) => (page.change === undefined ? [] : [{ ...page, change: page.change }]))
-    .toSorted((a, b) => b.change.at.localeCompare(a.change.at))
+export function changedPages(document: HandbookDocument, now: Date): readonly PageNews[] {
+  return pageChangesOf(document.chapters, now)
 }
