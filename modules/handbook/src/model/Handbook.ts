@@ -70,6 +70,11 @@ export interface HandbookPage {
    */
   readonly position: number
   /**
+   * When the page was last published with no note to say what changed, as an ISO 8601
+   * instant in UTC – a change that is dated but not described.
+   */
+  readonly revisedAt?: string
+  /**
    * The page's anchor inside its chapter, unique across the handbook.
    */
   readonly slug: string
@@ -89,9 +94,10 @@ export interface ChapterEntry {
    */
   readonly chapter: Chapter
   /**
-   * Every change note in the chapter, newest first.
+   * When the chapter's pages changed, noted or not, newest first, as ISO 8601 instants in
+   * UTC.
    */
-  readonly changes: readonly ChangeNote[]
+  readonly changes: readonly string[]
   /**
    * The chapter's place in the handbook, counted from 1 – what the contents number it by.
    */
@@ -173,23 +179,54 @@ export function chaptersOf(pages: readonly HandbookPage[]): readonly ChapterEntr
   }
   return groups.map((group, index) => ({
     chapter: group.chapter,
-    changes: group.pages
-      .flatMap((page) => (page.change === undefined ? [] : [page.change]))
-      .toSorted((a, b) => b.at.localeCompare(a.at)),
+    changes: group.pages.flatMap((page) => changesOn(page)).toSorted((a, b) => b.localeCompare(a)),
     number: index + 1,
     pages: group.pages,
   }))
 }
 
 /**
- * The chapter's change notes that are still news.
+ * When a page changed: when its note was written, and when it was published again with
+ * no note.
+ * @param page The page.
+ * @returns The moments, as ISO 8601 instants in UTC, in no particular order.
+ */
+export function changesOn(page: HandbookPage): readonly string[] {
+  return [
+    ...(page.change === undefined ? [] : [page.change.at]),
+    ...(page.revisedAt === undefined ? [] : [page.revisedAt]),
+  ]
+}
+
+/**
+ * When a page last changed, noted or not.
+ * @param page The page.
+ * @returns The moment, as an ISO 8601 instant in UTC, or undefined for a page unchanged
+ * since it was written.
+ */
+export function lastChangeOn(page: HandbookPage): string | undefined {
+  return changesOn(page).toSorted((a, b) => b.localeCompare(a))[0]
+}
+
+/**
+ * When anything in the chapters last changed, noted or not.
+ * @param chapters The chapters.
+ * @returns The moment, as an ISO 8601 instant in UTC, or undefined when nothing changed
+ * since it was written.
+ */
+export function lastChangeIn(chapters: readonly ChapterEntry[]): string | undefined {
+  return chapters.flatMap((entry) => entry.changes).toSorted((a, b) => b.localeCompare(a))[0]
+}
+
+/**
+ * When the chapter's pages changed, as long as the changes are still news.
  * @param entry The chapter.
  * @param now The moment to judge freshness against.
- * @returns The notes, newest first.
+ * @returns The moments, newest first.
  */
-export function freshChanges(entry: ChapterEntry, now: Date): readonly ChangeNote[] {
+export function freshChanges(entry: ChapterEntry, now: Date): readonly string[] {
   const since = freshSince(now)
-  return entry.changes.filter((change) => change.at > since)
+  return entry.changes.filter((at) => at > since)
 }
 
 /**

@@ -94,6 +94,18 @@ describe("changesOf", () => {
     ])
   })
 
+  it("lists a page published again without a note beside its older note, for a month", () => {
+    const revised = chaptersOf([
+      { ...page("resan", 1, "2026-09-23T00:00:00.000Z"), revisedAt: "2026-11-09T00:00:00.000Z" },
+      { ...page("visum", 2), revisedAt: "2026-10-01T00:00:00.000Z" },
+    ])
+    const changes = changesOf(revised, [], now)
+    expect(changes.map((item) => [said([item])[0], item.kind === "page" && item.text])).toEqual([
+      ["resan", undefined],
+      ["resan", "Nytt på resan"],
+    ])
+  })
+
   it("leaves out a question only published, once it is no longer news", () => {
     expect(said(changesOf([], folders, now))).not.toContain("Gammal fråga (new)")
     const later = new Date("2026-12-20T00:00:00.000Z")

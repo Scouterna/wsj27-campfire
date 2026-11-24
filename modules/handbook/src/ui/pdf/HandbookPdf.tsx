@@ -9,7 +9,8 @@ import {
   pageAnchor,
   type HandbookDocument,
 } from "../../model/documents"
-import { isIntroduction, type ChapterEntry } from "../../model/Handbook"
+import { isIntroduction, lastChangeIn, type ChapterEntry } from "../../model/Handbook"
+import { updatedLine } from "../changed-on"
 import { columnsOf, type ColumnLine } from "./contents-columns"
 import { bodyFace, contentArea, contentsLineHeight, contentsLook, look } from "./pdf-look"
 import { PdfBlocks, Placed, type PdfSetting } from "./PdfBlocks"
@@ -57,8 +58,8 @@ const contentsHeadingRoom = 30
 export function HandbookPdf(props: HandbookPdfProps): ReactElement {
   const { document, setting } = props
   const { colors } = setting
-  const changes = changedPages(document)
-  const newest = changes[0]?.change.at
+  const changes = changedPages(document, new Date())
+  const newest = lastChangeIn(document.chapters)
   const updated = newest === undefined ? undefined : `Uppdaterad ${dated.format(new Date(newest))}`
   const columns = columnsOf(contentsOf(document), {
     firstHeight: contentArea.height - contentsHeadingRoom,
@@ -105,13 +106,17 @@ export function HandbookPdf(props: HandbookPdfProps): ReactElement {
             <Text style={[look.pageTitle, { color: colors.bright, marginTop: 0 }]}>
               Ändringslogg
             </Text>
-            {changes.map((page) => (
-              <View key={page.id} style={look.changeEntry} wrap={false}>
+            {changes.map((change) => (
+              <View
+                key={`${String(change.page.id)}-${change.at}`}
+                style={look.changeEntry}
+                wrap={false}
+              >
                 <Text>
-                  <Text style={{ fontFamily: bodyFace(true, false) }}>{page.title}</Text>
-                  <Text style={look.changeDate}> {dated.format(new Date(page.change.at))}</Text>
+                  <Text style={{ fontFamily: bodyFace(true, false) }}>{change.page.title}</Text>
+                  <Text style={look.changeDate}> {dated.format(new Date(change.at))}</Text>
                 </Text>
-                <Text>{page.change.text}</Text>
+                {change.text === undefined ? null : <Text>{change.text}</Text>}
               </View>
             ))}
           </View>
@@ -214,34 +219,33 @@ function Chapter(props: ChapterProps): ReactElement {
       <Text id={chapterAnchor(entry)} style={look.chapterTitle}>
         {entry.chapter.name}
       </Text>
-      {entry.pages.map((page) => (
-        // Not a box of its own, because a title is only kept with what follows it when
-        // something stands before it in the box they share – and in a box of the page's
-        // own the title would stand first.
-        <Fragment key={page.id}>
-          {isIntroduction(page, entry) ? null : (
-            <View minPresenceAhead={70} wrap={false}>
-              <Placed anchor={pageAnchor(page)} onPlace={setting.onPlace} />
-              <Text
-                id={pageAnchor(page)}
-                style={[look.pageTitle, { color: setting.colors.bright }]}
-              >
-                {page.title}
-              </Text>
-              {page.change === undefined ? null : (
-                <Text style={look.changed}>
-                  Uppdaterad {dated.format(new Date(page.change.at))}
+      {entry.pages.map((page) => {
+        const updated = updatedLine(page)
+        return (
+          // Not a box of its own, because a title is only kept with what follows it when
+          // something stands before it in the box they share – and in a box of the page's
+          // own the title would stand first.
+          <Fragment key={page.id}>
+            {isIntroduction(page, entry) ? null : (
+              <View minPresenceAhead={70} wrap={false}>
+                <Placed anchor={pageAnchor(page)} onPlace={setting.onPlace} />
+                <Text
+                  id={pageAnchor(page)}
+                  style={[look.pageTitle, { color: setting.colors.bright }]}
+                >
+                  {page.title}
                 </Text>
-              )}
-            </View>
-          )}
-          <PdfBlocks
-            anchorOf={(index) => blockAnchor(page, index)}
-            blocks={page.content}
-            setting={setting}
-          />
-        </Fragment>
-      ))}
+                {updated === undefined ? null : <Text style={look.changed}>{updated}</Text>}
+              </View>
+            )}
+            <PdfBlocks
+              anchorOf={(index) => blockAnchor(page, index)}
+              blocks={page.content}
+              setting={setting}
+            />
+          </Fragment>
+        )
+      })}
     </View>
   )
 }

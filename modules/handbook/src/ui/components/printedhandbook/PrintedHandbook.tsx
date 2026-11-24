@@ -2,7 +2,9 @@ import { Logo, useTheme, type Theme } from "@scouterna/wsj27-campfire-ui"
 import type { ReactElement } from "react"
 
 import { faqTitle, type FaqFolder } from "../../../model/Faq"
-import { isIntroduction, type ChapterEntry } from "../../../model/Handbook"
+import { isIntroduction, lastChangeIn, type ChapterEntry } from "../../../model/Handbook"
+import { pageChangesOf } from "../../../model/news"
+import { updatedLine } from "../../changed-on"
 import { RichText } from "../richtext/RichText"
 
 import "./PrintedHandbook.css"
@@ -108,14 +110,8 @@ const dated = new Intl.DateTimeFormat("sv-SE", {
  */
 export function PrintedHandbook(props: PrintedHandbookProps): ReactElement {
   const theme = useTheme()
-  const changes = props.chapters
-    .flatMap((entry) =>
-      entry.pages.flatMap((page) =>
-        page.change === undefined ? [] : [{ change: page.change, page }],
-      ),
-    )
-    .toSorted((a, b) => b.change.at.localeCompare(a.change.at))
-  const newest = changes[0]?.change.at
+  const changes = pageChangesOf(props.chapters, new Date())
+  const newest = lastChangeIn(props.chapters)
 
   return (
     <div className="printed-handbook">
@@ -164,11 +160,16 @@ export function PrintedHandbook(props: PrintedHandbookProps): ReactElement {
         <section className="printed-changes">
           <h2>Ändringslogg</h2>
           <ul>
-            {changes.map(({ change, page }) => (
-              <li key={page.id}>
-                <strong>{page.title}</strong> <span>{dated.format(new Date(change.at))}</span>
-                <br />
-                {change.text}
+            {changes.map((change) => (
+              <li key={`${String(change.page.id)}-${change.at}`}>
+                <strong>{change.page.title}</strong>{" "}
+                <span>{dated.format(new Date(change.at))}</span>
+                {change.text === undefined ? null : (
+                  <>
+                    <br />
+                    {change.text}
+                  </>
+                )}
               </li>
             ))}
           </ul>
@@ -182,21 +183,20 @@ export function PrintedHandbook(props: PrintedHandbookProps): ReactElement {
           id={`print-${entry.chapter.slug}`}
         >
           <h1>{entry.chapter.name}</h1>
-          {entry.pages.map((page) => (
-            <section key={page.id} className="printed-page" id={`print-${page.slug}`}>
-              {isIntroduction(page, entry) ? null : <h2>{page.title}</h2>}
-              {page.change === undefined ? null : (
-                <p className="printed-changed">
-                  Uppdaterad {dated.format(new Date(page.change.at))}
-                </p>
-              )}
-              <RichText
-                blocks={page.content}
-                headingLevel={isIntroduction(page, entry) ? 2 : 3}
-                isEager
-              />
-            </section>
-          ))}
+          {entry.pages.map((page) => {
+            const updated = updatedLine(page)
+            return (
+              <section key={page.id} className="printed-page" id={`print-${page.slug}`}>
+                {isIntroduction(page, entry) ? null : <h2>{page.title}</h2>}
+                {updated === undefined ? null : <p className="printed-changed">{updated}</p>}
+                <RichText
+                  blocks={page.content}
+                  headingLevel={isIntroduction(page, entry) ? 2 : 3}
+                  isEager
+                />
+              </section>
+            )
+          })}
         </section>
       ))}
 

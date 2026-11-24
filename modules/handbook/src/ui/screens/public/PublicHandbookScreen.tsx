@@ -122,13 +122,14 @@ const noFolders: readonly never[] = []
 const changeLogId = "andringslogg"
 
 /**
- * The page's parts, in reading order: every chapter, then the change log when an editor
- * has noted any change.
+ * The page's parts, in reading order: every chapter, then the change log when it lists
+ * anything.
  * @param chapters The chapters.
+ * @param now The moment the change log is judged against.
  * @returns The parts.
  */
-function partsOf(chapters: readonly ChapterEntry[]): Part[] {
-  const hasChanges = chapters.some((entry) => entry.changes.length > 0)
+function partsOf(chapters: readonly ChapterEntry[], now: Date): Part[] {
+  const hasChanges = changesOf(chapters, noFolders, now).length > 0
   return [
     ...chapters.map((entry) => ({
       anchor: chapterId(entry),
@@ -239,7 +240,10 @@ function PublicHandbook(props: PublicHandbookProps): ReactElement {
   const [isContentsOpen, setContentsOpen] = useState(false)
   const saving = useSaving()
 
-  const parts = useMemo(() => partsOf(chapters), [chapters])
+  // One moment for as long as the page is open, so the content is not drawn again each
+  // time the reader scrolls from one part into the next.
+  const now = useMemo(() => new Date(), [])
+  const parts = useMemo(() => partsOf(chapters, now), [chapters, now])
   const anchors = useMemo(() => parts.flatMap((part) => part.read), [parts])
   // At the top of the page nothing has reached the reading band yet, and what the
   // reader is at is the first thing on it – said from the start, so the contents do not
@@ -262,9 +266,6 @@ function PublicHandbook(props: PublicHandbookProps): ReactElement {
   }
 
   const [whole] = documentsOf(chapters)
-  // One moment for as long as the page is open, so the content is not drawn again each
-  // time the reader scrolls from one part into the next.
-  const now = useMemo(() => new Date(), [])
 
   return (
     <div className="public-handbook">

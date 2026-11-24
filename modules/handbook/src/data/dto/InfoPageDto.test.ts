@@ -37,6 +37,21 @@ describe("toHandbookPage", () => {
     expect(toHandbookPage({ ...page, changeNoteAt: undefined })?.change).toBeUndefined()
   })
 
+  it("dates a page published well after it was written and noted, and no other", () => {
+    const written = { ...page, createdAt: "2026-08-31T06:24:04.458Z" }
+    const later = "2026-11-24T10:32:26.230Z"
+    expect(toHandbookPage({ ...written, updatedAt: later })?.revisedAt).toBe(later)
+    expect(toHandbookPage({ ...written, changeNote: "", updatedAt: later })?.revisedAt).toBe(later)
+    expect(
+      toHandbookPage({ ...written, updatedAt: "2026-09-23T07:35:27.917Z" })?.revisedAt,
+    ).toBeUndefined()
+    expect(
+      toHandbookPage({ ...written, changeNote: "", updatedAt: "2026-08-31T09:00:00.000Z" })
+        ?.revisedAt,
+    ).toBeUndefined()
+    expect(toHandbookPage({ ...written, updatedAt: "not a date" })?.revisedAt).toBeUndefined()
+  })
+
   it("keeps a page out of the public handbook unless the CMS says it is public", () => {
     expect(toHandbookPage({ ...page, audience: "campfire" })?.isPublic).toBe(false)
     expect(toHandbookPage({ ...page, audience: undefined })?.isPublic).toBe(false)

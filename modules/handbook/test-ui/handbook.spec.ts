@@ -4,11 +4,12 @@ import { faqFolders } from "../src/data/fetch-faq"
 
 // The handbook and its FAQ, walked as the people who read them. Inside the application
 // that is the contingent management for now: finding the chapter that changed and
-// reading it through, searching the handbook and the FAQ at once and landing on the
-// passage, reading every change in both, reading an FAQ folder, opening the editor on
-// the page they are reading, printing the whole handbook, downloading it as a PDF, and
-// an address nothing holds. A leader and a person outside the contingent are offered no
-// handbook at all, and anyone, signed in or not, the public handbook as a page.
+// reading it through, a page published again without a note, searching the handbook and
+// the FAQ at once and landing on the passage, reading every change in both, reading an
+// FAQ folder, opening the editor on the page they are reading, printing the whole
+// handbook, downloading it as a PDF, and an address nothing holds. A leader and a person
+// outside the contingent are offered no handbook at all, and anyone, signed in or not,
+// the public handbook as a page.
 //
 // The mock serves a short seeded handbook in the CMS's own shape. The FAQ is read from
 // Scouterna's help center by the browser rather than from the back-end, so the mock
@@ -436,6 +437,67 @@ test("keeps a change dated once it is no longer news, without the tint", async (
   await settled.click()
   await expect(page.locator("#resan-till-wsj-change")).toContainText(
     "Kontingentens syfte och mål är nya i avsnittet.",
+  )
+})
+
+/**
+ * Stands in for the CMS's page listing with the mock's own answer, two pages of it
+ * published again two days ago – one with no note at all, one keeping the note it had.
+ * @param page The walk's page.
+ * @returns The moment both were published again, as an ISO 8601 instant.
+ */
+async function serveRevisedHandbook(page: Page): Promise<string> {
+  const revisedAt = daysAgo(2)
+  await page.route(
+    (url) => url.pathname.endsWith("/services/cms/api/info-page"),
+    async (route: Route) => {
+      const response = await route.fetch()
+      const body = (await response.json()) as { docs: Record<string, unknown>[] }
+      const pages = body.docs.map((doc) => {
+        if (doc["slug"] === "hall-kontakten-under-resan") {
+          return { ...doc, changeNote: "", updatedAt: revisedAt }
+        }
+        return doc["slug"] === "resan-till-wsj" ? { ...doc, updatedAt: revisedAt } : doc
+      })
+      await route.fulfill({ json: { ...body, docs: pages }, response })
+    },
+  )
+  return revisedAt
+}
+
+test("dates a page published again without a note, and lists it as a change for a month", async ({
+  page,
+}) => {
+  const revisedAt = await serveRevisedHandbook(page)
+  await page.goto("/handbook/resa")
+  await signInAs(page, "Patrik Ply")
+  await expect(page.getByRole("heading", { level: 1, name: "Resa" })).toBeVisible()
+  const main = page.locator("main")
+  const updated = `Uppdaterad ${dayOf(revisedAt)}`
+
+  // A page with no note is dated, with nothing to open; one with an older note is dated
+  // by its newest publishing, and still opens the note.
+  const unnoted = main.locator("#hall-kontakten-under-resan .handbook-change-badge")
+  await expect(unnoted).toHaveText(updated)
+  await expect(unnoted).toHaveClass(/is-fresh/u)
+  await expect(unnoted).not.toHaveRole("button")
+  const noted = main.getByRole("button", { name: updated })
+  await expect(noted).toHaveClass(/is-fresh/u)
+  await noted.click()
+  await expect(page.locator("#resan-till-wsj-change")).toContainText(
+    "Kontingentens syfte och mål är nya i avsnittet.",
+  )
+
+  // In the change log, each publishing is a row of its own, the one without a note
+  // saying only where the page is.
+  await page.goto("/handbook?visa=andringslogg")
+  const rows = page
+    .locator("main a.row")
+    .filter({ has: page.locator(`time[datetime="${revisedAt}"]`) })
+  await expect(rows.locator("strong")).toHaveText(["Resan till WSJ", "Håll kontakten under resan"])
+  await expect(rows.locator("small")).toHaveText(["Resa", "Resa"])
+  await expect(page.locator("main a.row strong").filter({ hasText: "Resan till WSJ" })).toHaveCount(
+    2,
   )
 })
 
