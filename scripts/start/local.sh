@@ -3,6 +3,10 @@
 # back-end on 8003, and the Vite dev server on 3000. Browse http://localhost:8000, where
 # sign-in is the persona picker – no password, and no network beyond this machine.
 #
+# CAMPFIRE_CMS reads the handbook from a deployed CMS instead of the mock's seed – for
+# example CAMPFIRE_CMS=https://campfire.wsj27.se pnpm start:local – and then that read
+# needs the internet.
+#
 # Whatever already holds one of the ports – an earlier run, a server a closed terminal
 # left behind, the dev or prod environment's containers – is stopped first and named.
 # Each server is reported only once it answers, and the whole stack is checked through
