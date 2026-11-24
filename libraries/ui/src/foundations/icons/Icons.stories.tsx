@@ -26,6 +26,7 @@ import { PersonIcon } from "./set/PersonIcon"
 import { PersonPlusIcon } from "./set/PersonPlusIcon"
 import { PhoneIcon } from "./set/PhoneIcon"
 import { PictureIcon } from "./set/PictureIcon"
+import { PictureOffIcon } from "./set/PictureOffIcon"
 import { PlusIcon } from "./set/PlusIcon"
 import { RotateLeftIcon } from "./set/RotateLeftIcon"
 import { RotateRightIcon } from "./set/RotateRightIcon"
@@ -65,6 +66,7 @@ const icons: readonly (readonly [string, (props: IconProps) => ReactElement])[] 
   ["Person plus", PersonPlusIcon],
   ["Phone", PhoneIcon],
   ["Picture", PictureIcon],
+  ["Picture off", PictureOffIcon],
   ["Plus", PlusIcon],
   ["Rotate left", RotateLeftIcon],
   ["Rotate right", RotateRightIcon],

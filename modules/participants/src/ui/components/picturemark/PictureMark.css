@@ -1,0 +1,12 @@
+/* Drawn as the gender mark is – at the text's own height and in the same light grey – so
+   it reads as a fact about the person beside the others rather than as a health tone. */
+@layer component {
+  .picture-mark {
+    color: color-mix(in srgb, var(--color-ink) 45%, var(--color-paper));
+    display: inline-flex;
+    flex: none;
+    height: 1.1em;
+    vertical-align: -0.15em;
+    width: 1.1em;
+  }
+}

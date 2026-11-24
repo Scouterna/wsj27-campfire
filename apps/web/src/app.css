@@ -25,10 +25,12 @@
      placement rules are scoped under .shell because a component's own stylesheet
      arrives after this one, and the higher specificity is what lets placement win. */
 
+  /* Both bars sit above the controls a row raises over its own link, which the page
+     scrolls under them, and below the menus and the page's floating action. */
   .shell .topbar {
     position: sticky;
     top: 0;
-    z-index: 1;
+    z-index: 2;
   }
 
   main {
@@ -53,6 +55,7 @@
   .tabstrip {
     inset: auto 0 0 0;
     position: fixed;
+    z-index: 2;
   }
 
   /* The page's floating action, above the tab bar's corner. Phone chrome only – the

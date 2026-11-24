@@ -19,6 +19,7 @@ export const complete: ParticipantDetail = {
   unit: unitNumbered(3),
   birthDate: "1987-04-12",
   gender: "kvinna",
+  picturesPublishable: false,
   travel: "rundresa",
   memberGroup: "Mockåsens scoutkår",
   homeTown: "Göteborg",
@@ -128,6 +129,7 @@ export const withoutHealth: ParticipantDetail = {
   unit: unitNumbered(3),
   birthDate: "2011-09-02",
   gender: "man",
+  picturesPublishable: true,
   homeTown: "Kungsbacka",
   travel: "direktresa",
   contact: {
@@ -141,8 +143,9 @@ export const withoutHealth: ParticipantDetail = {
 
 /**
  * A hole wherever the registration allowed one: no kår, home town, or birth date, no
- * channels, no travel, one contact with no way to reach them, and a form whose health
- * questions were never answered. Every absent state on the screen is visible at once.
+ * channels, no travel, no pictures answer, one contact with no way to reach them, and a
+ * form whose health questions were never answered. Every absent state on the screen is
+ * visible at once.
  */
 export const sparse: ParticipantDetail = {
   memberNo: "1400012",

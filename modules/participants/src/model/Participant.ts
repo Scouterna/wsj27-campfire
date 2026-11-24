@@ -113,6 +113,12 @@ export interface Participant {
    */
   readonly phone?: string
   /**
+   * Whether pictures of them may be published – false only for an explicit no, and true
+   * for a yes and for someone who never answered. Absent when the service sent none of
+   * their contact answers, so neither is known.
+   */
+  readonly picturesPublishable?: boolean
+  /**
    * The function a management member serves in, read out of the record's minted roles.
    * Absent for everyone else, and for a management member whose funktion is not filled in.
    */

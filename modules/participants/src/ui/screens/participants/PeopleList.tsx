@@ -15,6 +15,7 @@ import { funktionName } from "../../../model/Participation"
 import { PersonBadge } from "../../components/badge/PersonBadge"
 import { CareButton } from "../../components/carebutton/CareButton"
 import { GenderMark } from "../../components/gender/GenderMark"
+import { PictureMark } from "../../components/picturemark/PictureMark"
 import type { CareSheets } from "../../use-care-sheets"
 
 import "./PeopleList.css"
@@ -115,6 +116,7 @@ export const PersonRow = memo(function PersonRow(props: PersonRowProps): ReactEl
   // A deltagare's age is the fact a leader reaches for, as on the home screen; a grown
   // member's says nothing the row needs.
   const age = person.role === "deltagare" ? ageOf(person, new Date()) : undefined
+  const arePicturesWithheld = person.picturesPublishable === false
 
   return (
     <Row
@@ -139,9 +141,10 @@ export const PersonRow = memo(function PersonRow(props: PersonRowProps): ReactEl
           ),
         })}
       link={{ to: "/participants/$memberNo", params: { memberNo: person.memberNo } }}
-      {...((person.gender !== undefined || age !== undefined) && {
+      {...((arePicturesWithheld || person.gender !== undefined || age !== undefined) && {
         trailing: (
           <span className="person-row-facts">
+            {arePicturesWithheld ? <PictureMark /> : null}
             {person.gender === undefined ? null : <GenderMark gender={person.gender} />}
             {age === undefined ? null : <span className="person-row-age">{age} år</span>}
           </span>
